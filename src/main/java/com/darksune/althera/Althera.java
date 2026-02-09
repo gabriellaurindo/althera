@@ -12,7 +12,7 @@ public final class Althera {
 
     public static final String MOD_ID = "althera";
 
-    public Althera(IEventBus modEventBus, ModContainer modContainer) {
+    public Althera(final IEventBus modEventBus, final ModContainer modContainer) {
         AltheraRegistries.register(modEventBus);
         modContainer.registerConfig(ModConfig.Type.COMMON, AltheraConfig.SPEC);
     }
