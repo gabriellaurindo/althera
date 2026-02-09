@@ -4,7 +4,7 @@ import net.minecraft.world.item.Item;
 
 public final class SummonSealItem extends Item {
 
-    private SummonSealItem(Properties properties) {
+    public SummonSealItem(final Properties properties) {
         super(properties);
     }
 
