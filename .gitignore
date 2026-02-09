@@ -1,0 +1,34 @@
+# =========================
+# Java / Gradle
+# =========================
+.gradle/
+build/
+out/
+*.log
+
+# Gradle wrapper (NÃO ignorar)
+!gradle/wrapper/gradle-wrapper.jar
+!gradle/wrapper/gradle-wrapper.properties
+
+# =========================
+# IntelliJ IDEA
+# =========================
+.idea/
+*.iml
+
+# =========================
+# Minecraft / NeoForge
+# =========================
+runs/
+logs/
+
+# =========================
+# OS / Editor
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# Environment / Secrets
+# =========================
+.env
