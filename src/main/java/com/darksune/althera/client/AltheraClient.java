@@ -29,4 +29,26 @@ public class AltheraClient {
         // Althera.LOGGER.info("HELLO FROM CLIENT SETUP");
         // Althera.LOGGER.info("MINECRAFT NAME >> {}", Minecraft.getInstance().getUser().getName());
     }
+
+//    @Override
+//    protected void registerModels(BlockModelGenerators blockModels, ItemModelGenerators itemModels) {
+//        itemModels.itemModelOutput.register(
+//                EXAMPLE_ITEM.get(),
+//                new ClientItem(
+//                        // Defines the model to submit for rendering
+//                        new BlockModelWrapper.Unbaked(
+//                                // Points to a model JSON relative to the 'models' directory
+//                                // Located at 'assets/examplemod/models/item/example_item.json'
+//                                ModelLocationUtils.getModelLocation(EXAMPLE_ITEM.get()),
+//                                Collections.emptyList()
+//                        ),
+//                        // Defines some settings to use during the rendering process
+//                        new ClientItem.Properties(
+//                                // When false, disables the animation where the item is raised
+//                                // up towards its normal position on item swap
+//                                false
+//                        )
+//                )
+//        );
+//    }
 }
