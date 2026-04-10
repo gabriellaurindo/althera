@@ -2,6 +2,7 @@ package com.darksune.althera;
 
 import com.darksune.althera.common.ModKeybinds;
 import com.darksune.althera.common.registry.AltheraRegistries;
+import com.darksune.althera.common.util.ManaUtil;
 import com.darksune.althera.data.config.AltheraConfig;
 import com.darksune.althera.network.SummonPayload;
 import net.minecraft.client.Minecraft;
@@ -74,21 +75,6 @@ public final class Althera {
 
                     Level level = player.level();
 
-                    var data = player.getPersistentData();
-
-                    // 🧠 garante mana
-                    if (!data.contains("mana")) {
-                        data.putInt("mana", 200);
-                        data.putInt("max_mana", 200);
-                    }
-
-                    int mana = data.getInt("mana");
-
-                    // ❌ sem mana
-                    if (mana < 10) {
-                        player.sendSystemMessage(Component.literal("Sem mana!"));
-                        return;
-                    }
 
                     // 🧟 verifica summon existente
                     boolean hasSummon = level.getEntitiesOfClass(Zombie.class, player.getBoundingBox().inflate(50))
@@ -98,6 +84,12 @@ public final class Althera {
 
                     if (hasSummon) {
                         player.sendSystemMessage(Component.literal("Você já tem um servo ativo!"));
+                        return;
+                    }
+
+                    ManaUtil.setDefaultMana(player);
+
+                    if (!ManaUtil.consumeMana(player, 10)) {
                         return;
                     }
 
@@ -150,11 +142,8 @@ public final class Althera {
 
                         level.addFreshEntity(zombie);
 
-                        // 🔥 consome mana
-                        data.putInt("mana", mana - 10);
-
                         player.sendSystemMessage(Component.literal(
-                                "Mana: " + (mana - 10) + "/" + data.getInt("max_mana")
+                                "Mana: " + ManaUtil.getMana(player) + "/" + ManaUtil.getMaxMana(player)
                         ));
                     }
                 }
@@ -181,14 +170,9 @@ public final class Althera {
         // ⏱️ roda a cada 2 segundos
         if (zombie.tickCount % 40 == 0) {
 
-            var data = owner.getPersistentData();
+            ManaUtil.setDefaultMana(owner);
+            int mana = ManaUtil.getMana(owner);
 
-            if (!data.contains("mana")) {
-                data.putInt("mana", 200);
-                data.putInt("max_mana", 200);
-            }
-
-            int mana = data.getInt("mana");
             int cost = 20;
 
             if (mana < cost) {
@@ -197,10 +181,10 @@ public final class Althera {
                 return;
             }
 
-            data.putInt("mana", mana - cost);
+            ManaUtil.consumeMana(owner, cost);
 
             owner.sendSystemMessage(Component.literal(
-                    "Mana: " + (mana - cost) + "/" + data.getInt("max_mana")
+                    "Mana: " + ManaUtil.getMana(owner) + "/" + ManaUtil.getMaxMana(owner)
             ));
         }
 
@@ -219,17 +203,7 @@ public final class Althera {
     @SubscribeEvent
     public static void onPlayerLogin(PlayerEvent.PlayerLoggedInEvent event) {
         Player player = event.getEntity();
-
-        var data = player.getPersistentData();
-
-        // só inicializa se não existir
-        if (!data.contains("mana")) {
-            data.putInt("mana", 200);
-            data.putInt("max_mana", 200);
-            data.putInt("mana_spent", 0);
-
-            System.out.println("Mana inicializada!");
-        }
+        ManaUtil.setDefaultMana(player);
     }
 
     @SubscribeEvent
@@ -239,25 +213,19 @@ public final class Althera {
         Level level = player.level();
         if (level.isClientSide) return;
 
-        var data = player.getPersistentData();
-
-        // garante que existe mana
-        if (!data.contains("mana")) {
-            data.putInt("mana", 200);
-            data.putInt("max_mana", 200);
-        }
+        ManaUtil.setDefaultMana(player);
 
         // ⏱️ a cada 5 segundos
         if (player.tickCount % 100 == 0) {
 
-            int mana = data.getInt("mana");
-            int max = data.getInt("max_mana");
+            int mana = ManaUtil.getMana(player);
+            int max = ManaUtil.getMaxMana(player);
 
             int regen = 10;
 
             int newMana = Math.min(mana + regen, max);
 
-            data.putInt("mana", newMana);
+            ManaUtil.setMana(player, newMana);
 
             player.sendSystemMessage(Component.literal(
                     "Mana regenerada: " + newMana + "/" + max
