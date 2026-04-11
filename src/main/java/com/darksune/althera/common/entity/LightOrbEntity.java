@@ -1,0 +1,94 @@
+package com.darksune.althera.common.entity;
+
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
+
+import java.util.UUID;
+
+public class LightOrbEntity extends Entity {
+
+    private UUID owner;
+
+    public void setOwner(final UUID owner) {
+        this.owner = owner;
+    }
+
+    public Player getOwner() {
+        if (owner == null) return null;
+        return level().getPlayerByUUID(owner);
+    }
+
+    public LightOrbEntity(EntityType<?> type, Level level) {
+        super(type, level);
+        this.noPhysics = true;
+    }
+
+    @Override
+    public void tick() {
+        super.tick();
+
+        // CLIENT → partículas
+        if (level().isClientSide) {
+            level().addParticle(ParticleTypes.END_ROD,
+                    getX(),
+                    getY(),
+                    getZ(),
+                    (random.nextDouble() - 0.5) * 0.02,
+                    (random.nextDouble() - 0.5) * 0.02,
+                    (random.nextDouble() - 0.5) * 0.02
+            );
+            return;
+        }
+
+        Player player = getOwner();
+        if (player == null) {
+            discard();
+            return;
+        }
+
+        // 🌀 ângulo baseado no tempo
+        double angle = (tickCount * 0.1);
+
+        double radius = 1.0; // distância do player
+        double height = 1.5;
+
+        double offsetX = Math.cos(angle) * radius;
+        double offsetZ = Math.sin(angle) * radius;
+
+        Vec3 target = new Vec3(
+                player.getX() + offsetX,
+                player.getY() + height,
+                player.getZ() + offsetZ
+        );
+
+        // movimento suave
+        Vec3 direction = target.subtract(position()).scale(0.2);
+
+        setPos(position().add(direction));
+    }
+
+    @Override
+    protected void addAdditionalSaveData(CompoundTag compound) {
+        if (owner != null) {
+            compound.putUUID("Owner", owner);
+        }
+    }
+
+    @Override
+    protected void readAdditionalSaveData(CompoundTag compound) {
+        if (compound.hasUUID("Owner")) {
+            owner = compound.getUUID("Owner");
+        }
+    }
+
+    @Override
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+
+    }
+}

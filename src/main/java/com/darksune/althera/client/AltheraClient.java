@@ -1,13 +1,13 @@
 package com.darksune.althera.client;
 
 import com.darksune.althera.Althera;
-import net.minecraft.client.Minecraft;
+import com.darksune.althera.client.renderer.LightOrbRenderer;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
-import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 
@@ -24,31 +24,10 @@ public class AltheraClient {
     }
 
     @SubscribeEvent
-    static void onClientSetup(FMLClientSetupEvent event) {
-        // Some client setup code
-        // Althera.LOGGER.info("HELLO FROM CLIENT SETUP");
-        // Althera.LOGGER.info("MINECRAFT NAME >> {}", Minecraft.getInstance().getUser().getName());
+    public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
+        event.registerEntityRenderer(
+                Althera.LIGHT_ORB.get(),
+                LightOrbRenderer::new
+        );
     }
-
-//    @Override
-//    protected void registerModels(BlockModelGenerators blockModels, ItemModelGenerators itemModels) {
-//        itemModels.itemModelOutput.register(
-//                EXAMPLE_ITEM.get(),
-//                new ClientItem(
-//                        // Defines the model to submit for rendering
-//                        new BlockModelWrapper.Unbaked(
-//                                // Points to a model JSON relative to the 'models' directory
-//                                // Located at 'assets/examplemod/models/item/example_item.json'
-//                                ModelLocationUtils.getModelLocation(EXAMPLE_ITEM.get()),
-//                                Collections.emptyList()
-//                        ),
-//                        // Defines some settings to use during the rendering process
-//                        new ClientItem.Properties(
-//                                // When false, disables the animation where the item is raised
-//                                // up towards its normal position on item swap
-//                                false
-//                        )
-//                )
-//        );
-//    }
 }

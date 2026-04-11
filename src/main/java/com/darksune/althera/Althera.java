@@ -1,14 +1,20 @@
 package com.darksune.althera;
 
 import com.darksune.althera.common.ModKeybinds;
+import com.darksune.althera.common.entity.LightOrbEntity;
 import com.darksune.althera.common.registry.AltheraRegistries;
 import com.darksune.althera.common.util.ManaUtil;
 import com.darksune.althera.data.config.AltheraConfig;
 import com.darksune.althera.network.SummonPayload;
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.Zombie;
@@ -27,6 +33,8 @@ import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
+import net.neoforged.neoforge.registries.DeferredHolder;
+import net.neoforged.neoforge.registries.DeferredRegister;
 
 import java.util.UUID;
 
@@ -38,8 +46,22 @@ public final class Althera {
 
     public static final String MOD_ID = "althera";
 
+    public static final DeferredRegister<EntityType<?>> ENTITIES =
+            DeferredRegister.create(Registries.ENTITY_TYPE, "althera");
+
+    public static final DeferredHolder<EntityType<?>, EntityType<LightOrbEntity>> LIGHT_ORB =
+            ENTITIES.register("light_orb",
+                    () -> EntityType.Builder
+                            .<LightOrbEntity>of(LightOrbEntity::new, MobCategory.MISC)
+                            .sized(0.2f, 0.2f)
+                            .clientTrackingRange(8)
+                            .updateInterval(1)
+                            .build("light_orb"));
+
     public Althera(final IEventBus modEventBus, final ModContainer modContainer) {
         AltheraRegistries.register(modEventBus);
+
+        ENTITIES.register(modEventBus);
         modContainer.registerConfig(ModConfig.Type.COMMON, AltheraConfig.SPEC);
     }
 
@@ -78,13 +100,14 @@ public final class Althera {
                     final Zombie oldSummon = ManaUtil.hasSummon(player, level);
                     if (nonNull(oldSummon)) {
                         oldSummon.discard();
+                        habilitarEspirito(player);
                         return;
                     }
 
                     if (ManaUtil.isPlayerSemMana(player, 20)) {
                         return;
                     }
-
+                    desabilitarEspirito(player);
                     final Zombie zombie = EntityType.ZOMBIE.create(level);
 
                     if (zombie != null) {
@@ -140,7 +163,17 @@ public final class Althera {
 
     @SubscribeEvent
     public static void onEntityTick(EntityTickEvent.Post event) {
-        if (!(event.getEntity() instanceof Zombie zombie)) return;
+
+        if (event.getEntity() instanceof Zombie zombie) {
+            handleZombie(zombie);
+        }
+
+        if (event.getEntity() instanceof LightOrbEntity orb) {
+            handleOrb(orb);
+        }
+    }
+
+    public static void handleZombie(final Zombie zombie) {
 
         Level level = zombie.level();
         if (level.isClientSide) return;
@@ -166,6 +199,7 @@ public final class Althera {
             if (mana < cost) {
                 owner.sendSystemMessage(Component.literal("Sem mana! Servo desapareceu."));
                 zombie.discard();
+                habilitarEspirito(owner);
                 return;
             }
 
@@ -181,6 +215,50 @@ public final class Althera {
 
         if (distance > 30) {
             zombie.teleportTo(
+                    owner.getX() + (level.getRandom().nextDouble() - 0.5) * 2,
+                    owner.getY(),
+                    owner.getZ() + (level.getRandom().nextDouble() - 0.5) * 2
+            );
+        }
+    }
+
+    public static void handleOrb(final LightOrbEntity orb) {
+
+        Level level = orb.level();
+        if (level.isClientSide) return;
+
+        Player owner = orb.getOwner();
+        if (owner == null) return;
+
+        // ⏱️ a cada 4 segundos
+        if (orb.tickCount % 80 == 0) {
+
+            // 💪 Força I (amplifier 0 = nível 1)
+            owner.addEffect(new MobEffectInstance(
+                    MobEffects.DAMAGE_BOOST,
+                    100, // duração (5 segundos)
+                    0,
+                    false,
+                    false,
+                    true
+            ));
+
+            // 🛡️ Resistência I
+            owner.addEffect(new MobEffectInstance(
+                    MobEffects.DAMAGE_RESISTANCE,
+                    100,
+                    0,
+                    false,
+                    false,
+                    true
+            ));
+        }
+
+        // 🧠 teleporte
+        double distance = orb.distanceTo(owner);
+
+        if (distance > 30) {
+            orb.teleportTo(
                     owner.getX() + (level.getRandom().nextDouble() - 0.5) * 2,
                     owner.getY(),
                     owner.getZ() + (level.getRandom().nextDouble() - 0.5) * 2
@@ -207,5 +285,40 @@ public final class Althera {
         if (player.tickCount % 40 == 0) {
             ManaUtil.regenMana(player, level);
         }
+    }
+
+    private static void habilitarEspirito(final Player player) {
+        Level level = player.level();
+
+        // ❌ já existe? não cria outro
+        if (getPlayerOrb(player, level) != null) {
+            return;
+        }
+
+        LightOrbEntity orb = LIGHT_ORB.get().create(level);
+
+        if (orb != null) {
+            orb.setPos(player.getX(), player.getY() + 1.5, player.getZ());
+            orb.setOwner(player.getUUID());
+
+            level.addFreshEntity(orb);
+        }
+    }
+
+    private static void desabilitarEspirito(final Player player) {
+        Level level = player.level();
+
+        level.getEntitiesOfClass(LightOrbEntity.class, player.getBoundingBox().inflate(50))
+                .stream()
+                .filter(o -> player.getUUID().equals(o.getOwner().getUUID()))
+                .forEach(Entity::discard);
+    }
+
+    private static LightOrbEntity getPlayerOrb(Player player, Level level) {
+        return level.getEntitiesOfClass(LightOrbEntity.class, player.getBoundingBox().inflate(50))
+                .stream()
+                .filter(o -> player.getUUID().equals(o.getOwner().getUUID()))
+                .findFirst()
+                .orElse(null);
     }
 }
