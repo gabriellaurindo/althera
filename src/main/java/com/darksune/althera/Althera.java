@@ -6,9 +6,7 @@ import com.darksune.althera.common.util.ManaUtil;
 import com.darksune.althera.data.config.AltheraConfig;
 import com.darksune.althera.network.SummonPayload;
 import net.minecraft.client.Minecraft;
-import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
@@ -17,7 +15,6 @@ import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -32,6 +29,8 @@ import net.neoforged.neoforge.event.tick.EntityTickEvent;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 
 import java.util.UUID;
+
+import static java.util.Objects.nonNull;
 
 @EventBusSubscriber
 @Mod(Althera.MOD_ID)
@@ -70,30 +69,23 @@ public final class Althera {
                 SummonPayload.STREAM_CODEC,
                 (payload, context) -> {
 
-                    var player = context.player();
-                    if (player == null) return;
-
-                    Level level = player.level();
-
-
-                    // 🧟 verifica summon existente
-                    boolean hasSummon = level.getEntitiesOfClass(Zombie.class, player.getBoundingBox().inflate(50))
-                            .stream()
-                            .anyMatch(z -> z.getTags().contains("friendly_summon")
-                                    && player.getUUID().equals(z.getPersistentData().getUUID("owner")));
-
-                    if (hasSummon) {
-                        player.sendSystemMessage(Component.literal("Você já tem um servo ativo!"));
-                        return;
-                    }
+                    final Player player = context.player();
+                    final Level level = player.level();
 
                     ManaUtil.setDefaultMana(player);
 
-                    if (!ManaUtil.consumeMana(player, 10)) {
+
+                    final Zombie oldSummon = ManaUtil.hasSummon(player, level);
+                    if (nonNull(oldSummon)) {
+                        oldSummon.discard();
                         return;
                     }
 
-                    Zombie zombie = EntityType.ZOMBIE.create(level);
+                    if (ManaUtil.isPlayerSemMana(player, 20)) {
+                        return;
+                    }
+
+                    final Zombie zombie = EntityType.ZOMBIE.create(level);
 
                     if (zombie != null) {
                         zombie.moveTo(
@@ -141,10 +133,6 @@ public final class Althera {
                         zombie.setTarget(null);
 
                         level.addFreshEntity(zombie);
-
-                        player.sendSystemMessage(Component.literal(
-                                "Mana: " + ManaUtil.getMana(player) + "/" + ManaUtil.getMaxMana(player)
-                        ));
                     }
                 }
         );
@@ -173,7 +161,7 @@ public final class Althera {
             ManaUtil.setDefaultMana(owner);
             int mana = ManaUtil.getMana(owner);
 
-            int cost = 20;
+            int cost = 10;
 
             if (mana < cost) {
                 owner.sendSystemMessage(Component.literal("Sem mana! Servo desapareceu."));
@@ -216,20 +204,8 @@ public final class Althera {
         ManaUtil.setDefaultMana(player);
 
         // ⏱️ a cada 5 segundos
-        if (player.tickCount % 100 == 0) {
-
-            int mana = ManaUtil.getMana(player);
-            int max = ManaUtil.getMaxMana(player);
-
-            int regen = 10;
-
-            int newMana = Math.min(mana + regen, max);
-
-            ManaUtil.setMana(player, newMana);
-
-            player.sendSystemMessage(Component.literal(
-                    "Mana regenerada: " + newMana + "/" + max
-            ));
+        if (player.tickCount % 40 == 0) {
+            ManaUtil.regenMana(player, level);
         }
     }
 }
