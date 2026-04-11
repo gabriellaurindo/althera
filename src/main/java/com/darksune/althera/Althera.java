@@ -161,7 +161,7 @@ public final class Althera {
             ManaUtil.setDefaultMana(owner);
             int mana = ManaUtil.getMana(owner);
 
-            int cost = 10;
+            int cost = 20;
 
             if (mana < cost) {
                 owner.sendSystemMessage(Component.literal("Sem mana! Servo desapareceu."));
@@ -203,7 +203,7 @@ public final class Althera {
 
         ManaUtil.setDefaultMana(player);
 
-        // ⏱️ a cada 5 segundos
+        // ⏱️ a cada 2 segundos
         if (player.tickCount % 40 == 0) {
             ManaUtil.regenMana(player, level);
         }

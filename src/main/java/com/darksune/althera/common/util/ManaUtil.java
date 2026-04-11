@@ -61,38 +61,32 @@ public class ManaUtil {
         if (nonNull(hasSummon(player, level))) {
             return;
         }
-        incrementMaxMana(player, MANA_REGEN);
 
         int mana = ManaUtil.getMana(player);
         int max = ManaUtil.getMaxMana(player);
         int newMana = Math.min(mana + MANA_REGEN, max);
-        if (newMana == max) {
-            return;
-        }
         ManaUtil.setMana(player, newMana);
 
         player.sendSystemMessage(Component.literal(
-                "Mana regenerada: " + newMana + "/" + max
+                "Mana: " + newMana + "/" + max
         ));
+
+        if (newMana == max) {
+            return;
+        }
+
+        incrementMaxMana(player, MANA_REGEN);
     }
 
     public static void incrementMaxMana(final Player player, final int amount) {
-        int manaRegenered = getManaRegenered(player) + amount;
-        setManaRegenered(player, manaRegenered);
-        int oldRegenered = getManaRegenered(player);
-        int newRegenered = oldRegenered + amount;
+        int total = getManaRegenered(player) + amount;
+        setManaRegenered(player, total);
 
-        int oldLevel = oldRegenered / 25;
-        int newLevel = newRegenered / 25;
+        int levelsGained = total / 25 - (total - amount) / 25;
 
-        if (newLevel > oldLevel) {
-            int gained = newLevel - oldLevel;
-
-            int maxMana = getMaxMana(player);
-            setMaxMana(player, maxMana + gained);
+        if (levelsGained > 0) {
+            setMaxMana(player, getMaxMana(player) + levelsGained);
         }
-
-        setManaRegenered(player, newRegenered);
     }
 
     public static Zombie hasSummon(final Player player, final Level level) {
