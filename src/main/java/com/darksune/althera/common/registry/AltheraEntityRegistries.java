@@ -1,6 +1,7 @@
 package com.darksune.althera.common.registry;
 
 import com.darksune.althera.common.entity.LightOrbEntity;
+import com.darksune.althera.common.entity.SummonedEntity;
 import com.darksune.althera.common.entity.SummonedZombieEntity;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.entity.EntityType;
@@ -30,6 +31,14 @@ public final class AltheraEntityRegistries {
                             .sized(0.6f, 1.95f)
                             .clientTrackingRange(8)
                             .build("summoned_zombie"));
+
+    public static final DeferredHolder<EntityType<?>, EntityType<SummonedEntity>> SUMMONED =
+            ENTITIES.register("summoned",
+                    () -> EntityType.Builder
+                            .of(SummonedEntity::new, MobCategory.MISC)
+                            .sized(0.6f, 1.8f)
+                            .clientTrackingRange(8)
+                            .build("summoned"));
 
     public static void register(final IEventBus bus) {
         ENTITIES.register(bus);

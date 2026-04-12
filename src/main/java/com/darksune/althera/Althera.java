@@ -2,6 +2,7 @@ package com.darksune.althera;
 
 import com.darksune.althera.common.ModKeybinds;
 import com.darksune.althera.common.entity.LightOrbEntity;
+import com.darksune.althera.common.entity.SummonedEntity;
 import com.darksune.althera.common.entity.SummonedZombieEntity;
 import com.darksune.althera.common.registry.AltheraEntityRegistries;
 import com.darksune.althera.common.registry.AltheraRegistries;
@@ -105,6 +106,10 @@ public final class Althera {
         event.put(
                 AltheraEntityRegistries.SUMMONED_ZOMBIE.get(),
                 SummonedZombieEntity.createAttributes().add(Attributes.MAX_HEALTH, 100.0D).build()
+        );
+        event.put(
+                AltheraEntityRegistries.SUMMONED.get(),
+                SummonedEntity.createAttributes().build()
         );
     }
 

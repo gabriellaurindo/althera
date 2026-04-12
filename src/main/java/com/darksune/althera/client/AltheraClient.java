@@ -2,6 +2,7 @@ package com.darksune.althera.client;
 
 import com.darksune.althera.Althera;
 import com.darksune.althera.client.renderer.LightOrbRenderer;
+import com.darksune.althera.client.renderer.SummonedRenderer;
 import com.darksune.althera.client.renderer.SummonedZombieRenderer;
 import com.darksune.althera.common.registry.AltheraEntityRegistries;
 import net.neoforged.api.distmarker.Dist;
@@ -29,6 +30,10 @@ public class AltheraClient {
         event.registerEntityRenderer(
                 AltheraEntityRegistries.SUMMONED_ZOMBIE.get(),
                 SummonedZombieRenderer::new
+        );
+        event.registerEntityRenderer(
+                AltheraEntityRegistries.SUMMONED.get(),
+                SummonedRenderer::new
         );
     }
 }
