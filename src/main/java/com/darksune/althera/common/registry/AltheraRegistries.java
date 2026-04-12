@@ -6,5 +6,6 @@ public final class AltheraRegistries {
 
     public static void register(final IEventBus modEventBus) {
         AltheraItemRegistries.register(modEventBus);
+        AltheraEntityRegistries.register(modEventBus);
     }
 }

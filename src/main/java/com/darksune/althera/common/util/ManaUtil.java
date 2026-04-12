@@ -1,7 +1,7 @@
 package com.darksune.althera.common.util;
 
+import com.darksune.althera.common.entity.SummonedZombieEntity;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 
@@ -89,8 +89,8 @@ public class ManaUtil {
         }
     }
 
-    public static Zombie hasSummon(final Player player, final Level level) {
-        return level.getEntitiesOfClass(Zombie.class, player.getBoundingBox().inflate(50))
+    public static SummonedZombieEntity hasSummon(final Player player, final Level level) {
+        return level.getEntitiesOfClass(SummonedZombieEntity.class, player.getBoundingBox().inflate(50))
                 .stream()
                 .filter(z -> z.getTags().contains("friendly_summon")
                         && player.getUUID().equals(z.getPersistentData().getUUID("owner")))

@@ -2,22 +2,20 @@ package com.darksune.althera;
 
 import com.darksune.althera.common.ModKeybinds;
 import com.darksune.althera.common.entity.LightOrbEntity;
+import com.darksune.althera.common.entity.SummonedZombieEntity;
+import com.darksune.althera.common.registry.AltheraEntityRegistries;
 import com.darksune.althera.common.registry.AltheraRegistries;
 import com.darksune.althera.common.util.ManaUtil;
 import com.darksune.althera.data.config.AltheraConfig;
 import com.darksune.althera.network.SummonPayload;
 import net.minecraft.client.Minecraft;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.monster.Monster;
-import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -30,11 +28,10 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
+import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
-import net.neoforged.neoforge.registries.DeferredHolder;
-import net.neoforged.neoforge.registries.DeferredRegister;
 
 import java.util.UUID;
 
@@ -46,22 +43,9 @@ public final class Althera {
 
     public static final String MOD_ID = "althera";
 
-    public static final DeferredRegister<EntityType<?>> ENTITIES =
-            DeferredRegister.create(Registries.ENTITY_TYPE, "althera");
-
-    public static final DeferredHolder<EntityType<?>, EntityType<LightOrbEntity>> LIGHT_ORB =
-            ENTITIES.register("light_orb",
-                    () -> EntityType.Builder
-                            .<LightOrbEntity>of(LightOrbEntity::new, MobCategory.MISC)
-                            .sized(0.2f, 0.2f)
-                            .clientTrackingRange(8)
-                            .updateInterval(1)
-                            .build("light_orb"));
 
     public Althera(final IEventBus modEventBus, final ModContainer modContainer) {
         AltheraRegistries.register(modEventBus);
-
-        ENTITIES.register(modEventBus);
         modContainer.registerConfig(ModConfig.Type.COMMON, AltheraConfig.SPEC);
     }
 
@@ -97,7 +81,7 @@ public final class Althera {
                     ManaUtil.setDefaultMana(player);
 
 
-                    final Zombie oldSummon = ManaUtil.hasSummon(player, level);
+                    final SummonedZombieEntity oldSummon = ManaUtil.hasSummon(player, level);
                     if (nonNull(oldSummon)) {
                         oldSummon.discard();
                         habilitarEspirito(player);
@@ -108,7 +92,7 @@ public final class Althera {
                         return;
                     }
                     desabilitarEspirito(player);
-                    final Zombie zombie = EntityType.ZOMBIE.create(level);
+                    final SummonedZombieEntity zombie = AltheraEntityRegistries.SUMMONED_ZOMBIE.get().create(level);
 
                     if (zombie != null) {
                         zombie.moveTo(
@@ -162,9 +146,17 @@ public final class Althera {
     }
 
     @SubscribeEvent
+    public static void registerAttributes(EntityAttributeCreationEvent event) {
+        event.put(
+                AltheraEntityRegistries.SUMMONED_ZOMBIE.get(),
+                SummonedZombieEntity.createAttributes().build()
+        );
+    }
+
+    @SubscribeEvent
     public static void onEntityTick(EntityTickEvent.Post event) {
 
-        if (event.getEntity() instanceof Zombie zombie) {
+        if (event.getEntity() instanceof SummonedZombieEntity zombie) {
             handleZombie(zombie);
         }
 
@@ -173,7 +165,7 @@ public final class Althera {
         }
     }
 
-    public static void handleZombie(final Zombie zombie) {
+    public static void handleZombie(final SummonedZombieEntity zombie) {
 
         Level level = zombie.level();
         if (level.isClientSide) return;
@@ -295,7 +287,7 @@ public final class Althera {
             return;
         }
 
-        LightOrbEntity orb = LIGHT_ORB.get().create(level);
+        LightOrbEntity orb = AltheraEntityRegistries.LIGHT_ORB.get().create(level);
 
         if (orb != null) {
             orb.setPos(player.getX(), player.getY() + 1.5, player.getZ());
