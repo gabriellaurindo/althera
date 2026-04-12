@@ -1,102 +1,116 @@
-# Guia de Contribuição
+# Contribution Guide
 
 ---
 
-## Estrutura de Branches
+## Branch Structure
 
 ### `master`
-- Branch principal com as **funcionalidades/conteúdo mais recentes**.
-- **Não garante** que possui a versão mais atualizada do Forge ou minecraft.
+- Main branch containing the **latest features/content**.
+- **Does not guarantee** the most up-to-date Forge or Minecraft version.
 
 ### `release`
-- Branch para feature com as **funcionalidades/conteúdo em desenvolvimento**.
+- Branch for features with **content currently under development**.
 
-### `feature-{nome}` / `hotfix-{nome}`
-- Branches para desenvolvimento de novos recursos ou correção de bugs na `release`.
-- **Exemplo**: `feature-servos`
+### `feature-{name}` / `hotfix-{name}`
+- Branches for developing new features or fixing bugs based on `release`.
+- **Example**: `feature-servos`
 
-### `forge-{versão}` / `fabric-{versão}`
-- Branches principais para quando for necessario pra cada versão específica do Forge/Fabric/Neoforge. São branchs para quando for necessario levar funcionalidades mais novas para versões mais antigas
-- **Exemplo**: `forge-1.21.3`
+### `forge-{version}` / `fabric-{version}`
+- Main branches used when necessary for specific versions of Forge/Fabric/NeoForge.
+- These branches are used when newer features need to be adapted to older versions.
+- **Example**: `forge-1.21.3`
 
-### `hotfix-forge-{versão}` / `hotfix-fabric-{versão}`
-- Branches destinadas a correções de bugs nas branches do Forge/Fabric/Neoforge.
-- **Exemplo**: `hotfix-forge-1.21.3`
-
----
-
-## Regras para Desenvolvimento
-
-1. **Funcionalidades novas** devem ser implementadas inicialmente nas features que serão mergeadas na release e posteriomente a release na `master` para garantir uma versão estável com todo o conteúdo disponível.
-2. Sempre que possível, fazer o merge da `master` nas branches principais (`forge-{versão}` / `fabric-{versão}`) utilizando uma branch intermediária:
-    - Nome: `merge-master-{forge/fabric}-{versão}`
-    - Criar ela com base na branch principal (forge/fabric) e fazer o merge da master nela
-    - Essa branch serve para ajustes antes do merge final, garantindo que as branches principais continuem funcionando enquanto as correções são feitas.
-3. **Criar branches principais do Forge/Fabric** a partir da `master`.
-4. **Manter o Changelog atualizado**.
+### `hotfix-forge-{version}` / `hotfix-fabric-{version}`
+- Branches for bug fixes in Forge/Fabric/NeoForge branches.
+- **Example**: `hotfix-forge-1.21.3`
 
 ---
 
-## Estrutura Específica de Versões
+## Development Rules
 
-### Versões mais detalhadas
-Caso necessário, criar uma versão mais específica para as branches principais:
-- **Formato**: `{forge/fabric}-{versão}-{versão-específica}`
-- **Exemplo**: `forge-1.21.3-53.0.19`
+1. **New features** should be implemented in feature branches, merged into `release`, and later `release` should be merged into `master` to ensure a stable version with all available content.
 
-A regra de hotfix permanece a mesma:
-- **Exemplo**: `hotfix-forge-1.21.3-53.0.19`
+2. Whenever possible, merge `master` into the main branches (`forge-{version}` / `fabric-{version}`) using an intermediate branch:
+    - Name: `merge-master-{forge/fabric}-{version}`
+    - Create it from the target main branch (forge/fabric) and merge `master` into it
+    - This branch is used to fix issues before the final merge, ensuring the main branches remain stable during adjustments
 
-**Importante**: **Nunca** realizar merge de qualquer branch principal (`forge` ou `fabric`) na `master`.
+3. **Create Forge/Fabric main branches** from `master`.
+
+4. **Keep the changelog updated**.
 
 ---
 
-## Tags para Versões Finais
+## Version-Specific Structure
 
-### Formato de Tags
+### More Detailed Versions
+If necessary, create a more specific version for main branches:
+- **Format**: `{forge/fabric}-{version}-{specific-version}`
+- **Example**: `forge-1.21.3-53.0.19`
 
-althera-{versão-mod}-{forge/fabric}-{versão}-{versão-específica (se houver)}
+Hotfix follows the same rule:
+- **Example**: `hotfix-forge-1.21.3-53.0.19`
 
+**Important**: **Never** merge any main branch (`forge` or `fabric`) into `master`.
 
-**Exemplos**:
+---
+
+## Release Tags
+
+### Tag Format
+
+althera-{mod-version}-{forge/fabric}-{version}-{specific-version (if applicable)}
+
+---
+
+### Examples
+
 - `althera-0.0.0-forge-1.21.3`
 - `althera-0.0.0-forge-1.21.3-53.0.19`
 
-### Regras de Incremento
-- **Novos recursos menores**: Incrementar o segundo número.
-    - Exemplo: `althera-0.1.0-forge-1.21.3`
-- **Atualizações grandes ou incompatíveis**: Incrementar o primeiro número.
-    - Exemplo: `althera-1.0.0-forge-1.21.3`
-- **Correções de bugs**: Incrementar o terceiro número.
-    - Exemplo: `althera-0.0.1-forge-1.21.3`
+---
 
-**Nota**: Todas as branches principais devem compartilhar o mesmo primeiro e segundo números que a `master` (caso estejam atualizadas), mas o terceiro número pode variar devido a correções específicas.
+### Versioning Rules
+
+- **Minor features**: increment the second number  
+  Example: `althera-0.1.0-forge-1.21.3`
+
+- **Major or breaking updates**: increment the first number  
+  Example: `althera-1.0.0-forge-1.21.3`
+
+- **Bug fixes**: increment the third number  
+  Example: `althera-0.0.1-forge-1.21.3`
+
+**Note**: All main branches should share the same first and second numbers as `master` (if updated), but the third number may vary due to specific fixes.
 
 ---
 
-## Importância do Changelog
+## Importance of the Changelog
 
-O changelog permite identificar facilmente quais funcionalidades estão presentes em cada versão do forge/fabric. Por exemplo:
-- Se a versão do mod for `1.1.0` na versão `1.21.3` do Forge, todas as outras versões relacionadas serão `1.1.x`.
+The changelog allows easy tracking of which features are present in each Forge/Fabric version. For example:
 
----
-
-## Estrutura do Changelog
-
-### Funcionalidades ou Atualizações
-
-{versão do mod} - {Título} {natureza: feature/hotfix ou ambos}
-
-{Descrição detalhada das alterações}
-
-### Hotfix para Versões Específicas
-
-{versão do mod} - {Título} hotfix - {forge/fabric}-{versão}-{versão-específica (se houver)}
-
-{Descrição detalhada das alterações}
-
+- If the mod version is `1.1.0` for Forge `1.21.3`, all related versions will be `1.1.x`.
 
 ---
 
-## Dúvidas ou Sugestões
-Caso tenha dúvidas ou sugestões, entre em contato!
+## Changelog Structure
+
+### Features or Updates
+
+{mod version} - {Title} {type: feature/hotfix or both}
+
+{Detailed description of changes}
+
+---
+
+### Hotfix for Specific Versions
+
+{mod version} - {Title} hotfix - {forge/fabric}-{version}-{specific-version (if applicable)}
+
+{Detailed description of changes}
+
+---
+
+## Questions or Suggestions
+
+If you have any questions or suggestions, feel free to reach out!
