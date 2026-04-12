@@ -92,9 +92,9 @@ public class ManaUtil {
     public static SummonedZombieEntity hasSummon(final Player player, final Level level) {
         return level.getEntitiesOfClass(SummonedZombieEntity.class, player.getBoundingBox().inflate(50))
                 .stream()
-                .filter(z -> z.getTags().contains("friendly_summon")
-                        && player.getUUID().equals(z.getPersistentData().getUUID("owner")))
-                .findFirst().orElse(null);
+                .filter(z -> z.getOwner() != null && player.getUUID().equals(z.getOwner().getUUID()))
+                .findFirst()
+                .orElse(null);
     }
 
     public static boolean isPlayerSemMana(final Player player, final int amount) {

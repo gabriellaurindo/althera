@@ -13,12 +13,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
-import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -32,8 +27,6 @@ import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
-
-import java.util.UUID;
 
 import static java.util.Objects.nonNull;
 
@@ -78,9 +71,6 @@ public final class Althera {
                     final Player player = context.player();
                     final Level level = player.level();
 
-                    ManaUtil.setDefaultMana(player);
-
-
                     final SummonedZombieEntity oldSummon = ManaUtil.hasSummon(player, level);
                     if (nonNull(oldSummon)) {
                         oldSummon.discard();
@@ -102,43 +92,7 @@ public final class Althera {
                                 player.getYRot(),
                                 0
                         );
-
-                        // 🟢 marca dono
-                        zombie.addTag("friendly_summon");
-                        zombie.getPersistentData().putUUID("owner", player.getUUID());
-
-                        zombie.setPersistenceRequired();
-
-                        zombie.targetSelector.getAvailableGoals().clear();
-
-                        zombie.targetSelector.addGoal(
-                                1,
-                                new NearestAttackableTargetGoal<>(
-                                        zombie,
-                                        Monster.class,
-                                        true,
-                                        target -> !target.getTags().contains("friendly_summon")
-                                )
-                        );
-
-                        zombie.setCustomName(Component.literal("Gangue do canudo"));
-
-                        zombie.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.NETHERITE_SWORD));
-
-                        zombie.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.NETHERITE_HELMET));
-                        zombie.setItemSlot(EquipmentSlot.CHEST, new ItemStack(Items.NETHERITE_CHESTPLATE));
-                        zombie.setItemSlot(EquipmentSlot.LEGS, new ItemStack(Items.NETHERITE_LEGGINGS));
-                        zombie.setItemSlot(EquipmentSlot.FEET, new ItemStack(Items.NETHERITE_BOOTS));
-
-                        zombie.setDropChance(EquipmentSlot.MAINHAND, 0.0F);
-                        zombie.setDropChance(EquipmentSlot.HEAD, 0.0F);
-                        zombie.setDropChance(EquipmentSlot.CHEST, 0.0F);
-                        zombie.setDropChance(EquipmentSlot.LEGS, 0.0F);
-                        zombie.setDropChance(EquipmentSlot.FEET, 0.0F);
-
-                        zombie.setCanPickUpLoot(false);
-                        zombie.setTarget(null);
-
+                        zombie.setOwner(player.getUUID());
                         level.addFreshEntity(zombie);
                     }
                 }
@@ -170,13 +124,7 @@ public final class Althera {
         Level level = zombie.level();
         if (level.isClientSide) return;
 
-        if (!zombie.getTags().contains("friendly_summon")) return;
-
-        // 🧠 pega dono
-        if (!zombie.getPersistentData().hasUUID("owner")) return;
-
-        UUID ownerId = zombie.getPersistentData().getUUID("owner");
-        Player owner = level.getPlayerByUUID(ownerId);
+        final Player owner = zombie.getOwner();
 
         if (owner == null) return;
 
@@ -259,13 +207,13 @@ public final class Althera {
     }
 
     @SubscribeEvent
-    public static void onPlayerLogin(PlayerEvent.PlayerLoggedInEvent event) {
-        Player player = event.getEntity();
+    public static void onPlayerLogin(final PlayerEvent.PlayerLoggedInEvent event) {
+        final Player player = event.getEntity();
         ManaUtil.setDefaultMana(player);
     }
 
     @SubscribeEvent
-    public static void onPlayerTick(EntityTickEvent.Post event) {
+    public static void onPlayerTick(final EntityTickEvent.Post event) {
         if (!(event.getEntity() instanceof Player player)) return;
 
         Level level = player.level();
@@ -298,7 +246,7 @@ public final class Althera {
     }
 
     private static void desabilitarEspirito(final Player player) {
-        Level level = player.level();
+        final Level level = player.level();
 
         level.getEntitiesOfClass(LightOrbEntity.class, player.getBoundingBox().inflate(50))
                 .stream()
