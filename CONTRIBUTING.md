@@ -6,18 +6,21 @@
 
 ### `master`
 - Branch principal com as **funcionalidades/conteúdo mais recentes**.
-- **Não garante** que possui a versão mais atualizada do Forge.
+- **Não garante** que possui a versão mais atualizada do Forge ou minecraft.
+
+### `release`
+- Branch para feature com as **funcionalidades/conteúdo em desenvolvimento**.
 
 ### `feature-{nome}` / `hotfix-{nome}`
-- Branches para desenvolvimento de novos recursos ou correção de bugs na `master`.
+- Branches para desenvolvimento de novos recursos ou correção de bugs na `release`.
 - **Exemplo**: `feature-servos`
 
 ### `forge-{versão}` / `fabric-{versão}`
-- Branches principais para cada versão específica do Forge ou Fabric.
+- Branches principais para quando for necessario pra cada versão específica do Forge/Fabric/Neoforge. São branchs para quando for necessario levar funcionalidades mais novas para versões mais antigas
 - **Exemplo**: `forge-1.21.3`
 
 ### `hotfix-forge-{versão}` / `hotfix-fabric-{versão}`
-- Branches destinadas a correções de bugs nas branches principais do Forge/Fabric.
+- Branches destinadas a correções de bugs nas branches do Forge/Fabric/Neoforge.
 - **Exemplo**: `hotfix-forge-1.21.3`
 
 ---
