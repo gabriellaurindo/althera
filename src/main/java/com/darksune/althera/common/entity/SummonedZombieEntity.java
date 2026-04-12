@@ -37,19 +37,8 @@ public class SummonedZombieEntity extends Zombie {
 
         // arma
         this.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.NETHERITE_SWORD));
-
-        // armadura
-        this.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.NETHERITE_HELMET));
-        this.setItemSlot(EquipmentSlot.CHEST, new ItemStack(Items.NETHERITE_CHESTPLATE));
-        this.setItemSlot(EquipmentSlot.LEGS, new ItemStack(Items.NETHERITE_LEGGINGS));
-        this.setItemSlot(EquipmentSlot.FEET, new ItemStack(Items.NETHERITE_BOOTS));
-
-        // não dropa itens
+        // não dropa arma
         this.setDropChance(EquipmentSlot.MAINHAND, 0.0F);
-        this.setDropChance(EquipmentSlot.HEAD, 0.0F);
-        this.setDropChance(EquipmentSlot.CHEST, 0.0F);
-        this.setDropChance(EquipmentSlot.LEGS, 0.0F);
-        this.setDropChance(EquipmentSlot.FEET, 0.0F);
 
         // não pega loot
         this.setCanPickUpLoot(false);
@@ -101,6 +90,11 @@ public class SummonedZombieEntity extends Zombie {
 
     @Override
     protected boolean convertsInWater() {
+        return false;
+    }
+
+    @Override
+    protected boolean isSunSensitive() {
         return false;
     }
 }

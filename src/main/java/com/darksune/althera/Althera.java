@@ -13,6 +13,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.neoforged.bus.api.IEventBus;
@@ -103,7 +104,7 @@ public final class Althera {
     public static void registerAttributes(EntityAttributeCreationEvent event) {
         event.put(
                 AltheraEntityRegistries.SUMMONED_ZOMBIE.get(),
-                SummonedZombieEntity.createAttributes().build()
+                SummonedZombieEntity.createAttributes().add(Attributes.MAX_HEALTH, 100.0D).build()
         );
     }
 
