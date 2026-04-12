@@ -52,14 +52,18 @@ public class LightOrbEntity extends Entity {
             return;
         }
 
-        // 🌀 ângulo baseado no tempo
-        double angle = (tickCount * 0.1);
+        // 🧭 direção do player
+        float yaw = player.getYRot();
 
-        double radius = 1.0; // distância do player
-        double height = 1.5;
+        // converte pra radiano
+        double rad = Math.toRadians(yaw);
 
-        double offsetX = Math.cos(angle) * radius;
-        double offsetZ = Math.sin(angle) * radius;
+        double radius = 2.0; // distância lateral
+        double height = 2.0;
+
+        // 👉 lado direito do player (perpendicular)
+        double offsetX = Math.sin(rad) * radius;
+        double offsetZ = -Math.cos(rad) * radius;
 
         Vec3 target = new Vec3(
                 player.getX() + offsetX,
@@ -69,7 +73,6 @@ public class LightOrbEntity extends Entity {
 
         // movimento suave
         Vec3 direction = target.subtract(position()).scale(0.2);
-
         setPos(position().add(direction));
     }
 
