@@ -1,7 +1,5 @@
-package com.darksune.althera.common.registry;
+package com.darksune.althera.common.item;
 
-import com.darksune.althera.common.item.AltheraItemId;
-import com.darksune.althera.common.item.SummonSealItem;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.neoforged.bus.api.IEventBus;
@@ -13,7 +11,7 @@ import java.util.function.Supplier;
 import static com.darksune.althera.Althera.MOD_ID;
 
 
-public final class AltheraItemRegistries {
+public final class AltheraItems {
 
     public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(MOD_ID);
 

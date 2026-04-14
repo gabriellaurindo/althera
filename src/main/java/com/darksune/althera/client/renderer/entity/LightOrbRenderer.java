@@ -1,4 +1,4 @@
-package com.darksune.althera.client.renderer;
+package com.darksune.althera.client.renderer.entity;
 
 import com.darksune.althera.common.entity.LightOrbEntity;
 import net.minecraft.client.renderer.entity.EntityRenderer;

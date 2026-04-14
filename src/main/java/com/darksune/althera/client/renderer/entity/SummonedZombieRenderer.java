@@ -1,4 +1,4 @@
-package com.darksune.althera.client.renderer;
+package com.darksune.althera.client.renderer.entity;
 
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.ZombieRenderer;

@@ -1,8 +1,5 @@
-package com.darksune.althera.common.registry;
+package com.darksune.althera.common.entity;
 
-import com.darksune.althera.common.entity.LightOrbEntity;
-import com.darksune.althera.common.entity.SummonedEntity;
-import com.darksune.althera.common.entity.SummonedZombieEntity;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
@@ -11,7 +8,7 @@ import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 
-public final class AltheraEntityRegistries {
+public final class AltheraEntities {
 
     public static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(Registries.ENTITY_TYPE, "althera");
 

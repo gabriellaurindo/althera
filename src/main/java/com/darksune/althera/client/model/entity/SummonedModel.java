@@ -1,4 +1,4 @@
-package com.darksune.althera.client.model;
+package com.darksune.althera.client.model.entity;
 
 import com.darksune.althera.common.entity.SummonedEntity;
 import net.minecraft.resources.ResourceLocation;

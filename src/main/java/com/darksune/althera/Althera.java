@@ -4,12 +4,13 @@ import com.darksune.althera.common.ModKeybinds;
 import com.darksune.althera.common.entity.LightOrbEntity;
 import com.darksune.althera.common.entity.SummonedEntity;
 import com.darksune.althera.common.entity.SummonedZombieEntity;
-import com.darksune.althera.common.registry.AltheraEntityRegistries;
+import com.darksune.althera.common.entity.AltheraEntities;
 import com.darksune.althera.common.registry.AltheraRegistries;
 import com.darksune.althera.common.util.ManaUtil;
-import com.darksune.althera.data.config.AltheraConfig;
+import com.darksune.althera.config.AltheraConfig;
 import com.darksune.althera.network.SummonPayload;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -25,6 +26,7 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
+import net.neoforged.neoforge.client.event.RenderGuiEvent;
 import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
@@ -84,7 +86,7 @@ public final class Althera {
                         return;
                     }
                     desabilitarEspirito(player);
-                    final SummonedZombieEntity zombie = AltheraEntityRegistries.SUMMONED_ZOMBIE.get().create(level);
+                    final SummonedZombieEntity zombie = AltheraEntities.SUMMONED_ZOMBIE.get().create(level);
 
                     if (zombie != null) {
                         zombie.moveTo(
@@ -104,11 +106,11 @@ public final class Althera {
     @SubscribeEvent
     public static void registerAttributes(EntityAttributeCreationEvent event) {
         event.put(
-                AltheraEntityRegistries.SUMMONED_ZOMBIE.get(),
+                AltheraEntities.SUMMONED_ZOMBIE.get(),
                 SummonedZombieEntity.createAttributes().add(Attributes.MAX_HEALTH, 100.0D).build()
         );
         event.put(
-                AltheraEntityRegistries.SUMMONED.get(),
+                AltheraEntities.SUMMONED.get(),
                 SummonedEntity.createAttributes().build()
         );
     }
@@ -123,6 +125,38 @@ public final class Althera {
         if (event.getEntity() instanceof LightOrbEntity orb) {
             handleOrb(orb);
         }
+    }
+
+    @SubscribeEvent
+    public static void onRenderGui(RenderGuiEvent.Post event) {
+        Minecraft mc = Minecraft.getInstance();
+        Player player = mc.player;
+
+        if (player == null) return;
+
+        var mana = ManaUtil.getMana(player);
+        var manaMax = ManaUtil.getMaxMana(player);
+
+        int width = mc.getWindow().getGuiScaledWidth();
+        int height = mc.getWindow().getGuiScaledHeight();
+
+        int barWidth = 182; // igual XP
+        int barHeight = 5;
+
+        int x = (width - barWidth) / 2;
+        int y = height - 32; // acima da hotbar
+
+        float ratio = (float) mana / manaMax;
+        int filled = (int) (barWidth * ratio);
+
+        GuiGraphics gui = event.getGuiGraphics();
+
+        // fundo
+        gui.fill(x, y, x + barWidth, y + barHeight, 0xFF000000);
+
+        // barra (azul, por exemplo)
+        gui.fill(x, y, x + filled, y + barHeight, 0xFF00BFFF);
+        gui.drawString(mc.font, mana + "/" + manaMax, x, y - 10, 0xFFFFFF);
     }
 
     public static void handleZombie(final SummonedZombieEntity zombie) {
@@ -241,7 +275,7 @@ public final class Althera {
             return;
         }
 
-        LightOrbEntity orb = AltheraEntityRegistries.LIGHT_ORB.get().create(level);
+        LightOrbEntity orb = AltheraEntities.LIGHT_ORB.get().create(level);
 
         if (orb != null) {
             orb.setPos(player.getX(), player.getY() + 1.5, player.getZ());
