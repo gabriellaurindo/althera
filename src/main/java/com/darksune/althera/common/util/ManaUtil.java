@@ -1,5 +1,7 @@
 package com.darksune.althera.common.util;
 
+import com.darksune.althera.common.attachment.AltheraAttachments;
+import com.darksune.althera.common.attachment.ManaData;
 import com.darksune.althera.common.entity.SummonedZombieEntity;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
@@ -70,6 +72,12 @@ public class ManaUtil {
         player.sendSystemMessage(Component.literal(
                 "Mana: " + newMana + "/" + max
         ));
+
+        ManaData manaData = player.getData(AltheraAttachments.MANA.get());
+        manaData.setMana(ManaUtil.getMana(player));
+        manaData.setMaxMana(ManaUtil.getMaxMana(player));
+        // 🔥 FORÇA SYNC
+        player.setData(AltheraAttachments.MANA.get(), manaData);
 
         if (newMana == max) {
             return;

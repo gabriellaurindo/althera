@@ -20,6 +20,10 @@ public class ManaData {
         setMana(this.mana + amount);
     }
 
+    public void setMaxMana(int maxMana) {
+        this.maxMana = maxMana;
+    }
+
     // CODEC (save/load)
     public static final Codec<ManaData> CODEC = RecordCodecBuilder.create(instance ->
             instance.group(

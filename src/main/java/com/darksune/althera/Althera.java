@@ -1,10 +1,12 @@
 package com.darksune.althera;
 
 import com.darksune.althera.common.ModKeybinds;
+import com.darksune.althera.common.attachment.AltheraAttachments;
+import com.darksune.althera.common.attachment.ManaData;
+import com.darksune.althera.common.entity.AltheraEntities;
 import com.darksune.althera.common.entity.LightOrbEntity;
 import com.darksune.althera.common.entity.SummonedEntity;
 import com.darksune.althera.common.entity.SummonedZombieEntity;
-import com.darksune.althera.common.entity.AltheraEntities;
 import com.darksune.althera.common.registry.AltheraRegistries;
 import com.darksune.althera.common.util.ManaUtil;
 import com.darksune.althera.config.AltheraConfig;
@@ -134,19 +136,23 @@ public final class Althera {
 
         if (player == null) return;
 
-        var mana = ManaUtil.getMana(player);
-        var manaMax = ManaUtil.getMaxMana(player);
+        // 🔥 pega direto do attachment
+        ManaData manaData = player.getData(AltheraAttachments.MANA.get());
+
+        int mana = manaData.getMana();
+        int manaMax = manaData.getMaxMana();
 
         int width = mc.getWindow().getGuiScaledWidth();
         int height = mc.getWindow().getGuiScaledHeight();
 
-        int barWidth = 182; // igual XP
+        int barWidth = 182;
         int barHeight = 5;
 
         int x = (width - barWidth) / 2;
-        int y = height - 32; // acima da hotbar
+        int y = height - 32;
 
-        float ratio = (float) mana / manaMax;
+        // evita divisão por zero (importante)
+        float ratio = manaMax > 0 ? (float) mana / manaMax : 0;
         int filled = (int) (barWidth * ratio);
 
         GuiGraphics gui = event.getGuiGraphics();
@@ -154,8 +160,10 @@ public final class Althera {
         // fundo
         gui.fill(x, y, x + barWidth, y + barHeight, 0xFF000000);
 
-        // barra (azul, por exemplo)
+        // barra
         gui.fill(x, y, x + filled, y + barHeight, 0xFF00BFFF);
+
+        // texto
         gui.drawString(mc.font, mana + "/" + manaMax, x, y - 10, 0xFFFFFF);
     }
 
@@ -184,6 +192,12 @@ public final class Althera {
             }
 
             ManaUtil.consumeMana(owner, cost);
+            ManaData manaData = owner.getData(AltheraAttachments.MANA.get());
+            manaData.setMana(ManaUtil.getMana(owner));
+            manaData.setMaxMana(ManaUtil.getMaxMana(owner));
+            // 🔥 FORÇA SYNC
+            owner.setData(AltheraAttachments.MANA.get(), manaData);
+
 
             owner.sendSystemMessage(Component.literal(
                     "Mana: " + ManaUtil.getMana(owner) + "/" + ManaUtil.getMaxMana(owner)
