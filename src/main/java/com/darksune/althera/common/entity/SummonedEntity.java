@@ -18,6 +18,7 @@ import software.bernie.geckolib.animatable.GeoEntity;
 import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.animation.AnimatableManager;
 import software.bernie.geckolib.animation.AnimationController;
+import software.bernie.geckolib.animation.PlayState;
 import software.bernie.geckolib.animation.RawAnimation;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
@@ -40,9 +41,15 @@ public class SummonedEntity extends PathfinderMob implements GeoEntity, OwnableE
                         this,
                         "controller",
                         0,
-                        state -> state.setAndContinue(
-                                RawAnimation.begin().thenLoop("idle")
-                        )
+                        state -> {
+                            if (state.isMoving()) {
+                                return state.setAndContinue(
+                                        RawAnimation.begin().thenLoop("walk")
+                                );
+                            }
+
+                            return PlayState.STOP;
+                        }
                 )
         );
     }

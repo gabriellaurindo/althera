@@ -32,7 +32,7 @@ public final class AltheraEntities {
     public static final DeferredHolder<EntityType<?>, EntityType<SummonedEntity>> SUMMONED =
             ENTITIES.register("summoned",
                     () -> EntityType.Builder
-                            .of(SummonedEntity::new, MobCategory.MISC)
+                            .of(SummonedEntity::new, MobCategory.CREATURE)
                             .sized(0.6f, 1.8f)
                             .clientTrackingRange(8)
                             .build("summoned"));
