@@ -1,5 +1,6 @@
 package com.darksune.althera.common.entity;
 
+import com.darksune.althera.common.attachment.ManaData;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.EntityType;
@@ -14,6 +15,8 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 
 import java.util.UUID;
+
+import static com.darksune.althera.common.util.LightOrbUtil.habilitarEspirito;
 
 public class SummonedZombieEntity extends Zombie {
 
@@ -86,6 +89,43 @@ public class SummonedZombieEntity extends Zombie {
                                 && !(target instanceof Player)
                 )
         );
+    }
+
+    @Override
+    public void tick() {
+        super.tick();
+        Level level = level();
+        if (level.isClientSide) return;
+
+        final Player owner = getOwner();
+
+        if (owner == null) return;
+
+        // ⏱️ roda a cada 2 segundos
+        if (tickCount % 40 == 0) {
+            final ManaData manaData = ManaData.get(owner);
+
+            int cost = 20;
+
+            if (manaData.getMana() < cost) {
+                owner.sendSystemMessage(Component.literal("Sem mana! Servo desapareceu."));
+                discard();
+                habilitarEspirito(owner);
+                return;
+            }
+            manaData.consumeMana(owner, cost);
+        }
+
+        // 🧠 teleporte (mantém separado)
+        double distance = distanceTo(owner);
+
+        if (distance > 30) {
+            teleportTo(
+                    owner.getX() + (level.getRandom().nextDouble() - 0.5) * 2,
+                    owner.getY(),
+                    owner.getZ() + (level.getRandom().nextDouble() - 0.5) * 2
+            );
+        }
     }
 
     @Override
