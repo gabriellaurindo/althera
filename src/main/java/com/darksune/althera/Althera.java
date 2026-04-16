@@ -8,7 +8,6 @@ import com.darksune.althera.common.entity.LightOrbEntity;
 import com.darksune.althera.common.entity.SummonedEntity;
 import com.darksune.althera.common.entity.SummonedZombieEntity;
 import com.darksune.althera.common.registry.AltheraRegistries;
-import com.darksune.althera.common.util.ManaUtil;
 import com.darksune.althera.config.AltheraConfig;
 import com.darksune.althera.network.SummonPayload;
 import net.minecraft.client.Minecraft;
@@ -30,7 +29,6 @@ import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.event.RenderGuiEvent;
 import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
-import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 
@@ -76,15 +74,15 @@ public final class Althera {
 
                     final Player player = context.player();
                     final Level level = player.level();
-
-                    final SummonedZombieEntity oldSummon = ManaUtil.hasSummon(player, level);
+                    final ManaData manaData = ManaData.get(player);
+                    final SummonedZombieEntity oldSummon = manaData.hasSummon(player, level);
                     if (nonNull(oldSummon)) {
                         oldSummon.discard();
                         habilitarEspirito(player);
                         return;
                     }
 
-                    if (ManaUtil.isPlayerSemMana(player, 20)) {
+                    if (!manaData.hasEnoughMana(20)) {
                         return;
                     }
                     desabilitarEspirito(player);
@@ -136,8 +134,7 @@ public final class Althera {
 
         if (player == null) return;
 
-        // 🔥 pega direto do attachment
-        ManaData manaData = player.getData(AltheraAttachments.MANA.get());
+        final ManaData manaData = player.getData(AltheraAttachments.MANA.get());
 
         int mana = manaData.getMana();
         int manaMax = manaData.getMaxMana();
@@ -179,29 +176,19 @@ public final class Althera {
         // ⏱️ roda a cada 2 segundos
         if (zombie.tickCount % 40 == 0) {
 
-            ManaUtil.setDefaultMana(owner);
-            int mana = ManaUtil.getMana(owner);
+//            ManaUtil.setDefaultMana(owner);
+            final ManaData manaData = ManaData.get(owner);
 
             int cost = 20;
 
-            if (mana < cost) {
+            if (manaData.getMana() < cost) {
                 owner.sendSystemMessage(Component.literal("Sem mana! Servo desapareceu."));
                 zombie.discard();
                 habilitarEspirito(owner);
                 return;
             }
 
-            ManaUtil.consumeMana(owner, cost);
-            ManaData manaData = owner.getData(AltheraAttachments.MANA.get());
-            manaData.setMana(ManaUtil.getMana(owner));
-            manaData.setMaxMana(ManaUtil.getMaxMana(owner));
-            // 🔥 FORÇA SYNC
-            owner.setData(AltheraAttachments.MANA.get(), manaData);
-
-
-            owner.sendSystemMessage(Component.literal(
-                    "Mana: " + ManaUtil.getMana(owner) + "/" + ManaUtil.getMaxMana(owner)
-            ));
+            manaData.consumeMana(owner, cost);
         }
 
         // 🧠 teleporte (mantém separado)
@@ -261,23 +248,16 @@ public final class Althera {
     }
 
     @SubscribeEvent
-    public static void onPlayerLogin(final PlayerEvent.PlayerLoggedInEvent event) {
-        final Player player = event.getEntity();
-        ManaUtil.setDefaultMana(player);
-    }
-
-    @SubscribeEvent
     public static void onPlayerTick(final EntityTickEvent.Post event) {
         if (!(event.getEntity() instanceof Player player)) return;
 
         Level level = player.level();
         if (level.isClientSide) return;
 
-        ManaUtil.setDefaultMana(player);
-
         // ⏱️ a cada 2 segundos
         if (player.tickCount % 40 == 0) {
-            ManaUtil.regenMana(player, level);
+            final ManaData manaData = ManaData.get(player);
+            manaData.regenMana(player, level);
         }
     }
 
