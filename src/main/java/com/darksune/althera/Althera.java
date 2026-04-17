@@ -5,7 +5,7 @@ import com.darksune.althera.common.attachment.AltheraAttachments;
 import com.darksune.althera.common.attachment.ManaData;
 import com.darksune.althera.common.entity.AltheraEntities;
 import com.darksune.althera.common.entity.SummonedEntity;
-import com.darksune.althera.common.entity.SummonedZombieEntity;
+import com.darksune.althera.common.entity.HeroEntity;
 import com.darksune.althera.common.registry.AltheraRegistries;
 import com.darksune.althera.config.AltheraConfig;
 import com.darksune.althera.network.SummonPayload;
@@ -72,7 +72,7 @@ public final class Althera {
                     final Player player = context.player();
                     final Level level = player.level();
                     final ManaData manaData = ManaData.get(player);
-                    final SummonedZombieEntity oldSummon = manaData.hasSummon(player, level);
+                    final HeroEntity oldSummon = manaData.hasSummon(player, level);
                     if (nonNull(oldSummon)) {
                         oldSummon.discard();
                         habilitarEspirito(player);
@@ -83,18 +83,18 @@ public final class Althera {
                         return;
                     }
                     desabilitarEspirito(player);
-                    final SummonedZombieEntity zombie = AltheraEntities.SUMMONED_ZOMBIE.get().create(level);
+                    final HeroEntity hero = AltheraEntities.HERO.get().create(level);
 
-                    if (zombie != null) {
-                        zombie.moveTo(
+                    if (hero != null) {
+                        hero.moveTo(
                                 player.getX(),
                                 player.getY(),
                                 player.getZ(),
                                 player.getYRot(),
                                 0
                         );
-                        zombie.setOwner(player.getUUID());
-                        level.addFreshEntity(zombie);
+                        hero.setOwner(player.getUUID());
+                        level.addFreshEntity(hero);
                     }
                 }
         );
@@ -103,8 +103,8 @@ public final class Althera {
     @SubscribeEvent
     public static void registerAttributes(EntityAttributeCreationEvent event) {
         event.put(
-                AltheraEntities.SUMMONED_ZOMBIE.get(),
-                SummonedZombieEntity.createAttributes().add(Attributes.MAX_HEALTH, 100.0D).build()
+                AltheraEntities.HERO.get(),
+                HeroEntity.createAttributes().add(Attributes.MAX_HEALTH, 100.0D).build()
         );
         event.put(
                 AltheraEntities.SUMMONED.get(),

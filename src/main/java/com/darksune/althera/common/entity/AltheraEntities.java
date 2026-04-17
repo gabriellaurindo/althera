@@ -21,13 +21,13 @@ public final class AltheraEntities {
                             .updateInterval(1)
                             .build("light_orb"));
 
-    public static final DeferredHolder<EntityType<?>, EntityType<SummonedZombieEntity>> SUMMONED_ZOMBIE =
-            ENTITIES.register("summoned_zombie",
+    public static final DeferredHolder<EntityType<?>, EntityType<HeroEntity>> HERO =
+            ENTITIES.register("hero",
                     () -> EntityType.Builder
-                            .of(SummonedZombieEntity::new, MobCategory.MONSTER)
+                            .of(HeroEntity::new, MobCategory.CREATURE)
                             .sized(0.6f, 1.95f)
                             .clientTrackingRange(8)
-                            .build("summoned_zombie"));
+                            .build("hero"));
 
     public static final DeferredHolder<EntityType<?>, EntityType<SummonedEntity>> SUMMONED =
             ENTITIES.register("summoned",

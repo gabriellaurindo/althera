@@ -1,6 +1,6 @@
 package com.darksune.althera.common.attachment;
 
-import com.darksune.althera.common.entity.SummonedZombieEntity;
+import com.darksune.althera.common.entity.HeroEntity;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.network.FriendlyByteBuf;
@@ -133,8 +133,8 @@ public class ManaData {
         }
     }
 
-    public SummonedZombieEntity hasSummon(final Player player, final Level level) {
-        return level.getEntitiesOfClass(SummonedZombieEntity.class, player.getBoundingBox().inflate(50))
+    public HeroEntity hasSummon(final Player player, final Level level) {
+        return level.getEntitiesOfClass(HeroEntity.class, player.getBoundingBox().inflate(50))
                 .stream()
                 .filter(z -> z.getOwner() != null && player.getUUID().equals(z.getOwner().getUUID()))
                 .findFirst()
