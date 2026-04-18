@@ -128,9 +128,10 @@ public class ManaData {
 
         int levelsGained = total / 25 - (total - amount) / 25;
 
-        if (levelsGained > 0) {
-            setMaxMana(getMaxMana() + levelsGained);
+        if (levelsGained < 0) {
+           return;
         }
+        setMaxMana(getMaxMana() + levelsGained);
     }
 
     public HeroEntity hasSummon(final Player player, final Level level) {

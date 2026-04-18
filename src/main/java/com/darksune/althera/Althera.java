@@ -1,6 +1,7 @@
 package com.darksune.althera;
 
 import com.darksune.althera.common.attachment.AltheraAttachments;
+import com.darksune.althera.common.attachment.HeroData;
 import com.darksune.althera.common.attachment.ManaData;
 import com.darksune.althera.common.entity.AltheraEntities;
 import com.darksune.althera.common.entity.HeroEntity;
@@ -66,17 +67,23 @@ public final class Althera {
                     desabilitarEspirito(player);
                     final HeroEntity hero = AltheraEntities.HERO.get().create(level);
 
-                    if (hero != null) {
-                        hero.moveTo(
-                                player.getX(),
-                                player.getY(),
-                                player.getZ(),
-                                player.getYRot(),
-                                0
-                        );
-                        hero.setOwner(player.getUUID());
-                        level.addFreshEntity(hero);
+                    if (hero == null) {
+                        return;
                     }
+                    final HeroData heroData = HeroData.get(player);
+                    double maxHealth = heroData.getMaxHealth();
+
+                    hero.getAttribute(Attributes.MAX_HEALTH).setBaseValue(maxHealth);
+                    hero.setHealth((float) maxHealth);
+                    hero.moveTo(
+                            player.getX(),
+                            player.getY(),
+                            player.getZ(),
+                            player.getYRot(),
+                            0
+                    );
+                    hero.setOwner(player.getUUID());
+                    level.addFreshEntity(hero);
                 }
         );
     }
@@ -85,7 +92,7 @@ public final class Althera {
     public static void registerAttributes(EntityAttributeCreationEvent event) {
         event.put(
                 AltheraEntities.HERO.get(),
-                HeroEntity.createAttributes().add(Attributes.MAX_HEALTH, 100.0D).build()
+                HeroEntity.createAttributes().add(Attributes.MAX_HEALTH, 20.0D).build()
         );
         event.put(
                 AltheraEntities.SUMMONED.get(),

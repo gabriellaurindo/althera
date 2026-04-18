@@ -8,8 +8,8 @@ import net.minecraft.world.entity.player.Player;
 
 public class HeroData {
 
-    public int health = 20;
-    public int maxHealth = 20;
+    public double health = 20;
+    public double maxHealth = 20;
 
     // =========================
     // GET / SET (Attachment)
@@ -19,19 +19,19 @@ public class HeroData {
         return player.getData(AltheraAttachments.HERO.get());
     }
 
-    public int getHealth() {
+    public double getHealth() {
         return health;
     }
 
-    public void setHealth(int health) {
+    public void setHealth(double health) {
         this.health = health;
     }
 
-    public int getMaxHealth() {
+    public double getMaxHealth() {
         return maxHealth;
     }
 
-    public void setMaxHealth(int maxHealth) {
+    public void setMaxHealth(double maxHealth) {
         this.maxHealth = maxHealth;
     }
 
@@ -41,12 +41,12 @@ public class HeroData {
 
     public static final Codec<HeroData> CODEC = RecordCodecBuilder.create(instance ->
             instance.group(
-                    Codec.INT.fieldOf("health").forGetter(data -> data.health),
-                    Codec.INT.fieldOf("maxHealth").forGetter(data -> data.maxHealth)
+                    Codec.DOUBLE.fieldOf("health").forGetter(data -> data.health),
+                    Codec.DOUBLE.fieldOf("maxHealth").forGetter(data -> data.maxHealth)
             ).apply(instance, (health, maxHealth) -> {
                 HeroData data = new HeroData();
                 data.health = health;
-                data.maxHealth = health;
+                data.maxHealth = maxHealth;
                 return data;
             })
     );
@@ -57,13 +57,13 @@ public class HeroData {
 
     public static final StreamCodec<FriendlyByteBuf, HeroData> STREAM_CODEC = StreamCodec.of(
             (buf, data) -> {
-                buf.writeInt(data.health);
-                buf.writeInt(data.maxHealth);
+                buf.writeDouble(data.health);
+                buf.writeDouble(data.maxHealth);
             },
             buf -> {
                 HeroData data = new HeroData();
-                data.health = buf.readInt();
-                data.maxHealth = buf.readInt();
+                data.health = buf.readDouble();
+                data.maxHealth = buf.readDouble();
                 return data;
             }
     );
@@ -76,8 +76,10 @@ public class HeroData {
         player.setData(AltheraAttachments.HERO.get(), this);
     }
 
-    public void incrementMaxHealth(final int amount) {
-        int total = getMaxHealth() + amount;
+    public void incrementMaxHealth(final double amount, final Player player) {
+        double total = getMaxHealth() + amount;
         setMaxHealth(total);
+        //TODO: Criar um esquema de dirty aqui + async direto no tick do player, colocar esse metodo em uma interface e implementar em todos os attachments
+        sync(player);
     }
 }
