@@ -143,5 +143,4 @@ public final class Althera {
             manaData.regenMana(player, level);
         }
     }
-
 }

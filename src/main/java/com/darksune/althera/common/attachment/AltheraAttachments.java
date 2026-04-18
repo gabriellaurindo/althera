@@ -20,6 +20,14 @@ public class AltheraAttachments {
                             .sync(ManaData.STREAM_CODEC)
                             .build());
 
+    public static final DeferredHolder<AttachmentType<?>, AttachmentType<HeroData>> HERO =
+            ATTACHMENTS.register("hero", () ->
+                    AttachmentType.builder(HeroData::new)
+                            .serialize(HeroData.CODEC)
+                            .copyOnDeath()
+                            .sync(HeroData.STREAM_CODEC)
+                            .build());
+
     public static void register(final IEventBus bus) {
         ATTACHMENTS.register(bus);
     }

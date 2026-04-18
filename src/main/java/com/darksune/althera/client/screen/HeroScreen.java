@@ -1,5 +1,6 @@
 package com.darksune.althera.client.screen;
 
+import com.darksune.althera.common.attachment.HeroData;
 import com.darksune.althera.common.entity.AltheraEntities;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -17,6 +18,8 @@ public class HeroScreen extends Screen {
     private static final int GUI_WIDTH = 176;
     private static final int GUI_HEIGHT = 166;
 
+    private LivingEntity previewEntity;
+
     public HeroScreen() {
         super(Component.literal("Status"));
     }
@@ -24,12 +27,17 @@ public class HeroScreen extends Screen {
     @Override
     protected void init() {
         super.init();
+        final Minecraft mc = Minecraft.getInstance();
+        this.previewEntity = AltheraEntities.HERO.get().create(mc.level);
     }
 
     @Override
     public void render(GuiGraphics gui, int mouseX, int mouseY, float partialTick) {
         final Minecraft mc = Minecraft.getInstance();
-        final LivingEntity entity = AltheraEntities.HERO.get().create(mc.level);
+        final LivingEntity entity = this.previewEntity;
+        entity.tickCount++;
+
+        final HeroData heroData = HeroData.get(mc.player);
 
         gui.fill(0, 0, this.width, this.height, 0x55000000);
 
@@ -62,6 +70,23 @@ public class HeroScreen extends Screen {
                 mouseX,
                 mouseY,
                 entity
+        );
+
+        int textX = x + 10;     // margem esquerda do painel
+        int textY = y + 30;     // abaixo do título
+
+        gui.drawString(this.font,
+                "Max Health",
+                textX,
+                textY,
+                0xFFD700 // dourado
+        );
+
+        gui.drawString(this.font,
+                String.valueOf(heroData.getMaxHealth()),
+                textX,
+                textY + 12,
+                0xFFFFFF
         );
 
         super.render(gui, mouseX, mouseY, partialTick);
