@@ -1,9 +1,12 @@
 package com.darksune.althera.client.screen;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
 
 public class HeroScreen extends Screen {
 
@@ -24,7 +27,8 @@ public class HeroScreen extends Screen {
 
     @Override
     public void render(GuiGraphics gui, int mouseX, int mouseY, float partialTick) {
-
+        final Minecraft mc = Minecraft.getInstance();
+        final Player player = mc.player;
         // fundo leve sem blur
         gui.fill(0, 0, this.width, this.height, 0x55000000);
 
@@ -41,6 +45,22 @@ public class HeroScreen extends Screen {
                 this.width / 2 - this.font.width(title) / 2,
                 y + 6,
                 0xFFFFFF
+        );
+
+        int entityX = x + GUI_WIDTH / 2;
+        int entityY = y + GUI_HEIGHT / 2;
+
+        InventoryScreen.renderEntityInInventoryFollowsMouse(
+                gui,
+                entityX - 25,
+                entityY - 50,
+                entityX + 25,
+                entityY + 50,
+                40,
+                0.0F,
+                mouseX,
+                mouseY,
+                player
         );
 
         super.render(gui, mouseX, mouseY, partialTick);
