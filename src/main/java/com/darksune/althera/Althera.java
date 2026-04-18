@@ -1,11 +1,10 @@
 package com.darksune.althera;
 
-import com.darksune.althera.common.AltheraKeybinds;
 import com.darksune.althera.common.attachment.AltheraAttachments;
 import com.darksune.althera.common.attachment.ManaData;
 import com.darksune.althera.common.entity.AltheraEntities;
-import com.darksune.althera.common.entity.SummonedEntity;
 import com.darksune.althera.common.entity.HeroEntity;
+import com.darksune.althera.common.entity.SummonedEntity;
 import com.darksune.althera.common.registry.AltheraRegistries;
 import com.darksune.althera.config.AltheraConfig;
 import com.darksune.althera.network.SummonPayload;
@@ -20,8 +19,6 @@ import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
-import net.neoforged.neoforge.client.event.ClientTickEvent;
-import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.event.RenderGuiEvent;
 import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
@@ -41,22 +38,6 @@ public final class Althera {
     public Althera(final IEventBus modEventBus, final ModContainer modContainer) {
         AltheraRegistries.register(modEventBus);
         modContainer.registerConfig(ModConfig.Type.COMMON, AltheraConfig.SPEC);
-    }
-
-    @SubscribeEvent
-    public static void onClientTick(ClientTickEvent.Post event) {
-        while (AltheraKeybinds.SUMMON_KEY.consumeClick()) {
-            sendSummon();
-        }
-    }
-
-    private static void sendSummon() {
-        Minecraft.getInstance().getConnection().send(new SummonPayload());
-    }
-
-    @SubscribeEvent
-    public static void registerKeys(RegisterKeyMappingsEvent event) {
-        event.register(AltheraKeybinds.SUMMON_KEY);
     }
 
     @SubscribeEvent

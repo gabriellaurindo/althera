@@ -12,4 +12,11 @@ public class AltheraKeybinds {
             GLFW.GLFW_KEY_G,
             "key.categories.althera"
     );
+
+    public static final KeyMapping HERO_SCREEN = new KeyMapping(
+            "key.althera.hero.screen",
+            InputConstants.Type.KEYSYM,
+            GLFW.GLFW_KEY_G,
+            "key.categories.althera"
+    );
 }
