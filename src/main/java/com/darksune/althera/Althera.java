@@ -1,7 +1,6 @@
 package com.darksune.althera;
 
 import com.darksune.althera.common.attachment.AltheraAttachments;
-import com.darksune.althera.common.attachment.HeroData;
 import com.darksune.althera.common.attachment.ManaData;
 import com.darksune.althera.common.entity.AltheraEntities;
 import com.darksune.althera.common.entity.HeroEntity;
@@ -56,7 +55,7 @@ public final class Althera {
                     final ManaData manaData = ManaData.get(player);
                     final HeroEntity oldSummon = manaData.hasSummon(player, level);
                     if (nonNull(oldSummon)) {
-                        oldSummon.discard();
+                        oldSummon.remove();
                         habilitarEspirito(player);
                         return;
                     }
@@ -65,16 +64,12 @@ public final class Althera {
                         return;
                     }
                     desabilitarEspirito(player);
-                    final HeroEntity hero = AltheraEntities.HERO.get().create(level);
+                    final HeroEntity hero = HeroEntity.create(level, player);
 
                     if (hero == null) {
                         return;
                     }
-                    final HeroData heroData = HeroData.get(player);
-                    double maxHealth = heroData.getMaxHealth();
 
-                    hero.getAttribute(Attributes.MAX_HEALTH).setBaseValue(maxHealth);
-                    hero.setHealth((float) maxHealth);
                     hero.moveTo(
                             player.getX(),
                             player.getY(),
@@ -82,7 +77,6 @@ public final class Althera {
                             player.getYRot(),
                             0
                     );
-                    hero.setOwner(player.getUUID());
                     level.addFreshEntity(hero);
                 }
         );

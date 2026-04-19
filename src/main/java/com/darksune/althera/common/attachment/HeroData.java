@@ -1,9 +1,11 @@
 package com.darksune.althera.common.attachment;
 
+import com.darksune.althera.common.entity.HeroEntity;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 
 public class HeroData {
@@ -81,5 +83,11 @@ public class HeroData {
         setMaxHealth(total);
         //TODO: Criar um esquema de dirty aqui + async direto no tick do player, colocar esse metodo em uma interface e implementar em todos os attachments
         sync(player);
+    }
+
+    public void setAttributes(final HeroEntity hero, final Player player) {
+        hero.getAttribute(Attributes.MAX_HEALTH).setBaseValue(maxHealth);
+        hero.setHealth((float) health);
+        hero.setOwner(player.getUUID());
     }
 }

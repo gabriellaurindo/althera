@@ -1,16 +1,19 @@
 package com.darksune.althera.common.entity;
 
+import com.darksune.althera.common.ai.goal.AssistOwnerGoal;
+import com.darksune.althera.common.ai.goal.ProtectOwnerGoal;
+import com.darksune.althera.common.attachment.HeroData;
 import com.darksune.althera.common.attachment.ManaData;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
-import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
-import net.minecraft.world.entity.monster.Monster;
+import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -111,6 +114,9 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
 
         if (owner == null) return;
 
+        final HeroData heroData = HeroData.get(owner);
+        this.getAttribute(Attributes.MAX_HEALTH).setBaseValue(heroData.getMaxHealth());
+        heroData.sync(owner);
         // ⏱️ roda a cada 2 segundos
         if (tickCount % 40 == 0) {
             final ManaData manaData = ManaData.get(owner);
@@ -124,6 +130,13 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
                 return;
             }
             manaData.consumeMana(owner, cost);
+
+
+            if (getHealth() < heroData.getMaxHealth()) {
+                heal(1.0F); // cura 1 de vida
+                heroData.setHealth(this.getHealth());
+                heroData.sync(owner);
+            }
         }
 
         // 🧠 teleporte (mantém separado)
@@ -142,26 +155,22 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
     protected void registerGoals() {
         super.registerGoals();
 
-        // 🧭 Seguir o dono (player)
-//        this.goalSelector.addGoal(1, new FollowOwnerGoal(this, 1.0D, 2.0F, 10.0F));
-
-        // ⚔️ Atacar inimigos
-        this.goalSelector.addGoal(2, new MeleeAttackGoal(this, 1.2D, true));
-
-        // 👀 olhar ao redor
-        this.goalSelector.addGoal(3, new RandomLookAroundGoal(this));
-
-        // 🚶 andar aleatoriamente (opcional)
-        this.goalSelector.addGoal(4, new WaterAvoidingRandomStrollGoal(this, 0.8D));
-
-        // 🎯 escolher alvo (monstros)
+        this.targetSelector.addGoal(0, new HurtByTargetGoal(this));
         this.targetSelector.addGoal(1,
-                new NearestAttackableTargetGoal<>(
-                        this,
-                        Monster.class,
-                        true
-                )
+                new ProtectOwnerGoal<>(this)
         );
+        this.targetSelector.addGoal(2,
+                new AssistOwnerGoal<>(this)
+        );
+        this.goalSelector.addGoal(3, new MeleeAttackGoal(this, 1.2D, true));
+        this.goalSelector.addGoal(4, new RandomLookAroundGoal(this));
+        this.goalSelector.addGoal(5, new WaterAvoidingRandomStrollGoal(this, 0.8D));
+    }
+
+    @Override
+    public void die(final DamageSource source) {
+        syncHealth();
+        super.die(source);
     }
 
     @Override
@@ -169,10 +178,10 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
         return cache;
     }
 
-    //TODO: Temporario
     @Override
     public boolean isAlliedTo(final Entity entity) {
-        return entity instanceof Player;
+        if (entity == getOwner()) return true;
+        return super.isAlliedTo(entity);
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -184,6 +193,24 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
 
     @Override
     public @Nullable UUID getOwnerUUID() {
-        return null;
+        return owner;
+    }
+
+    public static HeroEntity create(final Level level, final Player player) {
+        final HeroEntity hero = AltheraEntities.HERO.get().create(level);
+        final HeroData heroData = HeroData.get(player);
+        heroData.setAttributes(hero, player);
+        return hero;
+    }
+
+    public void remove() {
+        syncHealth();
+        this.discard();
+    }
+
+    public void syncHealth() {
+        final HeroData heroData = HeroData.get(getOwner());
+        heroData.setHealth(this.getHealth());
+        heroData.sync(getOwner());
     }
 }

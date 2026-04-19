@@ -1,7 +1,7 @@
 package com.darksune.althera.client.input;
 
 import com.darksune.althera.client.action.ClientActions;
-import com.darksune.althera.common.AltheraKeybinds;
+import com.darksune.althera.client.keybind.AltheraKeybinds;
 import net.minecraft.client.Minecraft;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;

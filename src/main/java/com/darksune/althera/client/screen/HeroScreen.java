@@ -1,5 +1,6 @@
 package com.darksune.althera.client.screen;
 
+import com.darksune.althera.client.keybind.AltheraKeybinds;
 import com.darksune.althera.common.attachment.HeroData;
 import com.darksune.althera.common.entity.AltheraEntities;
 import net.minecraft.client.Minecraft;
@@ -76,14 +77,14 @@ public class HeroScreen extends Screen {
         int textY = y + 30;     // abaixo do título
 
         gui.drawString(this.font,
-                "Max Health",
+                "Health",
                 textX,
                 textY,
                 0xFFD700 // dourado
         );
 
         gui.drawString(this.font,
-                String.valueOf(heroData.getMaxHealth()),
+                (int) heroData.getHealth() + " / " + (int) heroData.getMaxHealth(),
                 textX,
                 textY + 12,
                 0xFFFFFF
@@ -100,5 +101,14 @@ public class HeroScreen extends Screen {
     @Override
     public void renderBackground(GuiGraphics gui, int mouseX, int mouseY, float partialTick) {
         // bloqueia blur
+    }
+
+    @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (AltheraKeybinds.HERO_SCREEN.matches(keyCode, scanCode)) {
+            this.onClose();
+            return true;
+        }
+        return super.keyPressed(keyCode, scanCode, modifiers);
     }
 }

@@ -1,4 +1,4 @@
-package com.darksune.althera.common;
+package com.darksune.althera.client.keybind;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.KeyMapping;

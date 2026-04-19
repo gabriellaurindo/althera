@@ -1,5 +1,6 @@
 package com.darksune.althera.common.entity;
 
+import com.darksune.althera.common.attachment.HeroData;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -110,7 +111,17 @@ public class LightOrbEntity extends Entity {
                     true
             ));
         }
+        if (tickCount % 40 == 0) {
+            final HeroData heroData = HeroData.get(owner);
 
+            int newHealth = Math.min(
+                    (int) heroData.getHealth() + 2,
+                    (int) heroData.getMaxHealth()
+            );
+
+            heroData.setHealth(newHealth);
+            heroData.sync(owner);
+        }
         // 🧠 teleporte
         double distance = distanceTo(owner);
 
