@@ -23,6 +23,7 @@ public class AssistOwnerGoal<E extends Mob & OwnableEntity> extends TargetGoal {
         LivingEntity attacked = owner.getLastHurtMob();
 
         if (attacked == null) return false;
+        if (attacked == entity) return false;
 
         this.target = attacked;
         return true;

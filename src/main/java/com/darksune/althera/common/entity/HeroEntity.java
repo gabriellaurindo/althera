@@ -169,7 +169,12 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
 
     @Override
     public void die(final DamageSource source) {
+        if (level().isClientSide) {
+            super.die(source);
+            return;
+        }
         syncHealth();
+        habilitarEspirito(this.getOwner());
         super.die(source);
     }
 
