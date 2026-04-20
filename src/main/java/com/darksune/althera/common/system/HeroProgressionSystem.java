@@ -19,6 +19,11 @@ public class HeroProgressionSystem {
             heroData.setXp(heroData.getXp() - getXpToNextLevel(heroData));
             heroData.setLevel(heroData.getLevel() + 1);
             HeroStatsSystem.applyAttributes((HeroEntity) event.getSource().getEntity(), player);
+            player.sendSystemMessage(
+                    net.minecraft.network.chat.Component.literal(
+                            "§aSeu summon subiu para o nível " + heroData.getLevel() + "!"
+                    )
+            );
         }
 
         heroData.sync(player);
