@@ -1,6 +1,7 @@
 package com.darksune.althera.common.entity;
 
 import com.darksune.althera.common.attachment.HeroData;
+import com.darksune.althera.common.system.HeroStatsSystem;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -116,7 +117,7 @@ public class LightOrbEntity extends Entity {
 
             int newHealth = Math.min(
                     (int) heroData.getHealth() + 2,
-                    (int) heroData.getMaxHealth()
+                    (int) HeroStatsSystem.getMaxHealth(heroData.getLevel())
             );
 
             heroData.setHealth(newHealth);

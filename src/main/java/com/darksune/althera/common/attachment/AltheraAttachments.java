@@ -9,8 +9,7 @@ import net.neoforged.neoforge.registries.NeoForgeRegistries;
 
 public class AltheraAttachments {
 
-    public static final DeferredRegister<AttachmentType<?>> ATTACHMENTS =
-            DeferredRegister.create(NeoForgeRegistries.ATTACHMENT_TYPES, Althera.MOD_ID);
+    public static final DeferredRegister<AttachmentType<?>> ATTACHMENTS = DeferredRegister.create(NeoForgeRegistries.ATTACHMENT_TYPES, Althera.MOD_ID);
 
     public static final DeferredHolder<AttachmentType<?>, AttachmentType<ManaData>> MANA =
             ATTACHMENTS.register("mana", () ->

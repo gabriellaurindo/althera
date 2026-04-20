@@ -3,6 +3,8 @@ package com.darksune.althera.client.screen;
 import com.darksune.althera.client.keybind.AltheraKeybinds;
 import com.darksune.althera.common.attachment.HeroData;
 import com.darksune.althera.common.entity.AltheraEntities;
+import com.darksune.althera.common.system.HeroProgressionSystem;
+import com.darksune.althera.common.system.HeroStatsSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
@@ -84,9 +86,42 @@ public class HeroScreen extends Screen {
         );
 
         gui.drawString(this.font,
-                (int) heroData.getHealth() + " / " + (int) heroData.getMaxHealth(),
+                (int) heroData.getHealth() + " / " + (int) HeroStatsSystem.getMaxHealth(heroData.getLevel()),
                 textX,
                 textY + 12,
+                0xFFFFFF
+        );
+
+        // LEVEL
+        gui.drawString(this.font,
+                "Level",
+                textX,
+                textY + 24,
+                0x00FFAA
+        );
+
+        gui.drawString(this.font,
+                String.valueOf(heroData.getLevel()),
+                textX,
+                textY + 36,
+                0xFFFFFF
+        );
+
+        // XP
+        long currentXp = heroData.getXp();
+        long requiredXp = HeroProgressionSystem.getXpToNextLevel(heroData);
+
+        gui.drawString(this.font,
+                "XP",
+                textX,
+                textY + 48,
+                0x00AAFF
+        );
+
+        gui.drawString(this.font,
+                currentXp + " / " + requiredXp,
+                textX,
+                textY + 60,
                 0xFFFFFF
         );
 

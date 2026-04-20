@@ -1,24 +1,44 @@
 package com.darksune.althera.common.attachment;
 
-import com.darksune.althera.common.entity.HeroEntity;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 
 public class HeroData {
 
-    public double health = 20;
-    public double maxHealth = 20;
+    // =========================
+    // DATA
+    // =========================
+
+    private int level = 1;
+    private long xp = 0;
+
+    private double health = 10;
 
     // =========================
-    // GET / SET (Attachment)
+    // GET / SET
     // =========================
 
     public static HeroData get(final Player player) {
         return player.getData(AltheraAttachments.HERO.get());
+    }
+
+    public int getLevel() {
+        return level;
+    }
+
+    public void setLevel(final int level) {
+        this.level = level;
+    }
+
+    public long getXp() {
+        return xp;
+    }
+
+    public void setXp(final long xp) {
+        this.xp = xp;
     }
 
     public double getHealth() {
@@ -29,26 +49,20 @@ public class HeroData {
         this.health = health;
     }
 
-    public double getMaxHealth() {
-        return maxHealth;
-    }
-
-    public void setMaxHealth(double maxHealth) {
-        this.maxHealth = maxHealth;
-    }
-
     // =========================
     // CODEC (save/load)
     // =========================
 
     public static final Codec<HeroData> CODEC = RecordCodecBuilder.create(instance ->
             instance.group(
-                    Codec.DOUBLE.fieldOf("health").forGetter(data -> data.health),
-                    Codec.DOUBLE.fieldOf("maxHealth").forGetter(data -> data.maxHealth)
-            ).apply(instance, (health, maxHealth) -> {
+                    Codec.INT.fieldOf("level").forGetter(data -> data.level),
+                    Codec.LONG.fieldOf("xp").forGetter(data -> data.xp),
+                    Codec.DOUBLE.fieldOf("health").forGetter(data -> data.health)
+            ).apply(instance, (level, xp, health) -> {
                 HeroData data = new HeroData();
+                data.level = level;
+                data.xp = xp;
                 data.health = health;
-                data.maxHealth = maxHealth;
                 return data;
             })
     );
@@ -59,13 +73,15 @@ public class HeroData {
 
     public static final StreamCodec<FriendlyByteBuf, HeroData> STREAM_CODEC = StreamCodec.of(
             (buf, data) -> {
+                buf.writeInt(data.level);
+                buf.writeLong(data.xp);
                 buf.writeDouble(data.health);
-                buf.writeDouble(data.maxHealth);
             },
             buf -> {
                 HeroData data = new HeroData();
+                data.level = buf.readInt();
+                data.xp = buf.readLong();
                 data.health = buf.readDouble();
-                data.maxHealth = buf.readDouble();
                 return data;
             }
     );
@@ -76,18 +92,5 @@ public class HeroData {
 
     public void sync(final Player player) {
         player.setData(AltheraAttachments.HERO.get(), this);
-    }
-
-    public void incrementMaxHealth(final double amount, final Player player) {
-        double total = getMaxHealth() + amount;
-        setMaxHealth(total);
-        //TODO: Criar um esquema de dirty aqui + async direto no tick do player, colocar esse metodo em uma interface e implementar em todos os attachments
-        sync(player);
-    }
-
-    public void setAttributes(final HeroEntity hero, final Player player) {
-        hero.getAttribute(Attributes.MAX_HEALTH).setBaseValue(maxHealth);
-        hero.setHealth((float) health);
-        hero.setOwner(player.getUUID());
     }
 }

@@ -4,6 +4,7 @@ import com.darksune.althera.common.ai.goal.AssistOwnerGoal;
 import com.darksune.althera.common.ai.goal.ProtectOwnerGoal;
 import com.darksune.althera.common.attachment.HeroData;
 import com.darksune.althera.common.attachment.ManaData;
+import com.darksune.althera.common.system.HeroStatsSystem;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.damagesource.DamageSource;
@@ -115,8 +116,6 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
         if (owner == null) return;
 
         final HeroData heroData = HeroData.get(owner);
-        this.getAttribute(Attributes.MAX_HEALTH).setBaseValue(heroData.getMaxHealth());
-        heroData.sync(owner);
         // ⏱️ roda a cada 2 segundos
         if (tickCount % 40 == 0) {
             final ManaData manaData = ManaData.get(owner);
@@ -132,7 +131,7 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
             manaData.consumeMana(owner, cost);
 
 
-            if (getHealth() < heroData.getMaxHealth()) {
+            if (getHealth() < HeroStatsSystem.getMaxHealth(heroData.getLevel())) {
                 heal(1.0F); // cura 1 de vida
                 heroData.setHealth(this.getHealth());
                 heroData.sync(owner);
@@ -191,9 +190,9 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
 
     public static AttributeSupplier.Builder createAttributes() {
         return PathfinderMob.createMobAttributes()
-                .add(Attributes.MAX_HEALTH, 40.0D)
+                .add(Attributes.MAX_HEALTH, 20.0D)
                 .add(Attributes.MOVEMENT_SPEED, 0.25D)
-                .add(Attributes.ATTACK_DAMAGE, 6.0D);
+                .add(Attributes.ATTACK_DAMAGE, 1.25D);
     }
 
     @Override
@@ -203,8 +202,7 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
 
     public static HeroEntity create(final Level level, final Player player) {
         final HeroEntity hero = AltheraEntities.HERO.get().create(level);
-        final HeroData heroData = HeroData.get(player);
-        heroData.setAttributes(hero, player);
+        HeroStatsSystem.applyAttributes(hero, player);
         return hero;
     }
 

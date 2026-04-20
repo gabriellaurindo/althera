@@ -1,7 +1,7 @@
 package com.darksune.althera.common.event;
 
-import com.darksune.althera.common.attachment.HeroData;
 import com.darksune.althera.common.entity.HeroEntity;
+import com.darksune.althera.common.system.HeroProgressionSystem;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -16,9 +16,10 @@ public class CombatEvents {
 
         final Player owner = hero.getOwner();
 
-        if (owner != null) {
-            final HeroData data = HeroData.get(owner);
-            data.incrementMaxHealth(0.5, owner);
+        if (owner == null) {
+            return;
         }
+
+        HeroProgressionSystem.addXp(owner, event);
     }
 }

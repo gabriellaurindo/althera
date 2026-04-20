@@ -10,7 +10,6 @@ import com.darksune.althera.config.AltheraConfig;
 import com.darksune.althera.network.SummonPayload;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.neoforged.bus.api.IEventBus;
@@ -86,7 +85,7 @@ public final class Althera {
     public static void registerAttributes(EntityAttributeCreationEvent event) {
         event.put(
                 AltheraEntities.HERO.get(),
-                HeroEntity.createAttributes().add(Attributes.MAX_HEALTH, 20.0D).build()
+                HeroEntity.createAttributes().build()
         );
         event.put(
                 AltheraEntities.SUMMONED.get(),
