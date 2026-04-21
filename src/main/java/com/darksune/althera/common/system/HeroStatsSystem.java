@@ -29,6 +29,6 @@ public class HeroStatsSystem {
     }
 
     public static double getAttack(final int level) {
-        return 5 + (0.25 * level) - 0.25;
+        return 2.5 + (0.25 * level) - 0.25;
     }
 }
