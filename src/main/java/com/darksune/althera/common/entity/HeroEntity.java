@@ -24,7 +24,6 @@ import software.bernie.geckolib.animatable.GeoEntity;
 import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.animation.AnimatableManager;
 import software.bernie.geckolib.animation.AnimationController;
-import software.bernie.geckolib.animation.PlayState;
 import software.bernie.geckolib.animation.RawAnimation;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
@@ -44,7 +43,7 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
         this.xpReward = 0;
 
         // nome
-        this.setCustomName(Component.literal("Gangue do canudo"));
+        this.setCustomName(Component.literal("Hero"));
         this.setCustomNameVisible(true);
 
         // arma
@@ -81,7 +80,7 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
                                 );
                             }
 
-                            return PlayState.STOP;
+                            return state.setAndContinue(RawAnimation.begin().thenLoop("idle"));
                         }
                 )
         );

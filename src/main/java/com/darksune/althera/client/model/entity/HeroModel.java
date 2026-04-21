@@ -8,16 +8,16 @@ public class HeroModel extends GeoModel<HeroEntity> {
 
     @Override
     public ResourceLocation getModelResource(HeroEntity animatable) {
-        return ResourceLocation.fromNamespaceAndPath("althera", "geo/summoned.geo.json");
+        return ResourceLocation.fromNamespaceAndPath("althera", "geo/hero.geo.json");
     }
 
     @Override
     public ResourceLocation getTextureResource(HeroEntity animatable) {
-        return ResourceLocation.fromNamespaceAndPath("althera", "textures/entity/summoned.png");
+        return ResourceLocation.fromNamespaceAndPath("althera", "textures/entity/hero.png");
     }
 
     @Override
     public ResourceLocation getAnimationResource(HeroEntity animatable) {
-        return ResourceLocation.fromNamespaceAndPath("althera", "animations/summoned.animation.json");
+        return ResourceLocation.fromNamespaceAndPath("althera", "animations/hero.animation.json");
     }
 }

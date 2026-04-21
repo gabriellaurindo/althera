@@ -23,6 +23,8 @@ public class HeroScreen extends Screen {
 
     private LivingEntity previewEntity;
 
+    private float tickAccumulator = 0;
+
     public HeroScreen() {
         super(Component.literal("Status"));
     }
@@ -38,7 +40,12 @@ public class HeroScreen extends Screen {
     public void render(GuiGraphics gui, int mouseX, int mouseY, float partialTick) {
         final Minecraft mc = Minecraft.getInstance();
         final LivingEntity entity = this.previewEntity;
-        entity.tickCount++;
+        tickAccumulator += partialTick;
+
+        while (tickAccumulator >= 1.0F) {
+            entity.tickCount++;
+            tickAccumulator -= 1.0F;
+        }
 
         final HeroData heroData = HeroData.get(mc.player);
 
@@ -135,7 +142,7 @@ public class HeroScreen extends Screen {
                 entityY - 50,
                 entityX + 25,
                 entityY + 50,
-                40,
+                32,
                 0.0F,
                 mouseX,
                 mouseY,
