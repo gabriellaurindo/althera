@@ -1,5 +1,7 @@
 # Contribution Guide
 
+# ⚠️ SOLO DEVELOPMENT FOR NOW ⚠️
+
 ---
 
 ## Branch Structure

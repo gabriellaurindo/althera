@@ -1,3 +1,6 @@
 {
-  "item.althera.summon_seal": "Summon seal"
+  "item.althera.summon_seal": "Summon seal",
+  "key.categories.althera": "Althera",
+  "key.althera.summon": "Summon",
+  "key.althera.hero.screen": "Hero Menu"
 }
