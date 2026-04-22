@@ -9,7 +9,7 @@ public class AltheraKeybinds {
     public static final KeyMapping SUMMON_KEY = new KeyMapping(
             "key.althera.summon",
             InputConstants.Type.KEYSYM,
-            GLFW.GLFW_KEY_G,
+            GLFW.GLFW_KEY_H,
             "key.categories.althera"
     );
 
