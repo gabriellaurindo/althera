@@ -64,6 +64,10 @@ public class HeroData {
         this.summonUUID = null;
     }
 
+    public boolean isSummoned() {
+        return summonUUID != null;
+    }
+
     // =========================
     // CODEC (save/load)
     // =========================

@@ -140,8 +140,11 @@ public final class Althera {
 
         final HeroData heroData = HeroData.get(player);
 
-        // se não tem summon, ignora
-        if (heroData.getSummonUUID() == null) return;
+        desabilitarEspirito(player);
+        if (!heroData.isSummoned()) {
+            habilitarEspirito(player);
+            return;
+        }
 
         HeroSummonSystem.spawnSummon(player);
     }
