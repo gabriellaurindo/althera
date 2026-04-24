@@ -6,6 +6,8 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.entity.player.Player;
 
+import java.util.UUID;
+
 public class HeroData {
 
     // =========================
@@ -14,8 +16,9 @@ public class HeroData {
 
     private int level = 1;
     private long xp = 0;
-
     private double health = 10;
+
+    private UUID summonUUID = null;
 
     // =========================
     // GET / SET
@@ -49,6 +52,18 @@ public class HeroData {
         this.health = health;
     }
 
+    public UUID getSummonUUID() {
+        return summonUUID;
+    }
+
+    public void setSummonUUID(UUID summonUUID) {
+        this.summonUUID = summonUUID;
+    }
+
+    public void clearSummon() {
+        this.summonUUID = null;
+    }
+
     // =========================
     // CODEC (save/load)
     // =========================
@@ -57,12 +72,19 @@ public class HeroData {
             instance.group(
                     Codec.INT.fieldOf("level").forGetter(data -> data.level),
                     Codec.LONG.fieldOf("xp").forGetter(data -> data.xp),
-                    Codec.DOUBLE.fieldOf("health").forGetter(data -> data.health)
-            ).apply(instance, (level, xp, health) -> {
+                    Codec.DOUBLE.fieldOf("health").forGetter(data -> data.health),
+                    Codec.STRING.optionalFieldOf("summonUUID", "")
+                            .forGetter(data -> data.summonUUID != null ? data.summonUUID.toString() : "")
+            ).apply(instance, (level, xp, health, uuidStr) -> {
                 HeroData data = new HeroData();
                 data.level = level;
                 data.xp = xp;
                 data.health = health;
+
+                if (!uuidStr.isEmpty()) {
+                    data.summonUUID = UUID.fromString(uuidStr);
+                }
+
                 return data;
             })
     );
@@ -76,12 +98,22 @@ public class HeroData {
                 buf.writeInt(data.level);
                 buf.writeLong(data.xp);
                 buf.writeDouble(data.health);
+
+                buf.writeBoolean(data.summonUUID != null);
+                if (data.summonUUID != null) {
+                    buf.writeUUID(data.summonUUID);
+                }
             },
             buf -> {
                 HeroData data = new HeroData();
                 data.level = buf.readInt();
                 data.xp = buf.readLong();
                 data.health = buf.readDouble();
+
+                if (buf.readBoolean()) {
+                    data.summonUUID = buf.readUUID();
+                }
+
                 return data;
             }
     );

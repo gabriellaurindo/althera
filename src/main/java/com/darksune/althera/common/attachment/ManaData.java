@@ -1,14 +1,11 @@
 package com.darksune.althera.common.attachment;
 
-import com.darksune.althera.common.entity.HeroEntity;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-
-import static java.util.Objects.nonNull;
 
 public class ManaData {
 
@@ -106,7 +103,7 @@ public class ManaData {
     }
 
     public void regenMana(final Player player, final Level level) {
-        if (nonNull(hasSummon(player, level))) {
+        if (HeroData.get(player).getSummonUUID() != null) {
             return;
         }
 
@@ -132,14 +129,6 @@ public class ManaData {
            return;
         }
         setMaxMana(getMaxMana() + levelsGained);
-    }
-
-    public HeroEntity hasSummon(final Player player, final Level level) {
-        return level.getEntitiesOfClass(HeroEntity.class, player.getBoundingBox().inflate(50))
-                .stream()
-                .filter(z -> z.getOwner() != null && player.getUUID().equals(z.getOwner().getUUID()))
-                .findFirst()
-                .orElse(null);
     }
 
     public boolean hasEnoughMana(int amount) {

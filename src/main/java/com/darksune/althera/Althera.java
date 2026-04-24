@@ -1,15 +1,18 @@
 package com.darksune.althera;
 
 import com.darksune.althera.common.attachment.AltheraAttachments;
+import com.darksune.althera.common.attachment.HeroData;
 import com.darksune.althera.common.attachment.ManaData;
 import com.darksune.althera.common.entity.AltheraEntities;
 import com.darksune.althera.common.entity.HeroEntity;
 import com.darksune.althera.common.entity.SummonedEntity;
 import com.darksune.althera.common.registry.AltheraRegistries;
+import com.darksune.althera.common.system.HeroSummonSystem;
 import com.darksune.althera.config.AltheraConfig;
 import com.darksune.althera.network.SummonPayload;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.neoforged.bus.api.IEventBus;
@@ -20,6 +23,7 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.neoforge.client.event.RenderGuiEvent;
 import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 
@@ -50,9 +54,8 @@ public final class Althera {
                 (payload, context) -> {
 
                     final Player player = context.player();
-                    final Level level = player.level();
                     final ManaData manaData = ManaData.get(player);
-                    final HeroEntity oldSummon = manaData.hasSummon(player, level);
+                    final HeroEntity oldSummon = HeroSummonSystem.getSummon(player);
                     if (nonNull(oldSummon)) {
                         oldSummon.remove();
                         habilitarEspirito(player);
@@ -63,20 +66,7 @@ public final class Althera {
                         return;
                     }
                     desabilitarEspirito(player);
-                    final HeroEntity hero = HeroEntity.create(level, player);
-
-                    if (hero == null) {
-                        return;
-                    }
-
-                    hero.moveTo(
-                            player.getX(),
-                            player.getY(),
-                            player.getZ(),
-                            player.getYRot(),
-                            0
-                    );
-                    level.addFreshEntity(hero);
+                    HeroSummonSystem.spawnSummon(player);
                 }
         );
     }
@@ -142,5 +132,17 @@ public final class Althera {
             final ManaData manaData = ManaData.get(player);
             manaData.regenMana(player, level);
         }
+    }
+
+    @SubscribeEvent
+    public static void onPlayerChangeDimension(PlayerEvent.PlayerChangedDimensionEvent event) {
+        if (!(event.getEntity() instanceof ServerPlayer player)) return;
+
+        final HeroData heroData = HeroData.get(player);
+
+        // se não tem summon, ignora
+        if (heroData.getSummonUUID() == null) return;
+
+        HeroSummonSystem.spawnSummon(player);
     }
 }

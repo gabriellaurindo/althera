@@ -63,7 +63,7 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
 
     public Player getOwner() {
         if (owner == null) return null;
-        return level().getPlayerByUUID(owner);
+        return level().getServer().getPlayerList().getPlayer(owner);
     }
 
     @Override
@@ -107,45 +107,35 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
     @Override
     public void tick() {
         super.tick();
+
         Level level = level();
         if (level.isClientSide) return;
 
         final Player owner = getOwner();
-
         if (owner == null) return;
 
         final HeroData heroData = HeroData.get(owner);
-        // ⏱️ roda a cada 2 segundos
+
+        // =========================
+        // 🟣 REGEN / MANA (2s)
+        // =========================
         if (tickCount % 40 == 0) {
-            final ManaData manaData = ManaData.get(owner);
-
-            int cost = 20;
-
-            if (manaData.getMana() < cost) {
-                owner.sendSystemMessage(Component.literal("Sem mana! Servo desapareceu."));
-                discard();
-                habilitarEspirito(owner);
-                return;
-            }
-            manaData.consumeMana(owner, cost);
-
-
-            if (getHealth() < HeroStatsSystem.getMaxHealth(heroData.getLevel())) {
-                heal(1.0F); // cura 1 de vida
-                heroData.setHealth(this.getHealth());
-                heroData.sync(owner);
-            }
+            handleManaAndRegen(owner, heroData);
         }
 
-        // 🧠 teleporte (mantém separado)
-        double distance = distanceTo(owner);
+        // =========================
+        // 🟢 SYNC DE VIDA (quando muda)
+        // =========================
+        syncHealthIfChanged(owner, heroData);
 
-        if (distance > 30) {
-            teleportTo(
-                    owner.getX() + (level.getRandom().nextDouble() - 0.5) * 2,
-                    owner.getY(),
-                    owner.getZ() + (level.getRandom().nextDouble() - 0.5) * 2
-            );
+        // =========================
+        // 🔵 TELEPORTE
+        // =========================
+        handleTeleport(owner);
+
+        // Zupi :)
+        if (!this.getUUID().equals(heroData.getSummonUUID())) {
+            remove();
         }
     }
 
@@ -171,7 +161,11 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
             super.die(source);
             return;
         }
-        syncHealth();
+        if (getOwner() != null) {
+            final HeroData heroData = HeroData.get(getOwner());
+            heroData.clearSummon();
+            heroData.sync(getOwner());
+        }
         habilitarEspirito(this.getOwner());
         super.die(source);
     }
@@ -187,6 +181,57 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
         return super.isAlliedTo(entity);
     }
 
+    @Override
+    public @Nullable UUID getOwnerUUID() {
+        return owner;
+    }
+
+    @Override
+    public boolean canUsePortal(boolean isNetherPortal) {
+        return false;
+    }
+
+    private void handleManaAndRegen(Player owner, HeroData heroData) {
+        final ManaData manaData = ManaData.get(owner);
+
+        int cost = 20;
+
+        if (manaData.getMana() < cost) {
+            owner.sendSystemMessage(Component.literal("Sem mana! Servo desapareceu."));
+            remove();
+            habilitarEspirito(owner);
+            return;
+        }
+
+        manaData.consumeMana(owner, cost);
+
+        if (getHealth() < HeroStatsSystem.getMaxHealth(heroData.getLevel())) {
+            heal(1.0F);
+        }
+    }
+
+    private void syncHealthIfChanged(Player owner, HeroData heroData) {
+        double current = this.getHealth();
+        double saved = heroData.getHealth();
+
+        if (current != saved) {
+            heroData.setHealth(current);
+            heroData.sync(owner);
+        }
+    }
+
+    private void handleTeleport(Player owner) {
+        double distance = distanceTo(owner);
+
+        if (distance > 30) {
+            teleportTo(
+                    owner.getX() + (level().getRandom().nextDouble() - 0.5) * 2,
+                    owner.getY(),
+                    owner.getZ() + (level().getRandom().nextDouble() - 0.5) * 2
+            );
+        }
+    }
+
     public static AttributeSupplier.Builder createAttributes() {
         return PathfinderMob.createMobAttributes()
                 .add(Attributes.MAX_HEALTH, 20.0D)
@@ -194,25 +239,18 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
                 .add(Attributes.ATTACK_DAMAGE, 1.25D);
     }
 
-    @Override
-    public @Nullable UUID getOwnerUUID() {
-        return owner;
-    }
-
-    public static HeroEntity create(final Level level, final Player player) {
-        final HeroEntity hero = AltheraEntities.HERO.get().create(level);
+    public static HeroEntity create(final Player player) {
+        final HeroEntity hero = AltheraEntities.HERO.get().create(player.level());
         HeroStatsSystem.applyAttributes(hero, player);
         return hero;
     }
 
     public void remove() {
-        syncHealth();
+        if (getOwner() != null) {
+            final HeroData heroData = HeroData.get(getOwner());
+            heroData.clearSummon();
+            heroData.sync(getOwner());
+        }
         this.discard();
-    }
-
-    public void syncHealth() {
-        final HeroData heroData = HeroData.get(getOwner());
-        heroData.setHealth(this.getHealth());
-        heroData.sync(getOwner());
     }
 }
