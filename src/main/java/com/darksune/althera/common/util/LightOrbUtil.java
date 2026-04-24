@@ -2,9 +2,13 @@ package com.darksune.althera.common.util;
 
 import com.darksune.althera.common.entity.AltheraEntities;
 import com.darksune.althera.common.entity.LightOrbEntity;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.AABB;
+
+import java.util.UUID;
 
 public class LightOrbUtil {
 
@@ -27,12 +31,17 @@ public class LightOrbUtil {
     }
 
     public static void desabilitarEspirito(final Player player) {
-        final Level level = player.level();
+        final UUID uuid = player.getUUID();
 
-        level.getEntitiesOfClass(LightOrbEntity.class, player.getBoundingBox().inflate(50))
-                .stream()
-                .filter(o -> player.getUUID().equals(o.getOwner().getUUID()))
-                .forEach(Entity::discard);
+        //TODO temp, usar uuid
+        for (ServerLevel level : player.getServer().getAllLevels()) {
+            AABB box = new AABB(player.blockPosition()).inflate(10000);
+
+            level.getEntitiesOfClass(LightOrbEntity.class, box)
+                    .stream()
+                    .filter(e -> uuid.equals(e.getOwnerUUID()))
+                    .forEach(Entity::discard);
+        }
     }
 
     public static LightOrbEntity getPlayerOrb(Player player, Level level) {

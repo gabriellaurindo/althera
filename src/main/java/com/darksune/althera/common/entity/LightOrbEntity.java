@@ -28,6 +28,10 @@ public class LightOrbEntity extends Entity {
         return level().getPlayerByUUID(owner);
     }
 
+    public UUID getOwnerUUID() {
+        return owner;
+    }
+
     public LightOrbEntity(EntityType<?> type, Level level) {
         super(type, level);
         this.noPhysics = true;
