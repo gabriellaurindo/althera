@@ -17,8 +17,9 @@ public class HeroData {
     private int level = 1;
     private long xp = 0;
     private double health = 10;
-
     private UUID summonUUID = null;
+    private int interventions = 0;
+    private boolean defeated;
 
     // =========================
     // GET / SET
@@ -60,12 +61,32 @@ public class HeroData {
         this.summonUUID = summonUUID;
     }
 
+    public int getInterventions() {
+        return interventions;
+    }
+
+    public void setInterventions(int interventions) {
+        this.interventions = interventions;
+    }
+
+    public boolean isDefeated() {
+        return defeated;
+    }
+
+    public void setDefeated(boolean defeated) {
+        this.defeated = defeated;
+    }
+
     public void clearSummon() {
         this.summonUUID = null;
     }
 
     public boolean isSummoned() {
         return summonUUID != null;
+    }
+
+    public void incrementInterventions() {
+        this.interventions++;
     }
 
     // =========================
@@ -78,12 +99,18 @@ public class HeroData {
                     Codec.LONG.fieldOf("xp").forGetter(data -> data.xp),
                     Codec.DOUBLE.fieldOf("health").forGetter(data -> data.health),
                     Codec.STRING.optionalFieldOf("summonUUID", "")
-                            .forGetter(data -> data.summonUUID != null ? data.summonUUID.toString() : "")
-            ).apply(instance, (level, xp, health, uuidStr) -> {
+                            .forGetter(data -> data.summonUUID != null ? data.summonUUID.toString() : ""),
+                    Codec.INT.optionalFieldOf("interventions", 0)
+                            .forGetter(data -> data.interventions),
+                    Codec.BOOL.optionalFieldOf("defeated", false) // 🔥 ADICIONADO
+                            .forGetter(data -> data.defeated)
+            ).apply(instance, (level, xp, health, uuidStr, interventions, defeated) -> {
                 HeroData data = new HeroData();
                 data.level = level;
                 data.xp = xp;
                 data.health = health;
+                data.interventions = interventions;
+                data.defeated = defeated; // 🔥 IMPORTANTE
 
                 if (!uuidStr.isEmpty()) {
                     data.summonUUID = UUID.fromString(uuidStr);
@@ -107,6 +134,9 @@ public class HeroData {
                 if (data.summonUUID != null) {
                     buf.writeUUID(data.summonUUID);
                 }
+
+                buf.writeInt(data.interventions);
+                buf.writeBoolean(data.defeated);
             },
             buf -> {
                 HeroData data = new HeroData();
@@ -118,9 +148,13 @@ public class HeroData {
                     data.summonUUID = buf.readUUID();
                 }
 
+                data.interventions = buf.readInt();
+                data.defeated = buf.readBoolean();
+
                 return data;
             }
     );
+
 
     // =========================
     // LOGIC

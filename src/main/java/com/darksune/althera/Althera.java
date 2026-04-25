@@ -7,6 +7,7 @@ import com.darksune.althera.common.entity.AltheraEntities;
 import com.darksune.althera.common.entity.HeroEntity;
 import com.darksune.althera.common.entity.SummonedEntity;
 import com.darksune.althera.common.registry.AltheraRegistries;
+import com.darksune.althera.common.system.HeroStatsSystem;
 import com.darksune.althera.common.system.HeroSummonSystem;
 import com.darksune.althera.config.AltheraConfig;
 import com.darksune.althera.network.SummonPayload;
@@ -23,11 +24,11 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.neoforge.client.event.RenderGuiEvent;
 import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 
-import static com.darksune.althera.common.util.LightOrbUtil.desabilitarEspirito;
 import static com.darksune.althera.common.util.LightOrbUtil.habilitarEspirito;
 import static java.util.Objects.nonNull;
 
@@ -57,15 +58,14 @@ public final class Althera {
                     final ManaData manaData = ManaData.get(player);
                     final HeroEntity oldSummon = HeroSummonSystem.getSummon(player);
                     if (nonNull(oldSummon)) {
-                        oldSummon.remove();
-                        habilitarEspirito(player);
+                        oldSummon.remove(true);
                         return;
                     }
 
                     if (!manaData.hasEnoughMana(20)) {
                         return;
                     }
-                    desabilitarEspirito(player);
+
                     HeroSummonSystem.spawnSummon(player);
                 }
         );
@@ -132,6 +132,15 @@ public final class Althera {
             final ManaData manaData = ManaData.get(player);
             manaData.regenMana(player, level);
         }
+
+        if (player.tickCount % 1200 == 0) { // ⏱️ 1 minuto
+            final HeroData data = HeroData.get(player);
+
+            if (data.getInterventions() > 0) {
+                data.setInterventions(data.getInterventions() - 1);
+                data.sync(player);
+            }
+        }
     }
 
     @SubscribeEvent
@@ -140,12 +149,46 @@ public final class Althera {
 
         final HeroData heroData = HeroData.get(player);
 
-        desabilitarEspirito(player);
         if (!heroData.isSummoned()) {
             habilitarEspirito(player);
             return;
         }
 
         HeroSummonSystem.spawnSummon(player);
+    }
+
+    @SubscribeEvent
+    public static void onDamage(final LivingIncomingDamageEvent event) {
+        if (!(event.getEntity() instanceof Player player)) {
+            return;
+        }
+
+        if (event.getSource().getEntity() == null) {
+            return;
+        }
+
+        final HeroData heroData = HeroData.get(player);
+        if (heroData.getInterventions() >= HeroStatsSystem.getMaxInterventions()) {
+            return;
+        }
+
+        final HeroEntity hero = HeroSummonSystem.spawnOrMove(player);
+        if (hero == null) {
+            return;
+        }
+
+        float damage = event.getAmount();
+        if (damage <= 0) {
+            return;
+        }
+
+        hero.hurt(event.getSource(), damage);
+
+        heroData.incrementInterventions();
+        heroData.sync(player);
+
+        event.setAmount(0);
+        //todo no futuro colocar uma animacao ou algo do genero pra entender que gastou um save
+        //player.invulnerableTime = 20;
     }
 }

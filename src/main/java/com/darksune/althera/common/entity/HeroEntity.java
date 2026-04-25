@@ -8,6 +8,7 @@ import com.darksune.althera.common.system.HeroStatsSystem;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -135,7 +136,7 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
 
         // Zupi :)
         if (!this.getUUID().equals(heroData.getSummonUUID())) {
-            remove();
+            remove(false);
         }
     }
 
@@ -164,9 +165,13 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
         if (getOwner() != null) {
             final HeroData heroData = HeroData.get(getOwner());
             heroData.clearSummon();
+            heroData.setDefeated(true);
             heroData.sync(getOwner());
+            habilitarEspirito(this.getOwner());
+            getOwner().sendSystemMessage(
+                    Component.literal("§cYour summon has been defeated! It will recover over time.")
+            );
         }
-        habilitarEspirito(this.getOwner());
         super.die(source);
     }
 
@@ -191,15 +196,30 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
         return false;
     }
 
+    @Override
+    public boolean causeFallDamage(float distance, float damageMultiplier, DamageSource source) {
+        return false;
+    }
+
+    @Override
+    public boolean hurt(DamageSource source, float amount) {
+        if (source.is(DamageTypes.IN_WALL) ||
+                source.is(DamageTypes.DROWN) ||
+                source.is(DamageTypes.CRAMMING)) {
+            return false;
+        }
+
+        return super.hurt(source, amount);
+    }
+
     private void handleManaAndRegen(Player owner, HeroData heroData) {
         final ManaData manaData = ManaData.get(owner);
 
         int cost = 20;
 
         if (manaData.getMana() < cost) {
-            owner.sendSystemMessage(Component.literal("Sem mana! Servo desapareceu."));
-            remove();
-            habilitarEspirito(owner);
+            owner.sendSystemMessage(Component.literal("Not enough mana! Summon dismissed."));
+            remove(true);
             return;
         }
 
@@ -245,11 +265,14 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
         return hero;
     }
 
-    public void remove() {
+    public void remove(final boolean habilitarEspirito) {
         if (getOwner() != null) {
             final HeroData heroData = HeroData.get(getOwner());
             heroData.clearSummon();
             heroData.sync(getOwner());
+            if (habilitarEspirito) {
+                habilitarEspirito(getOwner());
+            }
         }
         this.discard();
     }

@@ -1,7 +1,10 @@
 package com.darksune.althera.common.entity;
 
+import com.darksune.althera.common.attachment.HeroData;
+import com.darksune.althera.common.system.HeroStatsSystem;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -112,6 +115,14 @@ public class LightOrbEntity extends Entity {
                     (int) heroData.getHealth() + 2,
                     (int) HeroStatsSystem.getMaxHealth(heroData.getLevel())
             );
+
+            if (heroData.isDefeated() && newHealth >= HeroStatsSystem.getMaxHealth(heroData.getLevel())) {
+                heroData.setDefeated(false);
+
+                owner.sendSystemMessage(
+                        Component.literal("§aYour summon has recovered and can be summoned again!")
+                );
+            }
 
             heroData.setHealth(newHealth);
             heroData.sync(owner);

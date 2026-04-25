@@ -149,6 +149,40 @@ public class HeroScreen extends Screen {
                 entity
         );
 
+        int max = HeroStatsSystem.getMaxInterventions();
+        int used = heroData.getInterventions();
+        int remaining = Math.max(0, max - used);
+
+
+        int boxX = x + GUI_WIDTH - 50;
+        int boxY = y + 30;
+
+
+        gui.drawString(this.font,
+                "Saves",
+                boxX,
+                boxY,
+                0x55FF55
+        );
+
+
+        for (int i = 0; i < max; i++) {
+
+            int yOffset = i * 12;
+
+            boolean active = i < remaining;
+
+            int color = active ? 0xFF00FF00 : 0xFF555555; // verde ou cinza
+
+            gui.fill(
+                    boxX,
+                    boxY + yOffset + 12,
+                    boxX + 8,
+                    boxY + yOffset + 8 + 12,
+                    color
+            );
+        }
+
         super.render(gui, mouseX, mouseY, partialTick);
     }
 
