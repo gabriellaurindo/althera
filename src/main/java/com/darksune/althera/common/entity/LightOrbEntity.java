@@ -1,7 +1,5 @@
 package com.darksune.althera.common.entity;
 
-import com.darksune.althera.common.attachment.HeroData;
-import com.darksune.althera.common.system.HeroStatsSystem;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -35,6 +33,8 @@ public class LightOrbEntity extends Entity {
     public LightOrbEntity(EntityType<?> type, Level level) {
         super(type, level);
         this.noPhysics = true;
+        //todo
+        //this.setPersistenceRequired();
     }
 
     @Override
@@ -95,17 +95,6 @@ public class LightOrbEntity extends Entity {
 
         // ⏱️ a cada 4 segundos
         if (tickCount % 80 == 0) {
-
-            // 💪 Força I (amplifier 0 = nível 1)
-            owner.addEffect(new MobEffectInstance(
-                    MobEffects.DAMAGE_BOOST,
-                    100, // duração (5 segundos)
-                    0,
-                    false,
-                    false,
-                    true
-            ));
-
             // 🛡️ Resistência I
             owner.addEffect(new MobEffectInstance(
                     MobEffects.DAMAGE_RESISTANCE,
