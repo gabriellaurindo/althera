@@ -15,7 +15,7 @@ public final class AltheraEntities {
     public static final DeferredHolder<EntityType<?>, EntityType<LightOrbEntity>> LIGHT_ORB =
             ENTITIES.register("light_orb",
                     () -> EntityType.Builder
-                            .of(LightOrbEntity::new, MobCategory.MISC)
+                            .of(LightOrbEntity::new, MobCategory.CREATURE)
                             .sized(0.2f, 0.2f)
                             .clientTrackingRange(8)
                             .updateInterval(1)
