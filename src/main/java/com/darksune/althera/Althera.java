@@ -158,7 +158,7 @@ public final class Althera {
     }
 
     @SubscribeEvent
-    public static void onDamage(final LivingIncomingDamageEvent event) {
+    public static void onPlayerDamage(final LivingIncomingDamageEvent event) {
         if (!(event.getEntity() instanceof Player player)) {
             return;
         }
@@ -187,8 +187,19 @@ public final class Althera {
         heroData.incrementInterventions();
         heroData.sync(player);
 
-        event.setAmount(0);
+        event.setCanceled(true);
         //todo no futuro colocar uma animacao ou algo do genero pra entender que gastou um save
         //player.invulnerableTime = 20;
+    }
+
+    @SubscribeEvent
+    public static void onHeroDamage(LivingIncomingDamageEvent event) {
+
+        if (!(event.getSource().getEntity() instanceof Player player)) return;
+        if (!(event.getEntity() instanceof HeroEntity hero)) return;
+
+        if (hero.isOwnedBy(player)) {
+            event.setCanceled(true);
+        }
     }
 }

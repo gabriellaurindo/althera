@@ -9,7 +9,10 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
-import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.OwnableEntity;
+import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
@@ -17,8 +20,6 @@ import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib.animatable.GeoEntity;
@@ -46,12 +47,6 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
         // nome
         this.setCustomName(Component.literal("Hero"));
         this.setCustomNameVisible(true);
-
-        // arma
-        this.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.NETHERITE_SWORD));
-        // não dropa arma
-        this.setDropChance(EquipmentSlot.MAINHAND, 0.0F);
-
         // não pega loot
         this.setCanPickUpLoot(false);
         // Nao da despawn
@@ -62,9 +57,16 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
         this.owner = owner;
     }
 
+    //todo otimizar isso deppois buscando byuuid
+    //  return this.level().getPlayerByUUID(ownerUUID);
+    //fazer isso em todas as classes que tem owner
     public Player getOwner() {
         if (owner == null) return null;
         return level().getServer().getPlayerList().getPlayer(owner);
+    }
+
+    public boolean isOwnedBy(Player player) {
+        return player.getUUID().equals(this.getOwnerUUID());
     }
 
     @Override
@@ -86,6 +88,7 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
                 )
         );
     }
+    //todo melhorar a movimentacao da entidade na agua, ela ta afundando
 
     @Override
     public void addAdditionalSaveData(CompoundTag compound) {
