@@ -9,65 +9,81 @@ import java.util.Map;
 
 public class MultiblockValidator {
 
-    // Estrutura completa
-    private static final Map<BlockPos, Block> PATTERN = Map.ofEntries(
+    // Camada Y = 0 (nível do core)
+    private static final String[][] LAYER_0 = {
+            {" ", " ", "G", " ", " "},
+            {" ", " ", " ", " ", " "},
+            {"G", " ", "C", " ", "G"},
+            {" ", " ", " ", " ", " "},
+            {" ", " ", "G", " ", " "}
+    };
 
-        // Cantos (esmeralda)
-        Map.entry(new BlockPos(-1, 0, -1), Blocks.EMERALD_BLOCK),
-        Map.entry(new BlockPos(1, 0, -1), Blocks.EMERALD_BLOCK),
-        Map.entry(new BlockPos(-1, 0, 1), Blocks.EMERALD_BLOCK),
-        Map.entry(new BlockPos(1, 0, 1), Blocks.EMERALD_BLOCK),
+    // Camada Y = +1 (netherrack)
+    private static final String[][] LAYER_1 = {
+            {" ", " ", "N", " ", " "},
+            {" ", " ", " ", " ", " "},
+            {"N", " ", " ", " ", "N"},
+            {" ", " ", " ", " ", " "},
+            {" ", " ", "N", " ", " "}
+    };
 
-        // Cruz (feno)
-        Map.entry(new BlockPos(0, 0, -1), Blocks.HAY_BLOCK),
-        Map.entry(new BlockPos(0, 0, 1), Blocks.HAY_BLOCK),
-        Map.entry(new BlockPos(-1, 0, 0), Blocks.HAY_BLOCK),
-        Map.entry(new BlockPos(1, 0, 0), Blocks.HAY_BLOCK)
+    // Camada Y = -1 (diamante embaixo do core)
+    private static final String[][] LAYER_NEG1 = {
+            {".", ".", ".", ".", "."},
+            {".", ".", ".", ".", "."},
+            {".", ".", "D", ".", "."},
+            {".", ".", ".", ".", "."},
+            {".", ".", ".", ".", "."}
+    };
+
+    // Mapeamento de símbolos
+    private static final Map<String, Block> KEY = Map.of(
+            "G", Blocks.GOLD_BLOCK,
+            "N", Blocks.NETHERRACK,
+            "D", Blocks.DIAMOND_BLOCK
     );
 
     public static boolean isValid(Level level, BlockPos center) {
+        return checkLayer(level, center, LAYER_0, 0)
+                && checkLayer(level, center, LAYER_1, 1)
+                && checkLayer(level, center, LAYER_NEG1, -1);
+    }
 
-        for (var entry : PATTERN.entrySet()) {
-            BlockPos checkPos = center.offset(entry.getKey());
-            Block expected = entry.getValue();
+    private static boolean checkLayer(Level level, BlockPos center, String[][] layer, int yOffset) {
 
-            if (!level.getBlockState(checkPos).is(expected)) {
-                return false;
+        int size = layer.length;
+        int half = size / 2;
+
+        for (int z = 0; z < size; z++) {
+            for (int x = 0; x < size; x++) {
+
+                String symbol = layer[z][x];
+                BlockPos pos = center.offset(x - half, yOffset, z - half);
+
+                // ignora
+                if (symbol.equals(".")) continue;
+
+                // vazio obrigatório
+                if (symbol.equals(" ")) {
+                    if (!level.isEmptyBlock(pos)) {
+                        return false;
+                    }
+                    continue;
+                }
+
+                // core
+                if (symbol.equals("C")) continue;
+
+                Block expected = KEY.get(symbol);
+
+                if (expected == null) return false;
+
+                if (!level.getBlockState(pos).is(expected)) {
+                    return false;
+                }
             }
         }
 
         return true;
     }
-
-//    public static boolean isValid(Level level, BlockPos center) {
-//        for (Direction dir : Direction.Plane.HORIZONTAL) {
-//            if (matchesRotation(level, center, dir)) {
-//                return true;
-//            }
-//        }
-//        return false;
-//    }
-//
-//    private static boolean matchesRotation(Level level, BlockPos center, Direction dir) {
-//        for (var entry : PATTERN.entrySet()) {
-//
-//            BlockPos rotated = rotate(entry.getKey(), dir);
-//            BlockPos checkPos = center.offset(rotated);
-//
-//            if (!level.getBlockState(checkPos).is(entry.getValue())) {
-//                return false;
-//            }
-//        }
-//        return true;
-//    }
-//
-//    private static BlockPos rotate(BlockPos pos, Direction dir) {
-//        return switch (dir) {
-//            case NORTH -> pos;
-//            case SOUTH -> new BlockPos(-pos.getX(), pos.getY(), -pos.getZ());
-//            case WEST  -> new BlockPos(pos.getZ(), pos.getY(), -pos.getX());
-//            case EAST  -> new BlockPos(-pos.getZ(), pos.getY(), pos.getX());
-//            default -> pos;
-//        };
-//    }
 }

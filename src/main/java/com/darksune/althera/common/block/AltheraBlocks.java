@@ -14,8 +14,7 @@ public class AltheraBlocks {
 
     public static final DeferredHolder<Block, Block> RITUAL_CORE = BLOCKS.register("ritual_core",
             () -> new RitualCoreBlock(BlockBehaviour.Properties.of()
-                    .strength(3.0f)
-                    .requiresCorrectToolForDrops()
+                    .strength(1.5f)
             ));
 
     public static void register(final IEventBus bus) {

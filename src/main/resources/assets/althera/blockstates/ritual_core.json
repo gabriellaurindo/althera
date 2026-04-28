@@ -1,0 +1,5 @@
+{
+  "variants": {
+    "": { "model": "althera:block/ritual_core" }
+  }
+}
