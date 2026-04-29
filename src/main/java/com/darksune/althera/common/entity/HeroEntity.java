@@ -228,7 +228,7 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
 
         manaData.consumeMana(owner, cost);
 
-        if (getHealth() < HeroStatsSystem.getMaxHealth(heroData.getLevel())) {
+        if (getHealth() < HeroStatsSystem.getMaxHealth(heroData)) {
             heal(1.0F);
         }
     }

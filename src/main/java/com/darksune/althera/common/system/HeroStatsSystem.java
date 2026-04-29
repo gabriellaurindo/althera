@@ -2,6 +2,7 @@ package com.darksune.althera.common.system;
 
 import com.darksune.althera.common.attachment.HeroData;
 import com.darksune.althera.common.entity.HeroEntity;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 
@@ -14,25 +15,41 @@ public class HeroStatsSystem {
         var attackAttr = hero.getAttribute(Attributes.ATTACK_DAMAGE);
         var armorAttr = hero.getAttribute(Attributes.ARMOR);
         if (maxHealthAttr != null) {
-            maxHealthAttr.setBaseValue(getMaxHealth(heroData.getLevel()));
+            maxHealthAttr.setBaseValue(getMaxHealth(heroData));
         }
         if (attackAttr != null) {
-            attackAttr.setBaseValue(getAttack(heroData.getLevel()));
+            attackAttr.setBaseValue(getAttack(heroData));
         }
         if (armorAttr != null) {
             armorAttr.setBaseValue(getArmor());
         }
+        //todo temp
+        if (heroData.getHeroClass() != null) {
+            hero.setCustomName(Component.literal(heroData.getHeroClass().getDisplayName()));
+        }
 
-        hero.setHealth((float) Math.min(heroData.getHealth(), getMaxHealth(heroData.getLevel())));
+        hero.setHealth((float) Math.min(heroData.getHealth(), getMaxHealth(heroData)));
         hero.setOwner(player.getUUID());
     }
 
-    public static double getMaxHealth(final int level) {
-        return 20 + level - 1;
+    public static double getMaxHealth(final HeroData data) {
+        double base = 20 + data.getLevel() - 1;
+
+        if (data.getHeroClass() != null) {
+            base *= data.getHeroClass().getHealthMultiplier();
+        }
+
+        return base;
     }
 
-    public static double getAttack(final int level) {
-        return 1.5 + (0.125 * level) - 0.125;
+    public static double getAttack(final HeroData data) {
+        double base = 1.5 + (0.125 * data.getLevel()) - 0.125;
+
+        if (data.getHeroClass() != null) {
+            base *= data.getHeroClass().getAttackMultiplier();
+        }
+
+        return base;
     }
 
     public static double getArmor() {

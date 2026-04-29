@@ -113,10 +113,10 @@ public class LightOrbEntity extends Entity {
 
             int newHealth = Math.min(
                     (int) heroData.getHealth() + 2,
-                    (int) HeroStatsSystem.getMaxHealth(heroData.getLevel())
+                    (int) HeroStatsSystem.getMaxHealth(heroData)
             );
 
-            if (heroData.isDefeated() && newHealth >= HeroStatsSystem.getMaxHealth(heroData.getLevel())) {
+            if (heroData.isDefeated() && newHealth >= HeroStatsSystem.getMaxHealth(heroData)) {
                 heroData.setDefeated(false);
 
                 owner.sendSystemMessage(

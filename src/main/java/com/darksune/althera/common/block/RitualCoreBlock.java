@@ -1,6 +1,12 @@
 package com.darksune.althera.common.block;
 
+import com.darksune.althera.common.attachment.HeroData;
+import com.darksune.althera.common.entity.HeroEntity;
 import com.darksune.althera.common.multiblock.MultiblockValidator;
+import com.darksune.althera.common.system.HeroClass;
+import com.darksune.althera.common.system.HeroClassSystem;
+import com.darksune.althera.common.system.HeroStatsSystem;
+import com.darksune.althera.common.system.HeroSummonSystem;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionResult;
@@ -29,34 +35,14 @@ public class RitualCoreBlock extends Block {
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos,
                                                Player player, BlockHitResult hit) {
+        if (level.isClientSide) {
+            return InteractionResult.SUCCESS;
+        }
 
-        if (!level.isClientSide) {
-            if (MultiblockValidator.isValid(level, pos)) {
-                player.sendSystemMessage(Component.literal("§aRitual válido!"));
-
-                // som
-                level.playSound(null, pos,
-                        net.minecraft.sounds.SoundEvents.ENCHANTMENT_TABLE_USE,
-                        net.minecraft.sounds.SoundSource.BLOCKS,
-                        1.0F, 1.0F
-                );
-
-                // partículas
-                if (level instanceof net.minecraft.server.level.ServerLevel serverLevel) {
-                    serverLevel.sendParticles(
-                            net.minecraft.core.particles.ParticleTypes.ENCHANT,
-                            pos.getX() + 0.5,
-                            pos.getY() + 1.0,
-                            pos.getZ() + 0.5,
-                            40,          // quantidade
-                            0.5, 0.5, 0.5, // espalhamento
-                            0.1           // velocidade
-                    );
-                }
-
-            } else {
-                player.sendSystemMessage(Component.literal("§cEstrutura inválida."));
-            }
+        if (MultiblockValidator.isValid(level, pos)) {
+            performRitual(player, level, pos);
+        } else {
+            player.sendSystemMessage(Component.literal("§cEstrutura inválida."));
         }
 
         return InteractionResult.SUCCESS;
@@ -70,5 +56,43 @@ public class RitualCoreBlock extends Block {
     @Override
     public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         return SHAPE;
+    }
+
+    public void performRitual(final Player player, final Level level, final BlockPos pos) {
+        player.sendSystemMessage(Component.literal("§aRitual válido!"));
+
+        level.playSound(null, pos,
+                net.minecraft.sounds.SoundEvents.ENCHANTMENT_TABLE_USE,
+                net.minecraft.sounds.SoundSource.BLOCKS,
+                1.0F, 1.0F
+        );
+
+        if (level instanceof net.minecraft.server.level.ServerLevel serverLevel) {
+            serverLevel.sendParticles(
+                    net.minecraft.core.particles.ParticleTypes.ENCHANT,
+                    pos.getX() + 0.5,
+                    pos.getY() + 1.0,
+                    pos.getZ() + 0.5,
+                    40,          // quantidade
+                    0.5, 0.5, 0.5, // espalhamento
+                    0.1           // velocidade
+            );
+        }
+
+        final BlockPos diamondPos = pos.below();
+        if (level.getBlockState(diamondPos).is(net.minecraft.world.level.block.Blocks.DIAMOND_BLOCK)) {
+            level.destroyBlock(diamondPos, false);
+        }
+
+        final HeroData heroData = HeroData.get(player);
+        final HeroClass heroClass = HeroClassSystem.getRandomClass();
+        heroData.setHeroClass(heroClass);
+        heroData.sync(player);
+
+        final HeroEntity summon = HeroSummonSystem.getSummon(player);
+
+        if (summon != null) {
+            HeroStatsSystem.applyAttributes(summon, player);
+        }
     }
 }

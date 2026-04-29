@@ -1,5 +1,6 @@
 package com.darksune.althera.common.attachment;
 
+import com.darksune.althera.common.system.HeroClass;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.network.FriendlyByteBuf;
@@ -16,10 +17,12 @@ public class HeroData {
 
     private int level = 1;
     private long xp = 0;
-    private double health = 10;
+    private double health = 20;
     private UUID summonUUID = null;
     private int interventions = 0;
     private boolean defeated;
+
+    private HeroClass heroClass = null;
 
     // =========================
     // GET / SET
@@ -77,6 +80,14 @@ public class HeroData {
         this.defeated = defeated;
     }
 
+    public HeroClass getHeroClass() {
+        return heroClass;
+    }
+
+    public void setHeroClass(HeroClass heroClass) {
+        this.heroClass = heroClass;
+    }
+
     public void clearSummon() {
         this.summonUUID = null;
     }
@@ -102,18 +113,28 @@ public class HeroData {
                             .forGetter(data -> data.summonUUID != null ? data.summonUUID.toString() : ""),
                     Codec.INT.optionalFieldOf("interventions", 0)
                             .forGetter(data -> data.interventions),
-                    Codec.BOOL.optionalFieldOf("defeated", false) // 🔥 ADICIONADO
-                            .forGetter(data -> data.defeated)
-            ).apply(instance, (level, xp, health, uuidStr, interventions, defeated) -> {
+                    Codec.BOOL.optionalFieldOf("defeated", false)
+                            .forGetter(data -> data.defeated),
+                    Codec.STRING.optionalFieldOf("heroClass", "")
+                            .forGetter(data -> data.heroClass != null ? data.heroClass.name() : "")
+            ).apply(instance, (level, xp, health, uuidStr, interventions, defeated, heroClassStr) -> {
                 HeroData data = new HeroData();
                 data.level = level;
                 data.xp = xp;
                 data.health = health;
                 data.interventions = interventions;
-                data.defeated = defeated; // 🔥 IMPORTANTE
+                data.defeated = defeated;
 
                 if (!uuidStr.isEmpty()) {
                     data.summonUUID = UUID.fromString(uuidStr);
+                }
+
+                if (!heroClassStr.isEmpty()) {
+                    try {
+                        data.heroClass = HeroClass.valueOf(heroClassStr);
+                    } catch (Exception ignored) {
+                        data.heroClass = null;
+                    }
                 }
 
                 return data;
@@ -137,6 +158,11 @@ public class HeroData {
 
                 buf.writeInt(data.interventions);
                 buf.writeBoolean(data.defeated);
+
+                buf.writeBoolean(data.heroClass != null);
+                if (data.heroClass != null) {
+                    buf.writeEnum(data.heroClass);
+                }
             },
             buf -> {
                 HeroData data = new HeroData();
@@ -151,15 +177,20 @@ public class HeroData {
                 data.interventions = buf.readInt();
                 data.defeated = buf.readBoolean();
 
+                if (buf.readBoolean()) {
+                    data.heroClass = buf.readEnum(HeroClass.class);
+                } else {
+                    data.heroClass = null;
+                }
+
                 return data;
             }
     );
 
-
     // =========================
     // LOGIC
     // =========================
-
+    //todo usar um sistema de dirt check no tick pra sync automatico
     public void sync(final Player player) {
         player.setData(AltheraAttachments.HERO.get(), this);
     }
