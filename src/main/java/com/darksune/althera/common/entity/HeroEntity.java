@@ -98,7 +98,6 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
                 )
         );
     }
-    //todo melhorar a movimentacao da entidade na agua, ela ta afundando
 
     @Override
     public void addAdditionalSaveData(CompoundTag compound) {
