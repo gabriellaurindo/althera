@@ -7,21 +7,22 @@ import com.darksune.althera.common.attachment.ManaData;
 import com.darksune.althera.common.system.HeroStatsSystem;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.OwnableEntity;
-import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.ai.goal.FloatGoal;
+import net.minecraft.world.entity.ai.control.MoveControl;
 import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
-import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
+import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
+import net.minecraft.world.entity.ai.navigation.WaterBoundPathNavigation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.pathfinder.PathType;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib.animatable.GeoEntity;
 import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
@@ -40,6 +41,10 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
 
     private UUID owner;
 
+    boolean searchingForLand;
+    protected final WaterBoundPathNavigation waterNavigation;
+    protected final GroundPathNavigation groundNavigation;
+
     public HeroEntity(EntityType<? extends PathfinderMob> type, Level level) {
         super(type, level);
         this.setPersistenceRequired();
@@ -52,6 +57,10 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
         this.setCanPickUpLoot(false);
         // Nao da despawn
         this.setPersistenceRequired();
+        this.moveControl = new HeroEntityMoveControl(this);
+        this.setPathfindingMalus(PathType.WATER, 0.0F);
+        this.waterNavigation = new WaterBoundPathNavigation(this, level);
+        this.groundNavigation = new GroundPathNavigation(this, level);
     }
 
     public void setOwner(final UUID owner) {
@@ -146,10 +155,10 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
 
     @Override
     protected void registerGoals() {
-        this.goalSelector.addGoal(1, new FloatGoal(this));
+
         this.goalSelector.addGoal(2, new MeleeAttackGoal(this, 1.2D, true));
         this.goalSelector.addGoal(3, new RandomLookAroundGoal(this));
-        this.goalSelector.addGoal(4, new WaterAvoidingRandomStrollGoal(this, 0.8D));
+
 
         this.targetSelector.addGoal(1, new HurtByTargetGoal(this));
         this.targetSelector.addGoal(2,
@@ -216,6 +225,35 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
         return super.hurt(source, amount);
     }
 
+    @Override
+    public boolean isPushedByFluid() {
+        return !this.isSwimming();
+    }
+
+    @Override
+    public void travel(Vec3 travelVector) {
+        if (this.isControlledByLocalInstance() && this.isInWater() && this.wantsToSwim()) {
+            this.moveRelative(0.01F, travelVector);
+            this.move(MoverType.SELF, this.getDeltaMovement());
+            this.setDeltaMovement(this.getDeltaMovement().scale(0.9));
+        } else {
+            super.travel(travelVector);
+        }
+    }
+
+    @Override
+    public void updateSwimming() {
+        if (!this.level().isClientSide) {
+            if (this.isEffectiveAi() && this.isInWater() && this.wantsToSwim()) {
+                this.navigation = this.waterNavigation;
+                this.setSwimming(true);
+            } else {
+                this.navigation = this.groundNavigation;
+                this.setSwimming(false);
+            }
+        }
+    }
+
     private void handleManaAndRegen(Player owner, HeroData heroData) {
         final ManaData manaData = ManaData.get(owner);
 
@@ -279,5 +317,52 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
             }
         }
         this.discard();
+    }
+
+    boolean wantsToSwim() {
+        return this.isInWater();
+    }
+
+    static class HeroEntityMoveControl extends MoveControl {
+        private final HeroEntity heroEntity;
+
+        public HeroEntityMoveControl(HeroEntity heroEntity) {
+            super(heroEntity);
+            this.heroEntity = heroEntity;
+        }
+
+        @Override
+        public void tick() {
+            LivingEntity livingEntity = this.heroEntity.getTarget();
+            if (this.heroEntity.wantsToSwim() && this.heroEntity.isInWater()) {
+                if (livingEntity != null && livingEntity.getY() > this.heroEntity.getY() || this.heroEntity.searchingForLand) {
+                    this.heroEntity.setDeltaMovement(this.heroEntity.getDeltaMovement().add(0.0, 0.002, 0.0));
+                }
+
+                if (this.operation != Operation.MOVE_TO || this.heroEntity.getNavigation().isDone()) {
+                    this.heroEntity.setSpeed(0.0F);
+                    return;
+                }
+
+                double d0 = this.wantedX - this.heroEntity.getX();
+                double d1 = this.wantedY - this.heroEntity.getY();
+                double d2 = this.wantedZ - this.heroEntity.getZ();
+                double d3 = Math.sqrt(d0 * d0 + d1 * d1 + d2 * d2);
+                d1 /= d3;
+                float f = (float)(Mth.atan2(d2, d0) * 180.0F / (float)Math.PI) - 90.0F;
+                this.heroEntity.setYRot(this.rotlerp(this.heroEntity.getYRot(), f, 90.0F));
+                this.heroEntity.yBodyRot = this.heroEntity.getYRot();
+                float f1 = (float)(this.speedModifier * this.heroEntity.getAttributeValue(Attributes.MOVEMENT_SPEED));
+                float f2 = Mth.lerp(0.125F, this.heroEntity.getSpeed(), f1);
+                this.heroEntity.setSpeed(f2);
+                this.heroEntity.setDeltaMovement(this.heroEntity.getDeltaMovement().add((double)f2 * d0 * 0.01, (double)f2 * d1 * 0.1, (double)f2 * d2 * 0.01));
+            } else {
+                if (!this.heroEntity.onGround()) {
+                    this.heroEntity.setDeltaMovement(this.heroEntity.getDeltaMovement().add(0.0, -0.008, 0.0));
+                }
+
+                super.tick();
+            }
+        }
     }
 }
