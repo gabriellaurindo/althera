@@ -5,6 +5,7 @@ import com.darksune.althera.common.ai.goal.ProtectOwnerGoal;
 import com.darksune.althera.common.attachment.HeroData;
 import com.darksune.althera.common.attachment.ManaData;
 import com.darksune.althera.common.system.HeroStatsSystem;
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
@@ -14,13 +15,16 @@ import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.MoveControl;
+import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.ai.navigation.WaterBoundPathNavigation;
+import net.minecraft.world.entity.ai.util.DefaultRandomPos;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.level.pathfinder.PathType;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
@@ -155,6 +159,7 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
     @Override
     protected void registerGoals() {
 
+        this.goalSelector.addGoal(1, new HeroEntitySwimUpGoal(this, 1.0, this.level().getSeaLevel()));
         this.goalSelector.addGoal(2, new MeleeAttackGoal(this, 1.2D, true));
         this.goalSelector.addGoal(3, new RandomLookAroundGoal(this));
 
@@ -264,7 +269,7 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
             return;
         }
 
-        manaData.consumeMana(owner, cost);
+//        manaData.consumeMana(owner, cost);
 
         if (getHealth() < HeroStatsSystem.getMaxHealth(heroData)) {
             heal(1.0F);
@@ -297,7 +302,8 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
         return PathfinderMob.createMobAttributes()
                 .add(Attributes.MAX_HEALTH, 20.0D)
                 .add(Attributes.MOVEMENT_SPEED, 0.25D)
-                .add(Attributes.ATTACK_DAMAGE, 1.25D);
+                .add(Attributes.ATTACK_DAMAGE, 1.25D)
+                .add(Attributes.STEP_HEIGHT, 1.0);
     }
 
     public static HeroEntity create(final Player player) {
@@ -319,7 +325,27 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
     }
 
     boolean wantsToSwim() {
-        return this.isInWater();
+        if (this.searchingForLand) {
+            return true;
+        } else {
+            LivingEntity livingentity = this.getTarget();
+            return livingentity != null && livingentity.isInWater();
+        }
+    }
+
+    protected boolean closeToNextPos() {
+        Path path = this.getNavigation().getPath();
+        if (path != null) {
+            BlockPos blockpos = path.getTarget();
+            if (blockpos != null) {
+                double d0 = this.distanceToSqr((double)blockpos.getX(), (double)blockpos.getY(), (double)blockpos.getZ());
+                if (d0 < 4.0) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     static class HeroEntityMoveControl extends MoveControl {
@@ -332,9 +358,9 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
 
         @Override
         public void tick() {
-            LivingEntity livingEntity = this.heroEntity.getTarget();
+            LivingEntity livingentity = this.heroEntity.getTarget();
             if (this.heroEntity.wantsToSwim() && this.heroEntity.isInWater()) {
-                if (livingEntity != null && livingEntity.getY() > this.heroEntity.getY() || this.heroEntity.searchingForLand) {
+                if (livingentity != null && livingentity.getY() > this.heroEntity.getY() || this.heroEntity.searchingForLand) {
                     this.heroEntity.setDeltaMovement(this.heroEntity.getDeltaMovement().add(0.0, 0.002, 0.0));
                 }
 
@@ -354,7 +380,7 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
                 float f1 = (float)(this.speedModifier * this.heroEntity.getAttributeValue(Attributes.MOVEMENT_SPEED));
                 float f2 = Mth.lerp(0.125F, this.heroEntity.getSpeed(), f1);
                 this.heroEntity.setSpeed(f2);
-                this.heroEntity.setDeltaMovement(this.heroEntity.getDeltaMovement().add((double)f2 * d0 * 0.01, (double)f2 * d1 * 0.1, (double)f2 * d2 * 0.01));
+                this.heroEntity.setDeltaMovement(this.heroEntity.getDeltaMovement().add((double)f2 * d0 * 0.005, (double)f2 * d1 * 0.1, (double)f2 * d2 * 0.005));
             } else {
                 if (!this.heroEntity.onGround()) {
                     this.heroEntity.setDeltaMovement(this.heroEntity.getDeltaMovement().add(0.0, -0.008, 0.0));
@@ -362,6 +388,59 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
 
                 super.tick();
             }
+        }
+    }
+
+    public void setSearchingForLand(boolean searchingForLand) {
+        this.searchingForLand = searchingForLand;
+    }
+
+    static class HeroEntitySwimUpGoal extends Goal {
+        private final HeroEntity heroEntity;
+        private final double speedModifier;
+        private final int seaLevel;
+        private boolean stuck;
+
+        public HeroEntitySwimUpGoal(HeroEntity heroEntity, double speedModifier, int seaLevel) {
+            this.heroEntity = heroEntity;
+            this.speedModifier = speedModifier;
+            this.seaLevel = seaLevel;
+        }
+
+        @Override
+        public boolean canUse() {
+            return !this.heroEntity.level().isDay() && this.heroEntity.isInWater() && this.heroEntity.getY() < (double)(this.seaLevel - 2);
+        }
+
+        @Override
+        public boolean canContinueToUse() {
+            return this.canUse() && !this.stuck;
+        }
+
+        @Override
+        public void tick() {
+            if (this.heroEntity.getY() < (double)(this.seaLevel - 1) && (this.heroEntity.getNavigation().isDone() || this.heroEntity.closeToNextPos())) {
+                Vec3 vec3 = DefaultRandomPos.getPosTowards(
+                        this.heroEntity, 4, 8, new Vec3(this.heroEntity.getX(), (double)(this.seaLevel - 1), this.heroEntity.getZ()), (float) (Math.PI / 2)
+                );
+                if (vec3 == null) {
+                    this.stuck = true;
+                    return;
+                }
+
+                this.heroEntity.getNavigation().moveTo(vec3.x, vec3.y, vec3.z, this.speedModifier);
+            }
+        }
+
+        @Override
+        public void start() {
+            this.heroEntity.setSearchingForLand(true);
+            this.stuck = false;
+        }
+
+        @Override
+        public void stop() {
+            this.heroEntity.setSearchingForLand(false);
         }
     }
 }
