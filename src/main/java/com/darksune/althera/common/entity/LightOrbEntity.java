@@ -1,10 +1,7 @@
 package com.darksune.althera.common.entity;
 
-import com.darksune.althera.common.attachment.HeroData;
-import com.darksune.althera.common.system.HeroStatsSystem;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -107,25 +104,6 @@ public class LightOrbEntity extends Entity {
                     false,
                     true
             ));
-        }
-        if (tickCount % 40 == 0) {
-            final HeroData heroData = HeroData.get(owner);
-
-            int newHealth = Math.min(
-                    (int) heroData.getHealth() + 2,
-                    (int) HeroStatsSystem.getMaxHealth(heroData)
-            );
-
-            if (heroData.isDefeated() && newHealth >= HeroStatsSystem.getMaxHealth(heroData)) {
-                heroData.setDefeated(false);
-
-                owner.sendSystemMessage(
-                        Component.literal("§aYour summon has recovered and can be summoned again!")
-                );
-            }
-
-            heroData.setHealth(newHealth);
-            heroData.sync(owner);
         }
         // 🧠 teleporte
         double distance = distanceTo(owner);

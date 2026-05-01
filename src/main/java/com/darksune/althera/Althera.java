@@ -13,6 +13,7 @@ import com.darksune.althera.config.AltheraConfig;
 import com.darksune.althera.network.SummonPayload;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -126,6 +127,7 @@ public final class Althera {
 
         Level level = player.level();
         if (level.isClientSide) return;
+        final HeroData heroData = HeroData.get(player);
 
         // ⏱️ a cada 2 segundos
         if (player.tickCount % 40 == 0) {
@@ -134,11 +136,29 @@ public final class Althera {
         }
 
         if (player.tickCount % 1200 == 0) { // ⏱️ 1 minuto
-            final HeroData data = HeroData.get(player);
+            if (heroData.getInterventions() > 0) {
+                heroData.setInterventions(heroData.getInterventions() - 1);
+                heroData.sync(player);
+            }
+        }
 
-            if (data.getInterventions() > 0) {
-                data.setInterventions(data.getInterventions() - 1);
-                data.sync(player);
+        if (player.tickCount % 40 == 0) {
+            if (heroData.isDefeated() || !heroData.isSummoned()) {
+                int newHealth = Math.min(
+                        (int) heroData.getHealth() + 2,
+                        (int) HeroStatsSystem.getMaxHealth(heroData)
+                );
+
+                if (heroData.isDefeated() && newHealth >= HeroStatsSystem.getMaxHealth(heroData)) {
+                    heroData.setDefeated(false);
+
+                    player.sendSystemMessage(
+                            Component.literal("§aYour summon has recovered and can be summoned again!")
+                    );
+                }
+
+                heroData.setHealth(newHealth);
+                heroData.sync(player);
             }
         }
     }
