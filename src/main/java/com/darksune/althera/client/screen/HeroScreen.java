@@ -69,18 +69,35 @@ public class HeroScreen extends Screen {
         int textX = x + 10;     // margem esquerda do painel
         int textY = y + 30;     // abaixo do título
 
+
+        if (heroData.getHeroClass() != null) {
+            gui.drawString(this.font,
+                    "Class",
+                    textX,
+                    textY - 24,
+                    0xAA55FF // roxo
+            );
+
+            gui.drawString(this.font,
+                    heroData.getHeroClass().getDisplayName(),
+                    textX,
+                    textY - 12,
+                    0xFFFFFF
+            );
+        }
+
         // LEVEL
         gui.drawString(this.font,
                 "Level",
                 textX,
-                textY,
+                textY + 2,
                 0x00FFAA
         );
 
         gui.drawString(this.font,
                 String.valueOf(heroData.getLevel()),
                 textX,
-                textY + 12,
+                textY + 14,
                 0xFFFFFF
         );
 
@@ -91,14 +108,14 @@ public class HeroScreen extends Screen {
         gui.drawString(this.font,
                 "XP",
                 textX,
-                textY + 24,
+                textY + 26,
                 0x00AAFF
         );
 
         gui.drawString(this.font,
                 currentXp + " / " + requiredXp,
                 textX,
-                textY + 36,
+                textY + 38,
                 0xFFFFFF
         );
 
@@ -106,14 +123,14 @@ public class HeroScreen extends Screen {
         gui.drawString(this.font,
                 "Health",
                 textX,
-                textY + 48,
+                textY + 50,
                 0xFFD700 // dourado
         );
 
         gui.drawString(this.font,
-                (int) heroData.getHealth() + " / " + (int) HeroStatsSystem.getMaxHealth(heroData.getLevel()),
+                (int) heroData.getHealth() + " / " + (int) HeroStatsSystem.getMaxHealth(heroData),
                 textX,
-                textY + 60,
+                textY + 62,
                 0xFFFFFF
         );
 
@@ -121,14 +138,14 @@ public class HeroScreen extends Screen {
         gui.drawString(this.font,
                 "Damage",
                 textX,
-                textY + 72,
+                textY + 74,
                 0xFF6B6B // vermelho
         );
 
         gui.drawString(this.font,
-                String.valueOf(HeroStatsSystem.getAttack(heroData.getLevel())),
+                String.format("%.1f", HeroStatsSystem.getAttack(heroData)),
                 textX,
-                textY + 84,
+                textY + 86,
                 0xFFFFFF
         );
 
@@ -148,6 +165,39 @@ public class HeroScreen extends Screen {
                 mouseY,
                 entity
         );
+
+        int max = HeroStatsSystem.getMaxInterventions();
+        int used = heroData.getInterventions();
+        int remaining = Math.max(0, max - used);
+
+
+        int boxX = x + GUI_WIDTH - 50;
+        int boxY = y + 30;
+
+
+        gui.drawString(this.font,
+                "Saves",
+                boxX,
+                boxY,
+                0x55FF55
+        );
+
+        for (int i = 0; i < max; i++) {
+
+            int yOffset = i * 12;
+
+            boolean active = i < remaining;
+
+            int color = active ? 0xFF00FF00 : 0xFF555555; // verde ou cinza
+
+            gui.fill(
+                    boxX,
+                    boxY + yOffset + 12,
+                    boxX + 8,
+                    boxY + yOffset + 8 + 12,
+                    color
+            );
+        }
 
         super.render(gui, mouseX, mouseY, partialTick);
     }

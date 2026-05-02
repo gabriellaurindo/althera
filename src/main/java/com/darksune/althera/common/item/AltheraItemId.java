@@ -8,6 +8,9 @@ public class AltheraItemId {
 
     public static final ResourceLocation SUMMON_SEAL = id("summon_seal");
 
+    //Block items
+    public static final ResourceLocation RITUAL_CORE = id("ritual_core");
+
     public static ResourceLocation id(final String name) {
         return ResourceLocation.fromNamespaceAndPath(MOD_ID, name);
     }

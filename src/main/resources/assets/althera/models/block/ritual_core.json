@@ -1,0 +1,47 @@
+{
+  "parent": "block/block",
+  "textures": {
+    "base": "minecraft:block/stone",
+    "top": "minecraft:block/obsidian",
+    "glow": "minecraft:block/amethyst_block",
+    "particle": "minecraft:block/amethyst_block"
+  },
+  "elements": [
+    {
+      "from": [2, 0, 2],
+      "to": [14, 2, 14],
+      "faces": {
+        "up": { "texture": "#base" },
+        "down": { "texture": "#base" },
+        "north": { "texture": "#base" },
+        "south": { "texture": "#base" },
+        "east": { "texture": "#base" },
+        "west": { "texture": "#base" }
+      }
+    },
+    {
+      "from": [3, 2, 3],
+      "to": [13, 4, 13],
+      "faces": {
+        "up": { "texture": "#top" },
+        "down": { "texture": "#top" },
+        "north": { "texture": "#top" },
+        "south": { "texture": "#top" },
+        "east": { "texture": "#top" },
+        "west": { "texture": "#top" }
+      }
+    },
+    {
+      "from": [7, 4, 7],
+      "to": [9, 6, 9],
+      "faces": {
+        "up": { "texture": "#glow" },
+        "down": { "texture": "#glow" },
+        "north": { "texture": "#glow" },
+        "south": { "texture": "#glow" },
+        "east": { "texture": "#glow" },
+        "west": { "texture": "#glow" }
+      }
+    }
+  ]
+}

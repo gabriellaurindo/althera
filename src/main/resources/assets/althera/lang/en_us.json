@@ -1,6 +1,10 @@
 {
   "item.althera.summon_seal": "Summon seal",
+  "item.althera.ritual_core": "Ritual core",
+
   "key.categories.althera": "Althera",
   "key.althera.summon": "Summon",
-  "key.althera.hero.screen": "Hero Menu"
+  "key.althera.hero.screen": "Hero Menu",
+
+  "block.althera.ritual_core": "Ritual core"
 }

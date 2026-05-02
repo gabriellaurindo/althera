@@ -1,15 +1,20 @@
 package com.darksune.althera;
 
 import com.darksune.althera.common.attachment.AltheraAttachments;
+import com.darksune.althera.common.attachment.HeroData;
 import com.darksune.althera.common.attachment.ManaData;
 import com.darksune.althera.common.entity.AltheraEntities;
 import com.darksune.althera.common.entity.HeroEntity;
 import com.darksune.althera.common.entity.SummonedEntity;
 import com.darksune.althera.common.registry.AltheraRegistries;
+import com.darksune.althera.common.system.HeroStatsSystem;
+import com.darksune.althera.common.system.HeroSummonSystem;
 import com.darksune.althera.config.AltheraConfig;
 import com.darksune.althera.network.SummonPayload;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.neoforged.bus.api.IEventBus;
@@ -20,10 +25,11 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.neoforge.client.event.RenderGuiEvent;
 import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 
-import static com.darksune.althera.common.util.LightOrbUtil.desabilitarEspirito;
 import static com.darksune.althera.common.util.LightOrbUtil.habilitarEspirito;
 import static java.util.Objects.nonNull;
 
@@ -50,33 +56,18 @@ public final class Althera {
                 (payload, context) -> {
 
                     final Player player = context.player();
-                    final Level level = player.level();
                     final ManaData manaData = ManaData.get(player);
-                    final HeroEntity oldSummon = manaData.hasSummon(player, level);
+                    final HeroEntity oldSummon = HeroSummonSystem.getSummon(player);
                     if (nonNull(oldSummon)) {
-                        oldSummon.remove();
-                        habilitarEspirito(player);
+                        oldSummon.remove(true);
                         return;
                     }
 
                     if (!manaData.hasEnoughMana(20)) {
                         return;
                     }
-                    desabilitarEspirito(player);
-                    final HeroEntity hero = HeroEntity.create(level, player);
 
-                    if (hero == null) {
-                        return;
-                    }
-
-                    hero.moveTo(
-                            player.getX(),
-                            player.getY(),
-                            player.getZ(),
-                            player.getYRot(),
-                            0
-                    );
-                    level.addFreshEntity(hero);
+                    HeroSummonSystem.spawnSummon(player);
                 }
         );
     }
@@ -136,11 +127,99 @@ public final class Althera {
 
         Level level = player.level();
         if (level.isClientSide) return;
+        final HeroData heroData = HeroData.get(player);
 
         // ⏱️ a cada 2 segundos
         if (player.tickCount % 40 == 0) {
             final ManaData manaData = ManaData.get(player);
             manaData.regenMana(player, level);
+        }
+
+        if (player.tickCount % 1200 == 0) { // ⏱️ 1 minuto
+            if (heroData.getInterventions() > 0) {
+                heroData.setInterventions(heroData.getInterventions() - 1);
+                heroData.sync(player);
+            }
+        }
+
+        if (player.tickCount % 40 == 0) {
+            if (heroData.isDefeated() || !heroData.isSummoned()) {
+                int newHealth = Math.min(
+                        (int) heroData.getHealth() + 2,
+                        (int) HeroStatsSystem.getMaxHealth(heroData)
+                );
+
+                if (heroData.isDefeated() && newHealth >= HeroStatsSystem.getMaxHealth(heroData)) {
+                    heroData.setDefeated(false);
+
+                    player.sendSystemMessage(
+                            Component.literal("§aYour summon has recovered and can be summoned again!")
+                    );
+                }
+
+                heroData.setHealth(newHealth);
+                heroData.sync(player);
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public static void onPlayerChangeDimension(PlayerEvent.PlayerChangedDimensionEvent event) {
+        if (!(event.getEntity() instanceof ServerPlayer player)) return;
+
+        final HeroData heroData = HeroData.get(player);
+
+        if (!heroData.isSummoned()) {
+            habilitarEspirito(player);
+            return;
+        }
+
+        HeroSummonSystem.spawnSummon(player);
+    }
+
+    @SubscribeEvent
+    public static void onPlayerDamage(final LivingIncomingDamageEvent event) {
+        if (!(event.getEntity() instanceof Player player)) {
+            return;
+        }
+
+        if (event.getSource().getEntity() == null) {
+            return;
+        }
+
+        final HeroData heroData = HeroData.get(player);
+        if (heroData.getInterventions() >= HeroStatsSystem.getMaxInterventions()) {
+            return;
+        }
+
+        final HeroEntity hero = HeroSummonSystem.spawnOrMove(player);
+        if (hero == null) {
+            return;
+        }
+
+        float damage = event.getAmount();
+        if (damage <= 0) {
+            return;
+        }
+
+        hero.hurt(event.getSource(), damage);
+
+        heroData.incrementInterventions();
+        heroData.sync(player);
+
+        event.setCanceled(true);
+        //todo no futuro colocar uma animacao ou algo do genero pra entender que gastou um save
+        //player.invulnerableTime = 20;
+    }
+
+    @SubscribeEvent
+    public static void onHeroDamage(LivingIncomingDamageEvent event) {
+
+        if (!(event.getSource().getEntity() instanceof Player player)) return;
+        if (!(event.getEntity() instanceof HeroEntity hero)) return;
+
+        if (hero.isOwnedBy(player)) {
+            event.setCanceled(true);
         }
     }
 }
