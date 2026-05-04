@@ -6,6 +6,7 @@ import com.darksune.althera.common.attachment.ManaData;
 import com.darksune.althera.common.entity.AltheraEntities;
 import com.darksune.althera.common.entity.HeroEntity;
 import com.darksune.althera.common.entity.SummonedEntity;
+import com.darksune.althera.common.hero.HeroLoader;
 import com.darksune.althera.common.registry.AltheraRegistries;
 import com.darksune.althera.common.system.HeroStatsSystem;
 import com.darksune.althera.common.system.HeroSummonSystem;
@@ -24,6 +25,8 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.neoforge.client.event.RenderGuiEvent;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
@@ -43,6 +46,11 @@ public final class Althera {
     public Althera(final IEventBus modEventBus, final ModContainer modContainer) {
         AltheraRegistries.register(modEventBus);
         modContainer.registerConfig(ModConfig.Type.COMMON, AltheraConfig.SPEC);
+        NeoForge.EVENT_BUS.addListener(this::onReloadListeners);
+    }
+
+    private void onReloadListeners(AddReloadListenerEvent event) {
+        event.addListener(new HeroLoader());
     }
 
     @SubscribeEvent
