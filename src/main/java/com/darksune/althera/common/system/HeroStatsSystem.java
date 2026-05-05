@@ -37,7 +37,7 @@ public class HeroStatsSystem {
         }
 
         hero.setHealth((float) Math.min(heroData.getHealth(), getMaxHealth(heroData)));
-        hero.setOwner(player.getUUID());
+        hero.setOwnerUuid(player.getUUID());
     }
 
     public static double getMaxHealth(final HeroData data) {

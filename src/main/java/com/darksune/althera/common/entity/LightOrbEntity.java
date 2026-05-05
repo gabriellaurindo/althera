@@ -15,19 +15,19 @@ import java.util.UUID;
 
 public class LightOrbEntity extends Entity {
 
-    private UUID owner;
+    private UUID ownerUuid;
 
-    public void setOwner(final UUID owner) {
-        this.owner = owner;
+    public void setOwnerUuid(final UUID ownerUuid) {
+        this.ownerUuid = ownerUuid;
     }
 
-    public Player getOwner() {
-        if (owner == null) return null;
-        return level().getPlayerByUUID(owner);
+    public Player getOwnerUuid() {
+        if (ownerUuid == null) return null;
+        return level().getPlayerByUUID(ownerUuid);
     }
 
     public UUID getOwnerUUID() {
-        return owner;
+        return ownerUuid;
     }
 
     public LightOrbEntity(EntityType<?> type, Level level) {
@@ -54,7 +54,7 @@ public class LightOrbEntity extends Entity {
             return;
         }
 
-        Player player = getOwner();
+        Player player = getOwnerUuid();
         if (player == null) {
             discard();
             return;
@@ -90,7 +90,7 @@ public class LightOrbEntity extends Entity {
         Level level = level();
         if (level.isClientSide) return;
 
-        Player owner = getOwner();
+        Player owner = getOwnerUuid();
         if (owner == null) return;
 
         // ⏱️ a cada 4 segundos
@@ -119,15 +119,15 @@ public class LightOrbEntity extends Entity {
 
     @Override
     protected void addAdditionalSaveData(CompoundTag compound) {
-        if (owner != null) {
-            compound.putUUID("Owner", owner);
+        if (ownerUuid != null) {
+            compound.putUUID("Owner", ownerUuid);
         }
     }
 
     @Override
     protected void readAdditionalSaveData(CompoundTag compound) {
         if (compound.hasUUID("Owner")) {
-            owner = compound.getUUID("Owner");
+            ownerUuid = compound.getUUID("Owner");
         }
     }
 

@@ -43,7 +43,7 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
 
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
 
-    private UUID owner;
+    private UUID ownerUuid;
 
     boolean searchingForLand;
     protected final WaterBoundPathNavigation waterNavigation;
@@ -67,16 +67,13 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
         this.groundNavigation = new GroundPathNavigation(this, level);
     }
 
-    public void setOwner(final UUID owner) {
-        this.owner = owner;
+    public void setOwnerUuid(final UUID ownerUuid) {
+        this.ownerUuid = ownerUuid;
     }
 
-    //todo otimizar isso deppois buscando byuuid
-    //  return this.level().getPlayerByUUID(ownerUUID);
-    //fazer isso em todas as classes que tem owner
     public Player getOwner() {
-        if (owner == null) return null;
-        return level().getServer().getPlayerList().getPlayer(owner);
+        if (ownerUuid == null) return null;
+        return this.level().getPlayerByUUID(ownerUuid);
     }
 
     public boolean isOwnedBy(Player player) {
@@ -107,8 +104,8 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
     public void addAdditionalSaveData(CompoundTag compound) {
         super.addAdditionalSaveData(compound);
 
-        if (owner != null) {
-            compound.putUUID("Owner", owner);
+        if (ownerUuid != null) {
+            compound.putUUID("Owner", ownerUuid);
         }
     }
 
@@ -117,7 +114,7 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
         super.readAdditionalSaveData(compound);
 
         if (compound.hasUUID("Owner")) {
-            owner = compound.getUUID("Owner");
+            ownerUuid = compound.getUUID("Owner");
         }
     }
 
@@ -205,7 +202,7 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
 
     @Override
     public @Nullable UUID getOwnerUUID() {
-        return owner;
+        return ownerUuid;
     }
 
     @Override
