@@ -3,6 +3,7 @@ package com.darksune.althera;
 import com.darksune.althera.common.attachment.AltheraAttachments;
 import com.darksune.althera.common.attachment.HeroData;
 import com.darksune.althera.common.attachment.ManaData;
+import com.darksune.althera.common.command.HeroCommand;
 import com.darksune.althera.common.entity.AltheraEntities;
 import com.darksune.althera.common.entity.HeroEntity;
 import com.darksune.althera.common.entity.SummonedEntity;
@@ -27,6 +28,7 @@ import net.neoforged.fml.config.ModConfig;
 import net.neoforged.neoforge.client.event.RenderGuiEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
@@ -51,6 +53,11 @@ public final class Althera {
 
     private void onReloadListeners(AddReloadListenerEvent event) {
         event.addListener(new HeroLoader());
+    }
+
+    @SubscribeEvent
+    public static void onRegisterCommands(RegisterCommandsEvent event) {
+        HeroCommand.register(event.getDispatcher());
     }
 
     @SubscribeEvent
