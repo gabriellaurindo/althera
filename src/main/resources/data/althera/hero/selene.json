@@ -1,0 +1,10 @@
+{
+  "name": "Selene",
+  "description": "A moon-bound sorceress.",
+  "class": "CASTER",
+  "rarity": "A",
+  "nature": "COMMON",
+  "model": "althera:geo/selene.geo.json",
+  "texture": "althera:textures/entity/selene.png",
+  "personality": "Elegant and mysterious"
+}

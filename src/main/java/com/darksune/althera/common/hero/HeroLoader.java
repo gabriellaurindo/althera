@@ -50,8 +50,15 @@ public class HeroLoader extends SimpleJsonResourceReloadListener {
         String name = json.get("name").getAsString();
         String description = json.get("description").getAsString();
 
-        ResourceLocation heroClass = ResourceLocation.parse(json.get("class").getAsString());
-        ResourceLocation rarity = ResourceLocation.parse(json.get("rarity").getAsString());
+        HeroClass heroClass = HeroClass.valueOf(json.get("class").getAsString().toUpperCase());
+
+        HeroRarity rarity = HeroRarity.valueOf(
+                json.get("rarity").getAsString().toUpperCase()
+        );
+
+        HeroNature nature = HeroNature.valueOf(
+                json.get("nature").getAsString().toUpperCase()
+        );
 
         ResourceLocation model = ResourceLocation.parse(json.get("model").getAsString());
         ResourceLocation texture = ResourceLocation.parse(json.get("texture").getAsString());
@@ -64,6 +71,7 @@ public class HeroLoader extends SimpleJsonResourceReloadListener {
                 description,
                 heroClass,
                 rarity,
+                nature,
                 model,
                 texture,
                 personality

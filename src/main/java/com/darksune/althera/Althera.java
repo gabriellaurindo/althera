@@ -67,7 +67,7 @@ public final class Althera {
                     final ManaData manaData = ManaData.get(player);
                     final HeroEntity oldSummon = HeroSummonSystem.getSummon(player);
                     if (nonNull(oldSummon)) {
-                        oldSummon.remove(true);
+                        oldSummon.remove();
                         return;
                     }
 

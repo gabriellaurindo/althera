@@ -1,10 +1,12 @@
 package com.darksune.althera.common.attachment;
 
-import com.darksune.althera.common.system.HeroClass;
+import com.darksune.althera.common.hero.HeroDefinition;
+import com.darksune.althera.common.hero.HeroRegistry;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 
 import java.util.UUID;
@@ -21,8 +23,7 @@ public class HeroData {
     private UUID summonUUID = null;
     private int interventions = 0;
     private boolean defeated;
-
-    private HeroClass heroClass = null;
+    private ResourceLocation heroId = null;
 
     // =========================
     // GET / SET
@@ -80,12 +81,16 @@ public class HeroData {
         this.defeated = defeated;
     }
 
-    public HeroClass getHeroClass() {
-        return heroClass;
+    public HeroDefinition getHeroDefinition() {
+        return heroId != null ? HeroRegistry.get(heroId) : null;
     }
 
-    public void setHeroClass(HeroClass heroClass) {
-        this.heroClass = heroClass;
+    public void setHero(ResourceLocation heroId) {
+        if (HeroRegistry.get(heroId) == null) {
+            throw new IllegalArgumentException("Hero not found: " + heroId);
+        }
+
+        this.heroId = heroId;
     }
 
     public void clearSummon() {
@@ -115,9 +120,9 @@ public class HeroData {
                             .forGetter(data -> data.interventions),
                     Codec.BOOL.optionalFieldOf("defeated", false)
                             .forGetter(data -> data.defeated),
-                    Codec.STRING.optionalFieldOf("heroClass", "")
-                            .forGetter(data -> data.heroClass != null ? data.heroClass.name() : "")
-            ).apply(instance, (level, xp, health, uuidStr, interventions, defeated, heroClassStr) -> {
+                    Codec.STRING.optionalFieldOf("heroId", "")
+                            .forGetter(data -> data.heroId != null ? data.heroId.toString() : "")
+            ).apply(instance, (level, xp, health, uuidStr, interventions, defeated, heroIdStr) -> {
                 HeroData data = new HeroData();
                 data.level = level;
                 data.xp = xp;
@@ -129,12 +134,8 @@ public class HeroData {
                     data.summonUUID = UUID.fromString(uuidStr);
                 }
 
-                if (!heroClassStr.isEmpty()) {
-                    try {
-                        data.heroClass = HeroClass.valueOf(heroClassStr);
-                    } catch (Exception ignored) {
-                        data.heroClass = null;
-                    }
+                if (!heroIdStr.isEmpty()) {
+                    data.heroId = ResourceLocation.parse(heroIdStr);
                 }
 
                 return data;
@@ -159,9 +160,9 @@ public class HeroData {
                 buf.writeInt(data.interventions);
                 buf.writeBoolean(data.defeated);
 
-                buf.writeBoolean(data.heroClass != null);
-                if (data.heroClass != null) {
-                    buf.writeEnum(data.heroClass);
+                buf.writeBoolean(data.heroId != null);
+                if (data.heroId != null) {
+                    buf.writeResourceLocation(data.heroId);
                 }
             },
             buf -> {
@@ -178,9 +179,7 @@ public class HeroData {
                 data.defeated = buf.readBoolean();
 
                 if (buf.readBoolean()) {
-                    data.heroClass = buf.readEnum(HeroClass.class);
-                } else {
-                    data.heroClass = null;
+                    data.heroId = buf.readResourceLocation();
                 }
 
                 return data;

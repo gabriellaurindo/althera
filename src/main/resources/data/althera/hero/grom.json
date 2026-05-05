@@ -1,0 +1,10 @@
+{
+  "name": "Grom",
+  "description": "A veteran defender.",
+  "class": "SHIELDER",
+  "rarity": "C",
+  "nature": "COMMON",
+  "model": "althera:geo/grom.geo.json",
+  "texture": "althera:textures/entity/grom.png",
+  "personality": "Gruff but reliable"
+}

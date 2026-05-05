@@ -70,21 +70,21 @@ public class HeroScreen extends Screen {
         int textY = y + 30;     // abaixo do título
 
 
-        if (heroData.getHeroClass() != null) {
-            gui.drawString(this.font,
-                    "Class",
-                    textX,
-                    textY - 24,
-                    0xAA55FF // roxo
-            );
 
-            gui.drawString(this.font,
-                    heroData.getHeroClass().getDisplayName(),
-                    textX,
-                    textY - 12,
-                    0xFFFFFF
-            );
-        }
+        gui.drawString(this.font,
+                "Class",
+                textX,
+                textY - 24,
+                0xAA55FF // roxo
+        );
+
+        gui.drawString(this.font,
+                heroData.getHeroDefinition().getHeroClass().getDisplayName(),
+                textX,
+                textY - 12,
+                0xFFFFFF
+        );
+
 
         // LEVEL
         gui.drawString(this.font,
@@ -146,6 +146,21 @@ public class HeroScreen extends Screen {
                 String.format("%.1f", HeroStatsSystem.getAttack(heroData)),
                 textX,
                 textY + 86,
+                0xFFFFFF
+        );
+
+        // Raridade
+        gui.drawString(this.font,
+                "Rarity",
+                textX,
+                textY + 98,
+                0xAA55FF // vermelho
+        );
+
+        gui.drawString(this.font,
+                heroData.getHeroDefinition().getRarity().getDisplayName(),
+                textX,
+                textY + 110,
                 0xFFFFFF
         );
 

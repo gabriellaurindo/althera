@@ -36,12 +36,14 @@ public class HeroSummonSystem {
     public static HeroEntity spawnSummon(final Player player, final boolean sendMessage) {
         final HeroData heroData = HeroData.get(player);
 
-        //todo: se eu puder garantir que esse .remove nao seja chamado nao vou precisar do if de espirito dentro do remove, sempre vai chamar
+        if (heroData.getHeroDefinition() == null) {
+            player.sendSystemMessage(
+                    Component.literal("§eYou don't have a summon.")
+            );
+            return null;
+        }
+
         if (heroData.getSummonUUID() != null) {
-            final HeroEntity existing = HeroSummonSystem.getSummon(player);
-            if (existing != null) {
-                existing.remove(false);
-            }
             heroData.clearSummon();
         }
 

@@ -2,30 +2,38 @@ package com.darksune.althera.common.system;
 
 import com.darksune.althera.common.attachment.HeroData;
 import com.darksune.althera.common.entity.HeroEntity;
+import com.darksune.althera.common.hero.HeroDefinition;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 
 public class HeroStatsSystem {
 
+    private final static int BASE_HEALTH = 19;
+    private final static double BASE_ATTACK = 1.125;
+
     public static void applyAttributes(final HeroEntity hero, final Player player) {
         final HeroData heroData = HeroData.get(player);
 
         var maxHealthAttr = hero.getAttribute(Attributes.MAX_HEALTH);
         var attackAttr = hero.getAttribute(Attributes.ATTACK_DAMAGE);
-        var armorAttr = hero.getAttribute(Attributes.ARMOR);
+//        var armorAttr = hero.getAttribute(Attributes.ARMOR);
+
         if (maxHealthAttr != null) {
             maxHealthAttr.setBaseValue(getMaxHealth(heroData));
         }
+
         if (attackAttr != null) {
             attackAttr.setBaseValue(getAttack(heroData));
         }
-        if (armorAttr != null) {
-            armorAttr.setBaseValue(getArmor());
-        }
-        //todo temp
-        if (heroData.getHeroClass() != null) {
-            hero.setCustomName(Component.literal(heroData.getHeroClass().getDisplayName()));
+
+//        if (armorAttr != null) {
+//            armorAttr.setBaseValue(getArmor(heroData));
+//        }
+
+        // temp name
+        if (heroData.getHeroDefinition() != null) {
+            hero.setCustomName(Component.literal(heroData.getHeroDefinition().getName()));
         }
 
         hero.setHealth((float) Math.min(heroData.getHealth(), getMaxHealth(heroData)));
@@ -33,30 +41,85 @@ public class HeroStatsSystem {
     }
 
     public static double getMaxHealth(final HeroData data) {
-        double base = 20 + data.getLevel() - 1;
+        HeroDefinition def = data.getHeroDefinition();
 
-        if (data.getHeroClass() != null) {
-            base *= data.getHeroClass().getHealthMultiplier();
-        }
+        double base = BASE_HEALTH + data.getLevel();
 
-        return base;
+        if (def == null) return base;
+
+        double result = base;
+
+        // Class scaling
+        result *= def.getHeroClass().getHealthMultiplier();
+
+        // Rarity scaling (HP-focused)
+        result *= def.getRarity().getHealthMultiplier();
+
+        // Nature scaling (global)
+        result *= def.getNature().getGlobalMultiplier();
+
+        return result;
     }
 
     public static double getAttack(final HeroData data) {
-        double base = 1.5 + (0.125 * data.getLevel()) - 0.125;
+        HeroDefinition def = data.getHeroDefinition();
 
-        if (data.getHeroClass() != null) {
-            base *= data.getHeroClass().getAttackMultiplier();
-        }
+        double base = BASE_ATTACK + (0.125 * data.getLevel());
 
-        return base;
+        if (def == null) return base;
+
+        double result = base;
+
+        // Class scaling
+        result *= def.getHeroClass().getAttackMultiplier();
+
+        // Rarity scaling (lighter impact than HP)
+        result *= getRarityAttackScaling(def);
+
+        // Nature scaling
+        result *= def.getNature().getGlobalMultiplier();
+
+        return result;
     }
 
-    public static double getArmor() {
-        return 0;
-    }
+//    public static double getArmor(final HeroData data) {
+//        HeroDefinition def = data.getHeroDefinition();
+//
+//        double base = 2.0; // you can tune this
+//
+//        if (def == null) return base;
+//
+//        double result = base;
+//
+//        // Class scaling
+//        result *= def.getHeroClass().getArmorMultiplier();
+//
+//        // Rarity scaling (moderate)
+//        result *= getRarityArmorScaling(def);
+//
+//        // Nature scaling
+//        result *= def.getNature().getGlobalMultiplier();
+//
+//        return result;
+//    }
 
     public static int getMaxInterventions() {
         return 3;
+    }
+
+    // =========================
+    // INTERNAL SCALING HELPERS
+    // =========================
+
+    private static double getRarityAttackScaling(HeroDefinition def) {
+        return lerp(def.getRarity().getHealthMultiplier(), 0.6f);
+    }
+
+//    private static double getRarityArmorScaling(HeroDefinition def) {
+//        return lerp(def.getRarity().getHealthMultiplier(), 0.5f);
+//    }
+
+    private static double lerp(double value, double factor) {
+        return 1.0 + (value - 1.0) * factor;
     }
 }

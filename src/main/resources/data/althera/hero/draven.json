@@ -1,0 +1,10 @@
+{
+  "name": "Draven",
+  "description": "A warlord with unmatched speed.",
+  "class": "LANCER",
+  "rarity": "S",
+  "nature": "COMMON",
+  "model": "althera:geo/draven.geo.json",
+  "texture": "althera:textures/entity/draven.png",
+  "personality": "Dominant and ruthless"
+}

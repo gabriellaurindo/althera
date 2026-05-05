@@ -1,9 +1,0 @@
-{
-  "name": "Aria",
-  "description": "A disciplined sword wielder.",
-  "class": "althera:sword",
-  "rarity": "althera:common",
-  "model": "althera:aria_model",
-  "texture": "althera:aria_texture",
-  "personality": "loyal, calm, serious"
-}

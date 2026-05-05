@@ -2,9 +2,9 @@ package com.darksune.althera.common.block;
 
 import com.darksune.althera.common.attachment.HeroData;
 import com.darksune.althera.common.entity.HeroEntity;
+import com.darksune.althera.common.hero.HeroDefinition;
 import com.darksune.althera.common.multiblock.MultiblockValidator;
-import com.darksune.althera.common.system.HeroClass;
-import com.darksune.althera.common.system.HeroClassSystem;
+import com.darksune.althera.common.system.HeroRollSystem;
 import com.darksune.althera.common.system.HeroStatsSystem;
 import com.darksune.althera.common.system.HeroSummonSystem;
 import net.minecraft.core.BlockPos;
@@ -85,8 +85,8 @@ public class RitualCoreBlock extends Block {
         }
 
         final HeroData heroData = HeroData.get(player);
-        final HeroClass heroClass = HeroClassSystem.getRandomClass();
-        heroData.setHeroClass(heroClass);
+        final HeroDefinition heroDefinition = HeroRollSystem.rollHero();
+        heroData.setHero(heroDefinition.getId());
         heroData.sync(player);
 
         final HeroEntity summon = HeroSummonSystem.getSummon(player);

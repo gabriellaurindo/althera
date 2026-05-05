@@ -1,0 +1,10 @@
+{
+  "name": "Dorn",
+  "description": "A fortress in human form.",
+  "class": "SHIELDER",
+  "rarity": "A",
+  "nature": "COMMON",
+  "model": "althera:geo/dorn.geo.json",
+  "texture": "althera:textures/entity/dorn.png",
+  "personality": "Loyal and unyielding"
+}

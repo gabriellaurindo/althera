@@ -1,0 +1,10 @@
+{
+  "name": "Aurelion",
+  "description": "A god-like entity beyond mortal comprehension.",
+  "class": "CASTER",
+  "rarity": "EX",
+  "nature": "DIVINE",
+  "model": "althera:geo/aurelion.geo.json",
+  "texture": "althera:textures/entity/aurelion.png",
+  "personality": "Omniscient and indifferent"
+}

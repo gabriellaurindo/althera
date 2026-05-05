@@ -152,7 +152,7 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
 
         // Zupi :)
         if (!this.getUUID().equals(heroData.getSummonUUID())) {
-            remove(false);
+            this.discard();
         }
     }
 
@@ -265,7 +265,7 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
 
         if (manaData.getMana() < cost) {
             owner.sendSystemMessage(Component.literal("Not enough mana! Summon dismissed."));
-            remove(true);
+            remove();
             return;
         }
 
@@ -312,14 +312,12 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
         return hero;
     }
 
-    public void remove(final boolean habilitarEspirito) {
+    public void remove() {
         if (getOwner() != null) {
             final HeroData heroData = HeroData.get(getOwner());
             heroData.clearSummon();
             heroData.sync(getOwner());
-            if (habilitarEspirito) {
-                habilitarEspirito(getOwner());
-            }
+            habilitarEspirito(getOwner());
         }
         this.discard();
     }

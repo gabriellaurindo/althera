@@ -1,0 +1,10 @@
+{
+  "name": "Eldrin",
+  "description": "A scholar who commands arcane forces.",
+  "class": "CASTER",
+  "rarity": "S",
+  "nature": "COMMON",
+  "model": "althera:geo/eldrin.geo.json",
+  "texture": "althera:textures/entity/eldrin.png",
+  "personality": "Wise and distant"
+}

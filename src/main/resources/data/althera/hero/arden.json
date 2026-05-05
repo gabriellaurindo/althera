@@ -1,0 +1,10 @@
+{
+  "name": "Arden",
+  "description": "A disciplined swordsman of the old order.",
+  "class": "SABER",
+  "rarity": "C",
+  "nature": "COMMON",
+  "model": "althera:geo/arden.geo.json",
+  "texture": "althera:textures/entity/arden.png",
+  "personality": "Honorable and calm"
+}

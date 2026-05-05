@@ -1,0 +1,10 @@
+{
+  "name": "Rusk",
+  "description": "A mercenary lancer.",
+  "class": "LANCER",
+  "rarity": "C",
+  "nature": "COMMON",
+  "model": "althera:geo/rusk.geo.json",
+  "texture": "althera:textures/entity/rusk.png",
+  "personality": "Pragmatic and cold"
+}
