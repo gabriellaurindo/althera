@@ -10,7 +10,7 @@ public class HeroDefinition {
     private final String description;
 
     private final HeroClass heroClass;
-    private final HeroRarity rarity;
+    private final HeroRank rank;
     private final HeroNature nature;
 
     private final ResourceLocation model;
@@ -23,7 +23,7 @@ public class HeroDefinition {
             String name,
             String description,
             HeroClass heroClass,
-            HeroRarity rarity,
+            HeroRank rank,
             HeroNature nature,
             ResourceLocation model,
             ResourceLocation texture,
@@ -33,7 +33,7 @@ public class HeroDefinition {
         this.name = name;
         this.description = description;
         this.heroClass = heroClass;
-        this.rarity = rarity;
+        this.rank = rank;
         this.nature = nature;
         this.model = model;
         this.texture = texture;
@@ -56,8 +56,8 @@ public class HeroDefinition {
         return heroClass;
     }
 
-    public HeroRarity getRarity() {
-        return rarity;
+    public HeroRank getRank() {
+        return rank;
     }
 
     public HeroNature getNature() {

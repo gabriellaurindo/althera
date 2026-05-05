@@ -1,7 +1,7 @@
 package com.darksune.althera.common.system;
 
 import com.darksune.althera.common.hero.HeroDefinition;
-import com.darksune.althera.common.hero.HeroRarity;
+import com.darksune.althera.common.hero.HeroRank;
 import com.darksune.althera.common.hero.HeroRegistry;
 
 import java.util.List;
@@ -12,12 +12,12 @@ public class HeroRollSystem {
 
     public static HeroDefinition rollHero() {
 
-        // 1. Roll rarity (weighted)
-        HeroRarity rarity = rollRarity();
+        // 1. Roll rank (weighted)
+        HeroRank rank = rollRank();
 
-        // 2. Get pool ONLY by rarity (no class bias)
+        // 2. Get pool ONLY by rank (no class bias)
         List<HeroDefinition> pool = HeroRegistry.getAll().stream()
-                .filter(h -> h.getRarity() == rarity)
+                .filter(h -> h.getRank() == rank)
                 .collect(Collectors.toList());
 
         // 3. Fallback safety
@@ -30,19 +30,19 @@ public class HeroRollSystem {
         return pool.get(index);
     }
 
-    private static HeroRarity rollRarity() {
+    private static HeroRank rollRank() {
         float roll = ThreadLocalRandom.current().nextFloat() * 100f;
 
         float cumulative = 0f;
 
-        for (HeroRarity rarity : HeroRarity.values()) {
-            cumulative += rarity.getDropChance();
+        for (HeroRank rank : HeroRank.values()) {
+            cumulative += rank.getDropChance();
 
             if (roll <= cumulative) {
-                return rarity;
+                return rank;
             }
         }
 
-        return HeroRarity.F; // fallback (should never happen)
+        return HeroRank.F; // fallback (should never happen)
     }
 }

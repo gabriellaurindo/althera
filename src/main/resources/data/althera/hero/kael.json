@@ -2,7 +2,7 @@
   "name": "Kael",
   "description": "A swift lancer who strikes before seen.",
   "class": "LANCER",
-  "rarity": "B",
+  "rank": "B",
   "nature": "COMMON",
   "model": "althera:geo/kael.geo.json",
   "texture": "althera:textures/entity/kael.png",

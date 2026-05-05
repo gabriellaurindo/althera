@@ -52,8 +52,8 @@ public class HeroLoader extends SimpleJsonResourceReloadListener {
 
         HeroClass heroClass = HeroClass.valueOf(json.get("class").getAsString().toUpperCase());
 
-        HeroRarity rarity = HeroRarity.valueOf(
-                json.get("rarity").getAsString().toUpperCase()
+        HeroRank rank = HeroRank.valueOf(
+                json.get("rank").getAsString().toUpperCase()
         );
 
         HeroNature nature = HeroNature.valueOf(
@@ -70,7 +70,7 @@ public class HeroLoader extends SimpleJsonResourceReloadListener {
                 name,
                 description,
                 heroClass,
-                rarity,
+                rank,
                 nature,
                 model,
                 texture,

@@ -42,7 +42,7 @@ public class RitualCoreBlock extends Block {
         if (MultiblockValidator.isValid(level, pos)) {
             performRitual(player, level, pos);
         } else {
-            player.sendSystemMessage(Component.literal("§cEstrutura inválida."));
+            player.sendSystemMessage(Component.literal("§cThe structure is incomplete and cannot sustain the ritual."));
         }
 
         return InteractionResult.SUCCESS;
@@ -59,7 +59,7 @@ public class RitualCoreBlock extends Block {
     }
 
     public void performRitual(final Player player, final Level level, final BlockPos pos) {
-        player.sendSystemMessage(Component.literal("§aRitual válido!"));
+        player.sendSystemMessage(Component.literal("§aYou have formed a contract with a hero."));
 
         level.playSound(null, pos,
                 net.minecraft.sounds.SoundEvents.ENCHANTMENT_TABLE_USE,

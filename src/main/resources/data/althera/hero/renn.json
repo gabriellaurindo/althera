@@ -2,7 +2,7 @@
   "name": "Renn",
   "description": "A rookie knight seeking glory.",
   "class": "SABER",
-  "rarity": "D",
+  "rank": "D",
   "nature": "COMMON",
   "model": "althera:geo/renn.geo.json",
   "texture": "althera:textures/entity/renn.png",

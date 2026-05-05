@@ -2,7 +2,7 @@
   "name": "Arden",
   "description": "A disciplined swordsman of the old order.",
   "class": "SABER",
-  "rarity": "C",
+  "rank": "C",
   "nature": "COMMON",
   "model": "althera:geo/arden.geo.json",
   "texture": "althera:textures/entity/arden.png",

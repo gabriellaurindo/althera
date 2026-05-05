@@ -2,7 +2,7 @@
   "name": "Mira",
   "description": "A mystic who bends reality.",
   "class": "CASTER",
-  "rarity": "B",
+  "rank": "B",
   "nature": "COMMON",
   "model": "althera:geo/mira.geo.json",
   "texture": "althera:textures/entity/mira.png",

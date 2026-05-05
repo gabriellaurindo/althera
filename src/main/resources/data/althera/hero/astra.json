@@ -2,7 +2,7 @@
   "name": "Astra",
   "description": "An archer who never misses.",
   "class": "ARCHER",
-  "rarity": "EX",
+  "rank": "EX",
   "nature": "COMMON",
   "model": "althera:geo/astra.geo.json",
   "texture": "althera:textures/entity/astra.png",

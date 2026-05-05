@@ -2,7 +2,7 @@
   "name": "Grom",
   "description": "A veteran defender.",
   "class": "SHIELDER",
-  "rarity": "C",
+  "rank": "C",
   "nature": "COMMON",
   "model": "althera:geo/grom.geo.json",
   "texture": "althera:textures/entity/grom.png",

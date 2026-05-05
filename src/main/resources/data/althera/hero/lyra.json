@@ -2,7 +2,7 @@
   "name": "Lyra",
   "description": "A master of long-range precision.",
   "class": "ARCHER",
-  "rarity": "A",
+  "rank": "A",
   "nature": "COMMON",
   "model": "althera:geo/lyra.geo.json",
   "texture": "althera:textures/entity/lyra.png",

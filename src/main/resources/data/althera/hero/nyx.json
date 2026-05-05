@@ -2,7 +2,7 @@
   "name": "Nyx",
   "description": "A master of forbidden magic.",
   "class": "CASTER",
-  "rarity": "EX",
+  "rank": "EX",
   "nature": "COMMON",
   "model": "althera:geo/nyx.geo.json",
   "texture": "althera:textures/entity/nyx.png",

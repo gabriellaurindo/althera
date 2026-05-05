@@ -149,16 +149,16 @@ public class HeroScreen extends Screen {
                 0xFFFFFF
         );
 
-        // Raridade
+        // Rank
         gui.drawString(this.font,
-                "Rarity",
+                "Rank",
                 textX,
                 textY + 98,
                 0xAA55FF // vermelho
         );
 
         gui.drawString(this.font,
-                heroData.getHeroDefinition().getRarity().getDisplayName(),
+                heroData.getHeroDefinition().getRank().getDisplayName(),
                 textX,
                 textY + 110,
                 0xFFFFFF

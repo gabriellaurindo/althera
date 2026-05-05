@@ -52,8 +52,8 @@ public class HeroStatsSystem {
         // Class scaling
         result *= def.getHeroClass().getHealthMultiplier();
 
-        // Rarity scaling (HP-focused)
-        result *= def.getRarity().getHealthMultiplier();
+        // Rank scaling (HP-focused)
+        result *= def.getRank().getHealthMultiplier();
 
         // Nature scaling (global)
         result *= def.getNature().getGlobalMultiplier();
@@ -73,8 +73,8 @@ public class HeroStatsSystem {
         // Class scaling
         result *= def.getHeroClass().getAttackMultiplier();
 
-        // Rarity scaling (lighter impact than HP)
-        result *= getRarityAttackScaling(def);
+        // Rank scaling (lighter impact than HP)
+        result *= getRankAttackScaling(def);
 
         // Nature scaling
         result *= def.getNature().getGlobalMultiplier();
@@ -94,8 +94,8 @@ public class HeroStatsSystem {
 //        // Class scaling
 //        result *= def.getHeroClass().getArmorMultiplier();
 //
-//        // Rarity scaling (moderate)
-//        result *= getRarityArmorScaling(def);
+//        // Rank scaling (moderate)
+//        result *= getRankArmorScaling(def);
 //
 //        // Nature scaling
 //        result *= def.getNature().getGlobalMultiplier();
@@ -111,12 +111,12 @@ public class HeroStatsSystem {
     // INTERNAL SCALING HELPERS
     // =========================
 
-    private static double getRarityAttackScaling(HeroDefinition def) {
-        return lerp(def.getRarity().getHealthMultiplier(), 0.6f);
+    private static double getRankAttackScaling(HeroDefinition def) {
+        return lerp(def.getRank().getHealthMultiplier(), 0.6f);
     }
 
-//    private static double getRarityArmorScaling(HeroDefinition def) {
-//        return lerp(def.getRarity().getHealthMultiplier(), 0.5f);
+//    private static double getRankArmorScaling(HeroDefinition def) {
+//        return lerp(def.getRank().getHealthMultiplier(), 0.5f);
 //    }
 
     private static double lerp(double value, double factor) {

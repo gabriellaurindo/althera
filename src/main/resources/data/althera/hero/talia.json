@@ -2,7 +2,7 @@
   "name": "Talia",
   "description": "A hunter of the deep woods.",
   "class": "ARCHER",
-  "rarity": "C",
+  "rank": "C",
   "nature": "COMMON",
   "model": "althera:geo/talia.geo.json",
   "texture": "althera:textures/entity/talia.png",

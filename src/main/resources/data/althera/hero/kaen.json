@@ -2,7 +2,7 @@
   "name": "Kaen",
   "description": "A wandering swordsman.",
   "class": "SABER",
-  "rarity": "B",
+  "rank": "B",
   "nature": "COMMON",
   "model": "althera:geo/kaen.geo.json",
   "texture": "althera:textures/entity/kaen.png",

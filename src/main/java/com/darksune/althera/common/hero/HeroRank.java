@@ -1,6 +1,6 @@
 package com.darksune.althera.common.hero;
 
-public enum HeroRarity {
+public enum HeroRank {
 
     F("F", 0.7f, 40f),
     E("E", 0.8f, 25f),
@@ -17,7 +17,7 @@ public enum HeroRarity {
     // Chance in percentage (0–100)
     private final float dropChance;
 
-    HeroRarity(String displayName, float healthMultiplier, float dropChance) {
+    HeroRank(String displayName, float healthMultiplier, float dropChance) {
         this.displayName = displayName;
         this.healthMultiplier = healthMultiplier;
         this.dropChance = dropChance;

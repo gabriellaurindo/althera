@@ -2,7 +2,7 @@
   "name": "Valen",
   "description": "A legendary duelist.",
   "class": "SABER",
-  "rarity": "S",
+  "rank": "S",
   "nature": "COMMON",
   "model": "althera:geo/valen.geo.json",
   "texture": "althera:textures/entity/valen.png",

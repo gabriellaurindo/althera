@@ -2,7 +2,7 @@
   "name": "Pip",
   "description": "A beginner archer.",
   "class": "ARCHER",
-  "rarity": "D",
+  "rank": "D",
   "nature": "COMMON",
   "model": "althera:geo/pip.geo.json",
   "texture": "althera:textures/entity/pip.png",
