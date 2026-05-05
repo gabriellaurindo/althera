@@ -10,19 +10,14 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
 
 public class HeroScreen extends Screen {
-
-    private static final ResourceLocation BACKGROUND =
-            ResourceLocation.fromNamespaceAndPath("minecraft", "textures/gui/demo_background.png");
 
     private static final int GUI_WIDTH = 176;
     private static final int GUI_HEIGHT = 166;
 
     private LivingEntity previewEntity;
-
     private float tickAccumulator = 0;
 
     public HeroScreen() {
@@ -40,8 +35,8 @@ public class HeroScreen extends Screen {
     public void render(GuiGraphics gui, int mouseX, int mouseY, float partialTick) {
         final Minecraft mc = Minecraft.getInstance();
         final LivingEntity entity = this.previewEntity;
-        tickAccumulator += partialTick;
 
+        tickAccumulator += partialTick;
         while (tickAccumulator >= 1.0F) {
             entity.tickCount++;
             tickAccumulator -= 1.0F;
@@ -49,172 +44,194 @@ public class HeroScreen extends Screen {
 
         final HeroData heroData = HeroData.get(mc.player);
 
+        // Background overlay
         gui.fill(0, 0, this.width, this.height, 0x55000000);
 
         int x = (this.width - GUI_WIDTH) / 2;
         int y = (this.height - GUI_HEIGHT) / 2;
 
-        // Painel
-        gui.fill(x, y, x + GUI_WIDTH, y + GUI_HEIGHT, 0xFF2B2B2B);
-        gui.fill(x + 2, y + 2, x + GUI_WIDTH - 2, y + GUI_HEIGHT - 2, 0xFF3C3C3C);
+        // ===== PANEL (DEPTH) =====
+        gui.fill(x - 2, y - 2, x + GUI_WIDTH + 2, y + GUI_HEIGHT + 2, 0x88000000);
+        gui.fill(x, y, x + GUI_WIDTH, y + GUI_HEIGHT, 0xFF1E1E1E);
+        gui.fill(x + 2, y + 2, x + GUI_WIDTH - 2, y + GUI_HEIGHT - 2, 0xFF2A2A2A);
 
-        String title = "Status";
+        // ===== TITLE =====
+        String title = "STATUS";
         gui.drawString(this.font,
                 title,
                 this.width / 2 - this.font.width(title) / 2,
-                y + 6,
+                y + 8,
                 0xFFFFFF
         );
 
-        int textX = x + 10;     // margem esquerda do painel
-        int textY = y + 30;     // abaixo do título
+        gui.fill(this.width / 2 - 30, y + 18, this.width / 2 + 30, y + 19, 0xFF666666);
 
-
-
-        gui.drawString(this.font,
-                "Class",
-                textX,
-                textY - 24,
-                0xAA55FF // roxo
-        );
-
-        gui.drawString(this.font,
-                heroData.getHeroDefinition().getHeroClass().getDisplayName(),
-                textX,
-                textY - 12,
-                0xFFFFFF
-        );
-
-
-        // LEVEL
-        gui.drawString(this.font,
-                "Level",
-                textX,
-                textY + 2,
-                0x00FFAA
-        );
-
-        gui.drawString(this.font,
-                String.valueOf(heroData.getLevel()),
-                textX,
-                textY + 14,
-                0xFFFFFF
-        );
-
-        // XP
-        long currentXp = heroData.getXp();
-        long requiredXp = HeroProgressionSystem.getXpToNextLevel(heroData);
-
-        gui.drawString(this.font,
-                "XP",
-                textX,
-                textY + 26,
-                0x00AAFF
-        );
-
-        gui.drawString(this.font,
-                currentXp + " / " + requiredXp,
-                textX,
-                textY + 38,
-                0xFFFFFF
-        );
-
-        // Vida
-        gui.drawString(this.font,
-                "Health",
-                textX,
-                textY + 50,
-                0xFFD700 // dourado
-        );
-
-        gui.drawString(this.font,
-                (int) heroData.getHealth() + " / " + (int) HeroStatsSystem.getMaxHealth(heroData),
-                textX,
-                textY + 62,
-                0xFFFFFF
-        );
-
-        // Ataque
-        gui.drawString(this.font,
-                "Damage",
-                textX,
-                textY + 74,
-                0xFF6B6B // vermelho
-        );
-
-        gui.drawString(this.font,
-                String.format("%.1f", HeroStatsSystem.getAttack(heroData)),
-                textX,
-                textY + 86,
-                0xFFFFFF
-        );
-
-        // Rank
-        gui.drawString(this.font,
-                "Rank",
-                textX,
-                textY + 98,
-                0xAA55FF // vermelho
-        );
-
-        gui.drawString(this.font,
-                heroData.getHeroDefinition().getRank().getDisplayName(),
-                textX,
-                textY + 110,
-                0xFFFFFF
-        );
-
-        // Render da entidade
-        int entityX = x + GUI_WIDTH / 2;
-        int entityY = y + GUI_HEIGHT / 2;
+        // ===== ENTITY (LEFT) =====
+        int entityX = x + 45;
+        int entityY = y + 185; // moved DOWN
 
         InventoryScreen.renderEntityInInventoryFollowsMouse(
                 gui,
                 entityX - 25,
-                entityY - 50,
+                entityY - 150, // less aggressive top offset
                 entityX + 25,
-                entityY + 50,
-                32,
+                entityY,
+                35,
                 0.0F,
                 mouseX,
                 mouseY,
                 entity
         );
 
-        int max = HeroStatsSystem.getMaxInterventions();
-        int used = heroData.getInterventions();
-        int remaining = Math.max(0, max - used);
+        // ===== STATS (RIGHT) =====
+        int textX = x + 90;
+        int textY = y + 30;
+        int statWidth = 70;
 
-
-        int boxX = x + GUI_WIDTH - 50;
-        int boxY = y + 30;
-
-
-        gui.drawString(this.font,
-                "Saves",
-                boxX,
-                boxY,
-                0x55FF55
+        // CLASS
+        drawStat(gui,
+                "Class",
+                heroData.getHeroDefinition().getHeroClass().getDisplayName(),
+                textX,
+                textY,
+                statWidth
         );
 
-        for (int i = 0; i < max; i++) {
+        // RANK
+        drawStat(gui,
+                "Rank",
+                heroData.getHeroDefinition().getRank().getDisplayName(),
+                textX,
+                textY + 12,
+                statWidth
+        );
 
-            int yOffset = i * 12;
+        // Separator
+        drawSeparator(gui, x, textY + 22);
 
-            boolean active = i < remaining;
+        // LEVEL
+        drawStat(gui,
+                "Level",
+                String.valueOf(heroData.getLevel()),
+                textX,
+                textY + 30,
+                statWidth
+        );
 
-            int color = active ? 0xFF00FF00 : 0xFF555555; // verde ou cinza
+        // XP BAR
+        long currentXp = heroData.getXp();
+        long requiredXp = HeroProgressionSystem.getXpToNextLevel(heroData);
+        float xpProgress = (float) currentXp / (float) requiredXp;
 
-            gui.fill(
-                    boxX,
-                    boxY + yOffset + 12,
-                    boxX + 8,
-                    boxY + yOffset + 8 + 12,
-                    color
-            );
-        }
+        drawBar(gui,
+                textX,
+                textY + 45,
+                80,
+                6,
+                xpProgress,
+                0xFF00AAFF
+        );
+
+        gui.drawString(this.font,
+                currentXp + "/" + requiredXp,
+                textX,
+                textY + 55,
+                0xAAAAAA
+        );
+
+        // HEALTH BAR
+        float hpPercent = (float) ((float) heroData.getHealth() / HeroStatsSystem.getMaxHealth(heroData));
+
+        drawBar(gui,
+                textX,
+                textY + 70,
+                80,
+                6,
+                hpPercent,
+                0xFFFF5555
+        );
+
+        gui.drawString(this.font,
+                (int) heroData.getHealth() + "/" + (int) HeroStatsSystem.getMaxHealth(heroData),
+                textX,
+                textY + 80,
+                0xAAAAAA
+        );
+
+        // DAMAGE
+        drawStat(gui,
+                "Damage",
+                String.format("%.1f", HeroStatsSystem.getAttack(heroData)),
+                textX,
+                textY + 95,
+                statWidth
+        );
+
+        // ===== SAVES =====
+//        int max = HeroStatsSystem.getMaxInterventions();
+//        int used = heroData.getInterventions();
+//        int remaining = Math.max(0, max - used);
+//
+//        int boxX = x + GUI_WIDTH - 25; // slight adjustment
+//        int boxY = y + 70;             // move DOWN so it doesn't overlap class/rank
+//
+//        gui.drawString(this.font, "Saves", boxX - 2, boxY - 12, 0x55FF55);
+//
+//        int size = 12;
+//        int spacing = 4;
+//
+//        for (int i = 0; i < max; i++) {
+//            int yOffset = i * (size + spacing);
+//
+//            boolean active = i < remaining;
+//
+//            int outerColor = 0xFF1A1A1A; // border shadow
+//            float pulse = (float)(Math.sin((Minecraft.getInstance().level.getGameTime() + i * 5) * 0.2) * 0.5 + 0.5);
+//
+//            int glow = active ? (int)(pulse * 80) : 0;
+//
+//            int innerColor = active
+//                    ? (0xFF00FF88 + (glow << 8)) // subtle animated brightness
+//                    : 0xFF444444;
+//
+//            int x1 = boxX;
+//            int y1 = boxY + yOffset;
+//
+//            // Outer border (gives depth)
+//            gui.fill(x1 - 1, y1 - 1, x1 + size + 1, y1 + size + 1, outerColor);
+//
+//            // Inner fill
+//            gui.fill(x1, y1, x1 + size, y1 + size, innerColor);
+//
+//            // Highlight (top-left light effect)
+//            if (active) {
+//                gui.fill(x1 + 2, y1 + 2, x1 + size - 4, y1 + size - 6, 0x55FFFFFF);
+//            }
+//        }
+
+
 
         super.render(gui, mouseX, mouseY, partialTick);
+    }
+
+    // ===== HELPERS =====
+
+    private void drawStat(GuiGraphics gui, String label, String value, int x, int y, int width) {
+        gui.drawString(this.font, label, x, y, 0xAAAAAA);
+
+        int valueWidth = this.font.width(value);
+        gui.drawString(this.font, value, x + width - valueWidth, y, 0xFFFFFF);
+    }
+
+    private void drawBar(GuiGraphics gui, int x, int y, int width, int height, float progress, int color) {
+        progress = Math.max(0, Math.min(1, progress));
+
+        gui.fill(x, y, x + width, y + height, 0xFF333333);
+        gui.fill(x, y, x + (int)(width * progress), y + height, color);
+    }
+
+    private void drawSeparator(GuiGraphics gui, int x, int y) {
+        gui.fill(x + 8, y, x + GUI_WIDTH - 8, y + 1, 0xFF444444);
     }
 
     @Override
@@ -224,7 +241,7 @@ public class HeroScreen extends Screen {
 
     @Override
     public void renderBackground(GuiGraphics gui, int mouseX, int mouseY, float partialTick) {
-        // bloqueia blur
+        // no blur
     }
 
     @Override
