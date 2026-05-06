@@ -66,6 +66,31 @@ public class HeroScreen extends Screen {
 
         gui.fill(this.width / 2 - 30, y + 18, this.width / 2 + 30, y + 19, 0xFF666666);
 
+        // ===== HERO NAME =====
+        String heroName = heroData.getHeroDefinition().getName();
+
+        int nameCenterX = x + 45;
+        int nameY = y + 30;
+
+        // Label
+        String label = "Name:";
+        gui.drawString(
+                this.font,
+                label,
+                nameCenterX - this.font.width(label) / 2,
+                nameY,
+                0xAAAAAA
+        );
+
+        // Value
+        gui.drawString(
+                this.font,
+                heroName,
+                nameCenterX - this.font.width(heroName) / 2,
+                nameY + 12,
+                0xFFFFFF
+        );
+
         // ===== ENTITY (LEFT) =====
         int entityX = x + 45;
         int entityY = y + 185; // moved DOWN
