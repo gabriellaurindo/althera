@@ -5,7 +5,6 @@ import com.darksune.althera.common.attachment.HeroData;
 import com.darksune.althera.common.system.HeroStatsSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.LivingEntity;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.RenderGuiEvent;
@@ -30,33 +29,20 @@ public class SummonHudRenderer {
 
         if (mc.player == null || mc.level == null) return;
 
-        HeroData data = HeroData.get(mc.player);
+        final HeroData heroData = HeroData.get(mc.player);
 
-        // 🔹 find summon (same logic you already had)
-        LivingEntity summon = null;
-
-        if (data.getSummonUUID() != null) {
-            for (LivingEntity entity : mc.level.getEntitiesOfClass(
-                    LivingEntity.class,
-                    mc.player.getBoundingBox().inflate(48))) {
-
-                if (data.getSummonUUID().equals(entity.getUUID())) {
-                    summon = entity;
-                    break;
-                }
-            }
+        if (heroData.getHeroDefinition() == null) {
+            return;
         }
-
-        if (summon == null || !summon.isAlive()) return;
 
         int screenWidth = mc.getWindow().getGuiScaledWidth();
         int screenHeight = mc.getWindow().getGuiScaledHeight();
 
         int centerX = screenWidth / 2;
-        int centerY = screenHeight - 90;
+        int centerY = screenHeight - 84;
 
-        int width = 128;
-        int height = 85;
+        int width = 96;
+        int height = 64;
 
         int drawX = centerX - width / 2;
         int drawY = centerY - height / 2;
@@ -69,8 +55,8 @@ public class SummonHudRenderer {
         // =========================
         // HP
         // =========================
-        float hpPercent = summon.getMaxHealth() > 0
-                ? summon.getHealth() / summon.getMaxHealth()
+        float hpPercent = HeroStatsSystem.getMaxHealth(heroData) > 0
+                ? (float) (heroData.getHealth() / HeroStatsSystem.getMaxHealth(heroData))
                 : 0;
 
         int visibleHeight = Math.max(1, Math.round(height * hpPercent));
@@ -89,7 +75,7 @@ public class SummonHudRenderer {
         // SAVES (igual HP)
         // =========================
         int max = HeroStatsSystem.getMaxInterventions();
-        int remaining = Math.max(0, max - data.getInterventions());
+        int remaining = Math.max(0, max - heroData.getInterventions());
 
         float savePercent = max > 0 ? (float) remaining / max : 0;
 
