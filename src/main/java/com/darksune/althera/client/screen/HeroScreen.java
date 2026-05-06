@@ -129,7 +129,7 @@ public class HeroScreen extends Screen {
                 80,
                 6,
                 xpProgress,
-                0xFF00AAFF
+                0xFF00FF88
         );
 
         gui.drawString(this.font,
@@ -167,46 +167,30 @@ public class HeroScreen extends Screen {
                 statWidth
         );
 
-        // ===== SAVES =====
+//        // ===== SAVES =====
 //        int max = HeroStatsSystem.getMaxInterventions();
 //        int used = heroData.getInterventions();
 //        int remaining = Math.max(0, max - used);
 //
-//        int boxX = x + GUI_WIDTH - 25; // slight adjustment
-//        int boxY = y + 70;             // move DOWN so it doesn't overlap class/rank
+//        int startX = x + GUI_WIDTH - 70; // move left to fit horizontal layout
+//        int yPos = y + 140;
 //
-//        gui.drawString(this.font, "Saves", boxX - 2, boxY - 12, 0x55FF55);
+//        // Label
+//        gui.drawString(this.font, "Saves", startX, yPos - 12, 0xAAAAAA);
 //
-//        int size = 12;
+//        int size = 6;
 //        int spacing = 4;
 //
 //        for (int i = 0; i < max; i++) {
-//            int yOffset = i * (size + spacing);
+//
+//            int xPos = startX + i * (size + spacing);
 //
 //            boolean active = i < remaining;
 //
-//            int outerColor = 0xFF1A1A1A; // border shadow
-//            float pulse = (float)(Math.sin((Minecraft.getInstance().level.getGameTime() + i * 5) * 0.2) * 0.5 + 0.5);
+//            int color = active ? 0xFF00FF88 : 0xFF555555;
 //
-//            int glow = active ? (int)(pulse * 80) : 0;
-//
-//            int innerColor = active
-//                    ? (0xFF00FF88 + (glow << 8)) // subtle animated brightness
-//                    : 0xFF444444;
-//
-//            int x1 = boxX;
-//            int y1 = boxY + yOffset;
-//
-//            // Outer border (gives depth)
-//            gui.fill(x1 - 1, y1 - 1, x1 + size + 1, y1 + size + 1, outerColor);
-//
-//            // Inner fill
-//            gui.fill(x1, y1, x1 + size, y1 + size, innerColor);
-//
-//            // Highlight (top-left light effect)
-//            if (active) {
-//                gui.fill(x1 + 2, y1 + 2, x1 + size - 4, y1 + size - 6, 0x55FFFFFF);
-//            }
+//            // simple square (clean)
+//            gui.fill(xPos, yPos, xPos + size, yPos + size, color);
 //        }
 
 
