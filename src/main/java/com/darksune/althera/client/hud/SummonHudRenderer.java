@@ -53,7 +53,7 @@ public class SummonHudRenderer {
         int screenHeight = mc.getWindow().getGuiScaledHeight();
 
         int centerX = screenWidth / 2;
-        int centerY = screenHeight - 70; // 👈 moved up
+        int centerY = screenHeight - 90;
 
         int width = 128;
         int height = 85;
