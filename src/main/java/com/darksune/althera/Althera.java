@@ -13,6 +13,7 @@ import com.darksune.althera.common.system.HeroStatsSystem;
 import com.darksune.althera.common.system.HeroSummonSystem;
 import com.darksune.althera.config.AltheraConfig;
 import com.darksune.althera.network.SummonPayload;
+import com.darksune.althera.network.packet.ToggleHeroSettingPacket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
@@ -84,6 +85,11 @@ public final class Althera {
 
                     HeroSummonSystem.spawnSummon(player);
                 }
+        );
+        registrar.playToServer(
+                ToggleHeroSettingPacket.TYPE,
+                ToggleHeroSettingPacket.STREAM_CODEC,
+                ToggleHeroSettingPacket::handle
         );
     }
 
@@ -204,6 +210,10 @@ public final class Althera {
 
         final HeroData heroData = HeroData.get(player);
         if (heroData.getInterventions() >= HeroStatsSystem.getMaxInterventions()) {
+            return;
+        }
+
+        if (heroData.isSaveDisabled()) {
             return;
         }
 

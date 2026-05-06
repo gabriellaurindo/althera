@@ -23,6 +23,8 @@ public class HeroData {
     private UUID summonUUID = null;
     private int interventions = 0;
     private boolean defeated;
+    private boolean isHiddenHud = false;
+    private boolean isSaveDisabled = false;
     private ResourceLocation heroId = null;
 
     // =========================
@@ -81,6 +83,22 @@ public class HeroData {
         this.defeated = defeated;
     }
 
+    public boolean isHiddenHud() {
+        return isHiddenHud;
+    }
+
+    public void setHiddenHud(boolean hiddenHud) {
+        isHiddenHud = hiddenHud;
+    }
+
+    public boolean isSaveDisabled() {
+        return isSaveDisabled;
+    }
+
+    public void setSaveDisabled(boolean saveDisabled) {
+        isSaveDisabled = saveDisabled;
+    }
+
     public HeroDefinition getHeroDefinition() {
         return heroId != null ? HeroRegistry.get(heroId) : null;
     }
@@ -120,15 +138,21 @@ public class HeroData {
                             .forGetter(data -> data.interventions),
                     Codec.BOOL.optionalFieldOf("defeated", false)
                             .forGetter(data -> data.defeated),
+                    Codec.BOOL.optionalFieldOf("isHiddenHud", false)
+                            .forGetter(data -> data.isHiddenHud),
+                    Codec.BOOL.optionalFieldOf("isSaveDisabled", false)
+                            .forGetter(data -> data.isSaveDisabled),
                     Codec.STRING.optionalFieldOf("heroId", "")
                             .forGetter(data -> data.heroId != null ? data.heroId.toString() : "")
-            ).apply(instance, (level, xp, health, uuidStr, interventions, defeated, heroIdStr) -> {
+            ).apply(instance, (level, xp, health, uuidStr, interventions, defeated, isHiddenHud, isSaveDisabled, heroIdStr) -> {
                 HeroData data = new HeroData();
                 data.level = level;
                 data.xp = xp;
                 data.health = health;
                 data.interventions = interventions;
                 data.defeated = defeated;
+                data.isHiddenHud = isHiddenHud;
+                data.isSaveDisabled = isSaveDisabled;
 
                 if (!uuidStr.isEmpty()) {
                     data.summonUUID = UUID.fromString(uuidStr);
@@ -159,6 +183,8 @@ public class HeroData {
 
                 buf.writeInt(data.interventions);
                 buf.writeBoolean(data.defeated);
+                buf.writeBoolean(data.isHiddenHud);
+                buf.writeBoolean(data.isSaveDisabled);
 
                 buf.writeBoolean(data.heroId != null);
                 if (data.heroId != null) {
@@ -177,6 +203,8 @@ public class HeroData {
 
                 data.interventions = buf.readInt();
                 data.defeated = buf.readBoolean();
+                data.isHiddenHud = buf.readBoolean();
+                data.isSaveDisabled = buf.readBoolean();
 
                 if (buf.readBoolean()) {
                     data.heroId = buf.readResourceLocation();

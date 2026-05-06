@@ -6,6 +6,7 @@ import com.darksune.althera.common.attachment.HeroData;
 import com.darksune.althera.common.entity.AltheraEntities;
 import com.darksune.althera.common.system.HeroProgressionSystem;
 import com.darksune.althera.common.system.HeroStatsSystem;
+import com.darksune.althera.network.packet.ToggleHeroSettingPacket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
@@ -13,6 +14,7 @@ import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 public class HeroScreen extends Screen {
 
@@ -306,23 +308,96 @@ public class HeroScreen extends Screen {
 
     private void renderSettingsTab(GuiGraphics gui) {
 
+        final Minecraft mc = Minecraft.getInstance();
+
+        if (mc.player == null) {
+            return;
+        }
+
+        HeroData heroData = HeroData.get(mc.player);
+
         int x = (this.width - GUI_WIDTH) / 2;
         int y = (this.height - GUI_HEIGHT) / 2;
+
+        int startX = x + 16;
+        int startY = y + 38;
 
         gui.drawString(
                 this.font,
                 "Settings",
-                x + 10,
-                y + 35,
+                startX,
+                startY,
                 0xFFFFFF
         );
 
+        // =====================================
+        // HIDE HUD
+        // =====================================
+
+        int checkboxSize = 10;
+
+        int hideHudY = startY + 24;
+
+        // box
+        gui.fill(
+                startX,
+                hideHudY,
+                startX + checkboxSize,
+                hideHudY + checkboxSize,
+                0xFF444444
+        );
+
+        // checked
+        if (heroData.isHiddenHud()) {
+
+            gui.fill(
+                    startX + 2,
+                    hideHudY + 2,
+                    startX + checkboxSize - 2,
+                    hideHudY + checkboxSize - 2,
+                    0xFF00FF88
+            );
+        }
+
         gui.drawString(
                 this.font,
-                "- Future options here",
-                x + 10,
-                y + 50,
-                0xAAAAAA
+                "Hide HUD",
+                startX + 16,
+                hideHudY + 1,
+                0xFFFFFF
+        );
+
+        // =====================================
+        // DISABLE SAVES
+        // =====================================
+
+        int savesY = hideHudY + 18;
+
+        gui.fill(
+                startX,
+                savesY,
+                startX + checkboxSize,
+                savesY + checkboxSize,
+                0xFF444444
+        );
+
+        if (heroData.isSaveDisabled()) {
+
+            gui.fill(
+                    startX + 2,
+                    savesY + 2,
+                    startX + checkboxSize - 2,
+                    savesY + checkboxSize - 2,
+                    0xFFFF5555
+            );
+        }
+
+        gui.drawString(
+                this.font,
+                "Disable Saves",
+                startX + 16,
+                savesY + 1,
+                0xFFFFFF
         );
     }
 
@@ -389,8 +464,20 @@ public class HeroScreen extends Screen {
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
 
+        final Minecraft mc = Minecraft.getInstance();
+
+        if (mc.player == null) {
+            return false;
+        }
+
+        HeroData heroData = HeroData.get(mc.player);
+
         int x = (this.width - GUI_WIDTH) / 2;
         int y = (this.height - GUI_HEIGHT) / 2;
+
+        // =====================================
+        // GEAR BUTTON
+        // =====================================
 
         int gearX = x + GUI_WIDTH - 20;
         int gearY = y + 6;
@@ -405,6 +492,56 @@ public class HeroScreen extends Screen {
                     : Tab.STATUS;
 
             return true;
+        }
+
+        // =====================================
+        // SETTINGS CHECKBOXES
+        // =====================================
+
+        if (currentTab == Tab.SETTINGS) {
+
+            int startX = x + 16;
+            int startY = y + 38;
+
+            int checkboxSize = 10;
+
+            // ---------------------------------
+            // HIDE HUD
+            // ---------------------------------
+
+            int hideHudY = startY + 24;
+
+            if (mouseX >= startX &&
+                    mouseX <= startX + checkboxSize &&
+                    mouseY >= hideHudY &&
+                    mouseY <= hideHudY + checkboxSize) {
+
+                PacketDistributor.sendToServer(
+                        new ToggleHeroSettingPacket(
+                                ToggleHeroSettingPacket.Setting.HIDDEN_HUD
+                        )
+                );
+                return true;
+            }
+
+            // ---------------------------------
+            // DISABLE SAVES
+            // ---------------------------------
+
+            int savesY = hideHudY + 18;
+
+            if (mouseX >= startX &&
+                    mouseX <= startX + checkboxSize &&
+                    mouseY >= savesY &&
+                    mouseY <= savesY + checkboxSize) {
+
+                PacketDistributor.sendToServer(
+                        new ToggleHeroSettingPacket(
+                                ToggleHeroSettingPacket.Setting.SAVE_DISABLED
+                        )
+                );
+                return true;
+            }
         }
 
         return super.mouseClicked(mouseX, mouseY, button);

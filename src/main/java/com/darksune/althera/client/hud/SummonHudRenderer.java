@@ -31,7 +31,7 @@ public class SummonHudRenderer {
 
         final HeroData heroData = HeroData.get(mc.player);
 
-        if (heroData.getHeroDefinition() == null) {
+        if (heroData.isHiddenHud() || heroData.getHeroDefinition() == null) {
             return;
         }
 
