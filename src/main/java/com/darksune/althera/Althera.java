@@ -18,6 +18,11 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.neoforged.bus.api.IEventBus;
@@ -232,9 +237,58 @@ public final class Althera {
         heroData.incrementInterventions();
         heroData.sync(player);
 
+        Entity attacker = event.getSource().getEntity();
+
+        if (attacker instanceof Mob mob) {
+
+            // Force aggro onto summon
+            mob.setTarget(hero);
+
+            // Optional: clear current navigation briefly
+            mob.getNavigation().stop();
+        }
+
+        // Cancel original damage
         event.setCanceled(true);
-        //todo no futuro colocar uma animacao ou algo do genero pra entender que gastou um save
-        //player.invulnerableTime = 20;
+
+        // Small invulnerability window
+        player.invulnerableTime = 20;
+
+        // =====================================
+        // KNOCKBACK ATTACKER
+        // =====================================
+
+        if (attacker instanceof LivingEntity livingAttacker) {
+
+            double dx = livingAttacker.getX() - player.getX();
+            double dz = livingAttacker.getZ() - player.getZ();
+
+            double length = Math.sqrt(dx * dx + dz * dz);
+
+            if (length > 0.001D) {
+
+                dx /= length;
+                dz /= length;
+
+                // Push attacker backwards
+                livingAttacker.push(dx * 1.2D, 0.25D, dz * 1.2D);
+
+                livingAttacker.hurtMarked = true;
+            }
+        }
+
+        // =====================================
+        // SOUND
+        // =====================================
+
+        player.level().playSound(
+                null,
+                player.blockPosition(),
+                SoundEvents.SHIELD_BLOCK,
+                SoundSource.PLAYERS,
+                0.25F,
+                1.4F
+        );
     }
 
     @SubscribeEvent
