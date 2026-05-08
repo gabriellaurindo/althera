@@ -32,6 +32,7 @@ public class HeroModel extends GeoModel<HeroEntity> {
                 animatable.getHeroDefinition();
 
         if (definition == null || definition.getModel() == null) {
+
             return DEFAULT_MODEL;
         }
 
@@ -44,15 +45,53 @@ public class HeroModel extends GeoModel<HeroEntity> {
         final HeroDefinition definition =
                 animatable.getHeroDefinition();
 
-        if (definition == null || definition.getTexture() == null) {
+        // sem definition -> usa texture padrão
+        if (definition == null) {
             return DEFAULT_TEXTURE;
         }
 
-        return definition.getTexture();
+        // model custom sem texture custom
+        // evita UV quebrado
+        if (definition.getModel() != null
+                && definition.getTexture() == null) {
+
+            return null;
+        }
+
+        // texture custom
+        if (definition.getTexture() != null) {
+            return definition.getTexture();
+        }
+
+        // model padrão -> texture padrão
+        return DEFAULT_TEXTURE;
     }
 
     @Override
     public ResourceLocation getAnimationResource(HeroEntity animatable) {
+
+        final HeroDefinition definition =
+                animatable.getHeroDefinition();
+
+        // sem definition -> usa default completo
+        if (definition == null) {
+            return DEFAULT_ANIMATION;
+        }
+
+        // modelo custom sem animação custom
+        // deixa sem animação pra evitar bone mismatch
+        if (definition.getModel() != null
+                && definition.getAnimations() == null) {
+
+            return null;
+        }
+
+        // animação custom
+        if (definition.getAnimations() != null) {
+            return definition.getAnimations();
+        }
+
+        // modelo padrão -> animação padrão
         return DEFAULT_ANIMATION;
     }
 }

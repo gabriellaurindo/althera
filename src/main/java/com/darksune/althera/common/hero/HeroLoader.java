@@ -137,6 +137,16 @@ public class HeroLoader extends SimpleJsonResourceReloadListener {
             );
         }
 
+        ResourceLocation animations = null;
+
+        if (json.has("animations")
+                && !json.get("animations").isJsonNull()) {
+
+            animations = ResourceLocation.parse(
+                    json.get("animations").getAsString()
+            );
+        }
+
         String personality =
                 GsonHelper.getAsString(
                         json,
@@ -153,6 +163,7 @@ public class HeroLoader extends SimpleJsonResourceReloadListener {
                 nature,
                 model,
                 texture,
+                animations,
                 personality
         );
     }

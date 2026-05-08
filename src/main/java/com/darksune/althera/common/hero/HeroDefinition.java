@@ -15,6 +15,7 @@ public class HeroDefinition {
 
     private final ResourceLocation model;
     private final ResourceLocation texture;
+    private final ResourceLocation animations;
 
     private final String personality;
 
@@ -27,6 +28,7 @@ public class HeroDefinition {
             HeroNature nature,
             ResourceLocation model,
             ResourceLocation texture,
+            ResourceLocation animations,
             String personality
     ) {
         this.id = id;
@@ -37,6 +39,7 @@ public class HeroDefinition {
         this.nature = nature;
         this.model = model;
         this.texture = texture;
+        this.animations = animations;
         this.personality = personality;
     }
 
@@ -70,6 +73,10 @@ public class HeroDefinition {
 
     public ResourceLocation getTexture() {
         return texture;
+    }
+
+    public ResourceLocation getAnimations() {
+        return animations;
     }
 
     public String getPersonality() {

@@ -59,7 +59,18 @@ public class RitualCoreBlock extends Block {
     }
 
     public void performRitual(final Player player, final Level level, final BlockPos pos) {
-        player.sendSystemMessage(Component.literal("§aYou have formed a contract with a hero."));
+        final HeroDefinition heroDefinition = HeroRollSystem.rollHero();
+        player.sendSystemMessage(
+                Component.literal(
+                        "§aYou have formed a contract with §f"
+                                + heroDefinition.getName()
+                                + " §7["
+                                + heroDefinition.getHeroClass().name()
+                                + "] §6("
+                                + heroDefinition.getRank().name()
+                                + ")"
+                )
+        );
 
         level.playSound(null, pos,
                 net.minecraft.sounds.SoundEvents.ENCHANTMENT_TABLE_USE,
@@ -85,7 +96,6 @@ public class RitualCoreBlock extends Block {
         }
 
         final HeroData heroData = HeroData.get(player);
-        final HeroDefinition heroDefinition = HeroRollSystem.rollHero();
         heroData.setHero(heroDefinition.getId());
         heroData.setHealth(HeroStatsSystem.getMaxHealth(heroData));
         heroData.sync(player);
@@ -93,7 +103,7 @@ public class RitualCoreBlock extends Block {
         final HeroEntity summon = HeroSummonSystem.getSummon(player);
 
         if (summon != null) {
-            HeroStatsSystem.applyAttributes(summon, player);
+            summon.remove();
         }
     }
 }
