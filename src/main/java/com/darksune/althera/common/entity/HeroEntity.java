@@ -4,10 +4,16 @@ import com.darksune.althera.common.ai.goal.AssistOwnerGoal;
 import com.darksune.althera.common.ai.goal.ProtectOwnerGoal;
 import com.darksune.althera.common.attachment.HeroData;
 import com.darksune.althera.common.attachment.ManaData;
+import com.darksune.althera.common.hero.HeroDefinition;
+import com.darksune.althera.common.hero.HeroRegistry;
 import com.darksune.althera.common.system.HeroStatsSystem;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
@@ -41,9 +47,39 @@ import static com.darksune.althera.common.util.LightOrbUtil.habilitarEspirito;
 
 public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntity {
 
+    private static final EntityDataAccessor<String> HERO_ID =
+            SynchedEntityData.defineId(
+                    HeroEntity.class,
+                    EntityDataSerializers.STRING
+            );
+
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
 
     private UUID ownerUuid;
+
+    public void setHeroId(final ResourceLocation heroId) {
+        this.entityData.set(HERO_ID, heroId.toString());
+    }
+
+    public ResourceLocation getHeroId() {
+
+        String raw = this.entityData.get(HERO_ID);
+
+        if (raw.isEmpty()) {
+            return null;
+        }
+
+        return ResourceLocation.parse(raw);
+    }
+
+    public HeroDefinition getHeroDefinition() {
+
+        ResourceLocation id = getHeroId();
+
+        return id != null
+                ? HeroRegistry.get(id)
+                : null;
+    }
 
     boolean searchingForLand;
     protected final WaterBoundPathNavigation waterNavigation;
@@ -107,6 +143,13 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
         if (ownerUuid != null) {
             compound.putUUID("Owner", ownerUuid);
         }
+
+        if (getHeroId() != null) {
+            compound.putString(
+                    "HeroId",
+                    getHeroId().toString()
+            );
+        }
     }
 
     @Override
@@ -116,6 +159,21 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
         if (compound.hasUUID("Owner")) {
             ownerUuid = compound.getUUID("Owner");
         }
+
+        if (compound.contains("HeroId")) {
+            setHeroId(
+                    ResourceLocation.parse(
+                            compound.getString("HeroId")
+                    )
+            );
+        }
+    }
+
+    @Override
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+
+        builder.define(HERO_ID, "");
     }
 
     @Override
@@ -129,6 +187,16 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
         if (owner == null) return;
 
         final HeroData heroData = HeroData.get(owner);
+
+        final HeroDefinition definition = heroData.getHeroDefinition();
+
+        if (definition != null) {
+            ResourceLocation newId = definition.getId();
+
+            if (!newId.equals(this.getHeroId())) {
+                this.setHeroId(newId);
+            }
+        }
 
         // =========================
         // 🟣 REGEN / MANA (2s)
@@ -305,6 +373,12 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
 
     public static HeroEntity create(final Player player) {
         final HeroEntity hero = AltheraEntities.HERO.get().create(player.level());
+        final HeroData heroData = HeroData.get(player);
+        final HeroDefinition definition = heroData.getHeroDefinition();
+
+        if (definition != null) {
+            hero.setHeroId(definition.getId());
+        }
         HeroStatsSystem.applyAttributes(hero, player);
         return hero;
     }

@@ -1,0 +1,10 @@
+{
+  "name": "Aria",
+  "description": "A graceful swordswoman of the old order, known for her unwavering discipline and elegant blade technique.",
+  "class": "SABER",
+  "rank": "EX",
+  "nature": "COMMON",
+  "model": "althera:geo/entity/hero/aria.geo.json",
+  "texture": "althera:textures/entity/hero/aria.png",
+  "personality": "Honorable and calm"
+}
