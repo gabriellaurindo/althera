@@ -4,7 +4,5 @@
   "class": "SHIELDER",
   "rank": "B",
   "nature": "COMMON",
-  "model": "althera:geo/brakka.geo.json",
-  "texture": "althera:textures/entity/brakka.png",
   "personality": "Protective and stubborn"
 }

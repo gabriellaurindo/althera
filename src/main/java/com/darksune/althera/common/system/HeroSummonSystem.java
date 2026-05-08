@@ -37,10 +37,12 @@ public class HeroSummonSystem {
         final HeroData heroData = HeroData.get(player);
 
         if (heroData.getHeroDefinition() == null) {
-            player.sendSystemMessage(
-                    Component.literal("§eYou don't have a summon.")
-            );
-            return null;
+            heroData.setHero(HeroRollSystem.rollHero().getId());
+            heroData.setHealth(HeroStatsSystem.getMaxHealth(heroData));
+//            player.sendSystemMessage(
+//                    Component.literal("§eYou don't have a summon.")
+//            );
+//            return null;
         }
 
         if (heroData.getSummonUUID() != null) {

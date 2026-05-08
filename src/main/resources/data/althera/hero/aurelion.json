@@ -4,7 +4,5 @@
   "class": "CASTER",
   "rank": "EX",
   "nature": "DIVINE",
-  "model": "althera:geo/aurelion.geo.json",
-  "texture": "althera:textures/entity/aurelion.png",
   "personality": "Omniscient and indifferent"
 }

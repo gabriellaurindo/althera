@@ -4,7 +4,5 @@
   "class": "LANCER",
   "rank": "A",
   "nature": "COMMON",
-  "model": "althera:geo/varek.geo.json",
-  "texture": "althera:textures/entity/varek.png",
   "personality": "Aggressive and fearless"
 }

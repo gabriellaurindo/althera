@@ -4,7 +4,5 @@
   "class": "ARCHER",
   "rank": "A",
   "nature": "COMMON",
-  "model": "althera:geo/lyra.geo.json",
-  "texture": "althera:textures/entity/lyra.png",
   "personality": "Sharp and confident"
 }

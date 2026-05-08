@@ -4,7 +4,5 @@
   "class": "SHIELDER",
   "rank": "A",
   "nature": "COMMON",
-  "model": "althera:geo/dorn.geo.json",
-  "texture": "althera:textures/entity/dorn.png",
   "personality": "Loyal and unyielding"
 }

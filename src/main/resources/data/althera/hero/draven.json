@@ -4,7 +4,5 @@
   "class": "LANCER",
   "rank": "S",
   "nature": "COMMON",
-  "model": "althera:geo/draven.geo.json",
-  "texture": "althera:textures/entity/draven.png",
   "personality": "Dominant and ruthless"
 }

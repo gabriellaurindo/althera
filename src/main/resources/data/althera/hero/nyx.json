@@ -4,7 +4,5 @@
   "class": "CASTER",
   "rank": "EX",
   "nature": "COMMON",
-  "model": "althera:geo/nyx.geo.json",
-  "texture": "althera:textures/entity/nyx.png",
   "personality": "Dark and enigmatic"
 }

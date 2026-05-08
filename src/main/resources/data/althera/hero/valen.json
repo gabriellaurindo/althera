@@ -4,7 +4,5 @@
   "class": "SABER",
   "rank": "S",
   "nature": "COMMON",
-  "model": "althera:geo/valen.geo.json",
-  "texture": "althera:textures/entity/valen.png",
   "personality": "Proud and precise"
 }

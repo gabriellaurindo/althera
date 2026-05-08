@@ -4,7 +4,5 @@
   "class": "ARCHER",
   "rank": "C",
   "nature": "COMMON",
-  "model": "althera:geo/talia.geo.json",
-  "texture": "althera:textures/entity/talia.png",
   "personality": "Quiet and observant"
 }

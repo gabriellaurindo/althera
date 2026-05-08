@@ -4,7 +4,5 @@
   "class": "CASTER",
   "rank": "S",
   "nature": "COMMON",
-  "model": "althera:geo/eldrin.geo.json",
-  "texture": "althera:textures/entity/eldrin.png",
   "personality": "Wise and distant"
 }

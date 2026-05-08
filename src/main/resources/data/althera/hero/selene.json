@@ -4,7 +4,5 @@
   "class": "CASTER",
   "rank": "A",
   "nature": "COMMON",
-  "model": "althera:geo/selene.geo.json",
-  "texture": "althera:textures/entity/selene.png",
   "personality": "Elegant and mysterious"
 }

@@ -5,6 +5,7 @@ import com.darksune.althera.common.hero.HeroDefinition;
 import com.darksune.althera.common.hero.HeroRank;
 import com.darksune.althera.common.hero.HeroRegistry;
 import com.darksune.althera.common.system.HeroRollSystem;
+import com.darksune.althera.common.system.HeroStatsSystem;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -56,6 +57,7 @@ public class HeroCommand {
 
         HeroData data = HeroData.get(player);
         data.setHero(def.getId());
+        data.setHealth(HeroStatsSystem.getMaxHealth(data));
         data.sync(player);
 
         source.sendSuccess(() -> Component.literal("§aRandom hero assigned."), false);
@@ -82,6 +84,7 @@ public class HeroCommand {
 
         HeroData data = HeroData.get(player);
         data.setHero(def.getId());
+        data.setHealth(HeroStatsSystem.getMaxHealth(data));
         data.sync(player);
 
         source.sendSuccess(() -> Component.literal("§dDivine hero granted."), false);
@@ -116,6 +119,7 @@ public class HeroCommand {
 
         HeroData data = HeroData.get(player);
         data.setHero(def.getId());
+        data.setHealth(HeroStatsSystem.getMaxHealth(data));
         data.sync(player);
 
         source.sendSuccess(() -> Component.literal("§aHero granted (" + rank + ")"), false);

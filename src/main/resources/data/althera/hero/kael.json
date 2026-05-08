@@ -4,7 +4,5 @@
   "class": "LANCER",
   "rank": "B",
   "nature": "COMMON",
-  "model": "althera:geo/kael.geo.json",
-  "texture": "althera:textures/entity/kael.png",
   "personality": "Focused and silent"
 }

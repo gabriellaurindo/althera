@@ -4,7 +4,5 @@
   "class": "SABER",
   "rank": "D",
   "nature": "COMMON",
-  "model": "althera:geo/renn.geo.json",
-  "texture": "althera:textures/entity/renn.png",
   "personality": "Brave but naive"
 }

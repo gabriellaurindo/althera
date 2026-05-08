@@ -4,7 +4,5 @@
   "class": "SHIELDER",
   "rank": "C",
   "nature": "COMMON",
-  "model": "althera:geo/grom.geo.json",
-  "texture": "althera:textures/entity/grom.png",
   "personality": "Gruff but reliable"
 }

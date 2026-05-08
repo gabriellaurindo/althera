@@ -4,7 +4,5 @@
   "class": "SABER",
   "rank": "C",
   "nature": "COMMON",
-  "model": "althera:geo/arden.geo.json",
-  "texture": "althera:textures/entity/arden.png",
   "personality": "Honorable and calm"
 }

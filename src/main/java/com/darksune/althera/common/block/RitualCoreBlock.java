@@ -87,6 +87,7 @@ public class RitualCoreBlock extends Block {
         final HeroData heroData = HeroData.get(player);
         final HeroDefinition heroDefinition = HeroRollSystem.rollHero();
         heroData.setHero(heroDefinition.getId());
+        heroData.setHealth(HeroStatsSystem.getMaxHealth(heroData));
         heroData.sync(player);
 
         final HeroEntity summon = HeroSummonSystem.getSummon(player);

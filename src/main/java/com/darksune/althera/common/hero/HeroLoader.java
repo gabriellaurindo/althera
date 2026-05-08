@@ -6,6 +6,7 @@ import com.google.gson.JsonObject;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
+import net.minecraft.util.GsonHelper;
 import net.minecraft.util.profiling.ProfilerFiller;
 
 import java.util.Map;
@@ -19,12 +20,19 @@ public class HeroLoader extends SimpleJsonResourceReloadListener {
     }
 
     @Override
-    protected Map<ResourceLocation, JsonElement> prepare(ResourceManager resourceManager, ProfilerFiller profiler) {
+    protected Map<ResourceLocation, JsonElement> prepare(
+            ResourceManager resourceManager,
+            ProfilerFiller profiler
+    ) {
         return super.prepare(resourceManager, profiler);
     }
 
     @Override
-    protected void apply(Map<ResourceLocation, JsonElement> map, ResourceManager resourceManager, ProfilerFiller profiler) {
+    protected void apply(
+            Map<ResourceLocation, JsonElement> map,
+            ResourceManager resourceManager,
+            ProfilerFiller profiler
+    ) {
 
         HeroRegistry.clear();
 
@@ -37,33 +45,104 @@ public class HeroLoader extends SimpleJsonResourceReloadListener {
 
         for (Map.Entry<ResourceLocation, JsonElement> entry : map.entrySet()) {
 
-            ResourceLocation id = entry.getKey();
-            JsonObject json = entry.getValue().getAsJsonObject();
+            try {
 
-            HeroDefinition hero = parseHero(id, json);
-            HeroRegistry.register(hero);
+                ResourceLocation id = entry.getKey();
+                JsonObject json = entry.getValue().getAsJsonObject();
+
+                HeroDefinition hero = parseHero(id, json);
+
+                HeroRegistry.register(hero);
+
+                System.out.println("Loaded hero: " + id);
+
+            } catch (Exception e) {
+
+                System.err.println(
+                        "Failed to load hero: " + entry.getKey()
+                );
+
+                e.printStackTrace();
+            }
         }
     }
 
-    private HeroDefinition parseHero(ResourceLocation id, JsonObject json) {
+    private HeroDefinition parseHero(
+            ResourceLocation id,
+            JsonObject json
+    ) {
 
-        String name = json.get("name").getAsString();
-        String description = json.get("description").getAsString();
+        String name =
+                GsonHelper.getAsString(
+                        json,
+                        "name",
+                        "Unknown Hero"
+                );
 
-        HeroClass heroClass = HeroClass.valueOf(json.get("class").getAsString().toUpperCase());
+        String description =
+                GsonHelper.getAsString(
+                        json,
+                        "description",
+                        ""
+                );
 
-        HeroRank rank = HeroRank.valueOf(
-                json.get("rank").getAsString().toUpperCase()
-        );
+        HeroClass heroClass =
+                HeroClass.valueOf(
+                        GsonHelper.getAsString(
+                                json,
+                                "class",
+                                "SABER"
+                        ).toUpperCase()
+                );
 
-        HeroNature nature = HeroNature.valueOf(
-                json.get("nature").getAsString().toUpperCase()
-        );
+        HeroRank rank =
+                HeroRank.valueOf(
+                        GsonHelper.getAsString(
+                                json,
+                                "rank",
+                                "COMMON"
+                        ).toUpperCase()
+                );
 
-        ResourceLocation model = ResourceLocation.parse(json.get("model").getAsString());
-        ResourceLocation texture = ResourceLocation.parse(json.get("texture").getAsString());
+        HeroNature nature =
+                HeroNature.valueOf(
+                        GsonHelper.getAsString(
+                                json,
+                                "nature",
+                                "COMMON"
+                        ).toUpperCase()
+                );
 
-        String personality = json.get("personality").getAsString();
+        // =========================
+        // OPTIONAL
+        // =========================
+
+        ResourceLocation model = null;
+
+        if (json.has("model")
+                && !json.get("model").isJsonNull()) {
+
+            model = ResourceLocation.parse(
+                    json.get("model").getAsString()
+            );
+        }
+
+        ResourceLocation texture = null;
+
+        if (json.has("texture")
+                && !json.get("texture").isJsonNull()) {
+
+            texture = ResourceLocation.parse(
+                    json.get("texture").getAsString()
+            );
+        }
+
+        String personality =
+                GsonHelper.getAsString(
+                        json,
+                        "personality",
+                        ""
+                );
 
         return new HeroDefinition(
                 id,
