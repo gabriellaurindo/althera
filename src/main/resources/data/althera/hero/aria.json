@@ -6,5 +6,6 @@
   "nature": "COMMON",
   "model": "althera:geo/entity/hero/aria.geo.json",
   "texture": "althera:textures/entity/hero/aria.png",
+  "animations": "althera:animations/entity/hero/aria.animation.json",
   "personality": "Honorable and calm"
 }

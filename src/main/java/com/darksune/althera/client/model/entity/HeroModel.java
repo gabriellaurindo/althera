@@ -22,7 +22,7 @@ public class HeroModel extends GeoModel<HeroEntity> {
     private static final ResourceLocation DEFAULT_ANIMATION =
             ResourceLocation.fromNamespaceAndPath(
                     "althera",
-                    "animations/hero/hero.animation.json"
+                    "animations/entity/hero/hero.animation.json"
             );
 
     @Override

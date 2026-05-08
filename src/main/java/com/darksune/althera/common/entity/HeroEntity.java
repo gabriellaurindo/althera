@@ -118,19 +118,46 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
+
         controllers.add(
                 new AnimationController<>(
                         this,
                         "controller",
                         0,
                         state -> {
-                            if (state.isMoving()) {
+
+                            // =========================
+                            // ATTACK
+                            // =========================
+
+                            if (this.swinging || this.swingTime > 0) {
+
                                 return state.setAndContinue(
-                                        RawAnimation.begin().thenLoop("walk")
+                                        RawAnimation.begin()
+                                                .thenPlay("attack")
                                 );
                             }
 
-                            return state.setAndContinue(RawAnimation.begin().thenLoop("idle"));
+                            // =========================
+                            // WALK
+                            // =========================
+
+                            if (state.isMoving()) {
+
+                                return state.setAndContinue(
+                                        RawAnimation.begin()
+                                                .thenLoop("walk")
+                                );
+                            }
+
+                            // =========================
+                            // IDLE
+                            // =========================
+
+                            return state.setAndContinue(
+                                    RawAnimation.begin()
+                                            .thenLoop("idle")
+                            );
                         }
                 )
         );
