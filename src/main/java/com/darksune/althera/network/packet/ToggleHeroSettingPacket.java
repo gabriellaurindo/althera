@@ -1,5 +1,6 @@
 package com.darksune.althera.network.packet;
 
+import com.darksune.althera.Althera;
 import com.darksune.althera.common.attachment.HeroData;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
@@ -13,7 +14,7 @@ public record ToggleHeroSettingPacket(Setting setting) implements CustomPacketPa
     public static final CustomPacketPayload.Type<ToggleHeroSettingPacket> TYPE =
             new CustomPacketPayload.Type<>(
                     ResourceLocation.fromNamespaceAndPath(
-                            "althera",
+                            Althera.MOD_ID,
                             "toggle_hero_setting"
                     )
             );
