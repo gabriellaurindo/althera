@@ -11,13 +11,14 @@ public class HeroStatsSystem {
 
     private final static int BASE_HEALTH = 19;
     private final static double BASE_ATTACK = 1.125;
+    private final static double BASE_ARMOR = 2.0;
 
     public static void applyAttributes(final HeroEntity hero, final Player player) {
         final HeroData heroData = HeroData.get(player);
 
         var maxHealthAttr = hero.getAttribute(Attributes.MAX_HEALTH);
         var attackAttr = hero.getAttribute(Attributes.ATTACK_DAMAGE);
-//        var armorAttr = hero.getAttribute(Attributes.ARMOR);
+        var armorAttr = hero.getAttribute(Attributes.ARMOR);
 
         if (maxHealthAttr != null) {
             maxHealthAttr.setBaseValue(getMaxHealth(heroData));
@@ -27,9 +28,9 @@ public class HeroStatsSystem {
             attackAttr.setBaseValue(getAttack(heroData));
         }
 
-//        if (armorAttr != null) {
-//            armorAttr.setBaseValue(getArmor(heroData));
-//        }
+        if (armorAttr != null) {
+            armorAttr.setBaseValue(getArmor(heroData));
+        }
 
         // temp name
         if (heroData.getHeroDefinition() != null) {
@@ -82,26 +83,26 @@ public class HeroStatsSystem {
         return result;
     }
 
-//    public static double getArmor(final HeroData data) {
-//        HeroDefinition def = data.getHeroDefinition();
-//
-//        double base = 2.0; // you can tune this
-//
-//        if (def == null) return base;
-//
-//        double result = base;
-//
-//        // Class scaling
-//        result *= def.getHeroClass().getArmorMultiplier();
-//
-//        // Rank scaling (moderate)
-//        result *= getRankArmorScaling(def);
-//
-//        // Nature scaling
-//        result *= def.getNature().getGlobalMultiplier();
-//
-//        return result;
-//    }
+    public static double getArmor(final HeroData data) {
+        HeroDefinition def = data.getHeroDefinition();
+
+        double base = BASE_ARMOR;
+
+        if (def == null) return base;
+
+        double result = base;
+
+        // Class scaling
+        result *= def.getHeroClass().getArmorMultiplier();
+
+        // Rank scaling (moderate)
+        result *= getRankArmorScaling(def);
+
+        // Nature scaling
+        result *= def.getNature().getGlobalMultiplier();
+
+        return result;
+    }
 
     public static int getMaxInterventions() {
         return 3;
@@ -115,9 +116,9 @@ public class HeroStatsSystem {
         return lerp(def.getRank().getHealthMultiplier(), 0.6f);
     }
 
-//    private static double getRankArmorScaling(HeroDefinition def) {
-//        return lerp(def.getRank().getHealthMultiplier(), 0.5f);
-//    }
+    private static double getRankArmorScaling(HeroDefinition def) {
+        return lerp(def.getRank().getHealthMultiplier(), 0.5f);
+    }
 
     private static double lerp(double value, double factor) {
         return 1.0 + (value - 1.0) * factor;
