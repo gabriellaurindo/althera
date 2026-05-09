@@ -1,6 +1,7 @@
 package com.darksune.althera.common.entity;
 
 import com.darksune.althera.common.ai.goal.AssistOwnerGoal;
+import com.darksune.althera.common.ai.goal.FollowOwnerGoal;
 import com.darksune.althera.common.ai.goal.HeroMeleeAttackGoal;
 import com.darksune.althera.common.ai.goal.ProtectOwnerGoal;
 import com.darksune.althera.common.attachment.HeroData;
@@ -276,7 +277,8 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
 
         this.goalSelector.addGoal(1, new HeroEntitySwimUpGoal(this, 1.0, this.level().getSeaLevel()));
         this.goalSelector.addGoal(2, new HeroMeleeAttackGoal(this, 1.2D, true));
-        this.goalSelector.addGoal(3, new RandomLookAroundGoal(this));
+        this.goalSelector.addGoal(3, new FollowOwnerGoal(this, 1.1D, 5F, 2F));
+        this.goalSelector.addGoal(4, new RandomLookAroundGoal(this));
 
         this.targetSelector.addGoal(1, new HurtByTargetGoal(this));
         this.targetSelector.addGoal(2,
