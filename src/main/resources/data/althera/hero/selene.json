@@ -1,0 +1,8 @@
+{
+  "name": "Selene",
+  "description": "A moon-bound sorceress.",
+  "class": "CASTER",
+  "rank": "A",
+  "nature": "COMMON",
+  "personality": "Elegant and mysterious"
+}

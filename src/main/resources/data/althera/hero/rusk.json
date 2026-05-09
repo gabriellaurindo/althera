@@ -1,0 +1,8 @@
+{
+  "name": "Rusk",
+  "description": "A mercenary lancer.",
+  "class": "LANCER",
+  "rank": "C",
+  "nature": "COMMON",
+  "personality": "Pragmatic and cold"
+}

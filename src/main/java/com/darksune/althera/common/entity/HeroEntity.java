@@ -1,13 +1,21 @@
 package com.darksune.althera.common.entity;
 
 import com.darksune.althera.common.ai.goal.AssistOwnerGoal;
+import com.darksune.althera.common.ai.goal.FollowOwnerGoal;
+import com.darksune.althera.common.ai.goal.HeroMeleeAttackGoal;
 import com.darksune.althera.common.ai.goal.ProtectOwnerGoal;
 import com.darksune.althera.common.attachment.HeroData;
 import com.darksune.althera.common.attachment.ManaData;
+import com.darksune.althera.common.hero.HeroDefinition;
+import com.darksune.althera.common.hero.HeroRegistry;
 import com.darksune.althera.common.system.HeroStatsSystem;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
@@ -16,7 +24,6 @@ import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.MoveControl;
 import net.minecraft.world.entity.ai.goal.Goal;
-import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
@@ -32,6 +39,7 @@ import software.bernie.geckolib.animatable.GeoEntity;
 import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.animation.AnimatableManager;
 import software.bernie.geckolib.animation.AnimationController;
+import software.bernie.geckolib.animation.PlayState;
 import software.bernie.geckolib.animation.RawAnimation;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
@@ -41,9 +49,20 @@ import static com.darksune.althera.common.util.LightOrbUtil.habilitarEspirito;
 
 public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntity {
 
+    private static final EntityDataAccessor<String> HERO_ID =
+            SynchedEntityData.defineId(
+                    HeroEntity.class,
+                    EntityDataSerializers.STRING
+            );
+    private static final EntityDataAccessor<Integer> ATTACK_TICKS =
+            SynchedEntityData.defineId(
+                    HeroEntity.class,
+                    EntityDataSerializers.INT
+            );
+
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
 
-    private UUID owner;
+    private UUID ownerUuid;
 
     boolean searchingForLand;
     protected final WaterBoundPathNavigation waterNavigation;
@@ -67,37 +86,101 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
         this.groundNavigation = new GroundPathNavigation(this, level);
     }
 
-    public void setOwner(final UUID owner) {
-        this.owner = owner;
+    public void setOwnerUuid(final UUID ownerUuid) {
+        this.ownerUuid = ownerUuid;
     }
 
-    //todo otimizar isso deppois buscando byuuid
-    //  return this.level().getPlayerByUUID(ownerUUID);
-    //fazer isso em todas as classes que tem owner
     public Player getOwner() {
-        if (owner == null) return null;
-        return level().getServer().getPlayerList().getPlayer(owner);
+        if (ownerUuid == null) return null;
+        return this.level().getPlayerByUUID(ownerUuid);
     }
 
     public boolean isOwnedBy(Player player) {
         return player.getUUID().equals(this.getOwnerUUID());
     }
 
+    public void setHeroId(final ResourceLocation heroId) {
+        this.entityData.set(HERO_ID, heroId.toString());
+    }
+
+    public ResourceLocation getHeroId() {
+
+        String raw = this.entityData.get(HERO_ID);
+
+        if (raw.isEmpty()) {
+            return null;
+        }
+
+        return ResourceLocation.parse(raw);
+    }
+
+    public HeroDefinition getHeroDefinition() {
+
+        ResourceLocation id = getHeroId();
+
+        return id != null
+                ? HeroRegistry.get(id)
+                : null;
+    }
+
+    public int getAttackAnimationTicks() {
+        return this.entityData.get(ATTACK_TICKS);
+    }
+
+    public void setAttackAnimationTicks(int ticks) {
+        this.entityData.set(ATTACK_TICKS, ticks);
+    }
+
+    public void triggerAttackAnimation() {
+        setAttackAnimationTicks(10);
+    }
+
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
+
+        // =========================
+        // MOVEMENT
+        // =========================
+
         controllers.add(
                 new AnimationController<>(
                         this,
-                        "controller",
-                        0,
+                        "movement",
+                        5,
                         state -> {
+
                             if (state.isMoving()) {
-                                return state.setAndContinue(
-                                        RawAnimation.begin().thenLoop("walk")
+                                state.getController().setAnimationSpeed(2D);
+                                return state.setAndContinue(RawAnimation.begin().thenLoop("walk")
                                 );
                             }
 
-                            return state.setAndContinue(RawAnimation.begin().thenLoop("idle"));
+                            state.getController().setAnimationSpeed(1D);
+                            return state.setAndContinue(RawAnimation.begin().thenLoop("idle")
+                            );
+                        }
+                )
+        );
+
+        // =========================
+        // ATTACK
+        // =========================
+
+        controllers.add(
+                new AnimationController<>(
+                        this,
+                        "attack",
+                        0,
+                        state -> {
+
+                            if (getAttackAnimationTicks() > 0) {
+                                state.getController().setAnimationSpeed(1.2D);
+                                state.getController().setAnimation(RawAnimation.begin().thenPlay("attack"));
+                                return PlayState.CONTINUE;
+                            }
+
+                            state.getController().forceAnimationReset();
+                            return PlayState.STOP;
                         }
                 )
         );
@@ -107,8 +190,15 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
     public void addAdditionalSaveData(CompoundTag compound) {
         super.addAdditionalSaveData(compound);
 
-        if (owner != null) {
-            compound.putUUID("Owner", owner);
+        if (ownerUuid != null) {
+            compound.putUUID("Owner", ownerUuid);
+        }
+
+        if (getHeroId() != null) {
+            compound.putString(
+                    "HeroId",
+                    getHeroId().toString()
+            );
         }
     }
 
@@ -117,8 +207,20 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
         super.readAdditionalSaveData(compound);
 
         if (compound.hasUUID("Owner")) {
-            owner = compound.getUUID("Owner");
+            ownerUuid = compound.getUUID("Owner");
         }
+
+        if (compound.contains("HeroId")) {
+            setHeroId(ResourceLocation.parse(compound.getString("HeroId")));
+        }
+    }
+
+    @Override
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+
+        builder.define(HERO_ID, "");
+        builder.define(ATTACK_TICKS, 0);
     }
 
     @Override
@@ -128,10 +230,24 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
         Level level = level();
         if (level.isClientSide) return;
 
+        if (getAttackAnimationTicks() > 0) {
+            setAttackAnimationTicks(getAttackAnimationTicks() - 1);
+        }
+
         final Player owner = getOwner();
         if (owner == null) return;
 
         final HeroData heroData = HeroData.get(owner);
+
+        final HeroDefinition definition = heroData.getHeroDefinition();
+
+        if (definition != null) {
+            ResourceLocation newId = definition.getId();
+
+            if (!newId.equals(this.getHeroId())) {
+                this.setHeroId(newId);
+            }
+        }
 
         // =========================
         // 🟣 REGEN / MANA (2s)
@@ -152,7 +268,7 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
 
         // Zupi :)
         if (!this.getUUID().equals(heroData.getSummonUUID())) {
-            remove(false);
+            this.discard();
         }
     }
 
@@ -160,9 +276,9 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
     protected void registerGoals() {
 
         this.goalSelector.addGoal(1, new HeroEntitySwimUpGoal(this, 1.0, this.level().getSeaLevel()));
-        this.goalSelector.addGoal(2, new MeleeAttackGoal(this, 1.2D, true));
-        this.goalSelector.addGoal(3, new RandomLookAroundGoal(this));
-
+        this.goalSelector.addGoal(2, new HeroMeleeAttackGoal(this, 1.2D, true));
+        this.goalSelector.addGoal(3, new FollowOwnerGoal(this, 1.1D, 5F, 2F));
+        this.goalSelector.addGoal(4, new RandomLookAroundGoal(this));
 
         this.targetSelector.addGoal(1, new HurtByTargetGoal(this));
         this.targetSelector.addGoal(2,
@@ -205,7 +321,7 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
 
     @Override
     public @Nullable UUID getOwnerUUID() {
-        return owner;
+        return ownerUuid;
     }
 
     @Override
@@ -265,7 +381,7 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
 
         if (manaData.getMana() < cost) {
             owner.sendSystemMessage(Component.literal("Not enough mana! Summon dismissed."));
-            remove(true);
+            remove();
             return;
         }
 
@@ -308,18 +424,22 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
 
     public static HeroEntity create(final Player player) {
         final HeroEntity hero = AltheraEntities.HERO.get().create(player.level());
+        final HeroData heroData = HeroData.get(player);
+        final HeroDefinition definition = heroData.getHeroDefinition();
+
+        if (definition != null) {
+            hero.setHeroId(definition.getId());
+        }
         HeroStatsSystem.applyAttributes(hero, player);
         return hero;
     }
 
-    public void remove(final boolean habilitarEspirito) {
+    public void remove() {
         if (getOwner() != null) {
             final HeroData heroData = HeroData.get(getOwner());
             heroData.clearSummon();
             heroData.sync(getOwner());
-            if (habilitarEspirito) {
-                habilitarEspirito(getOwner());
-            }
+            habilitarEspirito(getOwner());
         }
         this.discard();
     }

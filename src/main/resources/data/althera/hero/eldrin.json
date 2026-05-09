@@ -1,0 +1,8 @@
+{
+  "name": "Eldrin",
+  "description": "A scholar who commands arcane forces.",
+  "class": "CASTER",
+  "rank": "S",
+  "nature": "COMMON",
+  "personality": "Wise and distant"
+}

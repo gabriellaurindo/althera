@@ -24,7 +24,7 @@ public class LightOrbUtil {
 
         if (orb != null) {
             orb.setPos(player.getX(), player.getY() + 1.5, player.getZ());
-            orb.setOwner(player.getUUID());
+            orb.setOwnerUuid(player.getUUID());
 
             level.addFreshEntity(orb);
         }
@@ -47,7 +47,7 @@ public class LightOrbUtil {
     public static LightOrbEntity getPlayerOrb(Player player, Level level) {
         return level.getEntitiesOfClass(LightOrbEntity.class, player.getBoundingBox().inflate(50))
                 .stream()
-                .filter(o -> player.getUUID().equals(o.getOwner().getUUID()))
+                .filter(o -> player.getUUID().equals(o.getOwnerUuid().getUUID()))
                 .findFirst()
                 .orElse(null);
     }

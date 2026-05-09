@@ -2,9 +2,9 @@ package com.darksune.althera.common.block;
 
 import com.darksune.althera.common.attachment.HeroData;
 import com.darksune.althera.common.entity.HeroEntity;
+import com.darksune.althera.common.hero.HeroDefinition;
 import com.darksune.althera.common.multiblock.MultiblockValidator;
-import com.darksune.althera.common.system.HeroClass;
-import com.darksune.althera.common.system.HeroClassSystem;
+import com.darksune.althera.common.system.HeroRollSystem;
 import com.darksune.althera.common.system.HeroStatsSystem;
 import com.darksune.althera.common.system.HeroSummonSystem;
 import net.minecraft.core.BlockPos;
@@ -42,7 +42,7 @@ public class RitualCoreBlock extends Block {
         if (MultiblockValidator.isValid(level, pos)) {
             performRitual(player, level, pos);
         } else {
-            player.sendSystemMessage(Component.literal("§cEstrutura inválida."));
+            player.sendSystemMessage(Component.literal("§cThe structure is incomplete and cannot sustain the ritual."));
         }
 
         return InteractionResult.SUCCESS;
@@ -59,7 +59,18 @@ public class RitualCoreBlock extends Block {
     }
 
     public void performRitual(final Player player, final Level level, final BlockPos pos) {
-        player.sendSystemMessage(Component.literal("§aRitual válido!"));
+        final HeroDefinition heroDefinition = HeroRollSystem.rollHero();
+        player.sendSystemMessage(
+                Component.literal(
+                        "§aYou have formed a contract with §f"
+                                + heroDefinition.getName()
+                                + " §7["
+                                + heroDefinition.getHeroClass().name()
+                                + "] §6("
+                                + heroDefinition.getRank().name()
+                                + ")"
+                )
+        );
 
         level.playSound(null, pos,
                 net.minecraft.sounds.SoundEvents.ENCHANTMENT_TABLE_USE,
@@ -85,14 +96,14 @@ public class RitualCoreBlock extends Block {
         }
 
         final HeroData heroData = HeroData.get(player);
-        final HeroClass heroClass = HeroClassSystem.getRandomClass();
-        heroData.setHeroClass(heroClass);
+        heroData.setHero(heroDefinition.getId());
+        heroData.setHealth(HeroStatsSystem.getMaxHealth(heroData));
         heroData.sync(player);
 
         final HeroEntity summon = HeroSummonSystem.getSummon(player);
 
         if (summon != null) {
-            HeroStatsSystem.applyAttributes(summon, player);
+            summon.remove();
         }
     }
 }

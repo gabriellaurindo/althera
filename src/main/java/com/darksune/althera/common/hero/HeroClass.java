@@ -1,4 +1,4 @@
-package com.darksune.althera.common.system;
+package com.darksune.althera.common.hero;
 
 import java.util.EnumSet;
 
