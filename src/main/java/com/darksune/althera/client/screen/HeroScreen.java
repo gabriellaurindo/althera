@@ -4,6 +4,7 @@ import com.darksune.althera.Althera;
 import com.darksune.althera.client.keybind.AltheraKeybinds;
 import com.darksune.althera.common.attachment.HeroData;
 import com.darksune.althera.common.entity.AltheraEntities;
+import com.darksune.althera.common.entity.HeroEntity;
 import com.darksune.althera.common.system.HeroProgressionSystem;
 import com.darksune.althera.common.system.HeroStatsSystem;
 import com.darksune.althera.network.packet.ToggleHeroSettingPacket;
@@ -13,7 +14,6 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.LivingEntity;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 public class HeroScreen extends Screen {
@@ -27,7 +27,8 @@ public class HeroScreen extends Screen {
                     "textures/gui/gear.png"
             );
 
-    private LivingEntity previewEntity;
+    private HeroEntity previewEntity;
+
     private float tickAccumulator = 0;
 
     private Tab currentTab = Tab.STATUS;
@@ -46,7 +47,20 @@ public class HeroScreen extends Screen {
         super.init();
 
         final Minecraft mc = Minecraft.getInstance();
-        this.previewEntity = AltheraEntities.HERO.get().create(mc.level);
+
+        if (mc.player == null || mc.level == null) {
+            return;
+        }
+
+        final HeroData heroData = HeroData.get(mc.player);
+
+        HeroEntity entity = AltheraEntities.HERO.get().create(mc.level);
+
+        if (entity != null && heroData.getHeroDefinition() != null) {
+            entity.setHeroId(heroData.getHeroDefinition().getId());
+        }
+
+        this.previewEntity = entity;
     }
 
     @Override
@@ -58,7 +72,28 @@ public class HeroScreen extends Screen {
             return;
         }
 
-        final HeroData heroData = HeroData.get(mc.player);
+        final HeroData heroData =
+                HeroData.get(mc.player);
+
+        // =====================================
+        // SYNC PREVIEW ENTITY
+        // =====================================
+
+        if (previewEntity != null
+                && heroData.getHeroDefinition() != null) {
+
+            ResourceLocation current =
+                    previewEntity.getHeroId();
+
+            ResourceLocation expected =
+                    heroData.getHeroDefinition().getId();
+
+            if (current == null
+                    || !expected.equals(current)) {
+
+                previewEntity.setHeroId(expected);
+            }
+        }
 
         // ===== BACKGROUND =====
         gui.fill(0, 0, this.width, this.height, 0x55000000);
@@ -143,13 +178,13 @@ public class HeroScreen extends Screen {
     // STATUS TAB
     // =========================================================
 
-    private void renderStatusTab(GuiGraphics gui,
-                                 HeroData heroData,
-                                 int mouseX,
-                                 int mouseY,
-                                 float partialTick) {
+    private void renderStatusTab(GuiGraphics gui, HeroData heroData, int mouseX, int mouseY, float partialTick) {
 
-        final LivingEntity entity = this.previewEntity;
+        final HeroEntity entity = this.previewEntity;
+
+        if (entity == null || heroData.getHeroDefinition() == null) {
+            return;
+        }
 
         tickAccumulator += partialTick;
 

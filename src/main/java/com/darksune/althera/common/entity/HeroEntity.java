@@ -1,6 +1,7 @@
 package com.darksune.althera.common.entity;
 
 import com.darksune.althera.common.ai.goal.AssistOwnerGoal;
+import com.darksune.althera.common.ai.goal.HeroMeleeAttackGoal;
 import com.darksune.althera.common.ai.goal.ProtectOwnerGoal;
 import com.darksune.althera.common.attachment.HeroData;
 import com.darksune.althera.common.attachment.ManaData;
@@ -22,7 +23,6 @@ import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.MoveControl;
 import net.minecraft.world.entity.ai.goal.Goal;
-import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
@@ -38,6 +38,7 @@ import software.bernie.geckolib.animatable.GeoEntity;
 import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.animation.AnimatableManager;
 import software.bernie.geckolib.animation.AnimationController;
+import software.bernie.geckolib.animation.PlayState;
 import software.bernie.geckolib.animation.RawAnimation;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
@@ -52,34 +53,15 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
                     HeroEntity.class,
                     EntityDataSerializers.STRING
             );
+    private static final EntityDataAccessor<Integer> ATTACK_TICKS =
+            SynchedEntityData.defineId(
+                    HeroEntity.class,
+                    EntityDataSerializers.INT
+            );
 
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
 
     private UUID ownerUuid;
-
-    public void setHeroId(final ResourceLocation heroId) {
-        this.entityData.set(HERO_ID, heroId.toString());
-    }
-
-    public ResourceLocation getHeroId() {
-
-        String raw = this.entityData.get(HERO_ID);
-
-        if (raw.isEmpty()) {
-            return null;
-        }
-
-        return ResourceLocation.parse(raw);
-    }
-
-    public HeroDefinition getHeroDefinition() {
-
-        ResourceLocation id = getHeroId();
-
-        return id != null
-                ? HeroRegistry.get(id)
-                : null;
-    }
 
     boolean searchingForLand;
     protected final WaterBoundPathNavigation waterNavigation;
@@ -116,48 +98,88 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
         return player.getUUID().equals(this.getOwnerUUID());
     }
 
+    public void setHeroId(final ResourceLocation heroId) {
+        this.entityData.set(HERO_ID, heroId.toString());
+    }
+
+    public ResourceLocation getHeroId() {
+
+        String raw = this.entityData.get(HERO_ID);
+
+        if (raw.isEmpty()) {
+            return null;
+        }
+
+        return ResourceLocation.parse(raw);
+    }
+
+    public HeroDefinition getHeroDefinition() {
+
+        ResourceLocation id = getHeroId();
+
+        return id != null
+                ? HeroRegistry.get(id)
+                : null;
+    }
+
+    public int getAttackAnimationTicks() {
+        return this.entityData.get(ATTACK_TICKS);
+    }
+
+    public void setAttackAnimationTicks(int ticks) {
+        this.entityData.set(ATTACK_TICKS, ticks);
+    }
+
+    public void triggerAttackAnimation() {
+        setAttackAnimationTicks(10);
+    }
+
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
+
+        // =========================
+        // MOVEMENT
+        // =========================
 
         controllers.add(
                 new AnimationController<>(
                         this,
-                        "controller",
+                        "movement",
+                        5,
+                        state -> {
+
+                            if (state.isMoving()) {
+                                state.getController().setAnimationSpeed(2D);
+                                return state.setAndContinue(RawAnimation.begin().thenLoop("walk")
+                                );
+                            }
+
+                            state.getController().setAnimationSpeed(1D);
+                            return state.setAndContinue(RawAnimation.begin().thenLoop("idle")
+                            );
+                        }
+                )
+        );
+
+        // =========================
+        // ATTACK
+        // =========================
+
+        controllers.add(
+                new AnimationController<>(
+                        this,
+                        "attack",
                         0,
                         state -> {
 
-                            // =========================
-                            // ATTACK
-                            // =========================
-
-                            if (this.swinging || this.swingTime > 0) {
-
-                                return state.setAndContinue(
-                                        RawAnimation.begin()
-                                                .thenPlay("attack")
-                                );
+                            if (getAttackAnimationTicks() > 0) {
+                                state.getController().setAnimationSpeed(1D);
+                                state.getController().setAnimation(RawAnimation.begin().thenPlay("attack"));
+                                return PlayState.CONTINUE;
                             }
 
-                            // =========================
-                            // WALK
-                            // =========================
-
-                            if (state.isMoving()) {
-
-                                return state.setAndContinue(
-                                        RawAnimation.begin()
-                                                .thenLoop("walk")
-                                );
-                            }
-
-                            // =========================
-                            // IDLE
-                            // =========================
-
-                            return state.setAndContinue(
-                                    RawAnimation.begin()
-                                            .thenLoop("idle")
-                            );
+                            state.getController().forceAnimationReset();
+                            return PlayState.STOP;
                         }
                 )
         );
@@ -188,11 +210,7 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
         }
 
         if (compound.contains("HeroId")) {
-            setHeroId(
-                    ResourceLocation.parse(
-                            compound.getString("HeroId")
-                    )
-            );
+            setHeroId(ResourceLocation.parse(compound.getString("HeroId")));
         }
     }
 
@@ -201,6 +219,7 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
         super.defineSynchedData(builder);
 
         builder.define(HERO_ID, "");
+        builder.define(ATTACK_TICKS, 0);
     }
 
     @Override
@@ -209,6 +228,10 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
 
         Level level = level();
         if (level.isClientSide) return;
+
+        if (getAttackAnimationTicks() > 0) {
+            setAttackAnimationTicks(getAttackAnimationTicks() - 1);
+        }
 
         final Player owner = getOwner();
         if (owner == null) return;
@@ -252,9 +275,8 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
     protected void registerGoals() {
 
         this.goalSelector.addGoal(1, new HeroEntitySwimUpGoal(this, 1.0, this.level().getSeaLevel()));
-        this.goalSelector.addGoal(2, new MeleeAttackGoal(this, 1.2D, true));
+        this.goalSelector.addGoal(2, new HeroMeleeAttackGoal(this, 1.2D, true));
         this.goalSelector.addGoal(3, new RandomLookAroundGoal(this));
-
 
         this.targetSelector.addGoal(1, new HurtByTargetGoal(this));
         this.targetSelector.addGoal(2,

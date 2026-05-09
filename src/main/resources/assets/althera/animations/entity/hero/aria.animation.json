@@ -121,7 +121,7 @@
 		},
 		"attack": {
 			"loop": true,
-			"animation_length": 4,
+			"animation_length": 0.5,
 			"bones": {
 				"armor_left_leg": {
 					"rotation": {
