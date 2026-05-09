@@ -43,6 +43,6 @@ public class HeroRollSystem {
             }
         }
 
-        return HeroRank.F; // fallback (should never happen)
+        return HeroRank.EX; // Temp, colocar F
     }
 }
