@@ -173,7 +173,7 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
                         state -> {
 
                             if (getAttackAnimationTicks() > 0) {
-                                state.getController().setAnimationSpeed(1D);
+                                state.getController().setAnimationSpeed(1.2D);
                                 state.getController().setAnimation(RawAnimation.begin().thenPlay("attack"));
                                 return PlayState.CONTINUE;
                             }
