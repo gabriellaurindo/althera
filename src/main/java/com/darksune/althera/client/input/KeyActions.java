@@ -1,11 +1,12 @@
-package com.darksune.althera.client.action;
+package com.darksune.althera.client.input;
 
 import com.darksune.althera.client.screen.HeroScreen;
 import com.darksune.althera.common.attachment.HeroData;
 import com.darksune.althera.network.packet.SummonPacket;
+import com.darksune.althera.network.packet.UseCommandSealSkillPacket;
 import net.minecraft.client.Minecraft;
 
-public class ClientActions {
+public class KeyActions {
 
     public static void handleSummon() {
         Minecraft.getInstance().getConnection().send(new SummonPacket());
@@ -19,5 +20,9 @@ public class ClientActions {
         } else {
             mc.setScreen(null);
         }
+    }
+
+    public static void handleCommandSealSkill() {
+        Minecraft.getInstance().getConnection().send(new UseCommandSealSkillPacket());
     }
 }

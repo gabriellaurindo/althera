@@ -42,12 +42,16 @@ public final class PlayerEvents {
 
         if (player.tickCount % 40 == 0) {
             if (heroData.isDefeated() || !heroData.isSummoned()) {
-                int newHealth = Math.min(
-                        (int) heroData.getHealth() + 2,
-                        (int) HeroStatsSystem.getMaxHealth(heroData)
+                int maxHealth = (int) Math.round(
+                        HeroStatsSystem.getMaxHealth(heroData)
                 );
 
-                if (heroData.isDefeated() && newHealth >= HeroStatsSystem.getMaxHealth(heroData)) {
+                int newHealth = Math.min(
+                        (int) heroData.getHealth() + 2,
+                        maxHealth
+                );
+
+                if (heroData.isDefeated() && newHealth >= maxHealth) {
                     heroData.setDefeated(false);
 
                     player.sendSystemMessage(

@@ -35,7 +35,7 @@ public class HeroSummonSystem {
 
     public static HeroEntity spawnSummon(final Player player, final boolean sendMessage) {
         final HeroData heroData = HeroData.get(player);
-
+        //todo se tiver skill do commandSeal ativa nao pode remover e nem spanar de novo
         if (heroData.getHeroDefinition() == null) {
             heroData.setHero(HeroRollSystem.rollHero().getId());
             heroData.setHealth(HeroStatsSystem.getMaxHealth(heroData));
