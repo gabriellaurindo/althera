@@ -39,6 +39,7 @@ public class HeroSummonSystem {
         if (heroData.getHeroDefinition() == null) {
             heroData.setHero(HeroRollSystem.rollHero().getId());
             heroData.setHealth(HeroStatsSystem.getMaxHealth(heroData));
+            //todo no futuro tavelz precise fazer o ritual pra ter o summon
 //            player.sendSystemMessage(
 //                    Component.literal("§eYou don't have a summon.")
 //            );
