@@ -25,6 +25,7 @@ public class HeroData {
     private boolean defeated;
     private boolean isHiddenHud = false;
     private boolean isSaveDisabled = false;
+    private boolean canResurrect = true;
     private ResourceLocation heroId = null;
 
     // =========================
@@ -59,6 +60,9 @@ public class HeroData {
                     Codec.BOOL.optionalFieldOf("isSaveDisabled", false)
                             .forGetter(data -> data.isSaveDisabled),
 
+                    Codec.BOOL.optionalFieldOf("canResurrect", true)
+                            .forGetter(data -> data.canResurrect),
+
                     Codec.STRING.optionalFieldOf("heroId", "")
                             .forGetter(data -> data.heroId != null
                                     ? data.heroId.toString()
@@ -66,7 +70,7 @@ public class HeroData {
 
             ).apply(instance, (level, xp, health, uuidStr,
                                interventions, defeated,
-                               isHiddenHud, isSaveDisabled,
+                               isHiddenHud, isSaveDisabled, canResurrect,
                                heroIdStr) -> {
                 HeroData data = new HeroData();
 
@@ -77,6 +81,7 @@ public class HeroData {
                 data.defeated = defeated;
                 data.isHiddenHud = isHiddenHud;
                 data.isSaveDisabled = isSaveDisabled;
+                data.canResurrect = canResurrect;
 
                 if (!uuidStr.isEmpty()) {
                     data.summonUUID = UUID.fromString(uuidStr);
@@ -110,6 +115,7 @@ public class HeroData {
                 buf.writeBoolean(data.defeated);
                 buf.writeBoolean(data.isHiddenHud);
                 buf.writeBoolean(data.isSaveDisabled);
+                buf.writeBoolean(data.canResurrect);
 
                 buf.writeBoolean(data.heroId != null);
                 if (data.heroId != null) {
@@ -131,6 +137,7 @@ public class HeroData {
                 data.defeated = buf.readBoolean();
                 data.isHiddenHud = buf.readBoolean();
                 data.isSaveDisabled = buf.readBoolean();
+                data.canResurrect = buf.readBoolean();
 
                 if (buf.readBoolean()) {
                     data.heroId = buf.readResourceLocation();
@@ -210,6 +217,14 @@ public class HeroData {
 
     public void setSaveDisabled(boolean saveDisabled) {
         isSaveDisabled = saveDisabled;
+    }
+
+    public boolean canResurrect() {
+        return canResurrect;
+    }
+
+    public void setCanResurrect(boolean canResurrect) {
+        this.canResurrect = canResurrect;
     }
 
     public HeroDefinition getHeroDefinition() {

@@ -53,6 +53,7 @@ public final class PlayerEvents {
 
                 if (heroData.isDefeated() && newHealth >= maxHealth) {
                     heroData.setDefeated(false);
+                    heroData.setCanResurrect(true);
 
                     player.sendSystemMessage(
                             Component.literal("§aYour summon has recovered and can be summoned again!")

@@ -1,31 +1,40 @@
 package com.darksune.althera.common.commandseal.skill;
 
+import com.darksune.althera.common.attachment.HeroData;
 import com.darksune.althera.common.entity.HeroEntity;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.player.Player;
 
-public class OverdriveCommandSealSkill extends AbstractCommandSealSkill implements ICommandSealSkill {
+public class OverdriveCommandSealSkill extends AbstractCommandSealSkill {
 
+    private static final int DURATION_TICKS = 20 * 30;
+    private static final int COOLDOWN_TICKS = DURATION_TICKS + 20;
+
+    //todo criar niveis 1 nivel = 30 segundos e status +1, 2 nivel = 20s status +2, 3 nivel = 10s status + 3
     @Override
     public void execute(Player player, HeroEntity heroEntity) {
 
+        HeroData heroData = HeroData.get(player);
+
+        heroData.setCanResurrect(false);
+
         heroEntity.addEffect(new MobEffectInstance(
                 MobEffects.DAMAGE_BOOST,
-                getDurationTicks(),
-                1
+                DURATION_TICKS,
+                0
         ));
 
         heroEntity.addEffect(new MobEffectInstance(
                 MobEffects.DAMAGE_RESISTANCE,
-                getDurationTicks(),
-                1
+                DURATION_TICKS,
+                0
         ));
 
         heroEntity.addEffect(new MobEffectInstance(
                 MobEffects.MOVEMENT_SPEED,
-                getDurationTicks(),
-                1
+                DURATION_TICKS,
+                0
         ));
     }
 
@@ -37,7 +46,7 @@ public class OverdriveCommandSealSkill extends AbstractCommandSealSkill implemen
 
     @Override
     public int getCooldownTicks() {
-        return 20 * 60;
+        return COOLDOWN_TICKS;
     }
 
     @Override
@@ -47,6 +56,6 @@ public class OverdriveCommandSealSkill extends AbstractCommandSealSkill implemen
 
     @Override
     public int getDurationTicks() {
-        return 20 * 30;
+        return DURATION_TICKS;
     }
 }

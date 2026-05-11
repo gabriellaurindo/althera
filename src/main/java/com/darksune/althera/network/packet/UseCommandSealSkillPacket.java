@@ -2,6 +2,7 @@ package com.darksune.althera.network.packet;
 
 import com.darksune.althera.Althera;
 import com.darksune.althera.common.commandseal.CommandSealSystem;
+import com.darksune.althera.common.commandseal.skill.CommandSealSkillType;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -26,10 +27,7 @@ public record UseCommandSealSkillPacket()
         return TYPE;
     }
 
-    public static void handle(
-            UseCommandSealSkillPacket packet,
-            IPayloadContext context
-    ) {
+    public static void handle(UseCommandSealSkillPacket packet, IPayloadContext context) {
 
         context.enqueueWork(() -> {
 
@@ -37,7 +35,7 @@ public record UseCommandSealSkillPacket()
                 return;
             }
 
-            CommandSealSystem.activateSkill(player);
+            CommandSealSystem.activateSkill(player, CommandSealSkillType.REVIVE);
         });
     }
 }

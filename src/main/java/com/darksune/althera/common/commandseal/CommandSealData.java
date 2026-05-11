@@ -20,6 +20,8 @@ public class CommandSealData extends SyncableAttachment {
     // =========================
 
     private int color = 0xFFFFFF;
+    private int commandSealCharges = 3;
+    private long lastChargeResetDay;
     private Map<CommandSealSkillType, Integer> activeSkills = new HashMap<>();
     private Map<CommandSealSkillType, Integer> cooldownSkills = new HashMap<>();
 
@@ -37,17 +39,25 @@ public class CommandSealData extends SyncableAttachment {
                     Codec.INT.optionalFieldOf("color", 0xFFFFFF)
                             .forGetter(data -> data.color),
 
+                    Codec.INT.optionalFieldOf("commandSealCharges", 3)
+                            .forGetter(CommandSealData::getCommandSealCharges),
+
+                    Codec.LONG.optionalFieldOf("lastChargeResetDay", 0L)
+                            .forGetter(CommandSealData::getLastChargeResetDay),
+
                     SKILL_MAP_CODEC.optionalFieldOf("activeSkills", new HashMap<>())
                             .forGetter(CommandSealData::getActiveSkills),
 
                     SKILL_MAP_CODEC.optionalFieldOf("cooldownSkills", new HashMap<>())
                             .forGetter(CommandSealData::getCooldownSkills)
 
-            ).apply(instance, (color, activeSkills, cooldownSkills) -> {
+            ).apply(instance, (color, commandSealCharges, lastChargeResetDay, activeSkills, cooldownSkills) -> {
 
                 CommandSealData data = new CommandSealData();
 
                 data.color = color;
+                data.commandSealCharges = commandSealCharges;
+                data.lastChargeResetDay = lastChargeResetDay;
                 data.activeSkills.putAll(activeSkills);
                 data.cooldownSkills.putAll(cooldownSkills);
 
@@ -63,6 +73,10 @@ public class CommandSealData extends SyncableAttachment {
             (buf, data) -> {
 
                 buf.writeInt(data.color);
+
+                buf.writeInt(data.commandSealCharges);
+
+                buf.writeLong(data.lastChargeResetDay);
 
                 buf.writeInt(data.activeSkills.size());
 
@@ -87,12 +101,15 @@ public class CommandSealData extends SyncableAttachment {
 
                 data.color = buf.readInt();
 
+                data.commandSealCharges = buf.readInt();
+
+                data.lastChargeResetDay = buf.readLong();
+
                 int activeSkillSize = buf.readInt();
 
                 for (int i = 0; i < activeSkillSize; i++) {
 
-                    CommandSealSkillType skillType =
-                            buf.readEnum(CommandSealSkillType.class);
+                    CommandSealSkillType skillType = buf.readEnum(CommandSealSkillType.class);
 
                     int timer = buf.readInt();
 
@@ -103,8 +120,7 @@ public class CommandSealData extends SyncableAttachment {
 
                 for (int i = 0; i < cooldownSkillSize; i++) {
 
-                    CommandSealSkillType skillType =
-                            buf.readEnum(CommandSealSkillType.class);
+                    CommandSealSkillType skillType = buf.readEnum(CommandSealSkillType.class);
 
                     int timer = buf.readInt();
 
@@ -129,8 +145,25 @@ public class CommandSealData extends SyncableAttachment {
 
     public void setColor(int color) {
         this.color = color;
-
         markDirty();
+    }
+
+    public int getCommandSealCharges() {
+        return commandSealCharges;
+    }
+
+    public void setCommandSealCharges(int commandSealCharges) {
+        this.commandSealCharges = commandSealCharges;
+        markDirty();
+    }
+
+    public long getLastChargeResetDay() {
+        return lastChargeResetDay;
+    }
+
+    public void setLastChargeResetDay(long lastChargeResetDay) {
+        this.lastChargeResetDay = lastChargeResetDay;
+//        markDirty();
     }
 
     public Map<CommandSealSkillType, Integer> getActiveSkills() {
@@ -144,6 +177,24 @@ public class CommandSealData extends SyncableAttachment {
     // =========================
     // STATE
     // =========================
+
+    public boolean hasCharges() {
+        return commandSealCharges > 0;
+    }
+
+    public boolean consumeCharge() {
+        if (!hasCharges()) {
+            return false;
+        }
+        commandSealCharges--;
+        markDirty();
+        return true;
+    }
+
+    public void resetCharges() {
+        commandSealCharges = 3;
+        markDirty();
+    }
 
     public boolean isSkillOnCooldown(CommandSealSkillType skillType) {
         return cooldownSkills.containsKey(skillType);
