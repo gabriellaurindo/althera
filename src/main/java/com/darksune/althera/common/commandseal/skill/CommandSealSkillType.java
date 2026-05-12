@@ -5,7 +5,8 @@ import com.mojang.serialization.Codec;
 public enum CommandSealSkillType {
 
     OVERDRIVE("overdrive", true, new OverdriveCommandSealSkill()),
-    REVIVE("revive", false, new ReviveCommandSealSkill());
+    REVIVE("revive", false, new ReviveCommandSealSkill()),
+    HEAL("heal", true, new HealCommandSealSkill());
 
     public static final Codec<CommandSealSkillType> CODEC =
             Codec.STRING.xmap(

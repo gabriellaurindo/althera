@@ -10,8 +10,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-public record UseCommandSealSkillPacket()
-        implements CustomPacketPayload {
+public record UseCommandSealSkillPacket(CommandSealSkillType skillType) implements CustomPacketPayload {
 
     public static final Type<UseCommandSealSkillPacket> TYPE =
             new Type<>(ResourceLocation.fromNamespaceAndPath(
@@ -20,7 +19,14 @@ public record UseCommandSealSkillPacket()
             ));
 
     public static final StreamCodec<FriendlyByteBuf, UseCommandSealSkillPacket> STREAM_CODEC =
-            StreamCodec.unit(new UseCommandSealSkillPacket());
+            StreamCodec.of(
+                    (buf, packet) ->
+                            buf.writeEnum(packet.skillType),
+
+                    buf -> new UseCommandSealSkillPacket(
+                            buf.readEnum(CommandSealSkillType.class)
+                    )
+            );
 
     @Override
     public Type<? extends CustomPacketPayload> type() {
@@ -28,14 +34,16 @@ public record UseCommandSealSkillPacket()
     }
 
     public static void handle(UseCommandSealSkillPacket packet, IPayloadContext context) {
-
         context.enqueueWork(() -> {
 
             if (!(context.player() instanceof ServerPlayer player)) {
                 return;
             }
 
-            CommandSealSystem.activateSkill(player, CommandSealSkillType.REVIVE);
+            CommandSealSystem.activateSkill(
+                    player,
+                    packet.skillType
+            );
         });
     }
 }

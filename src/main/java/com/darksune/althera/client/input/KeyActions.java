@@ -2,6 +2,7 @@ package com.darksune.althera.client.input;
 
 import com.darksune.althera.client.screen.HeroScreen;
 import com.darksune.althera.common.attachment.HeroData;
+import com.darksune.althera.common.commandseal.skill.CommandSealSkillType;
 import com.darksune.althera.network.packet.SummonPacket;
 import com.darksune.althera.network.packet.UseCommandSealSkillPacket;
 import net.minecraft.client.Minecraft;
@@ -22,7 +23,7 @@ public class KeyActions {
         }
     }
 
-    public static void handleCommandSealSkill() {
-        Minecraft.getInstance().getConnection().send(new UseCommandSealSkillPacket());
+    public static void handleCommandSealSkill(final CommandSealSkillType skillType) {
+        Minecraft.getInstance().getConnection().send(new UseCommandSealSkillPacket(skillType));
     }
 }
