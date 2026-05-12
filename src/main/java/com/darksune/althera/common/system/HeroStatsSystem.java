@@ -12,7 +12,7 @@ public class HeroStatsSystem {
     private final static int BASE_HEALTH = 19;
     private final static double BASE_ATTACK = 1.125;
     private final static double BASE_ARMOR = 2.0;
-
+    //todo centralizar o calculo do hp maximo
     public static void applyAttributes(final HeroEntity hero, final Player player) {
         final HeroData heroData = HeroData.get(player);
 

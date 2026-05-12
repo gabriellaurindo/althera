@@ -6,5 +6,11 @@
   "key.althera.summon": "Summon",
   "key.althera.hero.screen": "Hero Menu",
 
+  "key.althera.commandseal.skill.one": "Overdrive",
+  "key.althera.commandseal.skill.two": "Revive",
+  "key.althera.commandseal.skill.three": "Heal",
+
+  "key.althera.ultimate.skill": "Explosion",
+
   "block.althera.ritual_core": "Ritual core"
 }

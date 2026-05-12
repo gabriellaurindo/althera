@@ -9,6 +9,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
+//Todo remover a logica de gameplay daqui, mover pra outro lugar e so chamadar algo como hud.activeAlgo(player, true/false)
 public record ToggleHeroSettingPacket(Setting setting) implements CustomPacketPayload {
 
     public static final CustomPacketPayload.Type<ToggleHeroSettingPacket> TYPE =
