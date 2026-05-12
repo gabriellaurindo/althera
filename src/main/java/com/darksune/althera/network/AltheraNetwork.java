@@ -3,6 +3,7 @@ package com.darksune.althera.network;
 import com.darksune.althera.network.packet.SummonPacket;
 import com.darksune.althera.network.packet.ToggleHeroSettingPacket;
 import com.darksune.althera.network.packet.UseCommandSealSkillPacket;
+import com.darksune.althera.network.packet.UseUltimateSkillPacket;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 
@@ -34,6 +35,12 @@ public final class AltheraNetwork {
                 UseCommandSealSkillPacket.TYPE,
                 UseCommandSealSkillPacket.STREAM_CODEC,
                 UseCommandSealSkillPacket::handle
+        );
+
+        registrar.playToServer(
+                UseUltimateSkillPacket.TYPE,
+                UseUltimateSkillPacket.STREAM_CODEC,
+                UseUltimateSkillPacket::handle
         );
     }
 }

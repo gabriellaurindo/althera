@@ -1,5 +1,6 @@
 package com.darksune.althera.client.input;
 
+import com.darksune.althera.common.ultimate.skill.UltimateSkillType;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -31,6 +32,10 @@ public class KeyInputHandler {
 
         if (AltheraKeybinds.COMMAND_SEAL_SKILL_THREE.consumeClick()) {
             KeyActions.handleCommandSealSkill(HEAL);
+        }
+
+        if (AltheraKeybinds.ULTIMATE_SKILL.consumeClick()) {
+            KeyActions.handleUltimateSkill(UltimateSkillType.EXPLOSION);
         }
     }
 }

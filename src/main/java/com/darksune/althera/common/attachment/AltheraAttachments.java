@@ -2,6 +2,7 @@ package com.darksune.althera.common.attachment;
 
 import com.darksune.althera.Althera;
 import com.darksune.althera.common.commandseal.CommandSealData;
+import com.darksune.althera.common.ultimate.UltimateData;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.attachment.AttachmentType;
 import net.neoforged.neoforge.registries.DeferredHolder;
@@ -34,6 +35,14 @@ public class AltheraAttachments {
                             .serialize(CommandSealData.CODEC)
                             .copyOnDeath()
                             .sync(CommandSealData.STREAM_CODEC)
+                            .build());
+
+    public static final DeferredHolder<AttachmentType<?>, AttachmentType<UltimateData>> ULTIMATE =
+            ATTACHMENTS.register("ultimate", () ->
+                    AttachmentType.builder(UltimateData::new)
+                            .serialize(UltimateData.CODEC)
+                            .copyOnDeath()
+                            .sync(UltimateData.STREAM_CODEC)
                             .build());
 
     public static void register(final IEventBus bus) {

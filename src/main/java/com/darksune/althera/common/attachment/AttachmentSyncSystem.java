@@ -20,7 +20,8 @@ public class AttachmentSyncSystem {
 
         List<ISyncableAttachment> attachments = List.of(
 //                player.getData(AltheraAttachments.HERO.get()),
-                player.getData(AltheraAttachments.COMMAND_SEAL.get())
+                player.getData(AltheraAttachments.COMMAND_SEAL.get()),
+                player.getData(AltheraAttachments.ULTIMATE.get())
         );
 
         for (ISyncableAttachment attachment : attachments) {

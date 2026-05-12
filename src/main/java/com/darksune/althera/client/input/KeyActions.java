@@ -3,8 +3,10 @@ package com.darksune.althera.client.input;
 import com.darksune.althera.client.screen.HeroScreen;
 import com.darksune.althera.common.attachment.HeroData;
 import com.darksune.althera.common.commandseal.skill.CommandSealSkillType;
+import com.darksune.althera.common.ultimate.skill.UltimateSkillType;
 import com.darksune.althera.network.packet.SummonPacket;
 import com.darksune.althera.network.packet.UseCommandSealSkillPacket;
+import com.darksune.althera.network.packet.UseUltimateSkillPacket;
 import net.minecraft.client.Minecraft;
 
 public class KeyActions {
@@ -25,5 +27,9 @@ public class KeyActions {
 
     public static void handleCommandSealSkill(final CommandSealSkillType skillType) {
         Minecraft.getInstance().getConnection().send(new UseCommandSealSkillPacket(skillType));
+    }
+
+    public static void handleUltimateSkill(final UltimateSkillType skillType) {
+        Minecraft.getInstance().getConnection().send(new UseUltimateSkillPacket(skillType));
     }
 }

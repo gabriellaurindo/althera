@@ -41,7 +41,14 @@ public class AltheraKeybinds {
     public static final KeyMapping COMMAND_SEAL_SKILL_THREE = new KeyMapping(
             "key.althera.commandseal.skill.three",
             InputConstants.Type.KEYSYM,
-            GLFW.GLFW_KEY_L,
+            GLFW.GLFW_KEY_V,
+            "key.categories.althera"
+    );
+
+    public static final KeyMapping ULTIMATE_SKILL = new KeyMapping(
+            "key.althera.ultimate.skill",
+            InputConstants.Type.KEYSYM,
+            GLFW.GLFW_KEY_U,
             "key.categories.althera"
     );
 
