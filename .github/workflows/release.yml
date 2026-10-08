@@ -1,0 +1,97 @@
+name: Release
+
+# Triggered by pushing a release tag created by the /release flow, e.g. althera-v2.2.0-neoforge-1.21.1.
+# Publishes the jar built from the tagged commit to GitHub Releases, CurseForge and Discord.
+on:
+  push:
+    tags:
+      - 'althera-v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    env:
+      CURSEFORGE_TOKEN: ${{ secrets.CURSEFORGE_TOKEN }}
+      CURSEFORGE_PROJECT_ID: ${{ vars.CURSEFORGE_PROJECT_ID }}
+      DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Resolve version and release notes
+        id: meta
+        run: |
+          VERSION=$(grep '^mod_version=' gradle.properties | cut -d= -f2 | tr -d '\r')
+          TAG="${GITHUB_REF_NAME}"
+          if [[ "$TAG" != "althera-v${VERSION}-"* ]]; then
+            echo "::error::Tag $TAG does not match mod_version $VERSION"
+            exit 1
+          fi
+          NOTES="release-notes/${VERSION}"
+          for f in github curseforge discord; do
+            if [[ ! -f "$NOTES/$f.md" ]]; then
+              echo "::error::Missing $NOTES/$f.md"
+              exit 1
+            fi
+          done
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "notes=$NOTES" >> "$GITHUB_OUTPUT"
+
+      - name: Setup JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Build with Gradle
+        run: ./gradlew build
+
+      - name: Locate jar
+        id: jar
+        run: |
+          JAR="build/libs/althera-${{ steps.meta.outputs.version }}.jar"
+          if [[ ! -f "$JAR" ]]; then
+            echo "::error::Jar not found: $JAR"
+            ls -la build/libs
+            exit 1
+          fi
+          echo "path=$JAR" >> "$GITHUB_OUTPUT"
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Althera - v${{ steps.meta.outputs.version }}
+          body_path: ${{ steps.meta.outputs.notes }}/github.md
+          files: ${{ steps.jar.outputs.path }}
+          make_latest: true
+
+      - name: Publish to CurseForge
+        if: env.CURSEFORGE_TOKEN != '' && env.CURSEFORGE_PROJECT_ID != ''
+        uses: Kir-Antipov/mc-publish@v3.3
+        with:
+          curseforge-id: ${{ env.CURSEFORGE_PROJECT_ID }}
+          curseforge-token: ${{ env.CURSEFORGE_TOKEN }}
+          files: ${{ steps.jar.outputs.path }}
+          name: althera-${{ steps.meta.outputs.version }}
+          version: ${{ steps.meta.outputs.version }}
+          version-type: release
+          changelog-file: ${{ steps.meta.outputs.notes }}/curseforge.md
+          loaders: neoforge
+          game-versions: 1.21.1
+          java: 21
+          dependencies: |
+            geckolib(required){curseforge:geckolib}
+
+      - name: Announce on Discord
+        if: env.DISCORD_WEBHOOK != ''
+        run: |
+          jq -n --rawfile content "${{ steps.meta.outputs.notes }}/discord.md" '{content: $content}' \
+            | curl -fsS -H "Content-Type: application/json" -d @- "$DISCORD_WEBHOOK"
