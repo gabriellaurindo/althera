@@ -14,6 +14,7 @@ and generates the GitHub Release, CurseForge, Discord and Patreon notes from it.
   - **Heal** (V, 50 mana): fully heals the summoned hero.
 - **Ultimate — Explosion** (U, 200 mana): the hero channels for a second and then explodes, damaging, burning and
   knocking back nearby enemies. Each ultimate can be used once per day.
+- The new keys (J, K, V, U) can be rebound in Options → Controls, under the Althera category.
 - `/althera_hero unstuck [player]`: fixes a summon stuck in an inconsistent state. The hero becomes defeated with zero
   health and recovers over time; level, xp and hero are kept. Any player can use it on themselves.
 - `/althera_mana refill [players]` (cheats): refills mana.
@@ -23,7 +24,6 @@ and generates the GitHub Release, CurseForge, Discord and Patreon notes from it.
 ### Changed
 - Chat commands now follow `/althera_<feature>`: `/hero summon` → `/althera_hero summon`,
   `/hero rank` → `/althera_hero rank`. `/hero divine` is temporarily disabled.
-- Summoned heroes consume mana again (20 every 2 seconds).
 - Logging out dismisses the summon. Active skills end as if the hero was dismissed (an active Overdrive defeats it).
 - Skills check their own requirements before consuming mana or charges (e.g. Revive only works on a defeated hero).
 - Revive only costs its own mana; summoning the revived hero needs no extra mana.
@@ -40,4 +40,4 @@ and generates the GitHub Release, CurseForge, Discord and Patreon notes from it.
 - Spirit orb lookup scanning a 10,000-block area in every dimension.
 - Damage interception using up an intervention when the hero did not absorb the hit, and triggering on self-inflicted
   damage (e.g. ender pearls).
-- Summon health when spawning.
+- Defeated heroes whose max health was not a whole number never finished recovering and could not be summoned again.
