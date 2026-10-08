@@ -10,7 +10,6 @@ public class HealCommandSealSkill extends AbstractCommandSealSkill {
     private static final int DURATION_TICKS = 20;
     private static final int COOLDOWN_TICKS = DURATION_TICKS + 20;
 
-    //todo criar uma skill de Heal, gasta 50 de mana e recupera toda a vida do summon, se tiver vivo claro
     @Override
     public void execute(Player player, HeroEntity heroEntity) {
         final HeroData heroData = HeroData.get(player);

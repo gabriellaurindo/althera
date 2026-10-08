@@ -1,6 +1,7 @@
 package com.darksune.althera.common.ultimate.skill;
 
 import com.darksune.althera.common.entity.HeroEntity;
+import com.darksune.althera.common.skill.SkillEndReason;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
@@ -55,8 +56,13 @@ public class ExplosionUltimateSkill
     }
 
     @Override
-    public void onExpire(Player player, HeroEntity heroEntity) {
-        super.onExpire(player, heroEntity);
+    public void onEnd(Player player, HeroEntity heroEntity, SkillEndReason reason) {
+        super.onEnd(player, heroEntity, reason);
+
+        // only explodes if the channeling finished; a defeated/dismissed hero cancels it
+        if (reason != SkillEndReason.EXPIRED || heroEntity == null) {
+            return;
+        }
 
         List<LivingEntity> entities =
                 heroEntity.level().getEntitiesOfClass(

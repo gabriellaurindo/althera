@@ -4,12 +4,13 @@ import com.darksune.althera.common.attachment.ManaData;
 import com.darksune.althera.common.commandseal.skill.CommandSealSkillType;
 import com.darksune.althera.common.commandseal.skill.ICommandSealSkill;
 import com.darksune.althera.common.entity.HeroEntity;
+import com.darksune.althera.common.skill.SkillEndReason;
+import com.darksune.althera.common.skill.SkillTimers;
 import com.darksune.althera.common.system.HeroSummonSystem;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.Iterator;
-import java.util.Map;
 
 public class CommandSealSystem {
 
@@ -33,6 +34,9 @@ public class CommandSealSystem {
             player.sendSystemMessage(Component.literal("Skill em cooldown"));
             return;
         }
+        if (!commandSealSkillType.getSkill().canActivate(player, hero)) {
+            return;
+        }
         activateSkill(player, hero, commandSealData, commandSealSkillType, manaData);
     }
 
@@ -53,58 +57,28 @@ public class CommandSealSystem {
     }
 
     public static void tickActiveSkills(Player player, HeroEntity heroEntity, CommandSealData data) {
-
-        Iterator<Map.Entry<CommandSealSkillType, Integer>> iterator = data.getActiveSkills().entrySet().iterator();
-
-        while (iterator.hasNext()) {
-
-            Map.Entry<CommandSealSkillType, Integer> entry = iterator.next();
-
-            CommandSealSkillType commandSealSkillType = entry.getKey();
-
-            ICommandSealSkill commandSealSkill = commandSealSkillType.getSkill();
-
-            int remainingTicks = entry.getValue() - 1;
-
-            if (remainingTicks <= 0) {
-
-                commandSealSkill.onExpire(player, heroEntity);
-
-                iterator.remove();
-
-                continue;
-            }
-
-            entry.setValue(remainingTicks);
-
-            commandSealSkill.tick(player, heroEntity, remainingTicks);
-        }
+        SkillTimers.tick(
+                data.getActiveSkills(),
+                (skillType, remainingTicks) -> skillType.getSkill().tick(player, heroEntity, remainingTicks),
+                skillType -> skillType.getSkill().onEnd(player, heroEntity, SkillEndReason.EXPIRED)
+        );
     }
 
     public static void tickCooldownSkills(Player player, CommandSealData data) {
+        SkillTimers.tick(
+                data.getCooldownSkills(),
+                (skillType, remainingTicks) -> {},
+                skillType -> skillType.getSkill().onCooldownExpire(player)
+        );
+    }
 
-        Iterator<Map.Entry<CommandSealSkillType, Integer>> iterator = data.getCooldownSkills().entrySet().iterator();
-
-        while (iterator.hasNext()) {
-
-            Map.Entry<CommandSealSkillType, Integer> entry = iterator.next();
-
-            CommandSealSkillType commandSealSkillType = entry.getKey();
-
-            ICommandSealSkill commandSealSkill = commandSealSkillType.getSkill();
-
-            int remainingTicks = entry.getValue() - 1;
-
-            if (remainingTicks <= 0) {
-
-                commandSealSkill.onCooldownExpire(player);
-
-                iterator.remove();
-
-                continue;
-            }
-
-            entry.setValue(remainingTicks);
-        }
+    /**
+     * Ends every active skill with the given reason; each skill decides the consequence in onEnd.
+     */
+    public static void endActiveSkills(Player player, @Nullable HeroEntity heroEntity, SkillEndReason reason) {
+        SkillTimers.endAll(
+                CommandSealData.get(player).getActiveSkills(),
+                skillType -> skillType.getSkill().onEnd(player, heroEntity, reason)
+        );
     }
 }

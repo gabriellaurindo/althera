@@ -10,8 +10,11 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 
+import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class UltimateData extends SyncableAttachment {
 
@@ -25,6 +28,9 @@ public class UltimateData extends SyncableAttachment {
 
     private Map<UltimateSkillType, Integer> cooldownSkills = new HashMap<>();
 
+    // ultimates used since the last daily reset (day change or sleeping)
+    private Set<UltimateSkillType> usedToday = EnumSet.noneOf(UltimateSkillType.class);
+
     // =========================
     // CODEC (save/load)
     // =========================
@@ -37,9 +43,11 @@ public class UltimateData extends SyncableAttachment {
 
             SKILL_MAP_CODEC.optionalFieldOf("activeSkills", new HashMap<>()).forGetter(UltimateData::getActiveSkills),
 
-            SKILL_MAP_CODEC.optionalFieldOf("cooldownSkills", new HashMap<>()).forGetter(UltimateData::getCooldownSkills)
+            SKILL_MAP_CODEC.optionalFieldOf("cooldownSkills", new HashMap<>()).forGetter(UltimateData::getCooldownSkills),
 
-    ).apply(instance, (lastUltimateResetDay, activeSkills, cooldownSkills) -> {
+            UltimateSkillType.CODEC.listOf().optionalFieldOf("usedToday", List.of()).forGetter(data -> List.copyOf(data.usedToday))
+
+    ).apply(instance, (lastUltimateResetDay, activeSkills, cooldownSkills, usedToday) -> {
 
         UltimateData data = new UltimateData();
 
@@ -48,6 +56,8 @@ public class UltimateData extends SyncableAttachment {
         data.activeSkills.putAll(activeSkills);
 
         data.cooldownSkills.putAll(cooldownSkills);
+
+        data.usedToday.addAll(usedToday);
 
         return data;
     }));
@@ -87,6 +97,17 @@ public class UltimateData extends SyncableAttachment {
 
                     buf.writeInt(entry.getValue());
                 }
+
+                // =========================
+                // USED TODAY
+                // =========================
+
+                buf.writeInt(data.usedToday.size());
+
+                for (UltimateSkillType skillType : data.usedToday) {
+
+                    buf.writeEnum(skillType);
+                }
             },
 
             buf -> {
@@ -123,6 +144,17 @@ public class UltimateData extends SyncableAttachment {
                     int timer = buf.readInt();
 
                     data.cooldownSkills.put(skillType, timer);
+                }
+
+                // =========================
+                // USED TODAY
+                // =========================
+
+                int usedTodaySize = buf.readInt();
+
+                for (int i = 0; i < usedTodaySize; i++) {
+
+                    data.usedToday.add(buf.readEnum(UltimateSkillType.class));
                 }
 
                 return data;
@@ -168,9 +200,20 @@ public class UltimateData extends SyncableAttachment {
         cooldownSkills.put(skillType, cooldown);
     }
 
-    public void resetCooldowns() {
+    public boolean wasUsedToday(UltimateSkillType skillType) {
+        return usedToday.contains(skillType);
+    }
+
+    public void markUsedToday(UltimateSkillType skillType) {
+        usedToday.add(skillType);
+        markDirty();
+    }
+
+    public void resetDaily() {
 
         cooldownSkills.clear();
+
+        usedToday.clear();
 
         markDirty();
     }

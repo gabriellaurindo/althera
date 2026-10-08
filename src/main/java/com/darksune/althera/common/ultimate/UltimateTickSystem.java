@@ -53,6 +53,6 @@ public class UltimateTickSystem {
 
         data.setLastUltimateResetDay(currentDay);
 
-        data.resetCooldowns();
+        data.resetDaily();
     }
 }

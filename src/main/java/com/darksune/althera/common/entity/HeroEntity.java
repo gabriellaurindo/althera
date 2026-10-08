@@ -9,6 +9,7 @@ import com.darksune.althera.common.attachment.ManaData;
 import com.darksune.althera.common.hero.HeroDefinition;
 import com.darksune.althera.common.hero.HeroRegistry;
 import com.darksune.althera.common.system.HeroStatsSystem;
+import com.darksune.althera.common.system.HeroSummonSystem;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -16,6 +17,7 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
@@ -73,12 +75,12 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
         this.setPersistenceRequired();
         this.xpReward = 0;
 
-        // nome
+        // name
         this.setCustomName(Component.literal("Hero"));
         this.setCustomNameVisible(true);
-        // não pega loot
+        // doesn't pick up loot
         this.setCanPickUpLoot(false);
-        // Nao da despawn
+        // doesn't despawn
         this.setPersistenceRequired();
         this.moveControl = new HeroEntityMoveControl(this);
         this.setPathfindingMalus(PathType.WATER, 0.0F);
@@ -93,6 +95,17 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
     public Player getOwner() {
         if (ownerUuid == null) return null;
         return this.level().getPlayerByUUID(ownerUuid);
+    }
+
+    /**
+     * Looks up the owner in any dimension; {@link #getOwner()} only sees the hero's current dimension.
+     */
+    @Nullable
+    public Player findOwner() {
+        if (ownerUuid == null || !(level() instanceof ServerLevel serverLevel)) {
+            return getOwner();
+        }
+        return serverLevel.getServer().getPlayerList().getPlayer(ownerUuid);
     }
 
     public boolean isOwnedBy(Player player) {
@@ -234,10 +247,23 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
             setAttackAnimationTicks(getAttackAnimationTicks() - 1);
         }
 
-        final Player owner = getOwner();
-        if (owner == null) return;
+        final Player owner = findOwner();
+        if (owner == null) {
+            // owner offline: don't leave the hero abandoned in the world
+            this.discard();
+            return;
+        }
 
         final HeroData heroData = HeroData.get(owner);
+
+        // Zupi :)
+        if (!this.getUUID().equals(heroData.getSummonUUID())) {
+            this.discard();
+            return;
+        }
+
+        // owner in another dimension: login/respawn/dimension change bring the hero back
+        if (owner.level() != level()) return;
 
         final HeroDefinition definition = heroData.getHeroDefinition();
 
@@ -257,19 +283,14 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
         }
 
         // =========================
-        // 🟢 SYNC DE VIDA (quando muda)
+        // 🟢 HEALTH SYNC (when it changes)
         // =========================
         syncHealthIfChanged(owner, heroData);
 
         // =========================
-        // 🔵 TELEPORTE
+        // 🔵 TELEPORT
         // =========================
         handleTeleport(owner);
-
-        // Zupi :)
-        if (!this.getUUID().equals(heroData.getSummonUUID())) {
-            this.discard();
-        }
     }
 
     @Override
@@ -295,15 +316,9 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
             super.die(source);
             return;
         }
-        if (getOwner() != null) {
-            final HeroData heroData = HeroData.get(getOwner());
-            heroData.clearSummon();
-            heroData.setDefeated(true);
-            heroData.sync(getOwner());
-            habilitarEspirito(this.getOwner());
-            getOwner().sendSystemMessage(
-                    Component.literal("§cYour summon has been defeated! It will recover over time.")
-            );
+        final Player owner = findOwner();
+        if (owner != null) {
+            HeroSummonSystem.handleDefeat(owner, this);
         }
         super.die(source);
     }
@@ -381,11 +396,11 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
 
         if (manaData.getMana() < cost) {
             owner.sendSystemMessage(Component.literal("Not enough mana! Summon dismissed."));
-            remove();
+            HeroSummonSystem.dismissSummon(owner);
             return;
         }
-
-//        manaData.consumeMana(owner, cost);
+        //todo temp
+        manaData.consumeMana(owner, cost);
 
         if (getHealth() < HeroStatsSystem.getMaxHealth(heroData)) {
             heal(1.0F);
@@ -435,11 +450,12 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
     }
 
     public void remove() {
-        if (getOwner() != null) {
-            final HeroData heroData = HeroData.get(getOwner());
+        final Player owner = findOwner();
+        if (owner != null) {
+            final HeroData heroData = HeroData.get(owner);
             heroData.clearSummon();
-            heroData.sync(getOwner());
-            habilitarEspirito(getOwner());
+            heroData.sync(owner);
+            habilitarEspirito(owner);
         }
         this.discard();
     }

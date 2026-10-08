@@ -2,19 +2,19 @@ package com.darksune.althera.common.ultimate;
 
 import com.darksune.althera.common.attachment.ManaData;
 import com.darksune.althera.common.entity.HeroEntity;
+import com.darksune.althera.common.skill.SkillEndReason;
+import com.darksune.althera.common.skill.SkillTimers;
 import com.darksune.althera.common.system.HeroSummonSystem;
 import com.darksune.althera.common.ultimate.skill.IUltimateSkill;
 import com.darksune.althera.common.ultimate.skill.UltimateSkillType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.Iterator;
-import java.util.Map;
 
 public class UltimateSystem {
 
-    //todo impedir spawn e despawn quando a ultimate foi ativa
-    //todo fazer funcionar uma vez por dia só
+    //todo block summon/dismiss while an ultimate is active
     public static void activateSkill(Player player, UltimateSkillType ultimateSkillType) {
 
         HeroEntity heroEntity = HeroSummonSystem.getSummon(player);
@@ -35,8 +35,17 @@ public class UltimateSystem {
             return;
         }
 
+        if (ultimateData.wasUsedToday(ultimateSkillType)) {
+            player.sendSystemMessage(Component.literal("§eUltimate already used today. It recharges at the start of a new day."));
+            return;
+        }
+
         if (ultimateData.isSkillOnCooldown(ultimateSkillType)) {
             player.sendSystemMessage(Component.literal("Ultimate on cooldown"));
+            return;
+        }
+
+        if (!ultimateSkill.canActivate(player, heroEntity)) {
             return;
         }
 
@@ -51,6 +60,8 @@ public class UltimateSystem {
 
         data.activateSkill(ultimateSkillType, ultimateSkill.getDurationTicks());
 
+        data.markUsedToday(ultimateSkillType);
+
         data.startSkillCooldown(ultimateSkillType, ultimateSkill.getCooldownTicks());
 
         ultimateSkill.onCooldownStart(player);
@@ -59,58 +70,28 @@ public class UltimateSystem {
     }
 
     public static void tickActiveSkills(Player player, HeroEntity heroEntity, UltimateData data) {
-
-        Iterator<Map.Entry<UltimateSkillType, Integer>> iterator = data.getActiveSkills().entrySet().iterator();
-
-        while (iterator.hasNext()) {
-
-            Map.Entry<UltimateSkillType, Integer> entry = iterator.next();
-
-            UltimateSkillType ultimateSkillType = entry.getKey();
-
-            IUltimateSkill ultimateSkill = ultimateSkillType.getSkill();
-
-            int remainingTicks = entry.getValue() - 1;
-
-            if (remainingTicks <= 0) {
-
-                ultimateSkill.onExpire(player, heroEntity);
-
-                iterator.remove();
-
-                continue;
-            }
-
-            entry.setValue(remainingTicks);
-
-            ultimateSkill.tick(player, heroEntity, remainingTicks);
-        }
+        SkillTimers.tick(
+                data.getActiveSkills(),
+                (skillType, remainingTicks) -> skillType.getSkill().tick(player, heroEntity, remainingTicks),
+                skillType -> skillType.getSkill().onEnd(player, heroEntity, SkillEndReason.EXPIRED)
+        );
     }
 
     public static void tickCooldownSkills(Player player, UltimateData data) {
+        SkillTimers.tick(
+                data.getCooldownSkills(),
+                (skillType, remainingTicks) -> {},
+                skillType -> skillType.getSkill().onCooldownExpire(player)
+        );
+    }
 
-        Iterator<Map.Entry<UltimateSkillType, Integer>> iterator = data.getCooldownSkills().entrySet().iterator();
-
-        while (iterator.hasNext()) {
-
-            Map.Entry<UltimateSkillType, Integer> entry = iterator.next();
-
-            UltimateSkillType ultimateSkillType = entry.getKey();
-
-            IUltimateSkill ultimateSkill = ultimateSkillType.getSkill();
-
-            int remainingTicks = entry.getValue() - 1;
-
-            if (remainingTicks <= 0) {
-
-                ultimateSkill.onCooldownExpire(player);
-
-                iterator.remove();
-
-                continue;
-            }
-
-            entry.setValue(remainingTicks);
-        }
+    /**
+     * Ends every active skill with the given reason; each skill decides the consequence in onEnd.
+     */
+    public static void endActiveSkills(Player player, @Nullable HeroEntity heroEntity, SkillEndReason reason) {
+        SkillTimers.endAll(
+                UltimateData.get(player).getActiveSkills(),
+                skillType -> skillType.getSkill().onEnd(player, heroEntity, reason)
+        );
     }
 }

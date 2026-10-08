@@ -1,5 +1,6 @@
 package com.darksune.althera.common.entity;
 
+import com.darksune.althera.common.util.LightOrbUtil;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -41,7 +42,7 @@ public class LightOrbEntity extends Entity {
     public void tick() {
         super.tick();
 
-        // CLIENT → partículas
+        // CLIENT → particles
         if (level().isClientSide) {
             level().addParticle(ParticleTypes.END_ROD,
                     getX(),
@@ -55,21 +56,21 @@ public class LightOrbEntity extends Entity {
         }
 
         Player player = getOwnerUuid();
-        if (player == null) {
+        if (player == null || !LightOrbUtil.isActiveOrb(this)) {
             discard();
             return;
         }
 
-        // 🧭 direção do player
+        // 🧭 player direction
         float yaw = player.getYRot();
 
-        // converte pra radiano
+        // convert to radians
         double rad = Math.toRadians(yaw);
 
-        double radius = 2.0; // distância lateral
+        double radius = 2.0; // side distance
         double height = 2.0;
 
-        // 👉 lado direito do player (perpendicular)
+        // 👉 player's right side (perpendicular)
         double offsetX = Math.sin(rad) * radius;
         double offsetZ = -Math.cos(rad) * radius;
 
@@ -79,7 +80,7 @@ public class LightOrbEntity extends Entity {
                 player.getZ() + offsetZ
         );
 
-        // movimento suave
+        // smooth movement
         Vec3 direction = target.subtract(position()).scale(0.2);
         setPos(position().add(direction));
         handleOrb();
@@ -93,9 +94,9 @@ public class LightOrbEntity extends Entity {
         Player owner = getOwnerUuid();
         if (owner == null) return;
 
-        // ⏱️ a cada 4 segundos
+        // ⏱️ every 4 seconds
         if (tickCount % 80 == 0) {
-            // 🛡️ Resistência I
+            // 🛡️ Resistance I
             owner.addEffect(new MobEffectInstance(
                     MobEffects.DAMAGE_RESISTANCE,
                     100,
@@ -105,7 +106,7 @@ public class LightOrbEntity extends Entity {
                     true
             ));
         }
-        // 🧠 teleporte
+        // 🧠 teleport
         double distance = distanceTo(owner);
 
         if (distance > 30) {
@@ -115,6 +116,12 @@ public class LightOrbEntity extends Entity {
                     owner.getZ() + (level.getRandom().nextDouble() - 0.5) * 2
             );
         }
+    }
+
+    // the orb is recreated from the hero state (login, respawn...), never loaded from the save
+    @Override
+    public boolean shouldBeSaved() {
+        return false;
     }
 
     @Override

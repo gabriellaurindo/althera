@@ -2,24 +2,29 @@ package com.darksune.althera.common.util;
 
 import com.darksune.althera.common.entity.AltheraEntities;
 import com.darksune.althera.common.entity.LightOrbEntity;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.AABB;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 public class LightOrbUtil {
 
-    public static void habilitarEspirito(final Player player) {
-        Level level = player.level();
+    // Active orb of each player (server-side). Orbs are not saved with the world,
+    // so this map is the source of truth and no area search is needed.
+    private static final Map<UUID, LightOrbEntity> ORBS = new HashMap<>();
 
-        // ❌ já existe? não cria outro
-        if (getPlayerOrb(player, level) != null) {
+    // the orb teleports by itself from 30 on; beyond this it is probably in a non-ticking chunk
+    private static final double RECALL_DISTANCE = 48;
+
+    public static void habilitarEspirito(final Player player) {
+        // ❌ already exists? don't create another
+        if (getPlayerOrb(player) != null) {
             return;
         }
 
+        Level level = player.level();
         LightOrbEntity orb = AltheraEntities.LIGHT_ORB.get().create(level);
 
         if (orb != null) {
@@ -27,28 +32,56 @@ public class LightOrbUtil {
             orb.setOwnerUuid(player.getUUID());
 
             level.addFreshEntity(orb);
+            ORBS.put(player.getUUID(), orb);
+        }
+    }
+
+    /**
+     * Creates the spirit if missing and brings it back if it was left behind (e.g. non-ticking chunk after a teleport).
+     */
+    public static void garantirEspirito(final Player player) {
+        final LightOrbEntity orb = getPlayerOrb(player);
+
+        if (orb == null) {
+            habilitarEspirito(player);
+            return;
+        }
+
+        if (orb.distanceTo(player) > RECALL_DISTANCE) {
+            orb.setPos(player.getX(), player.getY() + 1.5, player.getZ());
         }
     }
 
     public static void desabilitarEspirito(final Player player) {
-        final UUID uuid = player.getUUID();
+        final LightOrbEntity orb = ORBS.remove(player.getUUID());
 
-        //TODO temp, usar uuid
-        for (ServerLevel level : player.getServer().getAllLevels()) {
-            AABB box = new AABB(player.blockPosition()).inflate(10000);
-
-            level.getEntitiesOfClass(LightOrbEntity.class, box)
-                    .stream()
-                    .filter(e -> uuid.equals(e.getOwnerUUID()))
-                    .forEach(Entity::discard);
+        if (orb != null) {
+            orb.discard();
         }
     }
 
-    public static LightOrbEntity getPlayerOrb(Player player, Level level) {
-        return level.getEntitiesOfClass(LightOrbEntity.class, player.getBoundingBox().inflate(50))
-                .stream()
-                .filter(o -> player.getUUID().equals(o.getOwnerUuid().getUUID()))
-                .findFirst()
-                .orElse(null);
+    public static LightOrbEntity getPlayerOrb(final Player player) {
+        final LightOrbEntity orb = ORBS.get(player.getUUID());
+
+        if (orb == null || orb.isRemoved()) {
+            ORBS.remove(player.getUUID());
+            return null;
+        }
+
+        // left in the previous dimension (respawn/dimension change): discard it so it is recreated next to the player
+        if (orb.level() != player.level()) {
+            desabilitarEspirito(player);
+            return null;
+        }
+
+        return orb;
+    }
+
+    /**
+     * Orbs that are not in the map (from old saves or duplicates) must discard themselves.
+     */
+    public static boolean isActiveOrb(final LightOrbEntity orb) {
+        final UUID owner = orb.getOwnerUUID();
+        return owner != null && ORBS.get(owner) == orb;
     }
 }

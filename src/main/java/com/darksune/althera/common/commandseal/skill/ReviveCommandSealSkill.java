@@ -12,20 +12,32 @@ public class ReviveCommandSealSkill extends AbstractCommandSealSkill {
     private static final int DURATION_TICKS = 20;
     private static final int COOLDOWN_TICKS = DURATION_TICKS + 20;
 
-    //todo criar uma skill de Heal, gasta 50 de mana e recupera toda a vida do summon, se tiver vivo claro
+    @Override
+    public boolean canActivate(Player player, HeroEntity heroEntity) {
+        final HeroData heroData = HeroData.get(player);
+
+        if (!heroData.isDefeated()) {
+            player.sendSystemMessage(Component.literal("§eYour summon is not defeated."));
+            return false;
+        }
+
+        if (!heroData.canResurrect()) {
+            player.sendSystemMessage(Component.literal("§cYour summon cannot be revived until it fully recovers."));
+            return false;
+        }
+
+        return true;
+    }
+
     @Override
     public void execute(Player player, HeroEntity heroEntity) {
 
         final HeroData heroData = HeroData.get(player);
 
-        if (!heroData.canResurrect()) {
-            player.sendSystemMessage(Component.literal("deu ruim"));
-            return;
-        }
-
         heroData.setHealth(HeroStatsSystem.getMaxHealth(heroData));
         heroData.setDefeated(false);
-        HeroSummonSystem.spawnSummon(player);
+        // the skill already charged its own cost; summoning requires no extra mana
+        HeroSummonSystem.spawnSummon(player, true, false);
     }
 
     @Override

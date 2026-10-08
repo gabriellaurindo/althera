@@ -14,7 +14,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
 
-import static com.darksune.althera.common.util.LightOrbUtil.habilitarEspirito;
+import static com.darksune.althera.common.util.LightOrbUtil.desabilitarEspirito;
 
 @EventBusSubscriber(modid = Althera.MOD_ID)
 public final class PlayerEvents {
@@ -27,13 +27,18 @@ public final class PlayerEvents {
         if (level.isClientSide) return;
         final HeroData heroData = HeroData.get(player);
 
-        // ⏱️ a cada 2 segundos
+        // ⏱️ every 2 seconds
         if (player.tickCount % 40 == 0) {
             final ManaData manaData = ManaData.get(player);
             manaData.regenMana(player, level);
         }
 
-        if (player.tickCount % 1200 == 0) { // ⏱️ 1 minuto
+        // ⏱️ every second: hero/spirit left behind (/tp, ender pearl...)
+        if (player.tickCount % 20 == 0 && player.isAlive() && !player.isSpectator()) {
+            HeroSummonSystem.restorePresence(player);
+        }
+
+        if (player.tickCount % 1200 == 0) { // ⏱️ 1 minute
             if (heroData.getInterventions() > 0) {
                 heroData.setInterventions(heroData.getInterventions() - 1);
                 heroData.sync(player);
@@ -54,10 +59,7 @@ public final class PlayerEvents {
                 if (heroData.isDefeated() && newHealth >= maxHealth) {
                     heroData.setDefeated(false);
                     heroData.setCanResurrect(true);
-
-                    player.sendSystemMessage(
-                            Component.literal("§aYour summon has recovered and can be summoned again!")
-                    );
+                    player.sendSystemMessage(Component.literal("§aYour summon has recovered and can be summoned again!"));
                 }
 
                 heroData.setHealth(newHealth);
@@ -70,13 +72,29 @@ public final class PlayerEvents {
     public static void onPlayerChangeDimension(PlayerEvent.PlayerChangedDimensionEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
 
-        final HeroData heroData = HeroData.get(player);
+        HeroSummonSystem.restorePresence(player);
+    }
 
-        if (!heroData.isSummoned()) {
-            habilitarEspirito(player);
-            return;
-        }
+    @SubscribeEvent
+    public static void onPlayerRespawn(PlayerEvent.PlayerRespawnEvent event) {
+        if (!(event.getEntity() instanceof ServerPlayer player)) return;
 
-        HeroSummonSystem.spawnSummon(player);
+        HeroSummonSystem.restorePresence(player);
+    }
+
+    @SubscribeEvent
+    public static void onPlayerLogin(PlayerEvent.PlayerLoggedInEvent event) {
+        if (!(event.getEntity() instanceof ServerPlayer player)) return;
+
+        HeroSummonSystem.restorePresence(player);
+    }
+
+    @SubscribeEvent
+    public static void onPlayerLogout(PlayerEvent.PlayerLoggedOutEvent event) {
+        if (!(event.getEntity() instanceof ServerPlayer player)) return;
+
+        // don't leave the hero abandoned in the world while the owner is offline
+        HeroSummonSystem.dismissSummon(player);
+        desabilitarEspirito(player);
     }
 }
