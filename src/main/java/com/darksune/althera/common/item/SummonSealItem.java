@@ -29,7 +29,7 @@ public final class SummonSealItem extends Item {
 //
 //            var data = player.getPersistentData();
 //
-//            // 🧠 garante que tem mana
+//            // 🧠 make sure there is mana
 //            if (!data.contains(ManaUtil.MANA)) {
 //                data.putInt("mana", 200);
 //                data.putInt("max_mana", 200);
@@ -37,13 +37,13 @@ public final class SummonSealItem extends Item {
 //
 //            int mana = data.getInt("mana");
 //
-//            // ❌ sem mana suficiente
+//            // ❌ not enough mana
 //            if (mana < 10) {
 //                player.sendSystemMessage(Component.literal("Sem mana!"));
 //                return InteractionResult.FAIL;
 //            }
 //
-//            // 🧟 verifica se já tem summon ativo
+//            // 🧟 check whether a summon is already active
 //            boolean hasSummon = level.getEntitiesOfClass(Zombie.class, player.getBoundingBox().inflate(50))
 //                    .stream()
 //                    .anyMatch(z -> z.getTags().contains("friendly_summon")
@@ -65,17 +65,17 @@ public final class SummonSealItem extends Item {
 //                        0
 //                );
 //
-//                // 🟢 marca como "do jogador"
+//                // 🟢 mark as "player-owned"
 //                zombie.addTag("friendly_summon");
 //                zombie.getPersistentData().putUUID("owner", player.getUUID());
 //
-//                // 🟢 não despawnar
+//                // 🟢 don't despawn
 //                zombie.setPersistenceRequired();
 //
-//                // 🧠 limpa targets padrão
+//                // 🧠 clear default targets
 //                zombie.targetSelector.getAvailableGoals().clear();
 //
-//                // 🎯 atacar monstros que não são friendly
+//                // 🎯 attack monsters that aren't friendly
 //                zombie.targetSelector.addGoal(
 //                        1,
 //                        new NearestAttackableTargetGoal<>(
@@ -95,7 +95,7 @@ public final class SummonSealItem extends Item {
 //                zombie.setItemSlot(EquipmentSlot.LEGS, new ItemStack(Items.NETHERITE_LEGGINGS));
 //                zombie.setItemSlot(EquipmentSlot.FEET, new ItemStack(Items.NETHERITE_BOOTS));
 //
-//                // evitar drop
+//                // avoid drops
 //                zombie.setDropChance(EquipmentSlot.MAINHAND, 0.0F);
 //                zombie.setDropChance(EquipmentSlot.HEAD, 0.0F);
 //                zombie.setDropChance(EquipmentSlot.CHEST, 0.0F);
@@ -108,7 +108,7 @@ public final class SummonSealItem extends Item {
 //
 //                level.addFreshEntity(zombie);
 //
-//                // 🔥 consome mana
+//                // 🔥 consume mana
 //                data.putInt("mana", mana - 10);
 //
 //                player.sendSystemMessage(Component.literal(

@@ -9,6 +9,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
+//Todo move the gameplay logic out of here and just call something like hud.setSomething(player, true/false)
 public record ToggleHeroSettingPacket(Setting setting) implements CustomPacketPayload {
 
     public static final CustomPacketPayload.Type<ToggleHeroSettingPacket> TYPE =

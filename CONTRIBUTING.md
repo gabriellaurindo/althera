@@ -6,6 +6,9 @@
 
 ## Branch Structure
 
+> **Note (temporary):** for now all work happens on `feature-initial`, which is merged into `master` through a
+> pull request. The `release` branch is skipped until the flow below is needed again.
+
 ### `master`
 - Main branch containing the **latest features/content**.
 - **Does not guarantee** the most up-to-date Forge or Minecraft version.
@@ -97,19 +100,38 @@ The changelog allows easy tracking of which features are present in each Forge/F
 
 ## Changelog Structure
 
-### Features or Updates
+`CHANGELOG.md` follows this layout:
 
-{mod version} - {Title} {type: feature/hotfix or both}
+```
+## [Unreleased]
 
-{Detailed description of changes}
+### Added
+### Changed
+### Fixed
+```
+
+- Every change is added under `[Unreleased]` while developing.
+- On release, `[Unreleased]` becomes `## [{mod version}] - {YYYY-MM-DD} - {Title} ({feature/hotfix or both})`
+  and a new empty `[Unreleased]` is added above it.
+- Hotfixes for specific versions use the same header with `hotfix - {forge/fabric}-{version}-{specific-version}`.
 
 ---
 
-### Hotfix for Specific Versions
+## Release Flow
 
-{mod version} - {Title} hotfix - {forge/fabric}-{version}-{specific-version (if applicable)}
+Claude Code skills automate this flow: `/init-desen` prepares the work branch and `/publish` runs steps 1–5
+(optionally starting from the work branch, reconciling the changelog and opening/merging the PR).
 
-{Detailed description of changes}
+1. Merge the work branch into `master` through a pull request.
+2. On `master`, cut the release: version line in `CHANGELOG.md`, `mod_version` bump,
+   notes in `release-notes/{version}/` (`github.md`, `curseforge.md`, `discord.md`, `patreon.md`), wiki pages in
+   `docs/wiki/`, build check, `Release {version}` commit and tag.
+3. Push `master` and the tag. The tag triggers `.github/workflows/release.yml`, which builds the jar and publishes:
+   - GitHub Release (notes from `github.md` + jar)
+   - CurseForge (needs secret `CURSEFORGE_TOKEN` and variable `CURSEFORGE_PROJECT_ID`)
+   - Discord announcement (needs secret `DISCORD_WEBHOOK`)
+4. Publish the wiki with `scripts/sync-wiki.sh {version}`.
+5. Post `patreon.md` on Patreon (manual: Patreon has no API for posts).
 
 ---
 

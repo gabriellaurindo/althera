@@ -3,15 +3,19 @@ package com.darksune.althera.common.hero;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.mojang.logging.LogUtils;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.profiling.ProfilerFiller;
+import org.slf4j.Logger;
 
 import java.util.Map;
 
 public class HeroLoader extends SimpleJsonResourceReloadListener {
+
+    private static final Logger LOGGER = LogUtils.getLogger();
 
     private static final Gson GSON = new Gson();
 
@@ -36,12 +40,7 @@ public class HeroLoader extends SimpleJsonResourceReloadListener {
 
         HeroRegistry.clear();
 
-        System.out.println("=== HERO LOADER ===");
-        System.out.println("Entries: " + map.size());
-
-        for (var entry : map.entrySet()) {
-            System.out.println("Found: " + entry.getKey());
-        }
+        int failed = 0;
 
         for (Map.Entry<ResourceLocation, JsonElement> entry : map.entrySet()) {
 
@@ -54,17 +53,17 @@ public class HeroLoader extends SimpleJsonResourceReloadListener {
 
                 HeroRegistry.register(hero);
 
-                System.out.println("Loaded hero: " + id);
+                LOGGER.debug("Loaded hero {}", id);
 
             } catch (Exception e) {
 
-                System.err.println(
-                        "Failed to load hero: " + entry.getKey()
-                );
+                failed++;
 
-                e.printStackTrace();
+                LOGGER.error("Failed to load hero {}: {}", entry.getKey(), e.toString());
             }
         }
+
+        LOGGER.info("Loaded {} heroes ({} failed)", map.size() - failed, failed);
     }
 
     private HeroDefinition parseHero(

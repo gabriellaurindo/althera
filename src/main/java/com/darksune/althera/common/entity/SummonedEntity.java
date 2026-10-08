@@ -58,19 +58,19 @@ public class SummonedEntity extends PathfinderMob implements GeoEntity, OwnableE
     protected void registerGoals() {
         super.registerGoals();
 
-        // 🧭 Seguir o dono (player)
+        // 🧭 Follow the owner (player)
 //        this.goalSelector.addGoal(1, new FollowOwnerGoal(this, 1.0D, 2.0F, 10.0F));
 
-        // ⚔️ Atacar inimigos
+        // ⚔️ Attack enemies
         this.goalSelector.addGoal(2, new MeleeAttackGoal(this, 1.2D, true));
 
-        // 👀 olhar ao redor
+        // 👀 look around
         this.goalSelector.addGoal(3, new RandomLookAroundGoal(this));
 
-        // 🚶 andar aleatoriamente (opcional)
+        // 🚶 wander randomly (optional)
         this.goalSelector.addGoal(4, new WaterAvoidingRandomStrollGoal(this, 0.8D));
 
-        // 🎯 escolher alvo (monstros)
+        // 🎯 pick target (monsters)
         this.targetSelector.addGoal(1,
                 new NearestAttackableTargetGoal<>(
                         this,
@@ -85,7 +85,7 @@ public class SummonedEntity extends PathfinderMob implements GeoEntity, OwnableE
         return cache;
     }
 
-    //TODO: Temporario
+    //TODO: Temporary
     @Override
     public boolean isAlliedTo(final Entity entity) {
         return entity instanceof Player;

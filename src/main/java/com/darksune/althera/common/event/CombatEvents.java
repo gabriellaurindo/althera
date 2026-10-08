@@ -38,7 +38,10 @@ public class CombatEvents {
             return;
         }
 
-        if (event.getSource().getEntity() == null) {
+        final Entity attacker = event.getSource().getEntity();
+
+        // no attacker, or damage caused by the player themselves (e.g. ender pearl): the hero doesn't intervene
+        if (attacker == null || attacker == player) {
             return;
         }
 
@@ -61,12 +64,13 @@ public class CombatEvents {
             return;
         }
 
-        hero.hurt(event.getSource(), damage);
+        // the hero didn't absorb it (invulnerable, damage cancelled...): the damage goes through to the player
+        if (!hero.hurt(event.getSource(), damage)) {
+            return;
+        }
 
         heroData.incrementInterventions();
         heroData.sync(player);
-
-        Entity attacker = event.getSource().getEntity();
 
         if (attacker instanceof Mob mob) {
 

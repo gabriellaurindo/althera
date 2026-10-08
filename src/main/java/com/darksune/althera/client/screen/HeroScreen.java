@@ -1,7 +1,7 @@
 package com.darksune.althera.client.screen;
 
 import com.darksune.althera.Althera;
-import com.darksune.althera.client.keybind.AltheraKeybinds;
+import com.darksune.althera.client.input.AltheraKeybinds;
 import com.darksune.althera.common.attachment.HeroData;
 import com.darksune.althera.common.entity.AltheraEntities;
 import com.darksune.althera.common.entity.HeroEntity;

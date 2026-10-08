@@ -43,6 +43,6 @@ public class HeroRollSystem {
             }
         }
 
-        return HeroRank.EX; // Temp, colocar F
+        return HeroRank.EX; // Temp, should be F
     }
 }

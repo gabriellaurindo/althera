@@ -6,7 +6,7 @@ build/
 out/
 *.log
 
-# Gradle wrapper (NÃO ignorar)
+# Gradle wrapper (do NOT ignore)
 !gradle/wrapper/gradle-wrapper.jar
 !gradle/wrapper/gradle-wrapper.properties
 
@@ -32,3 +32,11 @@ Thumbs.db
 # Environment / Secrets
 # =========================
 .env
+
+# =========================
+# AI tooling (local only)
+# =========================
+CLAUDE.md
+CLAUDE.local.md
+.claude/
+.codegraph/
