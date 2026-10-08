@@ -124,14 +124,15 @@ Claude Code skills automate this flow: `/init-desen` prepares the work branch an
 
 1. Merge the work branch into `master` through a pull request.
 2. On `master`, cut the release: version line in `CHANGELOG.md`, `mod_version` bump,
-   notes in `release-notes/{version}/` (`github.md`, `curseforge.md`, `discord.md`, `patreon.md`), wiki pages in
+   notes in `release-notes/{version}/` (`github.md`, `curseforge.md`, `discord.md`), wiki pages in
    `docs/wiki/`, build check, `Release {version}` commit and tag.
 3. Push `master` and the tag. The tag triggers `.github/workflows/release.yml`, which builds the jar and publishes:
    - GitHub Release (notes from `github.md` + jar)
    - CurseForge (needs secret `CURSEFORGE_TOKEN` and variable `CURSEFORGE_PROJECT_ID`)
    - Discord announcement (needs secret `DISCORD_WEBHOOK`)
 4. Publish the wiki with `scripts/sync-wiki.sh {version}`.
-5. Post `patreon.md` on Patreon (manual: Patreon has no API for posts).
+5. Paste the manual docs: `docs/patreon/{version}.md` as a new Patreon post and `docs/curseforge/description.md`
+   as the CurseForge project description (neither site has an API for this).
 
 ---
 
