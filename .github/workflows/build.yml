@@ -1,6 +1,17 @@
 name: Build
 
-on: [push, pull_request]
+# Pushes to master build the merged result; pull requests build each update of the PR branch.
+# Feature branch pushes without an open PR do not build, which avoids duplicate runs.
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+# A newer commit on the same branch/PR cancels the build still running for the previous one.
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build:
