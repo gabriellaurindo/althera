@@ -43,7 +43,7 @@ public class FollowOwnerGoal extends Goal {
             return false;
         }
 
-        // não segue durante combate
+        // don't follow during combat
         if (hero.getTarget() != null) {
             return false;
         }

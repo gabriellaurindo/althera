@@ -260,7 +260,7 @@ public class HeroData {
     // LOGIC
     // =========================
 
-    //todo usar um sistema de dirt check no tick pra sync automatico
+    //todo use a dirty check on tick for automatic sync
     public void sync(Player player) {
         player.setData(AltheraAttachments.HERO.get(), this);
     }

@@ -1,6 +1,6 @@
 package com.darksune.althera;
 
-import com.darksune.althera.common.command.HeroCommand;
+import com.darksune.althera.common.command.AltheraCommands;
 import com.darksune.althera.common.entity.AltheraEntities;
 import com.darksune.althera.common.entity.HeroEntity;
 import com.darksune.althera.common.entity.SummonedEntity;
@@ -38,7 +38,7 @@ public final class Althera {
 
     @SubscribeEvent
     public static void onRegisterCommands(RegisterCommandsEvent event) {
-        HeroCommand.register(event.getDispatcher());
+        AltheraCommands.register(event.getDispatcher());
     }
 
     @SubscribeEvent
@@ -53,7 +53,7 @@ public final class Althera {
         );
     }
 
-    // todo: Comentado por enquanto
+    // todo: commented out for now
 //    @SubscribeEvent
 //    public static void onAddLayers(EntityRenderersEvent.AddLayers event) {
 //

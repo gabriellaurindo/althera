@@ -21,7 +21,7 @@ public final class AltheraCreativeTabs {
                             .icon(() -> new ItemStack(AltheraItems.SUMMON_SEAL.get()))
                             .displayItems((parameters, output) -> {
 
-                                // seus itens aqui
+                                // your items here
                                 output.accept(AltheraItems.SUMMON_SEAL.get());
                                 output.accept(AltheraItems.RITUAL_CORE.get());
 

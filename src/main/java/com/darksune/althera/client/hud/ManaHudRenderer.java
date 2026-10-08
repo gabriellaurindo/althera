@@ -35,19 +35,19 @@ public final class ManaHudRenderer {
         int x = (width - barWidth) / 2;
         int y = height - 48;
 
-        // evita divisão por zero (importante)
+        // avoid division by zero (important)
         float ratio = manaMax > 0 ? (float) mana / manaMax : 0;
         int filled = (int) (barWidth * ratio);
 
         GuiGraphics gui = event.getGuiGraphics();
 
-        // fundo
+        // background
         gui.fill(x, y, x + barWidth, y + barHeight, 0xFF000000);
 
-        // barra
+        // bar
         gui.fill(x, y, x + filled, y + barHeight, 0xFF00BFFF);
 
-        // texto
+        // text
         gui.drawString(mc.font, mana + "/" + manaMax, x, y - 10, 0xFFFFFF);
     }
 }

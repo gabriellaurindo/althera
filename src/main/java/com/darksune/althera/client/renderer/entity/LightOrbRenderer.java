@@ -13,12 +13,12 @@ public class LightOrbRenderer extends EntityRenderer<LightOrbEntity> {
 
     @Override
     public ResourceLocation getTextureLocation(LightOrbEntity entity) {
-        return null; // não usa textura
+        return null; // no texture
     }
 
     @Override
     public boolean shouldRender(LightOrbEntity entity, net.minecraft.client.renderer.culling.Frustum frustum,
                                 double x, double y, double z) {
-        return true; // sempre renderiza (importante pra partículas)
+        return true; // always render (important for particles)
     }
 }

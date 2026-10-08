@@ -24,8 +24,8 @@ public class RitualCoreBlock extends Block {
 
     private static final VoxelShape SHAPE = Shapes.or(
             Block.box(2, 0, 2, 14, 2, 14),  // base
-            Block.box(3, 2, 3, 13, 4, 13),  // topo
-            Block.box(7, 4, 7, 9, 6, 9)     // núcleo
+            Block.box(3, 2, 3, 13, 4, 13),  // top
+            Block.box(7, 4, 7, 9, 6, 9)     // core
     );
 
     public RitualCoreBlock(Properties properties) {
@@ -84,9 +84,9 @@ public class RitualCoreBlock extends Block {
                     pos.getX() + 0.5,
                     pos.getY() + 1.0,
                     pos.getZ() + 0.5,
-                    40,          // quantidade
-                    0.5, 0.5, 0.5, // espalhamento
-                    0.1           // velocidade
+                    40,          // count
+                    0.5, 0.5, 0.5, // spread
+                    0.1           // speed
             );
         }
 

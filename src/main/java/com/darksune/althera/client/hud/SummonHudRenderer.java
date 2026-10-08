@@ -72,14 +72,14 @@ public class SummonHudRenderer {
         );
 
         // =========================
-        // SAVES (igual HP)
+        // SAVES (same as HP)
         // =========================
         int max = HeroStatsSystem.getMaxInterventions();
         int remaining = Math.max(0, max - heroData.getInterventions());
 
         float savePercent = max > 0 ? (float) remaining / max : 0;
 
-        // mesma lógica do HP
+        // same logic as HP
         int saveVisibleHeight = (int)(height * savePercent);
         int saveYOffset = height - saveVisibleHeight;
 
@@ -87,8 +87,8 @@ public class SummonHudRenderer {
             gui.blit(
                     HUD_SAVES,
                     drawX,
-                    drawY + saveYOffset,   // move pra baixo
-                    0, saveYOffset,        // UV ajustado
+                    drawY + saveYOffset,   // move down
+                    0, saveYOffset,        // adjusted UV
                     width, saveVisibleHeight,
                     width, height
             );

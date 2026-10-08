@@ -9,7 +9,7 @@ import java.util.Map;
 
 public class MultiblockValidator {
 
-    // Camada Y = 0 (nível do core)
+    // Layer Y = 0 (core level)
     private static final String[][] LAYER_0 = {
             {" ", " ", "G", " ", " "},
             {" ", " ", " ", " ", " "},
@@ -18,7 +18,7 @@ public class MultiblockValidator {
             {" ", " ", "G", " ", " "}
     };
 
-    // Camada Y = +1 (netherrack)
+    // Layer Y = +1 (netherrack)
     private static final String[][] LAYER_1 = {
             {" ", " ", "N", " ", " "},
             {" ", " ", " ", " ", " "},
@@ -27,7 +27,7 @@ public class MultiblockValidator {
             {" ", " ", "N", " ", " "}
     };
 
-    // Camada Y = -1 (diamante embaixo do core)
+    // Layer Y = -1 (diamond below the core)
     private static final String[][] LAYER_NEG1 = {
             {".", ".", ".", ".", "."},
             {".", ".", ".", ".", "."},
@@ -36,7 +36,7 @@ public class MultiblockValidator {
             {".", ".", ".", ".", "."}
     };
 
-    // Mapeamento de símbolos
+    // Symbol mapping
     private static final Map<String, Block> KEY = Map.of(
             "G", Blocks.GOLD_BLOCK,
             "N", Blocks.NETHERRACK,
@@ -60,10 +60,10 @@ public class MultiblockValidator {
                 String symbol = layer[z][x];
                 BlockPos pos = center.offset(x - half, yOffset, z - half);
 
-                // ignora
+                // ignore
                 if (symbol.equals(".")) continue;
 
-                // vazio obrigatório
+                // must be empty
                 if (symbol.equals(" ")) {
                     if (!level.isEmptyBlock(pos)) {
                         return false;
