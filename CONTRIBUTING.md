@@ -131,10 +131,8 @@ Claude Code skills automate this flow: `/init-desen` prepares the work branch an
    - CurseForge (needs secret `CURSEFORGE_TOKEN` and variable `CURSEFORGE_PROJECT_ID`)
    - Discord announcement (needs secret `DISCORD_WEBHOOK`)
 4. Publish the wiki with `scripts/sync-wiki.sh {version}`.
-5. Paste the manual docs: `docs/patreon/{version}.md` as a new Patreon post and `docs/curseforge/description.md`
-   as the CurseForge project description (neither site has an API for this).
-6. Generate the release cover with `docs/chatgpt/cover-{version}.md` in ChatGPT (attach the previous covers as
-   references) and replace the cover on CurseForge and Patreon.
+5. Manually post the update on Patreon and update the CurseForge project description (neither site has an API for
+   this), and replace the release cover on both.
 
 ---
 

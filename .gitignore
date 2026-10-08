@@ -40,3 +40,10 @@ CLAUDE.md
 CLAUDE.local.md
 .claude/
 .codegraph/
+
+# =========================
+# Manual-paste docs (local only)
+# =========================
+docs/curseforge/
+docs/patreon/
+docs/chatgpt/
