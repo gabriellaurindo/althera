@@ -1,12 +1,6 @@
-# Changelog
+## Althera 2.2.0 — Seals, Ultimate & Stability
 
-All notable changes to Althera are documented here.
-Entries go under `[Unreleased]` while developing; the release flow turns that section into a versioned one
-and generates the GitHub Release, CurseForge, Discord and Patreon notes from it.
-
-## [Unreleased]
-
-## [2.2.0] - 2026-10-08 - Seals, Ultimate & Stability (feature + hotfix)
+Minecraft 1.21.1 · NeoForge 21.1.219 · requires GeckoLib 4.7+
 
 ### Added
 - **Command Seals**: 3 charges per day (reset at the start of a new day or after sleeping), each with its own key:
@@ -43,3 +37,5 @@ and generates the GitHub Release, CurseForge, Discord and Patreon notes from it.
 - Damage interception using up an intervention when the hero did not absorb the hit, and triggering on self-inflicted
   damage (e.g. ender pearls).
 - Defeated heroes whose max health was not a whole number never finished recovering and could not be summoned again.
+
+**Full Changelog**: https://github.com/gabriellaurindo/althera/compare/althera-v2.1.1-neoforge-1.21.1...althera-v2.2.0-neoforge-1.21.1

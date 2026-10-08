@@ -17,6 +17,8 @@ Heroes are powerful summoned companions that fight alongside the player and repr
 - Levels up over time
 - Becomes stronger through progression
 - Must land the **final hit** to gain experience
+- Follows you through teleports, ender pearls, respawns and dimension changes
+- Is dismissed when you log out
 
 Heroes are persistent companions and are designed to evolve alongside the player throughout the game.
 
@@ -84,6 +86,8 @@ When dismissed, Heroes enter a spirit state instead of remaining physically acti
 
 Spirit form allows Heroes to recover safely before being summoned again.
 
+The spirit orb always stays with you: it comes back after teleports, respawns, dimension changes and logging in.
+
 ---
 
 ## 📈 Progression
@@ -125,6 +129,8 @@ The system is designed to support future expansion and potentially community-cre
 
 ## 🔗 Related Systems
 
+- [Command Seals & Ultimates](Command-Seals-and-Ultimates)
+- [Commands](Commands)
 - [Ritual System](Ritual-System)
 
 More systems will be added as development continues.
