@@ -119,8 +119,11 @@ The changelog allows easy tracking of which features are present in each Forge/F
 
 ## Release Flow
 
+Claude Code skills automate this flow: `/init-desen` prepares the work branch and `/publish` runs steps 1–5
+(optionally starting from the work branch, reconciling the changelog and opening/merging the PR).
+
 1. Merge the work branch into `master` through a pull request.
-2. On `master`, cut the release (Claude Code `/release` skill): version line in `CHANGELOG.md`, `mod_version` bump,
+2. On `master`, cut the release: version line in `CHANGELOG.md`, `mod_version` bump,
    notes in `release-notes/{version}/` (`github.md`, `curseforge.md`, `discord.md`, `patreon.md`), wiki pages in
    `docs/wiki/`, build check, `Release {version}` commit and tag.
 3. Push `master` and the tag. The tag triggers `.github/workflows/release.yml`, which builds the jar and publishes:
