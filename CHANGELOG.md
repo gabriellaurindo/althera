@@ -2,7 +2,7 @@
 
 All notable changes to Althera are documented here.
 Entries go under `[Unreleased]` while developing; the release flow turns that section into a versioned one
-and generates the GitHub Release, CurseForge, Discord and Patreon notes from it.
+and generates the GitHub Release, CurseForge and Discord notes from it.
 
 ## [Unreleased]
 

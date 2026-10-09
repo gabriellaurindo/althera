@@ -131,8 +131,7 @@ Claude Code skills automate this flow: `/init-desen` prepares the work branch an
    - CurseForge (needs secret `CURSEFORGE_TOKEN` and variable `CURSEFORGE_PROJECT_ID`)
    - Discord announcement (needs secret `DISCORD_WEBHOOK`)
 4. Publish the wiki with `scripts/sync-wiki.sh {version}`.
-5. Manually post the update on Patreon and update the CurseForge project description (neither site has an API for
-   this), and replace the release cover on both.
+5. Manually update the CurseForge project description (the API can't edit it).
 
 ---
 
