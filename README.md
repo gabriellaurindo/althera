@@ -35,4 +35,5 @@ Copyright (c) 2026 Gabriel Laurindo (Darksune). Versions up to 2.2.0 were releas
 ## ⚠️ Assets Notice
 
 The artwork (textures, models, animations) may not be used commercially. Reuse needs credit and the same license —
-see [LICENSE-ASSETS.md](LICENSE-ASSETS.md).
+see [LICENSE-ASSETS.md](LICENSE-ASSETS.md). Videos, streams and screenshots of the mod are allowed, including
+monetized ones.

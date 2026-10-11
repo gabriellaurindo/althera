@@ -23,6 +23,12 @@ You may share and adapt the artwork, as long as you:
 - **do not use it commercially** (no selling it, no paywalled content);
 - **share your changes under the same license** (CC BY-NC-SA 4.0).
 
+## Additional permission: videos and streams
+
+As an exception to the NonCommercial term, you may show the artwork in videos, streams and screenshots of the mod in
+use, **including monetized ones** (e.g. YouTube, Twitch). This does not allow selling, redistributing or reusing the
+artwork itself outside of showing the mod.
+
 ## Other parts of the mod
 
 - **Code** — GNU Lesser General Public License v3 (`LICENSE`, which builds on the GNU GPL v3 in `COPYING`).
