@@ -30,6 +30,12 @@ If you are interested in creating your own Heroes:
 
 ---
 
+## 💬 Community
+
+Questions, suggestions or bugs? Join the [Althera Discord](https://discord.gg/mvkUSnWtm6).
+
+---
+
 ## 🚧 Work in Progress
 
 Althera is currently under active development.

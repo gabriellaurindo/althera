@@ -163,6 +163,14 @@ tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
 }
 
+// Ship the license files inside the jar (suffixed with the mod id to avoid clashes in merged jars).
+def licenseSuffix = "_${mod_id}"
+tasks.named('jar', Jar).configure {
+    from(files('LICENSE', 'COPYING', 'LICENSE-ASSETS.md')) {
+        rename { name -> name.contains('.') ? name.replaceFirst(/\./, "${licenseSuffix}.") : "${name}${licenseSuffix}" }
+    }
+}
+
 // IDEA no longer automatically downloads sources/javadoc jars for dependencies, so we need to explicitly enable the behavior.
 idea {
     module {

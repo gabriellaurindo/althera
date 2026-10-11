@@ -93,5 +93,6 @@ jobs:
       - name: Announce on Discord
         if: env.DISCORD_WEBHOOK != ''
         run: |
-          jq -n --rawfile content "${{ steps.meta.outputs.notes }}/discord.md" '{content: $content}' \
+          # flags 4 = SUPPRESS_EMBEDS: no link preview cards under the announcement.
+          jq -n --rawfile content "${{ steps.meta.outputs.notes }}/discord.md" '{content: $content, flags: 4}' \
             | curl -fsS -H "Content-Type: application/json" -d @- "$DISCORD_WEBHOOK"

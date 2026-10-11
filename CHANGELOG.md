@@ -2,9 +2,14 @@
 
 All notable changes to Althera are documented here.
 Entries go under `[Unreleased]` while developing; the release flow turns that section into a versioned one
-and generates the GitHub Release, CurseForge, Discord and Patreon notes from it.
+and generates the GitHub Release, CurseForge and Discord notes from it.
 
 ## [Unreleased]
+
+### Changed
+- New license, split by part like Applied Energistics 2: code under LGPLv3, artwork (textures, models, animations)
+  under CC BY-NC-SA 4.0 (credit required, no commercial use), text and translations under CC0. Versions up to 2.2.0
+  stay under MIT.
 
 ## [2.2.0] - 2026-10-08 - Seals, Ultimate & Stability (feature + hotfix)
 
