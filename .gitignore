@@ -50,3 +50,6 @@ docs/chatgpt/
 docs/discord/
 docs/TODO.md
 scripts/compress-cover.py
+
+# Private repo (gabriellaurindo/althera-private) for the local-only files above
+.private.git/
