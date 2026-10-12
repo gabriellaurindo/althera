@@ -6,6 +6,10 @@ and generates the GitHub Release, CurseForge and Discord notes from it.
 
 ## [Unreleased]
 
+### Fixed
+- Dedicated servers: the summon HUD, the hero screen (G) and custom hero models/textures (e.g. Aria) now work for
+  every player. Hero stats shown on the client also match the server again. Heroes are re-sent after `/reload`.
+
 ## [2.2.1] - 2026-10-11 - License Update (maintenance)
 
 ### Changed

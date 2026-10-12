@@ -2,19 +2,6 @@
 
 Tracked bugs and limitations that are known but not fixed yet. Ordered by severity.
 
-## High
-
-### Hero definitions are not synced to clients (dedicated server)
-`HeroLoader` is a server datapack reload listener, so `HeroRegistry` is only populated on the server.
-In singleplayer it works by accident (integrated server and client share the same static map).
-On a dedicated server `HeroData#getHeroDefinition()` returns `null` on the client, which means:
-- `SummonHudRenderer` never renders the summon HUD.
-- `KeyActions#handleHero` never opens `HeroScreen`.
-- `HeroModel` always falls back to the default model/texture/animations (custom heroes like Aria lose their assets).
-- Client-side `HeroStatsSystem#getMaxHealth` ignores class/rank/nature multipliers.
-
-**Fix idea:** server → client payload with all hero definitions, sent on `OnDatapackSyncEvent` (covers login and `/reload`).
-
 ## Medium
 
 ### Hero loader fallbacks and empty registry
