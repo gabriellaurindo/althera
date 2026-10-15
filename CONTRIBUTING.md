@@ -117,21 +117,14 @@ The changelog allows easy tracking of which features are present in each Forge/F
 
 ---
 
-## Release Flow
+## Pull Requests
 
-Claude Code skills automate this flow: `/init-desen` prepares the work branch and `/publish` runs steps 1–5
-(optionally starting from the work branch, reconciling the changelog and opening/merging the PR).
+1. Create a `feature-{name}` or `hotfix-{name}` branch (see Branch Structure).
+2. Add your changes under `## [Unreleased]` in `CHANGELOG.md` (see Changelog Structure).
+3. Make sure `./gradlew build` passes.
+4. Open a pull request into `master` describing what changed and why.
 
-1. Merge the work branch into `master` through a pull request.
-2. On `master`, cut the release: version line in `CHANGELOG.md`, `mod_version` bump,
-   notes in `release-notes/{version}/` (`github.md`, `curseforge.md`, `discord.md`), wiki pages in
-   `docs/wiki/`, build check, `Release {version}` commit and tag.
-3. Push `master` and the tag. The tag triggers `.github/workflows/release.yml`, which builds the jar and publishes:
-   - GitHub Release (notes from `github.md` + jar)
-   - CurseForge (needs secret `CURSEFORGE_TOKEN` and variable `CURSEFORGE_PROJECT_ID`)
-   - Discord announcement (needs secret `DISCORD_WEBHOOK`)
-4. Publish the wiki with `scripts/sync-wiki.sh {version}`.
-5. Manually update the CurseForge project description (the API can't edit it).
+Releases are handled by the maintainer after the pull request is merged.
 
 ---
 
