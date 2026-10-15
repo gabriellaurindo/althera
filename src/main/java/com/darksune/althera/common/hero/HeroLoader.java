@@ -63,7 +63,12 @@ public class HeroLoader extends SimpleJsonResourceReloadListener {
             }
         }
 
-        LOGGER.info("Loaded {} heroes ({} failed)", map.size() - failed, failed);
+        LOGGER.info(
+                "Loaded {} heroes ({} failed, {} rollable)",
+                map.size() - failed,
+                failed,
+                HeroRegistry.getRollable().size()
+        );
     }
 
     private HeroDefinition parseHero(

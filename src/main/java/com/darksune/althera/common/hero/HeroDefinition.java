@@ -82,4 +82,8 @@ public class HeroDefinition {
     public String getPersonality() {
         return personality;
     }
+
+    public boolean isRollable() {
+        return model != null && texture != null && animations != null;
+    }
 }

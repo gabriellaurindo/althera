@@ -39,11 +39,21 @@ Classes are intended to define combat archetypes, future abilities, and gameplay
 
 ### Hero Ranks
 
-Current ranks include:
+Ranks, from most common to rarest:
 
-- Common
-- Rare
-- EX
+| Rank | Chance | Health multiplier |
+|---|---|---|
+| F | 40% | ×0.7 |
+| E | 25% | ×0.8 |
+| D | 15% | ×0.9 |
+| C | 10% | ×1.0 |
+| B | 5% | ×1.15 |
+| A | 3% | ×1.3 |
+| S | 1.5% | ×1.5 |
+| EX | 0.5% | ×1.75 |
+
+Only Heroes with their own model, texture and animations can be rolled. The roll only considers ranks that have at
+least one such Hero, so while Aria is the only one, every roll gives Aria.
 
 Higher-ranked Heroes generally possess:
 

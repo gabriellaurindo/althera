@@ -11,8 +11,12 @@ and generates the GitHub Release, CurseForge and Discord notes from it.
   its key, the remaining time while the skill is active or on cooldown, and grays out when you lack mana or Command
   Seal charges. Ultimates already used today show a red ✕. Remaining Command Seal charges appear above the slots.
   The HUD follows the hero HUD visibility setting.
+- All hero ranks are enabled: F, E, D, C, B, A, S and EX, each with its own roll chance. Only heroes with their own
+  model, texture and animations can be rolled, so for now every roll still gives Aria; new heroes join the roll as
+  their visuals are added.
 
 ### Fixed
+- Summoning or performing the ritual with no hero available now shows a message instead of crashing.
 - Hero datapacks: a hero without `rank` now fails to load with a clear error instead of an invalid default.
 - Dedicated servers: the summon HUD, the hero screen (G) and custom hero models/textures (e.g. Aria) now work for
   every player. Hero stats shown on the client also match the server again. Heroes are re-sent after `/reload`.

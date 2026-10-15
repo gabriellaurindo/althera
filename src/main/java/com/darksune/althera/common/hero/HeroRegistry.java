@@ -20,6 +20,12 @@ public class HeroRegistry {
         return HEROES.values();
     }
 
+    public static List<HeroDefinition> getRollable() {
+        return HEROES.values().stream()
+                .filter(HeroDefinition::isRollable)
+                .toList();
+    }
+
     public static void clear() {
         HEROES.clear();
     }

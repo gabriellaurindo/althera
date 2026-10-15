@@ -20,6 +20,8 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
+import java.util.Optional;
+
 public class RitualCoreBlock extends Block {
 
     private static final VoxelShape SHAPE = Shapes.or(
@@ -59,7 +61,12 @@ public class RitualCoreBlock extends Block {
     }
 
     public void performRitual(final Player player, final Level level, final BlockPos pos) {
-        final HeroDefinition heroDefinition = HeroRollSystem.rollHero();
+        final Optional<HeroDefinition> rolled = HeroRollSystem.rollHero();
+        if (rolled.isEmpty()) {
+            player.sendSystemMessage(Component.literal("§cNo hero answers the ritual."));
+            return;
+        }
+        final HeroDefinition heroDefinition = rolled.get();
         player.sendSystemMessage(
                 Component.literal(
                         "§aYou have formed a contract with §f"

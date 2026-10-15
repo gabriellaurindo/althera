@@ -119,13 +119,21 @@ Class advantage relationships currently exist between:
 
 ## `rank`
 
-Defines Hero rarity and overall power scaling.
+Defines Hero rarity and overall power scaling. **Required**: a Hero without `rank` fails to load.
 
-Current supported values:
+| Rank | Chance | Health multiplier |
+|---|---|---|
+| F | 40% | ×0.7 |
+| E | 25% | ×0.8 |
+| D | 15% | ×0.9 |
+| C | 10% | ×1.0 |
+| B | 5% | ×1.15 |
+| A | 3% | ×1.3 |
+| S | 1.5% | ×1.5 |
+| EX | 0.5% | ×1.75 |
 
-- `EX`
-
-Additional ranks are planned for future versions.
+The roll first picks a rank (weighted by chance, among ranks that have at least one rollable Hero), then a random
+Hero of that rank.
 
 Example:
 
@@ -141,7 +149,8 @@ Internal Hero alignment/category system.
 
 Current supported values:
 
-- `COMMON`
+- `COMMON` (default)
+- `DIVINE` — ×10 global multiplier, granted with `/althera_hero divine`
 
 Example:
 
@@ -153,9 +162,11 @@ Example:
 
 # 🎨 Visual Assets
 
-All visual assets are optional.
+A Hero only enters the roll (first summon, ritual and the `summon` / `rank` / `divine` commands) when it defines
+**all three**: `model`, `texture` and `animations`.
 
-If omitted, the Hero automatically uses fallback/default assets when possible.
+Heroes without them still load (and keep working for players who already have them, using the default assets), but
+are never rolled. This lets you add a Hero's data first and its visuals later.
 
 ---
 
@@ -238,7 +249,8 @@ Example:
 # ⚠ Notes
 
 - Invalid paths may cause missing models or textures
-- Missing visual assets automatically fallback to default assets when possible
+- Heroes missing `model`, `texture` or `animations` are never rolled
+- The game log reports how many Heroes loaded, failed and are rollable
 - Animation support is still actively evolving
 - Hero combat systems may continue changing during development
 
@@ -247,7 +259,6 @@ Future updates may introduce:
 - Skills
 - Hero abilities
 - Unique AI behaviors
-- Additional ranks
 - Expanded class systems
 - Advanced combat logic
 

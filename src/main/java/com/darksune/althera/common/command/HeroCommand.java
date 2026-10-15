@@ -18,6 +18,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class HeroCommand {
@@ -90,7 +91,14 @@ public class HeroCommand {
     private static int summonRandom(CommandSourceStack source) throws CommandSyntaxException {
         Player player = source.getPlayerOrException();
 
-        HeroDefinition def = HeroRollSystem.rollHero();
+        Optional<HeroDefinition> rolled = HeroRollSystem.rollHero();
+
+        if (rolled.isEmpty()) {
+            source.sendFailure(Component.literal("§cNo rollable heroes registered."));
+            return 0;
+        }
+
+        HeroDefinition def = rolled.get();
 
         HeroData data = HeroData.get(player);
         data.setHero(def.getId());
@@ -143,12 +151,12 @@ public class HeroCommand {
             return 0;
         }
 
-        List<HeroDefinition> pool = HeroRegistry.getAll().stream()
+        List<HeroDefinition> pool = HeroRegistry.getRollable().stream()
                 .filter(h -> h.getRank() == rank)
                 .toList();
 
         if (pool.isEmpty()) {
-            source.sendFailure(Component.literal("§cNo heroes with that rank."));
+            source.sendFailure(Component.literal("§cNo rollable heroes with that rank."));
             return 0;
         }
 
