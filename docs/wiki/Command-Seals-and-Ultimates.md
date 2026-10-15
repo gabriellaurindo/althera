@@ -6,6 +6,20 @@ All keys can be changed in **Options → Controls**, under the **Althera** categ
 
 ---
 
+## 🖥️ Skill HUD
+
+Next to the hotbar (right side) there is one slot per skill, labeled with its key (**J**, **K**, **V**, **U**):
+
+- **◆◆◆** above the seal slots: Command Seal charges left today
+- **Gold border + seconds**: the skill is active (e.g. Overdrive's remaining time)
+- **Light overlay + seconds**: the skill is on cooldown
+- **Grayed out**: not enough mana, or no Command Seal charges left
+- **Red ✕** on an Ultimate: already used today
+
+The HUD is hidden together with the Hero HUD (hero screen settings) and with **F1**.
+
+---
+
 ## 🔱 Command Seals
 
 Command Seals are limited orders given to your Hero.

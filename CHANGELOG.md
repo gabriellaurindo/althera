@@ -6,6 +6,12 @@ and generates the GitHub Release, CurseForge and Discord notes from it.
 
 ## [Unreleased]
 
+### Added
+- **Skill HUD**: slots next to the hotbar for Overdrive (J), Revive (K), Heal (V) and Explosion (U). Each slot shows
+  its key, the remaining time while the skill is active or on cooldown, and grays out when you lack mana or Command
+  Seal charges. Ultimates already used today show a red ✕. Remaining Command Seal charges appear above the slots.
+  The HUD follows the hero HUD visibility setting.
+
 ### Fixed
 - Dedicated servers: the summon HUD, the hero screen (G) and custom hero models/textures (e.g. Aria) now work for
   every player. Hero stats shown on the client also match the server again. Heroes are re-sent after `/reload`.
