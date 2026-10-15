@@ -47,7 +47,7 @@ Example Hero JSON:
 
   "model": "althera:geo/entity/hero/aria.geo.json",
   "texture": "althera:textures/entity/hero/aria.png",
-  "animations": "althera:animations/hero/aria.animation.json",
+  "animations": "althera:animations/entity/hero/aria.animation.json",
 
   "personality": "Honorable and calm"
 }
@@ -213,13 +213,13 @@ Path to the GeckoLib animation file.
 Example:
 
 ```json
-"animations": "althera:animations/hero/aria.animation.json"
+"animations": "althera:animations/entity/hero/aria.animation.json"
 ```
 
 Expected asset location:
 
 ```text
-assets/althera/animations/hero/aria.animation.json
+assets/althera/animations/entity/hero/aria.animation.json
 ```
 
 ### Currently Supported Animations
