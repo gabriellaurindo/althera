@@ -24,7 +24,3 @@ next tick, but attributes are not re-applied and the entity health overwrites th
 ### Hero removed from the datapack
 If a player's hero id no longer exists, `getHeroDefinition()` returns `null` and the next summon silently rolls a new
 random hero (level and xp are kept). No message is shown.
-
-### Skill timers are not synced every tick
-Active/cooldown timers are decremented server-side without marking the attachment dirty; the client only receives them
-when a skill starts/ends. Any future HUD that shows remaining time will display stale values.
