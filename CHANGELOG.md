@@ -14,6 +14,7 @@ and generates the GitHub Release, CurseForge and Discord notes from it.
 - All hero ranks are enabled: F, E, D, C, B, A, S and EX, each with its own roll chance. Only heroes with their own
   model, texture and animations can be rolled, so for now every roll still gives Aria; new heroes join the roll as
   their visuals are added.
+- `/althera_hero divine` (cheats) is enabled again: assigns a random Divine hero, when one is available.
 
 ### Fixed
 - Summoning or performing the ritual with no hero available now shows a message instead of crashing.

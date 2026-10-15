@@ -13,7 +13,8 @@ Commands marked with **cheats** require cheats enabled (singleplayer) or operato
 | `/althera_hero unstuck` | Everyone | Fixes your summon if it gets stuck in an inconsistent state |
 | `/althera_hero unstuck <player>` | Cheats | Same, for another player |
 | `/althera_hero summon` | Cheats | Assigns you a random Hero |
-| `/althera_hero rank <rank>` | Cheats | Assigns you a random Hero of the given rank |
+| `/althera_hero rank <rank>` | Cheats | Assigns you a random Hero of the given rank (`F`, `E`, `D`, `C`, `B`, `A`, `S`, `EX`) |
+| `/althera_hero divine` | Cheats | Assigns you a random Divine Hero |
 
 ### What `unstuck` does
 

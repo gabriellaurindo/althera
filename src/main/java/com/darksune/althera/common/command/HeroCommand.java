@@ -34,11 +34,10 @@ public class HeroCommand {
                         )
 
                         // DIVINE
-                        // todo disabled: with HeroRank limited to EX no divine hero can load (see KNOWN_ISSUES.md)
-//                        .then(Commands.literal("divine")
-//                                .requires(AltheraCommands::hasCheats)
-//                                .executes(ctx -> summonDivine(ctx.getSource()))
-//                        )
+                        .then(Commands.literal("divine")
+                                .requires(AltheraCommands::hasCheats)
+                                .executes(ctx -> summonDivine(ctx.getSource()))
+                        )
 
                         // BY RANK
                         .then(Commands.literal("rank")
@@ -109,32 +108,32 @@ public class HeroCommand {
         return 1;
     }
 
-//    // =========================
-//    // DIVINE
-//    // =========================
+    // =========================
+    // DIVINE
+    // =========================
 
-//    private static int summonDivine(CommandSourceStack source) throws CommandSyntaxException {
-//        Player player = source.getPlayerOrException();
+    private static int summonDivine(CommandSourceStack source) throws CommandSyntaxException {
+        Player player = source.getPlayerOrException();
 
-//        List<HeroDefinition> pool = HeroRegistry.getAll().stream()
-//                .filter(h -> h.getNature().isDivine())
-//                .toList();
+        List<HeroDefinition> pool = HeroRegistry.getRollable().stream()
+                .filter(h -> h.getNature().isDivine())
+                .toList();
 
-//        if (pool.isEmpty()) {
-//            source.sendFailure(Component.literal("§cNo divine heroes registered."));
-//            return 0;
-//        }
+        if (pool.isEmpty()) {
+            source.sendFailure(Component.literal("§cNo rollable divine heroes registered."));
+            return 0;
+        }
 
-//        HeroDefinition def = pool.get(ThreadLocalRandom.current().nextInt(pool.size()));
+        HeroDefinition def = pool.get(ThreadLocalRandom.current().nextInt(pool.size()));
 
-//        HeroData data = HeroData.get(player);
-//        data.setHero(def.getId());
-//        data.setHealth(HeroStatsSystem.getMaxHealth(data));
-//        data.sync(player);
+        HeroData data = HeroData.get(player);
+        data.setHero(def.getId());
+        data.setHealth(HeroStatsSystem.getMaxHealth(data));
+        data.sync(player);
 
-//        source.sendSuccess(() -> Component.literal("§dDivine hero granted."), false);
-//        return 1;
-//    }
+        source.sendSuccess(() -> Component.literal("§dDivine hero granted."), false);
+        return 1;
+    }
 
     // =========================
     // BY RANK

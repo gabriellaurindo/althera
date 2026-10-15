@@ -4,12 +4,6 @@ Tracked bugs and limitations that are known but not fixed yet. Ordered by severi
 
 ## Medium
 
-### Hero loader fallbacks and empty registry
-- `HeroLoader` defaults a missing `rank` to `"COMMON"`, which is not a valid `HeroRank`, so a hero without `rank`
-  always fails to load.
-- If no hero loads at all (broken datapack), `HeroRollSystem#rollHero` calls `nextInt(0)` and crashes on the first summon.
-- `/althera_hero divine` is commented out in `HeroCommand`: no divine hero can load while only rank `EX` is supported.
-
 ### Ritual does not end active skills
 `RitualCoreBlock#performRitual` removes the summon with `HeroEntity#remove()` instead of
 `HeroSummonSystem#dismissSummon`, so active command seal skills/ultimates are not ended
