@@ -98,8 +98,7 @@ public class HeroLoader extends SimpleJsonResourceReloadListener {
                 HeroRank.valueOf(
                         GsonHelper.getAsString(
                                 json,
-                                "rank",
-                                "COMMON"
+                                "rank"
                         ).toUpperCase()
                 );
 

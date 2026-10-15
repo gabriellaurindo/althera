@@ -13,6 +13,7 @@ and generates the GitHub Release, CurseForge and Discord notes from it.
   The HUD follows the hero HUD visibility setting.
 
 ### Fixed
+- Hero datapacks: a hero without `rank` now fails to load with a clear error instead of an invalid default.
 - Dedicated servers: the summon HUD, the hero screen (G) and custom hero models/textures (e.g. Aria) now work for
   every player. Hero stats shown on the client also match the server again. Heroes are re-sent after `/reload`.
 
