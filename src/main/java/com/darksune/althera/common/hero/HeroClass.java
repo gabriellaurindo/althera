@@ -8,7 +8,8 @@ public enum HeroClass {
     LANCER("Lancer", 1.0f, 1.25f, 0.85f, 1.25f),
     ARCHER("Archer", 0.85f, 1.35f, 0.75f, 1.1f),
     CASTER("Caster", 0.75f, 1.5f, 0.7f, 1.0f),
-    SHIELDER("Shielder", 1.5f, 0.7f, 1.6f, 0.75f);
+    SHIELDER("Shielder", 1.5f, 0.7f, 1.6f, 0.75f),
+    ASSASSIN("Assassin", 0.8f, 1.4f, 0.7f, 1.3f);
 
     private final String displayName;
 
@@ -38,8 +39,9 @@ public enum HeroClass {
         LANCER.setRelations(EnumSet.of(ARCHER), EnumSet.of(SABER));
         ARCHER.setRelations(EnumSet.of(SABER), EnumSet.of(LANCER));
 
-        CASTER.setRelations(EnumSet.noneOf(HeroClass.class), EnumSet.noneOf(HeroClass.class));
-        SHIELDER.setRelations(EnumSet.noneOf(HeroClass.class), EnumSet.noneOf(HeroClass.class));
+        CASTER.setRelations(EnumSet.noneOf(HeroClass.class), EnumSet.of(ASSASSIN));
+        SHIELDER.setRelations(EnumSet.of(ASSASSIN), EnumSet.noneOf(HeroClass.class));
+        ASSASSIN.setRelations(EnumSet.of(CASTER), EnumSet.of(SHIELDER));
     }
 
     private void setRelations(final EnumSet<HeroClass> strongAgainst, final EnumSet<HeroClass> weakAgainst) {

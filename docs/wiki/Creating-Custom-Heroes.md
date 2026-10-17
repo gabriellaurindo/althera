@@ -92,6 +92,7 @@ Current supported values:
 - `ARCHER`
 - `CASTER`
 - `SHIELDER`
+- `ASSASSIN`
 
 Example:
 
@@ -108,12 +109,15 @@ Example:
 | Archer | High attack, lower durability |
 | Caster | Extremely high attack scaling |
 | Shielder | High defense and survivability |
+| Assassin | Highest speed and high attack, but fragile |
 
 Class advantage relationships currently exist between:
 
 - Saber > Lancer
 - Lancer > Archer
 - Archer > Saber
+- Assassin > Caster
+- Shielder > Assassin
 
 ---
 

@@ -31,6 +31,7 @@ Each Hero belongs to a specific class and possesses an internal rank that influe
 ### Current Classes
 
 - Saber
+- Assassin
 - Archer *(planned)*
 - Lancer *(planned)*
 - More classes planned
@@ -146,11 +147,11 @@ The system is designed to support future expansion and potentially community-cre
 More systems will be added as development continues.
 
 > [!IMPORTANT]
-> At the current stage of development, only one fully playable Hero is publicly available.
+> At the current stage of development, only two fully playable Heroes are publicly available.
 >
 > This temporary limitation exists because the new model, texture, and animation pipeline is still being stabilized and expanded.
 >
-> Aria (EX Rank) is currently the primary showcase Hero featuring:
+> Aria (EX Rank, Saber) and Clare (EX Rank, Assassin) are currently the showcase Heroes featuring:
 >
 > - Custom model
 > - Custom textures

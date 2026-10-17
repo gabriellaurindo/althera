@@ -12,11 +12,20 @@ and generates the GitHub Release, CurseForge and Discord notes from it.
   Seal charges. Ultimates already used today show a red ✕. Remaining Command Seal charges appear above the slots.
   The HUD follows the hero HUD visibility setting.
 - All hero ranks are enabled: F, E, D, C, B, A, S and EX, each with its own roll chance. Only heroes with their own
-  model, texture and animations can be rolled, so for now every roll still gives Aria; new heroes join the roll as
-  their visuals are added.
+  model, texture and animations can be rolled, so for now every roll gives one of the two EX heroes, Aria or Clare;
+  new heroes join the roll as their visuals are added.
+- **Clare**, a new EX hero of the new Assassin class: a gothic heroine with long silver hair, crimson eyes, X
+  hairpins, a black and crimson dress with a lace jabot, detached sleeves, thigh-high buckled boots, a torn
+  crimson-lined overskirt and a gothic rapier with a ruby on the guard. Her hair, locks and overskirt sway as she
+  moves, and she has her own idle, walk, attack, ultimate and death animations. During her ultimate a spinning red
+  magic circle, about 4 blocks wide, opens at her feet.
+- **Assassin class**: fast and hard-hitting but fragile (less health and armor, more attack and speed). Strong
+  against Casters, weak against Shielders.
 - `/althera_hero divine` (cheats) is enabled again: assigns a random Divine hero, when one is available.
 
 ### Changed
+- **Notice:** hero models, textures and animations are work in progress. They can and will change constantly between
+  versions until they reach their final quality.
 - New look for the mana bar: framed bar with a blue gradient, a soft shine, 10% marks and smooth animation, with a
   light trail showing the mana you just spent. The value now sits to the right of the bar, and the frame pulses red
   when you have less than 20 mana (the cost to summon).
@@ -25,7 +34,7 @@ and generates the GitHub Release, CurseForge and Discord notes from it.
   ritual fails without consuming the diamond block.
 - Explosion ultimate: while channeling, the hero plays its ultimate animation (when its model has one) instead of
   getting a white glowing outline.
-- Heroes with a death animation now collapse to the ground on defeat. Heroes without one keep the classic
+- Heroes with a death animation (Clare) now collapse to the ground on defeat. Heroes without one keep the classic
   sideways tip-over.
 
 ### Fixed

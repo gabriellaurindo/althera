@@ -42,6 +42,9 @@ Althera is currently under active development.
 
 Systems, balancing, animations, AI behavior, and customization features are continuously evolving.
 
+> **Note:** Hero models, textures and animations are work in progress. They can and will change constantly between
+> versions until they reach their final quality.
+
 This documentation will continue expanding alongside the mod with:
 - Additional gameplay systems
 - More Hero customization features
