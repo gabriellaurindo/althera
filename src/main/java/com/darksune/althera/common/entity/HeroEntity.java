@@ -61,6 +61,10 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
                     HeroEntity.class,
                     EntityDataSerializers.INT
             );
+    private static final String ULTIMATE_CONTROLLER = "ultimate";
+    private static final String ULTIMATE_ANIMATION = "ultimate";
+    private static final String DEATH_ANIMATION = "death";
+    private static final int DEATH_ANIMATION_TICKS = 40;
 
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
 
@@ -77,7 +81,6 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
 
         // name
         this.setCustomName(Component.literal("Hero"));
-        this.setCustomNameVisible(true);
         // doesn't pick up loot
         this.setCanPickUpLoot(false);
         // doesn't despawn
@@ -215,6 +218,11 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
 
     public void triggerUltimateAnimation() {
         triggerAnim(ULTIMATE_CONTROLLER, ULTIMATE_ANIMATION);
+    }
+
+    public float getModelScale() {
+        final HeroDefinition definition = getHeroDefinition();
+        return definition == null ? 1.0f : definition.getScale();
     }
 
     public boolean isPlayingUltimate() {

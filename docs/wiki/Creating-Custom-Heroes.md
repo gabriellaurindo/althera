@@ -49,7 +49,8 @@ Example Hero JSON:
   "texture": "althera:textures/entity/hero/aria.png",
   "animations": "althera:animations/entity/hero/aria.animation.json",
 
-  "personality": "Honorable and calm"
+  "personality": "Honorable and calm",
+  "scale": 0.72
 }
 ```
 
@@ -237,6 +238,19 @@ At the current stage of development, the following animation names are expected:
 - `death` (played on defeat; keep it at most 2 seconds long and hold the last frame)
 
 These animation names should exist inside the animation JSON file. A missing animation simply doesn't play.
+
+---
+
+# 📏 Scale
+
+Optional. Multiplies the size of the hero model in the world (default `1.0`). The player is 1.8 blocks tall: lower the
+value if the hero looks taller than the player, raise it if shorter. The hero screens (Choose your Hero, hero status)
+ignore `scale` and show the model at its drawn size, a bit larger than the player. Only the rendering is scaled; the
+hero hitbox is fixed at 0.6 x 1.8 blocks, the same as the player.
+
+```json
+"scale": 0.72
+```
 
 ---
 

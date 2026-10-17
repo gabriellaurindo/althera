@@ -37,6 +37,9 @@ and generates the GitHub Release, CurseForge and Discord notes from it.
 - **Aria** has a brand new model, texture and animations: a paladin with a long cape, flowing hair and ponytail, a
   detailed face, and new idle, walk, attack, ultimate and death animations. During her ultimate, golden wings sprout
   behind her and then fade away.
+- Aria and Clare are now about as tall as the player, and the hero hitbox matches the player's (1.8 blocks). The hero
+  screens still show them at full size. Datapack heroes can set an optional `scale` in their JSON to match.
+- The hero's name no longer floats above its head.
 - New look for the mana bar: framed bar with a blue gradient, a soft shine, 10% marks and smooth animation, with a
   light trail showing the mana you just spent. The value now sits to the right of the bar, and the frame pulses red
   when you have less than 20 mana (the cost to summon).

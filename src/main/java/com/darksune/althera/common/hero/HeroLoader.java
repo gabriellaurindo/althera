@@ -167,7 +167,8 @@ public class HeroLoader extends SimpleJsonResourceReloadListener {
                 model,
                 texture,
                 animations,
-                personality
+                personality,
+                GsonHelper.getAsFloat(json, "scale", 1.0f)
         );
     }
 }

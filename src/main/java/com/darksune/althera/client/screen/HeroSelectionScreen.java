@@ -132,7 +132,7 @@ public class HeroSelectionScreen extends Screen {
                     y + 4,
                     x + CARD_WIDTH - 4,
                     y + 4 + PREVIEW_HEIGHT,
-                    32,
+                    Math.round(32 / entity.getModelScale()),
                     0.0F,
                     mouseX,
                     mouseY,

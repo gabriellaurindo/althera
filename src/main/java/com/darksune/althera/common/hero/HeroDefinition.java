@@ -18,6 +18,7 @@ public class HeroDefinition {
     private final ResourceLocation animations;
 
     private final String personality;
+    private final float scale;
 
     public HeroDefinition(
             ResourceLocation id,
@@ -29,7 +30,8 @@ public class HeroDefinition {
             ResourceLocation model,
             ResourceLocation texture,
             ResourceLocation animations,
-            String personality
+            String personality,
+            float scale
     ) {
         this.id = id;
         this.name = name;
@@ -41,6 +43,7 @@ public class HeroDefinition {
         this.texture = texture;
         this.animations = animations;
         this.personality = personality;
+        this.scale = scale;
     }
 
     public ResourceLocation getId() {
@@ -81,6 +84,10 @@ public class HeroDefinition {
 
     public String getPersonality() {
         return personality;
+    }
+
+    public float getScale() {
+        return scale;
     }
 
     public boolean isRollable() {

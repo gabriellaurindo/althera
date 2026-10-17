@@ -25,7 +25,7 @@ public final class AltheraEntities {
             ENTITIES.register("hero",
                     () -> EntityType.Builder
                             .of(HeroEntity::new, MobCategory.CREATURE)
-                            .sized(0.6f, 1.95f)
+                            .sized(0.6f, 1.8f)
                             .clientTrackingRange(8)
                             .build("hero"));
 
