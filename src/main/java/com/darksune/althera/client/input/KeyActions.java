@@ -1,6 +1,7 @@
 package com.darksune.althera.client.input;
 
 import com.darksune.althera.client.screen.HeroScreen;
+import com.darksune.althera.client.screen.HeroSelectionOpener;
 import com.darksune.althera.common.attachment.HeroData;
 import com.darksune.althera.common.commandseal.skill.CommandSealSkillType;
 import com.darksune.althera.common.ultimate.skill.UltimateSkillType;
@@ -20,6 +21,8 @@ public class KeyActions {
         HeroData heroData = HeroData.get(mc.player);
         if (mc.screen == null && heroData.getHeroDefinition() != null) {
             mc.setScreen(new HeroScreen());
+        } else if (mc.screen == null) {
+            HeroSelectionOpener.open();
         } else {
             mc.setScreen(null);
         }

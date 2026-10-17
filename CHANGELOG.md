@@ -11,6 +11,14 @@ and generates the GitHub Release, CurseForge and Discord notes from it.
   its key, the remaining time while the skill is active or on cooldown, and grays out when you lack mana or Command
   Seal charges. Ultimates already used today show a red ✕. Remaining Command Seal charges appear above the slots.
   The HUD follows the hero HUD visibility setting.
+- **Choose your Hero** screen: players without a hero now pick their first one instead of getting a random roll. It
+  opens on login (or when you press the summon or hero key) and shows each hero with an animated preview, rank,
+  class, description and class stats. Every hero with its own model, texture and animations can be chosen; for now
+  that is Aria (Saber) and Clare (Assassin).
+  - **This version only:** players who already have a hero also get the screen once on login and can switch to
+    another hero, keeping their hero level and XP (or keep their current one). Closing the screen keeps your hero
+    and shows it again on your next login until you decide. This one-time switch will be removed in the next
+    version.
 - All hero ranks are enabled: F, E, D, C, B, A, S and EX, each with its own roll chance. Only heroes with their own
   model, texture and animations can be rolled, so for now every roll gives one of the two EX heroes, Aria or Clare;
   new heroes join the roll as their visuals are added.

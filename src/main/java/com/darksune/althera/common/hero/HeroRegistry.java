@@ -26,6 +26,13 @@ public class HeroRegistry {
                 .toList();
     }
 
+    public static List<HeroDefinition> getSelectable() {
+        return HEROES.values().stream()
+                .filter(HeroDefinition::isRollable)
+                .sorted(Comparator.comparing(HeroDefinition::getName))
+                .toList();
+    }
+
     public static void clear() {
         HEROES.clear();
     }

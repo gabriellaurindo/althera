@@ -252,6 +252,17 @@ Example:
 
 ---
 
+# ⭐ Choose your Hero
+
+Players without a Hero pick their first one on the **Choose your Hero** screen (on login, or when pressing the summon
+or hero key). Every Hero with its own `model`, `texture` and `animations` shows up there, so a new Hero with complete
+visuals becomes selectable automatically.
+
+In the current version only, players who already have a Hero can also use this screen once to switch Heroes while
+keeping their level; this will be removed in the next version.
+
+---
+
 # ⚠ Notes
 
 - Invalid paths may cause missing models or textures

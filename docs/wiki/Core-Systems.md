@@ -53,8 +53,20 @@ Ranks, from most common to rarest:
 | S | 1.5% | ×1.5 |
 | EX | 0.5% | ×1.75 |
 
-Only Heroes with their own model, texture and animations can be rolled. The roll only considers ranks that have at
-least one such Hero, so while Aria is the only one, every roll gives Aria.
+Players without a Hero choose their first one on the **Choose your Hero** screen, which opens on login (and when
+pressing the summon or hero key). Every Hero with its own model, texture and animations can be chosen; for now that
+is Aria (Saber) and Clare (Assassin), both EX.
+
+> [!NOTE]
+> **Temporary, current version only:** players who already have a Hero also get this screen once on login and can
+> switch to another Hero, keeping their Hero level and XP, or keep their current one. Closing the screen keeps the
+> current Hero and the screen returns on the next login until a choice is made. This one-time switch will be removed
+> in the next version.
+
+The ritual swaps your Hero: it rolls a new one, different from your current Hero, and your Hero level carries over
+(see [Ritual System](Ritual-System)). Rolls only consider Heroes with their own model, texture and animations, and only
+ranks that have at least one such Hero, so while Aria and Clare (both EX) are the only ones, every roll gives one of
+them.
 
 Higher-ranked Heroes generally possess:
 

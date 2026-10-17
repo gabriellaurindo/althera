@@ -66,6 +66,12 @@ public class HeroSummonSystem {
      */
     public static HeroEntity spawnSummon(final Player player, final boolean sendMessage, final boolean checkMana) {
         final HeroData heroData = HeroData.get(player);
+        if (HeroSelectionSystem.needsSelection(player)) {
+            if (sendMessage) {
+                HeroSelectionSystem.requestSelection(player);
+            }
+            return null;
+        }
         if (heroData.getHeroDefinition() == null) {
             final Optional<HeroDefinition> rolled = HeroRollSystem.rollHero();
             if (rolled.isEmpty()) {
