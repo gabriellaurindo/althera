@@ -78,6 +78,12 @@ public class HeroSelectionScreen extends Screen {
                         .build()
         );
         updateChooseButton();
+
+        addRenderableWidget(
+                Button.builder(Component.literal("x"), button -> onClose())
+                        .bounds(this.width - 26, 6, 20, 20)
+                        .build()
+        );
     }
 
     @Override
