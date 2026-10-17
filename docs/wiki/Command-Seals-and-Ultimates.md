@@ -92,7 +92,8 @@ Ultimates are the Hero's strongest abilities.
 |---|---|---|
 | **U** | 200 | Yes |
 
-The Hero glows and slows down while channeling for about **1 second**, then explodes:
+The Hero slows down and plays its casting animation (if its model has one) while channeling for about
+**1 second**, then explodes:
 - Damages every nearby creature within **6 blocks** (except you)
 - Sets them on fire
 - Knocks them back

@@ -229,8 +229,10 @@ At the current stage of development, the following animation names are expected:
 - `idle`
 - `walk`
 - `attack`
+- `ultimate` (played while channeling an ultimate)
+- `death` (played on defeat; keep it at most 2 seconds long and hold the last frame)
 
-These animation names should exist inside the animation JSON file.
+These animation names should exist inside the animation JSON file. A missing animation simply doesn't play.
 
 ---
 

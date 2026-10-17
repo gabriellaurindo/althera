@@ -27,14 +27,7 @@ public class ExplosionUltimateSkill
 
     @Override
     public void execute(Player player, HeroEntity heroEntity) {
-        heroEntity.addEffect(new MobEffectInstance(
-                MobEffects.GLOWING,
-                DURATION_TICKS,
-                0,
-                false,
-                false,
-                true
-        ));
+        heroEntity.triggerUltimateAnimation();
 
         heroEntity.addEffect(new MobEffectInstance(
                 MobEffects.MOVEMENT_SLOWDOWN,

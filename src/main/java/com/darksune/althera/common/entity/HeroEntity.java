@@ -162,6 +162,11 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
                         5,
                         state -> {
 
+                            if (isDeadOrDying()) {
+                                state.getController().setAnimationSpeed(1D);
+                                return state.setAndContinue(RawAnimation.begin().thenPlayAndHold(DEATH_ANIMATION));
+                            }
+
                             if (state.isMoving()) {
                                 state.getController().setAnimationSpeed(2D);
                                 return state.setAndContinue(RawAnimation.begin().thenLoop("walk")
@@ -186,7 +191,7 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
                         0,
                         state -> {
 
-                            if (getAttackAnimationTicks() > 0) {
+                            if (getAttackAnimationTicks() > 0 && !isDeadOrDying()) {
                                 state.getController().setAnimationSpeed(1.2D);
                                 state.getController().setAnimation(RawAnimation.begin().thenPlay("attack"));
                                 return PlayState.CONTINUE;
@@ -197,6 +202,25 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
                         }
                 )
         );
+
+        controllers.add(
+                new AnimationController<>(
+                        this,
+                        ULTIMATE_CONTROLLER,
+                        0,
+                        state -> PlayState.STOP
+                ).triggerableAnim(ULTIMATE_ANIMATION, RawAnimation.begin().thenPlay(ULTIMATE_ANIMATION))
+        );
+    }
+
+    public void triggerUltimateAnimation() {
+        triggerAnim(ULTIMATE_CONTROLLER, ULTIMATE_ANIMATION);
+    }
+
+    public boolean isPlayingUltimate() {
+        final AnimationController<?> controller =
+                getAnimatableInstanceCache().getManagerForId(getId()).getAnimationControllers().get(ULTIMATE_CONTROLLER);
+        return controller != null && controller.isPlayingTriggeredAnimation();
     }
 
     @Override
@@ -242,6 +266,7 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
 
         Level level = level();
         if (level.isClientSide) return;
+        if (isDeadOrDying()) return;
 
         if (getAttackAnimationTicks() > 0) {
             setAttackAnimationTicks(getAttackAnimationTicks() - 1);
@@ -321,6 +346,15 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
             HeroSummonSystem.handleDefeat(owner, this);
         }
         super.die(source);
+    }
+
+    @Override
+    protected void tickDeath() {
+        ++this.deathTime;
+        if (this.deathTime >= DEATH_ANIMATION_TICKS && !this.level().isClientSide() && !this.isRemoved()) {
+            this.level().broadcastEntityEvent(this, (byte) 60);
+            this.remove(RemovalReason.KILLED);
+        }
     }
 
     @Override

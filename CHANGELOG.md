@@ -23,6 +23,10 @@ and generates the GitHub Release, CurseForge and Discord notes from it.
 - The ritual now swaps your hero: it rolls a new hero, never the one you already have (rank chances still apply).
   Your hero level and XP carry over, and the new hero starts at full health. If no other hero is available, the
   ritual fails without consuming the diamond block.
+- Explosion ultimate: while channeling, the hero plays its ultimate animation (when its model has one) instead of
+  getting a white glowing outline.
+- Heroes with a death animation now collapse to the ground on defeat. Heroes without one keep the classic
+  sideways tip-over.
 
 ### Fixed
 - Summoning or performing the ritual with no hero available now shows a message instead of crashing.
