@@ -34,6 +34,9 @@ and generates the GitHub Release, CurseForge and Discord notes from it.
 ### Changed
 - **Notice:** hero models, textures and animations are work in progress. They can and will change constantly between
   versions until they reach their final quality.
+- **Aria** has a brand new model, texture and animations: a paladin with a long cape, flowing hair and ponytail, a
+  detailed face, and new idle, walk, attack, ultimate and death animations. During her ultimate, golden wings sprout
+  behind her and then fade away.
 - New look for the mana bar: framed bar with a blue gradient, a soft shine, 10% marks and smooth animation, with a
   light trail showing the mana you just spent. The value now sits to the right of the bar, and the frame pulses red
   when you have less than 20 mana (the cost to summon).
@@ -42,7 +45,7 @@ and generates the GitHub Release, CurseForge and Discord notes from it.
   ritual fails without consuming the diamond block.
 - Explosion ultimate: while channeling, the hero plays its ultimate animation (when its model has one) instead of
   getting a white glowing outline.
-- Heroes with a death animation (Clare) now collapse to the ground on defeat. Heroes without one keep the classic
+- Heroes with a death animation (Aria, Clare) now collapse to the ground on defeat. Heroes without one keep the classic
   sideways tip-over.
 
 ### Fixed
