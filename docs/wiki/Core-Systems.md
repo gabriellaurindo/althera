@@ -94,6 +94,9 @@ Mana is the primary resource used to maintain your Hero while summoned.
 
 This system creates a balance between combat power and resource management.
 
+Your mana is shown in the mana bar on screen. The mana bar and the Hero HUD are hidden together with the rest of the
+interface when you press **F1**.
+
 ---
 
 ## 👻 Spirit Form

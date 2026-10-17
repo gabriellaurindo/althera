@@ -6,6 +6,8 @@ and generates the GitHub Release, CurseForge and Discord notes from it.
 
 ## [Unreleased]
 
+## [3.0.1] - 2026-10-17 - Clean Screenshots (hotfix)
+
 ### Fixed
 - The mana bar and the hero HUD now hide together with the rest of the interface when you press F1, like the skill
   HUD already did.
