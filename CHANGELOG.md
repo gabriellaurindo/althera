@@ -6,6 +6,8 @@ and generates the GitHub Release, CurseForge and Discord notes from it.
 
 ## [Unreleased]
 
+## [3.0.0] - 2026-10-17 - Choose your Hero (feature + hotfix)
+
 ### Added
 - **Skill HUD**: slots next to the hotbar for Overdrive (J), Revive (K), Heal (V) and Explosion (U). Each slot shows
   its key, the remaining time while the skill is active or on cooldown, and grays out when you lack mana or Command
