@@ -16,6 +16,11 @@ and generates the GitHub Release, CurseForge and Discord notes from it.
   their visuals are added.
 - `/althera_hero divine` (cheats) is enabled again: assigns a random Divine hero, when one is available.
 
+### Changed
+- New look for the mana bar: framed bar with a blue gradient, a soft shine, 10% marks and smooth animation, with a
+  light trail showing the mana you just spent. The value now sits to the right of the bar, and the frame pulses red
+  when you have less than 20 mana (the cost to summon).
+
 ### Fixed
 - Summoning or performing the ritual with no hero available now shows a message instead of crashing.
 - Hero datapacks: a hero without `rank` now fails to load with a clear error instead of an invalid default.
