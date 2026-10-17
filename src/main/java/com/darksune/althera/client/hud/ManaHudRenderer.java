@@ -44,7 +44,7 @@ public final class ManaHudRenderer {
         Minecraft mc = Minecraft.getInstance();
         Player player = mc.player;
 
-        if (player == null) return;
+        if (player == null || mc.options.hideGui) return;
 
         final ManaData manaData = player.getData(AltheraAttachments.MANA.get());
 
