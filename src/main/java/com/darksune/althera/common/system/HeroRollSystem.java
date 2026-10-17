@@ -3,6 +3,8 @@ package com.darksune.althera.common.system;
 import com.darksune.althera.common.hero.HeroDefinition;
 import com.darksune.althera.common.hero.HeroRank;
 import com.darksune.althera.common.hero.HeroRegistry;
+import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.EnumSet;
 import java.util.List;
@@ -14,8 +16,16 @@ import java.util.stream.Collectors;
 public class HeroRollSystem {
 
     public static Optional<HeroDefinition> rollHero() {
+        return rollFrom(HeroRegistry.getRollable());
+    }
 
-        List<HeroDefinition> rollable = HeroRegistry.getRollable();
+    public static Optional<HeroDefinition> rollHeroExcept(@Nullable ResourceLocation excludedId) {
+        return rollFrom(HeroRegistry.getRollable().stream()
+                .filter(hero -> !hero.getId().equals(excludedId))
+                .toList());
+    }
+
+    private static Optional<HeroDefinition> rollFrom(List<HeroDefinition> rollable) {
 
         if (rollable.isEmpty()) {
             return Optional.empty();

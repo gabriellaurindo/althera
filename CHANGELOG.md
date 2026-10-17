@@ -20,6 +20,9 @@ and generates the GitHub Release, CurseForge and Discord notes from it.
 - New look for the mana bar: framed bar with a blue gradient, a soft shine, 10% marks and smooth animation, with a
   light trail showing the mana you just spent. The value now sits to the right of the bar, and the frame pulses red
   when you have less than 20 mana (the cost to summon).
+- The ritual now swaps your hero: it rolls a new hero, never the one you already have (rank chances still apply).
+  Your hero level and XP carry over, and the new hero starts at full health. If no other hero is available, the
+  ritual fails without consuming the diamond block.
 
 ### Fixed
 - Summoning or performing the ritual with no hero available now shows a message instead of crashing.
