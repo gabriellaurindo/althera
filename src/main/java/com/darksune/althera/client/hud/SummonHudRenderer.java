@@ -27,7 +27,7 @@ public class SummonHudRenderer {
         var gui = event.getGuiGraphics();
         var mc = Minecraft.getInstance();
 
-        if (mc.player == null || mc.level == null) return;
+        if (mc.player == null || mc.level == null || mc.options.hideGui) return;
 
         final HeroData heroData = HeroData.get(mc.player);
 
