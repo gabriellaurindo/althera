@@ -1,5 +1,7 @@
 package com.darksune.althera.common.skill;
 
+import com.darksune.althera.common.attachment.ISyncableAttachment;
+
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -13,7 +15,15 @@ import java.util.function.Consumer;
  */
 public final class SkillTimers {
 
+    public static final int SYNC_INTERVAL_TICKS = 20;
+
     private SkillTimers() {
+    }
+
+    public static void markDirtyOnSyncTick(final ISyncableAttachment data, final int remainingTicks) {
+        if (remainingTicks % SYNC_INTERVAL_TICKS == 0) {
+            data.markDirty();
+        }
     }
 
     @FunctionalInterface

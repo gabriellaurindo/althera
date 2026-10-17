@@ -1,7 +1,6 @@
 package com.darksune.althera.common.block;
 
 import com.darksune.althera.common.attachment.HeroData;
-import com.darksune.althera.common.entity.HeroEntity;
 import com.darksune.althera.common.hero.HeroDefinition;
 import com.darksune.althera.common.multiblock.MultiblockValidator;
 import com.darksune.althera.common.system.HeroRollSystem;
@@ -19,6 +18,8 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
+
+import java.util.Optional;
 
 public class RitualCoreBlock extends Block {
 
@@ -59,7 +60,24 @@ public class RitualCoreBlock extends Block {
     }
 
     public void performRitual(final Player player, final Level level, final BlockPos pos) {
-        final HeroDefinition heroDefinition = HeroRollSystem.rollHero();
+        final HeroData heroData = HeroData.get(player);
+        final HeroDefinition current = heroData.getHeroDefinition();
+        final Optional<HeroDefinition> rolled = HeroRollSystem.rollHeroExcept(current != null ? current.getId() : null);
+        if (rolled.isEmpty()) {
+            player.sendSystemMessage(Component.literal(current != null
+                    ? "§cNo other hero answers the ritual."
+                    : "§cNo hero answers the ritual."));
+            return;
+        }
+        final HeroDefinition heroDefinition = rolled.get();
+
+        if (current != null) {
+            HeroSummonSystem.dismissSummon(player);
+            player.sendSystemMessage(Component.literal(
+                    "§7" + current.getName() + " leaves. Your hero level (" + heroData.getLevel() + ") carries over."
+            ));
+        }
+
         player.sendSystemMessage(
                 Component.literal(
                         "§aYou have formed a contract with §f"
@@ -95,15 +113,8 @@ public class RitualCoreBlock extends Block {
             level.destroyBlock(diamondPos, false);
         }
 
-        final HeroData heroData = HeroData.get(player);
         heroData.setHero(heroDefinition.getId());
         heroData.setHealth(HeroStatsSystem.getMaxHealth(heroData));
         heroData.sync(player);
-
-        final HeroEntity summon = HeroSummonSystem.getSummon(player);
-
-        if (summon != null) {
-            summon.remove();
-        }
     }
 }

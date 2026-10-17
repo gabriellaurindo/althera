@@ -5,6 +5,7 @@ import com.darksune.althera.common.attachment.ManaData;
 import com.darksune.althera.common.commandseal.CommandSealSystem;
 import com.darksune.althera.common.entity.AltheraEntities;
 import com.darksune.althera.common.entity.HeroEntity;
+import com.darksune.althera.common.hero.HeroDefinition;
 import com.darksune.althera.common.skill.SkillEndReason;
 import com.darksune.althera.common.ultimate.UltimateSystem;
 import net.minecraft.network.chat.Component;
@@ -13,6 +14,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -64,8 +66,21 @@ public class HeroSummonSystem {
      */
     public static HeroEntity spawnSummon(final Player player, final boolean sendMessage, final boolean checkMana) {
         final HeroData heroData = HeroData.get(player);
+        if (HeroSelectionSystem.needsSelection(player)) {
+            if (sendMessage) {
+                HeroSelectionSystem.requestSelection(player);
+            }
+            return null;
+        }
         if (heroData.getHeroDefinition() == null) {
-            heroData.setHero(HeroRollSystem.rollHero().getId());
+            final Optional<HeroDefinition> rolled = HeroRollSystem.rollHero();
+            if (rolled.isEmpty()) {
+                if (sendMessage) {
+                    player.sendSystemMessage(Component.literal("§cNo hero can answer your call right now."));
+                }
+                return null;
+            }
+            heroData.setHero(rolled.get().getId());
             heroData.setHealth(HeroStatsSystem.getMaxHealth(heroData));
             //todo in the future the ritual may be required to get a summon
 //            player.sendSystemMessage(

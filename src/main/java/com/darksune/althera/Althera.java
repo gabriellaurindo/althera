@@ -5,9 +5,11 @@ import com.darksune.althera.common.entity.AltheraEntities;
 import com.darksune.althera.common.entity.HeroEntity;
 import com.darksune.althera.common.entity.SummonedEntity;
 import com.darksune.althera.common.hero.HeroLoader;
+import com.darksune.althera.common.hero.HeroRegistry;
 import com.darksune.althera.common.registry.AltheraRegistries;
 import com.darksune.althera.config.AltheraConfig;
 import com.darksune.althera.network.AltheraNetwork;
+import com.darksune.althera.network.packet.SyncHeroesPacket;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
@@ -16,8 +18,10 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
+import net.neoforged.neoforge.event.OnDatapackSyncEvent;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 @EventBusSubscriber
 @Mod(Althera.MOD_ID)
@@ -34,6 +38,12 @@ public final class Althera {
 
     private void onReloadListeners(AddReloadListenerEvent event) {
         event.addListener(new HeroLoader());
+    }
+
+    @SubscribeEvent
+    public static void onDatapackSync(OnDatapackSyncEvent event) {
+        SyncHeroesPacket packet = SyncHeroesPacket.of(HeroRegistry.getAll());
+        event.getRelevantPlayers().forEach(player -> PacketDistributor.sendToPlayer(player, packet));
     }
 
     @SubscribeEvent

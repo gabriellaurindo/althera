@@ -15,12 +15,14 @@ import java.util.Map;
 
 public class CommandSealData extends SyncableAttachment {
 
+    public static final int MAX_CHARGES = 3;
+
     // =========================
     // DATA
     // =========================
 
     private int color = 0xFFFFFF;
-    private int commandSealCharges = 3;
+    private int commandSealCharges = MAX_CHARGES;
     private long lastChargeResetDay;
     private Map<CommandSealSkillType, Integer> activeSkills = new HashMap<>();
     private Map<CommandSealSkillType, Integer> cooldownSkills = new HashMap<>();
@@ -39,7 +41,7 @@ public class CommandSealData extends SyncableAttachment {
                     Codec.INT.optionalFieldOf("color", 0xFFFFFF)
                             .forGetter(data -> data.color),
 
-                    Codec.INT.optionalFieldOf("commandSealCharges", 3)
+                    Codec.INT.optionalFieldOf("commandSealCharges", MAX_CHARGES)
                             .forGetter(CommandSealData::getCommandSealCharges),
 
                     Codec.LONG.optionalFieldOf("lastChargeResetDay", 0L)
@@ -192,7 +194,7 @@ public class CommandSealData extends SyncableAttachment {
     }
 
     public void resetCharges() {
-        commandSealCharges = 3;
+        commandSealCharges = MAX_CHARGES;
         markDirty();
     }
 

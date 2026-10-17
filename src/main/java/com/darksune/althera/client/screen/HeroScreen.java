@@ -5,6 +5,7 @@ import com.darksune.althera.client.input.AltheraKeybinds;
 import com.darksune.althera.common.attachment.HeroData;
 import com.darksune.althera.common.entity.AltheraEntities;
 import com.darksune.althera.common.entity.HeroEntity;
+import com.darksune.althera.common.hero.HeroDefinition;
 import com.darksune.althera.common.system.HeroProgressionSystem;
 import com.darksune.althera.common.system.HeroStatsSystem;
 import com.darksune.althera.network.packet.ToggleHeroSettingPacket;
@@ -14,12 +15,37 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FormattedCharSequence;
 import net.neoforged.neoforge.network.PacketDistributor;
+
+import java.util.List;
+import java.util.Locale;
 
 public class HeroScreen extends Screen {
 
-    private static final int GUI_WIDTH = 176;
-    private static final int GUI_HEIGHT = 166;
+    private static final int GUI_WIDTH = 250;
+    private static final int GUI_HEIGHT = 190;
+
+    private static final int PREVIEW_X = 12;
+    private static final int PREVIEW_Y = 32;
+    private static final int PREVIEW_WIDTH = 100;
+    private static final int PREVIEW_HEIGHT = 112;
+
+    private static final int INFO_X = 126;
+    private static final int INFO_WIDTH = GUI_WIDTH - INFO_X - 12;
+
+    private static final int CHECKBOX_SIZE = 10;
+    private static final int SETTING_ROW_HEIGHT = 44;
+
+    private static final int COLOR_BORDER = 0xFF1E1E1E;
+    private static final int COLOR_PANEL = 0xFF2A2A2A;
+    private static final int COLOR_PREVIEW = 0xFF202020;
+    private static final int COLOR_LABEL = 0xFFAAAAAA;
+    private static final int COLOR_RANK = 0xFFFFAA00;
+    private static final int COLOR_ACCENT = 0xFFE0B040;
+    private static final int COLOR_XP = 0xFF00FF88;
+    private static final int COLOR_HEALTH = 0xFFFF5555;
+    private static final int COLOR_SEPARATOR = 0xFF444444;
 
     private static final ResourceLocation GEAR_ICON =
             ResourceLocation.fromNamespaceAndPath(
@@ -36,6 +62,25 @@ public class HeroScreen extends Screen {
     private enum Tab {
         STATUS,
         SETTINGS
+    }
+
+    private enum SettingRow {
+        HIDE_HUD("Hide HUD", "Hides the hero HUD and the skill slots.", 0xFF00FF88),
+        DISABLE_INTERVENTIONS(
+                "Disable interventions",
+                "Your hero will not step in to absorb the damage you take.",
+                0xFFFF5555
+        );
+
+        private final String label;
+        private final String description;
+        private final int color;
+
+        SettingRow(String label, String description, int color) {
+            this.label = label;
+            this.description = description;
+            this.color = color;
+        }
     }
 
     public HeroScreen() {
@@ -75,10 +120,6 @@ public class HeroScreen extends Screen {
         final HeroData heroData =
                 HeroData.get(mc.player);
 
-        // =====================================
-        // SYNC PREVIEW ENTITY
-        // =====================================
-
         if (previewEntity != null
                 && heroData.getHeroDefinition() != null) {
 
@@ -95,83 +136,52 @@ public class HeroScreen extends Screen {
             }
         }
 
-        // ===== BACKGROUND =====
         gui.fill(0, 0, this.width, this.height, 0x55000000);
 
-        int x = (this.width - GUI_WIDTH) / 2;
-        int y = (this.height - GUI_HEIGHT) / 2;
+        final int x = left();
+        final int y = top();
 
-        // ===== PANEL =====
-        gui.fill(x - 2, y - 2, x + GUI_WIDTH + 2, y + GUI_HEIGHT + 2, 0x88000000);
-        gui.fill(x, y, x + GUI_WIDTH, y + GUI_HEIGHT, 0xFF1E1E1E);
-        gui.fill(x + 2, y + 2, x + GUI_WIDTH - 2, y + GUI_HEIGHT - 2, 0xFF2A2A2A);
+        gui.fill(x - 2, y - 2, x + GUI_WIDTH + 2, y + GUI_HEIGHT + 2, COLOR_BORDER);
+        gui.fill(x, y, x + GUI_WIDTH, y + GUI_HEIGHT, COLOR_PANEL);
 
-        // ===== TITLE =====
-        String title = currentTab == Tab.STATUS
+        final String title = currentTab == Tab.STATUS
                 ? "STATUS"
                 : "SETTINGS";
 
-        gui.drawString(
-                this.font,
-                title,
-                this.width / 2 - this.font.width(title) / 2,
-                y + 8,
-                0xFFFFFF
-        );
+        gui.drawCenteredString(this.font, title, this.width / 2, y + 10, 0xFFFFFF);
+        gui.fill(this.width / 2 - 30, y + 21, this.width / 2 + 30, y + 22, COLOR_SEPARATOR);
 
-        gui.fill(
-                this.width / 2 - 30,
-                y + 18,
-                this.width / 2 + 30,
-                y + 19,
-                0xFF666666
-        );
-
-        // ===== GEAR ICON =====
-
-        int gearX = x + GUI_WIDTH - 20;
-        int gearY = y + 6;
-
-        boolean hovered =
-                mouseX >= gearX &&
-                        mouseX <= gearX + 16 &&
-                        mouseY >= gearY &&
-                        mouseY <= gearY + 16;
-
-        // Hover effect
-        if (hovered) {
-            gui.fill(
-                    gearX - 1,
-                    gearY - 1,
-                    gearX + 17,
-                    gearY + 17,
-                    0x33FFFFFF
-            );
-        }
-
-        gui.blit(
-                GEAR_ICON,
-                gearX,
-                gearY,
-                0,
-                0,
-                16,
-                16,
-                16,
-                16
-        );
-
-        // ===== TAB CONTENT =====
+        renderGear(gui, mouseX, mouseY);
+        renderClose(gui, mouseX, mouseY);
 
         if (currentTab == Tab.STATUS) {
             renderStatusTab(gui, heroData, mouseX, mouseY, partialTick);
         }
 
         if (currentTab == Tab.SETTINGS) {
-            renderSettingsTab(gui);
+            renderSettingsTab(gui, heroData, mouseX, mouseY);
         }
 
         super.render(gui, mouseX, mouseY, partialTick);
+    }
+
+    private void renderGear(GuiGraphics gui, int mouseX, int mouseY) {
+        final int gearX = gearX();
+        final int gearY = gearY();
+
+        if (isOverGear(mouseX, mouseY) || currentTab == Tab.SETTINGS) {
+            gui.fill(gearX - 2, gearY - 2, gearX + 18, gearY + 18, 0x33FFFFFF);
+        }
+
+        gui.blit(GEAR_ICON, gearX, gearY, 0, 0, 16, 16, 16, 16);
+    }
+
+    private void renderClose(GuiGraphics gui, int mouseX, int mouseY) {
+        final int closeX = closeX();
+        final int closeY = closeY();
+
+        gui.fill(closeX - 2, closeY - 2, closeX + 14, closeY + 14, isOverClose(mouseX, mouseY) ? 0x88FF5555 : 0x33FFFFFF);
+        gui.drawCenteredString(this.font, "x", closeX + 6, closeY + 2, 0xFFFFFF);
     }
 
     // =========================================================
@@ -181,8 +191,9 @@ public class HeroScreen extends Screen {
     private void renderStatusTab(GuiGraphics gui, HeroData heroData, int mouseX, int mouseY, float partialTick) {
 
         final HeroEntity entity = this.previewEntity;
+        final HeroDefinition definition = heroData.getHeroDefinition();
 
-        if (entity == null || heroData.getHeroDefinition() == null) {
+        if (entity == null || definition == null) {
             return;
         }
 
@@ -193,147 +204,102 @@ public class HeroScreen extends Screen {
             tickAccumulator -= 1.0F;
         }
 
-        int x = (this.width - GUI_WIDTH) / 2;
-        int y = (this.height - GUI_HEIGHT) / 2;
+        final int x = left();
+        final int y = top();
 
-        // ===== HERO NAME =====
+        final int previewLeft = x + PREVIEW_X;
+        final int previewTop = y + PREVIEW_Y;
 
-        String heroName = heroData.getHeroDefinition().getName();
-
-        int nameCenterX = x + 45;
-        int nameY = y + 30;
-
-        gui.drawString(
-                this.font,
-                "Name:",
-                nameCenterX - this.font.width("Name:") / 2,
-                nameY,
-                0xAAAAAA
-        );
-
-        gui.drawString(
-                this.font,
-                heroName,
-                nameCenterX - this.font.width(heroName) / 2,
-                nameY + 12,
-                0xFFFFFF
-        );
-
-        // ===== ENTITY =====
-
-        int entityX = x + 45;
-        int entityY = y + 185;
+        gui.fill(previewLeft, previewTop, previewLeft + PREVIEW_WIDTH, previewTop + PREVIEW_HEIGHT, COLOR_PREVIEW);
 
         InventoryScreen.renderEntityInInventoryFollowsMouse(
                 gui,
-                entityX - 25,
-                entityY - 150,
-                entityX + 25,
-                entityY,
-                35,
+                previewLeft,
+                previewTop,
+                previewLeft + PREVIEW_WIDTH,
+                previewTop + PREVIEW_HEIGHT,
+                Math.round(34 / entity.getModelScale()),
                 0.0F,
                 mouseX,
                 mouseY,
                 entity
         );
 
-        // ===== STATS =====
+        final int previewCenterX = previewLeft + PREVIEW_WIDTH / 2;
 
-        int textX = x + 90;
-        int textY = y + 30;
-        int statWidth = 70;
-
-        // CLASS
-        drawStat(
-                gui,
-                "Class",
-                heroData.getHeroDefinition().getHeroClass().getDisplayName(),
-                textX,
-                textY,
-                statWidth
-        );
-
-        // RANK
-        drawStat(
-                gui,
-                "Rank",
-                heroData.getHeroDefinition().getRank().getDisplayName(),
-                textX,
-                textY + 12,
-                statWidth
-        );
-
-        // Separator
-        drawSeparator(gui, x, textY + 22);
-
-        // LEVEL
-        drawStat(
-                gui,
-                "Level",
-                String.valueOf(heroData.getLevel()),
-                textX,
-                textY + 30,
-                statWidth
-        );
-
-        // XP BAR
-        long currentXp = heroData.getXp();
-        long requiredXp = HeroProgressionSystem.getXpToNextLevel(heroData);
-
-        float xpProgress = (float) currentXp / (float) requiredXp;
-
-        drawBar(
-                gui,
-                textX,
-                textY + 45,
-                80,
-                6,
-                xpProgress,
-                0xFF00FF88
-        );
-
-        gui.drawString(
+        gui.drawCenteredString(this.font, definition.getName(), previewCenterX, previewTop + PREVIEW_HEIGHT + 8, 0xFFFFFF);
+        gui.drawCenteredString(
                 this.font,
-                currentXp + "/" + requiredXp,
-                textX,
-                textY + 55,
-                0xAAAAAA
+                definition.getRank().getDisplayName() + " · " + definition.getHeroClass().getDisplayName(),
+                previewCenterX,
+                previewTop + PREVIEW_HEIGHT + 20,
+                COLOR_RANK
         );
 
-        // HEALTH BAR
+        final int infoX = x + INFO_X;
+        int infoY = y + 32;
 
-        float hpPercent =
-                (float) ((float) heroData.getHealth()
-                                        / HeroStatsSystem.getMaxHealth(heroData));
+        drawStat(gui, "Level", String.valueOf(heroData.getLevel()), infoX, infoY, INFO_WIDTH, COLOR_ACCENT);
+        infoY += 14;
 
-        drawBar(
+        final long currentXp = heroData.getXp();
+        final long requiredXp = HeroProgressionSystem.getXpToNextLevel(heroData);
+
+        drawBar(gui, infoX, infoY, INFO_WIDTH, 6, requiredXp > 0 ? (float) currentXp / requiredXp : 0, COLOR_XP);
+        infoY += 9;
+        drawStat(gui, "XP", currentXp + " / " + requiredXp, infoX, infoY, INFO_WIDTH, 0xFFFFFFFF);
+        infoY += 20;
+
+        final double maxHealth = HeroStatsSystem.getMaxHealth(heroData);
+
+        drawStat(
                 gui,
-                textX,
-                textY + 70,
-                80,
-                6,
-                hpPercent,
-                0xFFFF5555
+                "Health",
+                (int) heroData.getHealth() + " / " + (int) maxHealth,
+                infoX,
+                infoY,
+                INFO_WIDTH,
+                0xFFFFFFFF
         );
+        infoY += 12;
+        drawBar(gui, infoX, infoY, INFO_WIDTH, 6, maxHealth > 0 ? (float) (heroData.getHealth() / maxHealth) : 0, COLOR_HEALTH);
+        infoY += 16;
 
-        gui.drawString(
-                this.font,
-                (int) heroData.getHealth() + "/" +
-                        (int) HeroStatsSystem.getMaxHealth(heroData),
-                textX,
-                textY + 80,
-                0xAAAAAA
-        );
-
-        // DAMAGE
+        gui.fill(infoX, infoY, infoX + INFO_WIDTH, infoY + 1, COLOR_SEPARATOR);
+        infoY += 8;
 
         drawStat(
                 gui,
                 "Damage",
-                String.format("%.1f", HeroStatsSystem.getAttack(heroData)),
-                textX,
-                textY + 95,
-                statWidth
+                String.format(Locale.ROOT, "%.1f", HeroStatsSystem.getAttack(heroData)),
+                infoX,
+                infoY,
+                INFO_WIDTH,
+                0xFFFFFFFF
+        );
+        infoY += 12;
+
+        drawStat(
+                gui,
+                "Armor",
+                String.format(Locale.ROOT, "%.1f", HeroStatsSystem.getArmor(heroData)),
+                infoX,
+                infoY,
+                INFO_WIDTH,
+                0xFFFFFFFF
+        );
+        infoY += 12;
+
+        final int interventionsLeft = HeroStatsSystem.getMaxInterventions() - heroData.getInterventions();
+
+        drawStat(
+                gui,
+                "Interventions",
+                interventionsLeft + " / " + HeroStatsSystem.getMaxInterventions(),
+                infoX,
+                infoY,
+                INFO_WIDTH,
+                0xFFFFFFFF
         );
     }
 
@@ -341,99 +307,60 @@ public class HeroScreen extends Screen {
     // SETTINGS TAB
     // =========================================================
 
-    private void renderSettingsTab(GuiGraphics gui) {
+    private void renderSettingsTab(GuiGraphics gui, HeroData heroData, int mouseX, int mouseY) {
 
-        final Minecraft mc = Minecraft.getInstance();
+        final SettingRow[] rows = SettingRow.values();
 
-        if (mc.player == null) {
-            return;
+        for (int i = 0; i < rows.length; i++) {
+            final SettingRow row = rows[i];
+            final int rowX = left() + 14;
+            final int rowY = rowTop(i);
+            final int rowWidth = GUI_WIDTH - 28;
+
+            final boolean hovered = isOverRow(i, mouseX, mouseY);
+
+            gui.fill(rowX, rowY, rowX + rowWidth, rowY + SETTING_ROW_HEIGHT - 4, hovered ? 0xFF353535 : COLOR_PREVIEW);
+
+            final int boxX = rowX + 8;
+            final int boxY = rowY + 6;
+
+            gui.fill(boxX - 1, boxY - 1, boxX + CHECKBOX_SIZE + 1, boxY + CHECKBOX_SIZE + 1, COLOR_SEPARATOR);
+            gui.fill(boxX, boxY, boxX + CHECKBOX_SIZE, boxY + CHECKBOX_SIZE, 0xFF111111);
+
+            if (isEnabled(heroData, row)) {
+                gui.fill(boxX + 2, boxY + 2, boxX + CHECKBOX_SIZE - 2, boxY + CHECKBOX_SIZE - 2, row.color);
+            }
+
+            gui.drawString(this.font, row.label, boxX + CHECKBOX_SIZE + 8, boxY + 1, 0xFFFFFF);
+
+            final List<FormattedCharSequence> lines =
+                    this.font.split(Component.literal(row.description), rowWidth - CHECKBOX_SIZE - 32);
+            for (int line = 0; line < Math.min(lines.size(), 2); line++) {
+                gui.drawString(this.font, lines.get(line), boxX + CHECKBOX_SIZE + 8, boxY + 13 + line * 10, COLOR_LABEL);
+            }
         }
 
-        HeroData heroData = HeroData.get(mc.player);
-
-        int x = (this.width - GUI_WIDTH) / 2;
-        int y = (this.height - GUI_HEIGHT) / 2;
-
-        int startX = x + 16;
-        int startY = y + 38;
-
-        gui.drawString(
+        gui.drawCenteredString(
                 this.font,
-                "Settings",
-                startX,
-                startY,
-                0xFFFFFF
+                "Click the gear to go back",
+                this.width / 2,
+                top() + GUI_HEIGHT - 16,
+                0x777777
         );
+    }
 
-        // =====================================
-        // HIDE HUD
-        // =====================================
+    private boolean isEnabled(HeroData heroData, SettingRow row) {
+        return switch (row) {
+            case HIDE_HUD -> heroData.isHiddenHud();
+            case DISABLE_INTERVENTIONS -> heroData.isSaveDisabled();
+        };
+    }
 
-        int checkboxSize = 10;
-
-        int hideHudY = startY + 24;
-
-        // box
-        gui.fill(
-                startX,
-                hideHudY,
-                startX + checkboxSize,
-                hideHudY + checkboxSize,
-                0xFF444444
-        );
-
-        // checked
-        if (heroData.isHiddenHud()) {
-
-            gui.fill(
-                    startX + 2,
-                    hideHudY + 2,
-                    startX + checkboxSize - 2,
-                    hideHudY + checkboxSize - 2,
-                    0xFF00FF88
-            );
-        }
-
-        gui.drawString(
-                this.font,
-                "Hide HUD",
-                startX + 16,
-                hideHudY + 1,
-                0xFFFFFF
-        );
-
-        // =====================================
-        // DISABLE SAVES
-        // =====================================
-
-        int savesY = hideHudY + 18;
-
-        gui.fill(
-                startX,
-                savesY,
-                startX + checkboxSize,
-                savesY + checkboxSize,
-                0xFF444444
-        );
-
-        if (heroData.isSaveDisabled()) {
-
-            gui.fill(
-                    startX + 2,
-                    savesY + 2,
-                    startX + checkboxSize - 2,
-                    savesY + checkboxSize - 2,
-                    0xFFFF5555
-            );
-        }
-
-        gui.drawString(
-                this.font,
-                "Disable Saves",
-                startX + 16,
-                savesY + 1,
-                0xFFFFFF
-        );
+    private ToggleHeroSettingPacket.Setting packetSetting(SettingRow row) {
+        return switch (row) {
+            case HIDE_HUD -> ToggleHeroSettingPacket.Setting.HIDDEN_HUD;
+            case DISABLE_INTERVENTIONS -> ToggleHeroSettingPacket.Setting.SAVE_DISABLED;
+        };
     }
 
     // =========================================================
@@ -445,18 +372,17 @@ public class HeroScreen extends Screen {
                           String value,
                           int x,
                           int y,
-                          int width) {
+                          int width,
+                          int valueColor) {
 
-        gui.drawString(this.font, label, x, y, 0xAAAAAA);
-
-        int valueWidth = this.font.width(value);
+        gui.drawString(this.font, label, x, y, COLOR_LABEL);
 
         gui.drawString(
                 this.font,
                 value,
-                x + width - valueWidth,
+                x + width - this.font.width(value),
                 y,
-                0xFFFFFF
+                valueColor
         );
     }
 
@@ -470,6 +396,7 @@ public class HeroScreen extends Screen {
 
         progress = Math.max(0, Math.min(1, progress));
 
+        gui.fill(x - 1, y - 1, x + width + 1, y + height + 1, COLOR_BORDER);
         gui.fill(x, y, x + width, y + height, 0xFF333333);
 
         gui.fill(
@@ -481,15 +408,50 @@ public class HeroScreen extends Screen {
         );
     }
 
-    private void drawSeparator(GuiGraphics gui, int x, int y) {
+    private int left() {
+        return (this.width - GUI_WIDTH) / 2;
+    }
 
-        gui.fill(
-                x + 8,
-                y,
-                x + GUI_WIDTH - 8,
-                y + 1,
-                0xFF444444
-        );
+    private int top() {
+        return (this.height - GUI_HEIGHT) / 2;
+    }
+
+    private int gearX() {
+        return left() + 8;
+    }
+
+    private int gearY() {
+        return top() + 6;
+    }
+
+    private int closeX() {
+        return left() + GUI_WIDTH - 22;
+    }
+
+    private int closeY() {
+        return top() + 6;
+    }
+
+    private boolean isOverClose(double mouseX, double mouseY) {
+        return mouseX >= closeX() && mouseX <= closeX() + 12
+                && mouseY >= closeY() && mouseY <= closeY() + 12;
+    }
+
+    private int rowTop(int index) {
+        return top() + 34 + index * SETTING_ROW_HEIGHT;
+    }
+
+    private boolean isOverGear(double mouseX, double mouseY) {
+        return mouseX >= gearX() && mouseX <= gearX() + 16
+                && mouseY >= gearY() && mouseY <= gearY() + 16;
+    }
+
+    private boolean isOverRow(int index, double mouseX, double mouseY) {
+        final int rowX = left() + 14;
+        final int rowY = rowTop(index);
+
+        return mouseX >= rowX && mouseX <= rowX + GUI_WIDTH - 28
+                && mouseY >= rowY && mouseY <= rowY + SETTING_ROW_HEIGHT - 4;
     }
 
     // =========================================================
@@ -499,29 +461,12 @@ public class HeroScreen extends Screen {
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
 
-        final Minecraft mc = Minecraft.getInstance();
-
-        if (mc.player == null) {
-            return false;
+        if (isOverClose(mouseX, mouseY)) {
+            this.onClose();
+            return true;
         }
 
-        HeroData heroData = HeroData.get(mc.player);
-
-        int x = (this.width - GUI_WIDTH) / 2;
-        int y = (this.height - GUI_HEIGHT) / 2;
-
-        // =====================================
-        // GEAR BUTTON
-        // =====================================
-
-        int gearX = x + GUI_WIDTH - 20;
-        int gearY = y + 6;
-
-        if (mouseX >= gearX &&
-                mouseX <= gearX + 16 &&
-                mouseY >= gearY &&
-                mouseY <= gearY + 16) {
-
+        if (isOverGear(mouseX, mouseY)) {
             currentTab = currentTab == Tab.STATUS
                     ? Tab.SETTINGS
                     : Tab.STATUS;
@@ -529,53 +474,14 @@ public class HeroScreen extends Screen {
             return true;
         }
 
-        // =====================================
-        // SETTINGS CHECKBOXES
-        // =====================================
-
         if (currentTab == Tab.SETTINGS) {
+            final SettingRow[] rows = SettingRow.values();
 
-            int startX = x + 16;
-            int startY = y + 38;
-
-            int checkboxSize = 10;
-
-            // ---------------------------------
-            // HIDE HUD
-            // ---------------------------------
-
-            int hideHudY = startY + 24;
-
-            if (mouseX >= startX &&
-                    mouseX <= startX + checkboxSize &&
-                    mouseY >= hideHudY &&
-                    mouseY <= hideHudY + checkboxSize) {
-
-                PacketDistributor.sendToServer(
-                        new ToggleHeroSettingPacket(
-                                ToggleHeroSettingPacket.Setting.HIDDEN_HUD
-                        )
-                );
-                return true;
-            }
-
-            // ---------------------------------
-            // DISABLE SAVES
-            // ---------------------------------
-
-            int savesY = hideHudY + 18;
-
-            if (mouseX >= startX &&
-                    mouseX <= startX + checkboxSize &&
-                    mouseY >= savesY &&
-                    mouseY <= savesY + checkboxSize) {
-
-                PacketDistributor.sendToServer(
-                        new ToggleHeroSettingPacket(
-                                ToggleHeroSettingPacket.Setting.SAVE_DISABLED
-                        )
-                );
-                return true;
+            for (int i = 0; i < rows.length; i++) {
+                if (isOverRow(i, mouseX, mouseY)) {
+                    PacketDistributor.sendToServer(new ToggleHeroSettingPacket(packetSetting(rows[i])));
+                    return true;
+                }
             }
         }
 

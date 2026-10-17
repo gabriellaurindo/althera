@@ -59,7 +59,10 @@ public class CommandSealSystem {
     public static void tickActiveSkills(Player player, HeroEntity heroEntity, CommandSealData data) {
         SkillTimers.tick(
                 data.getActiveSkills(),
-                (skillType, remainingTicks) -> skillType.getSkill().tick(player, heroEntity, remainingTicks),
+                (skillType, remainingTicks) -> {
+                    skillType.getSkill().tick(player, heroEntity, remainingTicks);
+                    SkillTimers.markDirtyOnSyncTick(data, remainingTicks);
+                },
                 skillType -> skillType.getSkill().onEnd(player, heroEntity, SkillEndReason.EXPIRED)
         );
     }
@@ -67,7 +70,7 @@ public class CommandSealSystem {
     public static void tickCooldownSkills(Player player, CommandSealData data) {
         SkillTimers.tick(
                 data.getCooldownSkills(),
-                (skillType, remainingTicks) -> {},
+                (skillType, remainingTicks) -> SkillTimers.markDirtyOnSyncTick(data, remainingTicks),
                 skillType -> skillType.getSkill().onCooldownExpire(player)
         );
     }

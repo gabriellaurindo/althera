@@ -3,6 +3,7 @@ package com.darksune.althera.common.event;
 import com.darksune.althera.Althera;
 import com.darksune.althera.common.attachment.HeroData;
 import com.darksune.althera.common.attachment.ManaData;
+import com.darksune.althera.common.system.HeroSelectionSystem;
 import com.darksune.althera.common.system.HeroStatsSystem;
 import com.darksune.althera.common.system.HeroSummonSystem;
 import net.minecraft.network.chat.Component;
@@ -87,6 +88,7 @@ public final class PlayerEvents {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
 
         HeroSummonSystem.restorePresence(player);
+        HeroSelectionSystem.requestSelection(player);
     }
 
     @SubscribeEvent

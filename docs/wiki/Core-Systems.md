@@ -31,6 +31,7 @@ Each Hero belongs to a specific class and possesses an internal rank that influe
 ### Current Classes
 
 - Saber
+- Assassin
 - Archer *(planned)*
 - Lancer *(planned)*
 - More classes planned
@@ -39,11 +40,33 @@ Classes are intended to define combat archetypes, future abilities, and gameplay
 
 ### Hero Ranks
 
-Current ranks include:
+Ranks, from most common to rarest:
 
-- Common
-- Rare
-- EX
+| Rank | Chance | Health multiplier |
+|---|---|---|
+| F | 40% | ×0.7 |
+| E | 25% | ×0.8 |
+| D | 15% | ×0.9 |
+| C | 10% | ×1.0 |
+| B | 5% | ×1.15 |
+| A | 3% | ×1.3 |
+| S | 1.5% | ×1.5 |
+| EX | 0.5% | ×1.75 |
+
+Players without a Hero choose their first one on the **Choose your Hero** screen, which opens on login (and when
+pressing the summon or hero key). Every Hero with its own model, texture and animations can be chosen; for now that
+is Aria (Saber) and Clare (Assassin), both EX.
+
+> [!NOTE]
+> **Temporary, current version only:** players who already have a Hero also get this screen once on login and can
+> switch to another Hero, keeping their Hero level and XP, or keep their current one. Closing the screen keeps the
+> current Hero and the screen returns on the next login until a choice is made. This one-time switch will be removed
+> in the next version.
+
+The ritual swaps your Hero: it rolls a new one, different from your current Hero, and your Hero level carries over
+(see [Ritual System](Ritual-System)). Rolls only consider Heroes with their own model, texture and animations, and only
+ranks that have at least one such Hero, so while Aria and Clare (both EX) are the only ones, every roll gives one of
+them.
 
 Higher-ranked Heroes generally possess:
 
@@ -136,11 +159,11 @@ The system is designed to support future expansion and potentially community-cre
 More systems will be added as development continues.
 
 > [!IMPORTANT]
-> At the current stage of development, only one fully playable Hero is publicly available.
+> At the current stage of development, only two fully playable Heroes are publicly available.
 >
 > This temporary limitation exists because the new model, texture, and animation pipeline is still being stabilized and expanded.
 >
-> Aria (EX Rank) is currently the primary showcase Hero featuring:
+> Aria (EX Rank, Saber) and Clare (EX Rank, Assassin) are currently the showcase Heroes featuring:
 >
 > - Custom model
 > - Custom textures

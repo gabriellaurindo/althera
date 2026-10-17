@@ -7,6 +7,9 @@ A summoning-based mod featuring custom entities powered by GeckoLib.
 - Custom summon mechanics
 - Animated 3D entities
 
+> **Note:** Hero models, textures and animations are work in progress. They can and will change constantly between
+> versions until they reach their final quality.
+
 ## Links
 - Download: [CurseForge](https://www.curseforge.com/minecraft/mc-mods/althera)
 - Documentation: [Wiki](https://github.com/gabriellaurindo/althera/wiki)

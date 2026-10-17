@@ -1,0 +1,12 @@
+{
+  "name": "Clare",
+  "description": "A silent blade in crimson and black who strikes from the shadows and is gone before the echo fades.",
+  "class": "ASSASSIN",
+  "rank": "EX",
+  "nature": "COMMON",
+  "model": "althera:geo/entity/hero/clare.geo.json",
+  "texture": "althera:textures/entity/hero/clare.png",
+  "animations": "althera:animations/entity/hero/clare.animation.json",
+  "personality": "Cold, quiet and loyal",
+  "scale": 0.8
+}

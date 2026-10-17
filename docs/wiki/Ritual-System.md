@@ -44,6 +44,19 @@ The ritual is composed of **three vertical layers**, all centered on the Ritual 
 <img width="653" height="512" alt="ritual_2" src="https://github.com/user-attachments/assets/fae8784c-90e4-4f6c-9007-e58cea2f33dc" />
 <img width="255" height="140" alt="ritual_core_craft" src="https://github.com/user-attachments/assets/ec1692f2-649a-44f6-9b91-bbc1af792113" />
 
+## 🔄 What the Ritual Does
+
+The ritual **swaps your Hero**:
+
+- It rolls a **new Hero, different from the one you have** (rank chances still apply)
+- Your current Hero leaves; your **Hero level and XP carry over** to the new one
+- The new Hero starts at full health
+- If no other Hero is available, the ritual fails and the Diamond Block is **not** consumed
+
+Without a Hero, the ritual simply rolls your first one.
+
+---
+
 ## ⚠️ Validation Rules
 
 For the ritual to work:

@@ -3,6 +3,7 @@ package com.darksune.althera.client.model.entity;
 import com.darksune.althera.common.entity.HeroEntity;
 import com.darksune.althera.common.hero.HeroDefinition;
 import net.minecraft.resources.ResourceLocation;
+import software.bernie.geckolib.animation.AnimationState;
 import software.bernie.geckolib.model.GeoModel;
 
 public class HeroModel extends GeoModel<HeroEntity> {
@@ -24,6 +25,13 @@ public class HeroModel extends GeoModel<HeroEntity> {
                     "althera",
                     "animations/entity/hero/hero.animation.json"
             );
+
+    private static final String ULTIMATE_EFFECT_BONE = "ultimate_effect";
+
+    @Override
+    public void setCustomAnimations(HeroEntity animatable, long instanceId, AnimationState<HeroEntity> animationState) {
+        getBone(ULTIMATE_EFFECT_BONE).ifPresent(bone -> bone.setHidden(!animatable.isPlayingUltimate()));
+    }
 
     @Override
     public ResourceLocation getModelResource(HeroEntity animatable) {

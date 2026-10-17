@@ -47,9 +47,10 @@ Example Hero JSON:
 
   "model": "althera:geo/entity/hero/aria.geo.json",
   "texture": "althera:textures/entity/hero/aria.png",
-  "animations": "althera:animations/hero/aria.animation.json",
+  "animations": "althera:animations/entity/hero/aria.animation.json",
 
-  "personality": "Honorable and calm"
+  "personality": "Honorable and calm",
+  "scale": 0.72
 }
 ```
 
@@ -92,6 +93,7 @@ Current supported values:
 - `ARCHER`
 - `CASTER`
 - `SHIELDER`
+- `ASSASSIN`
 
 Example:
 
@@ -108,24 +110,35 @@ Example:
 | Archer | High attack, lower durability |
 | Caster | Extremely high attack scaling |
 | Shielder | High defense and survivability |
+| Assassin | Highest speed and high attack, but fragile |
 
 Class advantage relationships currently exist between:
 
 - Saber > Lancer
 - Lancer > Archer
 - Archer > Saber
+- Assassin > Caster
+- Shielder > Assassin
 
 ---
 
 ## `rank`
 
-Defines Hero rarity and overall power scaling.
+Defines Hero rarity and overall power scaling. **Required**: a Hero without `rank` fails to load.
 
-Current supported values:
+| Rank | Chance | Health multiplier |
+|---|---|---|
+| F | 40% | ×0.7 |
+| E | 25% | ×0.8 |
+| D | 15% | ×0.9 |
+| C | 10% | ×1.0 |
+| B | 5% | ×1.15 |
+| A | 3% | ×1.3 |
+| S | 1.5% | ×1.5 |
+| EX | 0.5% | ×1.75 |
 
-- `EX`
-
-Additional ranks are planned for future versions.
+The roll first picks a rank (weighted by chance, among ranks that have at least one rollable Hero), then a random
+Hero of that rank.
 
 Example:
 
@@ -141,7 +154,8 @@ Internal Hero alignment/category system.
 
 Current supported values:
 
-- `COMMON`
+- `COMMON` (default)
+- `DIVINE` — ×10 global multiplier, granted with `/althera_hero divine`
 
 Example:
 
@@ -153,9 +167,11 @@ Example:
 
 # 🎨 Visual Assets
 
-All visual assets are optional.
+A Hero only enters the roll (first summon, ritual and the `summon` / `rank` / `divine` commands) when it defines
+**all three**: `model`, `texture` and `animations`.
 
-If omitted, the Hero automatically uses fallback/default assets when possible.
+Heroes without them still load (and keep working for players who already have them, using the default assets), but
+are never rolled. This lets you add a Hero's data first and its visuals later.
 
 ---
 
@@ -202,13 +218,13 @@ Path to the GeckoLib animation file.
 Example:
 
 ```json
-"animations": "althera:animations/hero/aria.animation.json"
+"animations": "althera:animations/entity/hero/aria.animation.json"
 ```
 
 Expected asset location:
 
 ```text
-assets/althera/animations/hero/aria.animation.json
+assets/althera/animations/entity/hero/aria.animation.json
 ```
 
 ### Currently Supported Animations
@@ -218,8 +234,23 @@ At the current stage of development, the following animation names are expected:
 - `idle`
 - `walk`
 - `attack`
+- `ultimate` (played while channeling an ultimate)
+- `death` (played on defeat; keep it at most 2 seconds long and hold the last frame)
 
-These animation names should exist inside the animation JSON file.
+These animation names should exist inside the animation JSON file. A missing animation simply doesn't play.
+
+---
+
+# 📏 Scale
+
+Optional. Multiplies the size of the hero model in the world (default `1.0`). The player is 1.8 blocks tall: lower the
+value if the hero looks taller than the player, raise it if shorter. The hero screens (Choose your Hero, hero status)
+ignore `scale` and show the model at its drawn size, a bit larger than the player. Only the rendering is scaled; the
+hero hitbox is fixed at 0.6 x 1.8 blocks, the same as the player.
+
+```json
+"scale": 0.72
+```
 
 ---
 
@@ -235,10 +266,22 @@ Example:
 
 ---
 
+# ⭐ Choose your Hero
+
+Players without a Hero pick their first one on the **Choose your Hero** screen (on login, or when pressing the summon
+or hero key). Every Hero with its own `model`, `texture` and `animations` shows up there, so a new Hero with complete
+visuals becomes selectable automatically.
+
+In the current version only, players who already have a Hero can also use this screen once to switch Heroes while
+keeping their level; this will be removed in the next version.
+
+---
+
 # ⚠ Notes
 
 - Invalid paths may cause missing models or textures
-- Missing visual assets automatically fallback to default assets when possible
+- Heroes missing `model`, `texture` or `animations` are never rolled
+- The game log reports how many Heroes loaded, failed and are rollable
 - Animation support is still actively evolving
 - Hero combat systems may continue changing during development
 
@@ -247,7 +290,6 @@ Future updates may introduce:
 - Skills
 - Hero abilities
 - Unique AI behaviors
-- Additional ranks
 - Expanded class systems
 - Advanced combat logic
 
