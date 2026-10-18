@@ -63,12 +63,19 @@ Effects that act on creatures take a `target`:
 | `"self"` | The Hero |
 | `"owner"` | The Hero's owner (you) |
 | `{ "area": 6 }` | Every creature within 6 blocks of the Hero, except the Hero and the owner |
+| `{ "line": 8, "width": 1.5 }` | Every creature on a straight line in front of the Hero, up to 8 blocks (stops at walls), within `width` blocks of it (default `1`), except the Hero and the owner |
+
+**Direction**: towards the point you (the owner) are looking at, up to 32 blocks away: the creature or block under
+your crosshair, otherwise straight ahead of your view. It is taken when each phase starts, so for `on_end` you can aim
+while the Hero channels. Lines, dashes and
+particle trails all start where the Hero stood when the phase began, so in `on_end` you can damage the line before
+or after the `dash`.
 
 ---
 
 # ✨ Effects
 
-Positions (sounds, particles, explosions) are taken from the Hero.
+Positions (sounds, particles, explosions) are taken from the Hero's current position (after a `dash`, its new one).
 
 ### `damage`
 | Field | Default | |
@@ -115,6 +122,9 @@ A visual/sound explosion at the Hero. It never breaks blocks.
 | `spread` | `[0, 0, 0]` | Spread on X, Y, Z |
 | `speed` | `0` | |
 | `height` | `0` | Height above the Hero's feet |
+| `line` | `0` | Above 0, draws a trail along the line in front of the Hero (same path as `line` targets and `dash`), with `count` particles every half block |
+
+Colored dust: `{ "type": "minecraft:dust", "color": [0.75, 0.05, 0.1], "scale": 1.5 }` (RGB from 0 to 1).
 
 ### `sound`
 | Field | Default | |
@@ -122,6 +132,13 @@ A visual/sound explosion at the Hero. It never breaks blocks.
 | `sound` | — | Sound id, e.g. `minecraft:entity.generic.explode` |
 | `volume` | `1` | |
 | `pitch` | `1` | |
+
+### `dash`
+Moves the Hero instantly in a straight line in front of it, stopping before walls.
+
+| Field | Default | |
+|---|---|---|
+| `distance` | — | Blocks |
 
 ### `ultimate_animation`
 Plays the `ultimate` animation of the Hero model (if it has one). No fields.
@@ -150,6 +167,39 @@ Plays the `ultimate` animation of the Hero model (if it has one). No fields.
     { "type": "particles", "particle": { "type": "minecraft:flame" }, "count": 80, "spread": [1.5, 1.0, 1.5], "speed": 0.05, "height": 1 },
     { "type": "particles", "particle": { "type": "minecraft:smoke" }, "count": 50, "spread": [1.2, 0.8, 1.2], "speed": 0.03, "height": 1 },
     { "type": "sound", "sound": "minecraft:entity.generic.explode", "volume": 3.0, "pitch": 0.8 }
+  ]
+}
+```
+
+---
+
+# 🗡 Example: Crimson Requiem (Clare)
+
+Channels for 1.5 seconds over a crimson mist, then dashes 8 blocks through everything in front of her.
+
+```json
+{
+  "name": "Crimson Requiem",
+  "mana_cost": 200,
+  "channel_ticks": 30,
+  "cooldown_ticks": 20,
+  "on_start": [
+    { "type": "ultimate_animation" },
+    { "type": "mob_effect", "target": "self", "effect": "minecraft:slowness", "duration": 30, "amplifier": 4, "show_particles": false },
+    { "type": "sound", "sound": "minecraft:block.respawn_anchor.charge", "volume": 1.5, "pitch": 1.3 }
+  ],
+  "on_tick": [
+    { "type": "particles", "particle": { "type": "minecraft:dust", "color": [0.75, 0.05, 0.1], "scale": 1.2 }, "count": 3, "spread": [1.0, 0.05, 1.0], "height": 0.1 }
+  ],
+  "on_end": [
+    { "type": "mob_effect", "target": { "line": 8, "width": 1.5 }, "effect": "minecraft:wither", "duration": 80, "amplifier": 1 },
+    { "type": "damage", "target": { "line": 8, "width": 1.5 }, "amount": 18 },
+    { "type": "particles", "particle": { "type": "minecraft:dust", "color": [0.75, 0.05, 0.1], "scale": 1.5 }, "count": 4, "spread": [0.2, 0.4, 0.2], "height": 1, "line": 8 },
+    { "type": "particles", "particle": { "type": "minecraft:crit" }, "count": 2, "spread": [0.3, 0.3, 0.3], "speed": 0.1, "height": 1, "line": 8 },
+    { "type": "dash", "distance": 8 },
+    { "type": "particles", "particle": { "type": "minecraft:sweep_attack" }, "count": 1, "height": 1 },
+    { "type": "sound", "sound": "minecraft:item.trident.riptide_1", "volume": 1.5, "pitch": 1.4 },
+    { "type": "sound", "sound": "minecraft:entity.player.attack.sweep", "volume": 2.0, "pitch": 0.7 }
   ]
 }
 ```

@@ -13,6 +13,7 @@ public enum UltimateEffectType implements StringRepresentable {
     EXPLOSION("explosion", ExplosionEffect.CODEC),
     PARTICLES("particles", ParticlesEffect.CODEC),
     SOUND("sound", SoundEffect.CODEC),
+    DASH("dash", DashEffect.CODEC),
     ULTIMATE_ANIMATION("ultimate_animation", UltimateAnimationEffect.CODEC);
 
     public static final Codec<UltimateEffectType> CODEC = StringRepresentable.fromEnum(UltimateEffectType::values);

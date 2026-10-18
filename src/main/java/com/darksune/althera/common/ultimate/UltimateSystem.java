@@ -69,7 +69,7 @@ public class UltimateSystem {
 
         data.startSkillCooldown(ultimateId, ultimate.cooldownTicks());
 
-        ultimate.start(new UltimateContext(player, heroEntity));
+        ultimate.start(UltimateContext.of(player, heroEntity));
     }
 
     public static void tickActiveSkills(Player player, HeroEntity heroEntity, UltimateData data) {
@@ -78,7 +78,7 @@ public class UltimateSystem {
                 (ultimateId, remainingTicks) -> {
                     UltimateDefinition ultimate = UltimateRegistry.get(ultimateId);
                     if (ultimate != null) {
-                        ultimate.tick(new UltimateContext(player, heroEntity));
+                        ultimate.tick(UltimateContext.of(player, heroEntity));
                     }
                     SkillTimers.markDirtyOnSyncTick(data, remainingTicks);
                 },
@@ -113,7 +113,7 @@ public class UltimateSystem {
         UltimateDefinition ultimate = UltimateRegistry.get(ultimateId);
 
         if (reason == SkillEndReason.EXPIRED && heroEntity != null && ultimate != null) {
-            ultimate.end(new UltimateContext(player, heroEntity));
+            ultimate.end(UltimateContext.of(player, heroEntity));
         }
     }
 }

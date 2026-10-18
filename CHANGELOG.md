@@ -8,12 +8,15 @@ and generates the GitHub Release, CurseForge and Discord notes from it.
 
 ### Added
 - **Custom Ultimates**: Ultimates are now data-driven. Datapacks can create their own in `data/<namespace>/ultimate/`
-  by combining effects (damage, knockback, fire, mob effects, explosions, particles, sounds and the hero's
+  by combining effects (damage, knockback, fire, mob effects, explosions, dashes, particles, sounds and the hero's
   ultimate animation) on activation, while channeling and when channeling ends, and give one to each hero with the
   new `ultimate` field of the hero JSON. See the wiki page "Creating Custom Ultimates".
+- **Crimson Requiem**, Clare's own Ultimate: she channels over a crimson mist for 1.5 seconds, then dashes 8 blocks
+  towards where you are looking (aim while she channels), dealing heavy damage and Wither II to everything in her
+  path and leaving a crimson trail. She stops before walls.
 
 ### Changed
-- Each hero now has its own Ultimate. Aria and Clare still use Explosion, which works exactly as before.
+- Each hero now has its own Ultimate. Aria keeps Explosion, which works exactly as before.
 - Using the Ultimate without your hero summoned now tells you to summon it.
 
 ## [3.0.1] - 2026-10-17 - Clean Screenshots (hotfix)

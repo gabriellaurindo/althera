@@ -9,5 +9,5 @@
   "animations": "althera:animations/entity/hero/clare.animation.json",
   "personality": "Cold, quiet and loyal",
   "scale": 0.8,
-  "ultimate": "althera:explosion"
+  "ultimate": "althera:crimson_requiem"
 }
