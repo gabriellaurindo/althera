@@ -14,6 +14,8 @@ and generates the GitHub Release, CurseForge and Discord notes from it.
 - **Crimson Requiem**, Clare's own Ultimate: she channels over a crimson mist for 1.5 seconds, then dashes 8 blocks
   towards where you are looking (aim while she channels), dealing heavy damage and Wither II to everything in her
   path and leaving a crimson trail. She stops before walls.
+- **Ultimate tab** in the hero screen (G): click **Ultimate** to see your hero's Ultimate, with its key, mana cost,
+  channel time, whether it is ready today and a short explanation of how it works.
 
 ### Changed
 - Each hero now has its own Ultimate. Aria keeps Explosion, which works exactly as before.

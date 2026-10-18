@@ -1,5 +1,6 @@
 {
   "name": "Explosion",
+  "description": "Your hero stands still and gathers power for 1 second, then explodes: every creature within 6 blocks takes heavy damage, is set on fire and is knocked back. You are never hit.",
   "mana_cost": 200,
   "channel_ticks": 20,
   "cooldown_ticks": 20,

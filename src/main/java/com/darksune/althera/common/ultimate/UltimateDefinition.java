@@ -10,6 +10,7 @@ import java.util.List;
 
 public record UltimateDefinition(
         String name,
+        String description,
         int manaCost,
         int channelTicks,
         int cooldownTicks,
@@ -20,6 +21,7 @@ public record UltimateDefinition(
 
     public static final Codec<UltimateDefinition> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.STRING.optionalFieldOf("name", "Ultimate").forGetter(UltimateDefinition::name),
+            Codec.STRING.optionalFieldOf("description", "").forGetter(UltimateDefinition::description),
             ExtraCodecs.NON_NEGATIVE_INT.fieldOf("mana_cost").forGetter(UltimateDefinition::manaCost),
             ExtraCodecs.POSITIVE_INT.fieldOf("channel_ticks").forGetter(UltimateDefinition::channelTicks),
             ExtraCodecs.NON_NEGATIVE_INT.optionalFieldOf("cooldown_ticks", 0).forGetter(UltimateDefinition::cooldownTicks),

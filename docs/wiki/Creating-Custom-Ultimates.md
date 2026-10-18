@@ -28,6 +28,7 @@ Heroes without `ultimate` use `althera:explosion`. Ultimates reload with `/reloa
 ```json
 {
   "name": "Explosion",
+  "description": "Your hero stands still and gathers power for 1 second, then explodes...",
   "mana_cost": 200,
   "channel_ticks": 20,
   "cooldown_ticks": 20,
@@ -40,6 +41,7 @@ Heroes without `ultimate` use `althera:explosion`. Ultimates reload with `/reloa
 | Field | Required | Description |
 |---|---|---|
 | `name` | No | Display name (default `Ultimate`) |
+| `description` | No | Short explanation shown in the Ultimate tab of the hero screen (**G**) |
 | `mana_cost` | Yes | Mana spent on activation |
 | `channel_ticks` | Yes | How long the Hero channels before `on_end` (20 ticks = 1 second) |
 | `cooldown_ticks` | No | Cooldown after activation (default `0`) |
@@ -150,6 +152,7 @@ Plays the `ultimate` animation of the Hero model (if it has one). No fields.
 ```json
 {
   "name": "Explosion",
+  "description": "Your hero stands still and gathers power for 1 second, then explodes: every creature within 6 blocks takes heavy damage, is set on fire and is knocked back. You are never hit.",
   "mana_cost": 200,
   "channel_ticks": 20,
   "cooldown_ticks": 20,
@@ -180,6 +183,7 @@ Channels for 1.5 seconds over a crimson mist, then dashes 8 blocks through every
 ```json
 {
   "name": "Crimson Requiem",
+  "description": "Clare stands still over a crimson mist for 1.5 seconds, then dashes 8 blocks towards where you are looking, stopping before walls. Everything in her path takes heavy damage and Wither II. Aim while she channels.",
   "mana_cost": 200,
   "channel_ticks": 30,
   "cooldown_ticks": 20,

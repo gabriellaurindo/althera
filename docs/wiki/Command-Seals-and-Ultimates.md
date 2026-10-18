@@ -79,7 +79,9 @@ Fully restores the summoned Hero's health.
 ## 💥 Ultimates
 
 Ultimates are the Hero's strongest abilities. Each Hero has its own Ultimate (**U**): Aria uses Explosion and
-Clare uses Crimson Requiem. Datapacks can create new ones: see [Creating Custom Ultimates](Creating-Custom-Ultimates).
+Clare uses Crimson Requiem. To see how your Hero's Ultimate works, open the hero screen (**G**) and click
+**Ultimate**: it shows its name, key, mana cost, channel time, whether it is ready today and a short description.
+Datapacks can create new ones: see [Creating Custom Ultimates](Creating-Custom-Ultimates).
 
 - The Ultimate can be used **once per day**
 - Ultimates are restored at the start of a new day (sleeping through the night also counts)

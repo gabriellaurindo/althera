@@ -1,5 +1,6 @@
 {
   "name": "Crimson Requiem",
+  "description": "Clare stands still over a crimson mist for 1.5 seconds, then dashes 8 blocks towards where you are looking, stopping before walls. Everything in her path takes heavy damage and Wither II. Aim while she channels.",
   "mana_cost": 200,
   "channel_ticks": 30,
   "cooldown_ticks": 20,
