@@ -47,6 +47,7 @@ public record SyncHeroesPacket(List<HeroDefinition> heroes) implements CustomPac
         buf.writeNullable(hero.getAnimations(), FriendlyByteBuf::writeResourceLocation);
         buf.writeUtf(hero.getPersonality());
         buf.writeFloat(hero.getScale());
+        buf.writeResourceLocation(hero.getUltimate());
     }
 
     private static HeroDefinition readHero(FriendlyByteBuf buf) {
@@ -61,7 +62,8 @@ public record SyncHeroesPacket(List<HeroDefinition> heroes) implements CustomPac
                 buf.readNullable(FriendlyByteBuf::readResourceLocation),
                 buf.readNullable(FriendlyByteBuf::readResourceLocation),
                 buf.readUtf(),
-                buf.readFloat()
+                buf.readFloat(),
+                buf.readResourceLocation()
         );
     }
 

@@ -6,6 +6,16 @@ and generates the GitHub Release, CurseForge and Discord notes from it.
 
 ## [Unreleased]
 
+### Added
+- **Custom Ultimates**: Ultimates are now data-driven. Datapacks can create their own in `data/<namespace>/ultimate/`
+  by combining effects (damage, knockback, fire, mob effects, explosions, particles, sounds and the hero's
+  ultimate animation) on activation, while channeling and when channeling ends, and give one to each hero with the
+  new `ultimate` field of the hero JSON. See the wiki page "Creating Custom Ultimates".
+
+### Changed
+- Each hero now has its own Ultimate. Aria and Clare still use Explosion, which works exactly as before.
+- Using the Ultimate without your hero summoned now tells you to summon it.
+
 ## [3.0.1] - 2026-10-17 - Clean Screenshots (hotfix)
 
 ### Fixed

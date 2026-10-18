@@ -78,9 +78,10 @@ Fully restores the summoned Hero's health.
 
 ## 💥 Ultimates
 
-Ultimates are the Hero's strongest abilities.
+Ultimates are the Hero's strongest abilities. Each Hero has its own Ultimate (**U**); for now every Hero uses
+Explosion. Datapacks can create new ones: see [Creating Custom Ultimates](Creating-Custom-Ultimates).
 
-- Each Ultimate can be used **once per day**
+- The Ultimate can be used **once per day**
 - Ultimates are restored at the start of a new day (sleeping through the night also counts)
 - Ultimates do not use Command Seal charges
 
@@ -106,3 +107,4 @@ If the Hero is defeated or dismissed while channeling, the explosion is cancelle
 
 - [Core Systems](Core-Systems)
 - [Commands](Commands)
+- [Creating Custom Ultimates](Creating-Custom-Ultimates)

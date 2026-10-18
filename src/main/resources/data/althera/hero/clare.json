@@ -8,5 +8,6 @@
   "texture": "althera:textures/entity/hero/clare.png",
   "animations": "althera:animations/entity/hero/clare.animation.json",
   "personality": "Cold, quiet and loyal",
-  "scale": 0.8
+  "scale": 0.8,
+  "ultimate": "althera:explosion"
 }

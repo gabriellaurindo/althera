@@ -19,6 +19,8 @@ public class HeroLoader extends SimpleJsonResourceReloadListener {
 
     private static final Gson GSON = new Gson();
 
+    private static final String DEFAULT_ULTIMATE = "althera:explosion";
+
     public HeroLoader() {
         super(GSON, "hero");
     }
@@ -168,7 +170,8 @@ public class HeroLoader extends SimpleJsonResourceReloadListener {
                 texture,
                 animations,
                 personality,
-                GsonHelper.getAsFloat(json, "scale", 1.0f)
+                GsonHelper.getAsFloat(json, "scale", 1.0f),
+                ResourceLocation.parse(GsonHelper.getAsString(json, "ultimate", DEFAULT_ULTIMATE))
         );
     }
 }

@@ -14,6 +14,7 @@ Custom Heroes may include:
 - Textures
 - Animations
 - Personality data
+- Ultimates
 
 ---
 
@@ -50,7 +51,8 @@ Example Hero JSON:
   "animations": "althera:animations/entity/hero/aria.animation.json",
 
   "personality": "Honorable and calm",
-  "scale": 0.72
+  "scale": 0.72,
+  "ultimate": "althera:explosion"
 }
 ```
 
@@ -266,6 +268,17 @@ Example:
 
 ---
 
+# 💥 Ultimate
+
+Optional. Id of the Hero's Ultimate (default `althera:explosion`). Ultimates are their own JSON files, so several
+Heroes can share one; see [Creating Custom Ultimates](Creating-Custom-Ultimates).
+
+```json
+"ultimate": "althera:explosion"
+```
+
+---
+
 # ⭐ Choose your Hero
 
 Players without a Hero pick their first one on the **Choose your Hero** screen (on login, or when pressing the summon
@@ -288,7 +301,7 @@ keeping their level; this will be removed in the next version.
 Future updates may introduce:
 
 - Skills
-- Hero abilities
+- More Hero abilities
 - Unique AI behaviors
 - Expanded class systems
 - Advanced combat logic
@@ -298,3 +311,4 @@ Future updates may introduce:
 # 🔗 Related Pages
 
 - [Core Systems](Core-Systems)
+- [Creating Custom Ultimates](Creating-Custom-Ultimates)

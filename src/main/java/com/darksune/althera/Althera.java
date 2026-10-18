@@ -7,9 +7,12 @@ import com.darksune.althera.common.entity.SummonedEntity;
 import com.darksune.althera.common.hero.HeroLoader;
 import com.darksune.althera.common.hero.HeroRegistry;
 import com.darksune.althera.common.registry.AltheraRegistries;
+import com.darksune.althera.common.ultimate.UltimateLoader;
+import com.darksune.althera.common.ultimate.UltimateRegistry;
 import com.darksune.althera.config.AltheraConfig;
 import com.darksune.althera.network.AltheraNetwork;
 import com.darksune.althera.network.packet.SyncHeroesPacket;
+import com.darksune.althera.network.packet.SyncUltimatesPacket;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
@@ -38,12 +41,14 @@ public final class Althera {
 
     private void onReloadListeners(AddReloadListenerEvent event) {
         event.addListener(new HeroLoader());
+        event.addListener(new UltimateLoader(event.getRegistryAccess()));
     }
 
     @SubscribeEvent
     public static void onDatapackSync(OnDatapackSyncEvent event) {
-        SyncHeroesPacket packet = SyncHeroesPacket.of(HeroRegistry.getAll());
-        event.getRelevantPlayers().forEach(player -> PacketDistributor.sendToPlayer(player, packet));
+        SyncHeroesPacket heroes = SyncHeroesPacket.of(HeroRegistry.getAll());
+        SyncUltimatesPacket ultimates = new SyncUltimatesPacket(UltimateRegistry.getAll());
+        event.getRelevantPlayers().forEach(player -> PacketDistributor.sendToPlayer(player, heroes, ultimates));
     }
 
     @SubscribeEvent

@@ -1,0 +1,21 @@
+{
+  "name": "Explosion",
+  "mana_cost": 200,
+  "channel_ticks": 20,
+  "cooldown_ticks": 20,
+  "on_start": [
+    { "type": "ultimate_animation" },
+    { "type": "mob_effect", "target": "self", "effect": "minecraft:slowness", "duration": 20, "amplifier": 4, "show_particles": false },
+    { "type": "sound", "sound": "minecraft:block.beacon.power_select", "volume": 2.0, "pitch": 0.5 }
+  ],
+  "on_end": [
+    { "type": "knockback", "target": { "area": 6 }, "horizontal": 0.35, "vertical": 0.6 },
+    { "type": "ignite", "target": { "area": 6 }, "ticks": 60 },
+    { "type": "damage", "target": { "area": 6 }, "amount": 12 },
+    { "type": "explosion" },
+    { "type": "particles", "particle": { "type": "minecraft:explosion_emitter" }, "height": 1 },
+    { "type": "particles", "particle": { "type": "minecraft:flame" }, "count": 80, "spread": [1.5, 1.0, 1.5], "speed": 0.05, "height": 1 },
+    { "type": "particles", "particle": { "type": "minecraft:smoke" }, "count": 50, "spread": [1.2, 0.8, 1.2], "speed": 0.03, "height": 1 },
+    { "type": "sound", "sound": "minecraft:entity.generic.explode", "volume": 3.0, "pitch": 0.8 }
+  ]
+}

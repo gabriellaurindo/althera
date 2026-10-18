@@ -8,5 +8,6 @@
   "texture": "althera:textures/entity/hero/aria.png",
   "animations": "althera:animations/entity/hero/aria.animation.json",
   "personality": "Honorable and calm",
-  "scale": 0.72
+  "scale": 0.72,
+  "ultimate": "althera:explosion"
 }
