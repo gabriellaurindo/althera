@@ -11,6 +11,9 @@ and generates the GitHub Release, CurseForge and Discord notes from it.
   by combining effects (damage, knockback, fire, mob effects, explosions, dashes, particles, sounds and the hero's
   ultimate animation) on activation, while channeling and when channeling ends, and give one to each hero with the
   new `ultimate` field of the hero JSON. See the wiki page "Creating Custom Ultimates".
+- **Dodge**: heroes can now evade attacks, depending on their class. Assassins dodge 10% of attacks; Sabers,
+  Lancers and Archers 5%; Casters and Shielders never dodge. Explosions can't be dodged. A dodge during an
+  intervention still protects you. The hero screen (G) shows your hero's dodge chance.
 - **Crimson Requiem**, Clare's own Ultimate: she channels over a crimson mist for 1.5 seconds, then dashes 8 blocks
   towards where you are looking (aim while she channels), dealing heavy damage and Wither II to everything in her
   path and leaving a crimson trail. She stops before walls.
@@ -20,6 +23,14 @@ and generates the GitHub Release, CurseForge and Discord notes from it.
 ### Changed
 - Each hero now has its own Ultimate. Aria keeps Explosion, which works exactly as before.
 - Using the Ultimate without your hero summoned now tells you to summon it.
+
+### Fixed
+- Heroes fight hordes properly: they now hit whichever enemy is attacking them within reach instead of chasing a single
+  target through the crowd, keep fighting nearby enemies that are attacking them or you when their target dies, and no
+  longer drop the enemy in front of them to run after a mob you hit some time ago.
+- Heroes are now hard to push around: they resist knockback depending on their class, so a crowd of mobs can no
+  longer bat them away from their target. Shielders can't be pushed at all, Sabers and Lancers barely move, and
+  Archers, Assassins and Casters still get pushed a little.
 
 ## [3.0.1] - 2026-10-17 - Clean Screenshots (hotfix)
 

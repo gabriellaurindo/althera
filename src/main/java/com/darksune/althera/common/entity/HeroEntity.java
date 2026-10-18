@@ -1,6 +1,7 @@
 package com.darksune.althera.common.entity;
 
 import com.darksune.althera.common.ai.goal.AssistOwnerGoal;
+import com.darksune.althera.common.ai.goal.EngageThreatsGoal;
 import com.darksune.althera.common.ai.goal.FollowOwnerGoal;
 import com.darksune.althera.common.ai.goal.HeroMeleeAttackGoal;
 import com.darksune.althera.common.ai.goal.ProtectOwnerGoal;
@@ -11,6 +12,7 @@ import com.darksune.althera.common.hero.HeroRegistry;
 import com.darksune.althera.common.system.HeroStatsSystem;
 import com.darksune.althera.common.system.HeroSummonSystem;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -18,6 +20,8 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
@@ -45,7 +49,10 @@ import software.bernie.geckolib.animation.PlayState;
 import software.bernie.geckolib.animation.RawAnimation;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
+import java.util.Comparator;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Predicate;
 
 import static com.darksune.althera.common.util.LightOrbUtil.habilitarEspirito;
 
@@ -69,6 +76,7 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
 
     private UUID ownerUuid;
+    private int dodgeTick = -1;
 
     boolean searchingForLand;
     protected final WaterBoundPathNavigation waterNavigation;
@@ -341,6 +349,22 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
         this.targetSelector.addGoal(3,
                 new AssistOwnerGoal<>(this)
         );
+        this.targetSelector.addGoal(4, new EngageThreatsGoal(this));
+    }
+
+    public boolean isThreat(final Mob mob) {
+        if (mob == this || !mob.isAlive() || !canAttack(mob) || isAlliedTo(mob)) return false;
+
+        final LivingEntity mobTarget = mob.getTarget();
+        return mob == getLastHurtByMob()
+                || mobTarget == this
+                || (mobTarget != null && mobTarget == getOwner());
+    }
+
+    public Optional<Mob> findClosestThreat(final double radius, final Predicate<Mob> filter) {
+        return level().getEntitiesOfClass(Mob.class, getBoundingBox().inflate(radius), mob -> isThreat(mob) && filter.test(mob))
+                .stream()
+                .min(Comparator.comparingDouble(this::distanceToSqr));
     }
 
     @Override
@@ -399,7 +423,42 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
             return false;
         }
 
+        if (tryDodge(source)) {
+            return false;
+        }
+
         return super.hurt(source, amount);
+    }
+
+    public boolean hasDodgedThisTick() {
+        return dodgeTick == tickCount;
+    }
+
+    private boolean tryDodge(final DamageSource source) {
+        if (level().isClientSide || invulnerableTime > 10 || !isDodgeable(source)) return false;
+
+        final HeroDefinition definition = getHeroDefinition();
+        if (definition == null || random.nextFloat() >= definition.getHeroClass().getDodgeChance()) return false;
+
+        dodgeTick = tickCount;
+        playDodgeEffects();
+        return true;
+    }
+
+    private boolean isDodgeable(final DamageSource source) {
+        final Entity attacker = source.getEntity();
+        return attacker != null
+                && attacker != getOwner()
+                && !source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)
+                && !source.is(DamageTypeTags.IS_EXPLOSION);
+    }
+
+    private void playDodgeEffects() {
+        level().playSound(null, getX(), getY(), getZ(), SoundEvents.PLAYER_ATTACK_NODAMAGE, getSoundSource(), 1.0F, 1.2F);
+
+        if (level() instanceof ServerLevel serverLevel) {
+            serverLevel.sendParticles(ParticleTypes.CLOUD, getX(), getY() + getBbHeight() * 0.5, getZ(), 6, 0.3, 0.3, 0.3, 0.02);
+        }
     }
 
     @Override

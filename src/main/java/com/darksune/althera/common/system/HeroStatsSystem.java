@@ -12,6 +12,7 @@ public class HeroStatsSystem {
     private final static int BASE_HEALTH = 19;
     private final static double BASE_ATTACK = 1.125;
     private final static double BASE_ARMOR = 2.0;
+    private final static double BASE_KNOCKBACK_RESISTANCE = 0.8;
     //todo centralize the max HP calculation
     public static void applyAttributes(final HeroEntity hero, final Player player) {
         final HeroData heroData = HeroData.get(player);
@@ -19,6 +20,7 @@ public class HeroStatsSystem {
         var maxHealthAttr = hero.getAttribute(Attributes.MAX_HEALTH);
         var attackAttr = hero.getAttribute(Attributes.ATTACK_DAMAGE);
         var armorAttr = hero.getAttribute(Attributes.ARMOR);
+        var knockbackResistanceAttr = hero.getAttribute(Attributes.KNOCKBACK_RESISTANCE);
 
         if (maxHealthAttr != null) {
             maxHealthAttr.setBaseValue(getMaxHealth(heroData));
@@ -30,6 +32,10 @@ public class HeroStatsSystem {
 
         if (armorAttr != null) {
             armorAttr.setBaseValue(getArmor(heroData));
+        }
+
+        if (knockbackResistanceAttr != null) {
+            knockbackResistanceAttr.setBaseValue(getKnockbackResistance(heroData));
         }
 
         // temp name
@@ -102,6 +108,22 @@ public class HeroStatsSystem {
         result *= def.getNature().getGlobalMultiplier();
 
         return result;
+    }
+
+    public static double getKnockbackResistance(final HeroData data) {
+        HeroDefinition def = data.getHeroDefinition();
+
+        if (def == null) return BASE_KNOCKBACK_RESISTANCE;
+
+        return def.getHeroClass().getKnockbackResistance();
+    }
+
+    public static double getDodgeChance(final HeroData data) {
+        HeroDefinition def = data.getHeroDefinition();
+
+        if (def == null) return 0;
+
+        return def.getHeroClass().getDodgeChance();
     }
 
     public static int getMaxInterventions() {

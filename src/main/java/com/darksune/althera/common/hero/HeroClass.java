@@ -4,12 +4,12 @@ import java.util.EnumSet;
 
 public enum HeroClass {
 
-    SABER("Saber", 1.15f, 1.15f, 1.15f, 1.0f),
-    LANCER("Lancer", 1.0f, 1.25f, 0.85f, 1.25f),
-    ARCHER("Archer", 0.85f, 1.35f, 0.75f, 1.1f),
-    CASTER("Caster", 0.75f, 1.5f, 0.7f, 1.0f),
-    SHIELDER("Shielder", 1.5f, 0.7f, 1.6f, 0.75f),
-    ASSASSIN("Assassin", 0.8f, 1.4f, 0.7f, 1.3f);
+    SABER("Saber", 1.15f, 1.15f, 1.15f, 1.0f, 0.8f, 0.05f),
+    LANCER("Lancer", 1.0f, 1.25f, 0.85f, 1.25f, 0.75f, 0.05f),
+    ARCHER("Archer", 0.85f, 1.35f, 0.75f, 1.1f, 0.6f, 0.05f),
+    CASTER("Caster", 0.75f, 1.5f, 0.7f, 1.0f, 0.5f, 0.0f),
+    SHIELDER("Shielder", 1.5f, 0.7f, 1.6f, 0.75f, 1.0f, 0.0f),
+    ASSASSIN("Assassin", 0.8f, 1.4f, 0.7f, 1.3f, 0.6f, 0.1f);
 
     private final String displayName;
 
@@ -17,6 +17,8 @@ public enum HeroClass {
     private final float attackMultiplier;
     private final float armorMultiplier;
     private final float speedMultiplier;
+    private final float knockbackResistance;
+    private final float dodgeChance;
 
     private EnumSet<HeroClass> strongAgainst;
     private EnumSet<HeroClass> weakAgainst;
@@ -25,13 +27,17 @@ public enum HeroClass {
               float healthMultiplier,
               float attackMultiplier,
               float armorMultiplier,
-              float speedMultiplier) {
+              float speedMultiplier,
+              float knockbackResistance,
+              float dodgeChance) {
 
         this.displayName = displayName;
         this.healthMultiplier = healthMultiplier;
         this.attackMultiplier = attackMultiplier;
         this.armorMultiplier = armorMultiplier;
         this.speedMultiplier = speedMultiplier;
+        this.knockbackResistance = knockbackResistance;
+        this.dodgeChance = dodgeChance;
     }
 
     static {
@@ -85,5 +91,13 @@ public enum HeroClass {
 
     public float getSpeedMultiplier() {
         return speedMultiplier;
+    }
+
+    public float getKnockbackResistance() {
+        return knockbackResistance;
+    }
+
+    public float getDodgeChance() {
+        return dodgeChance;
     }
 }

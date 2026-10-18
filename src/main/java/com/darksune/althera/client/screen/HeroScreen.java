@@ -309,6 +309,17 @@ public class HeroScreen extends Screen {
         );
         infoY += 12;
 
+        drawStat(
+                gui,
+                "Dodge",
+                String.format(Locale.ROOT, "%.0f%%", HeroStatsSystem.getDodgeChance(heroData) * 100),
+                infoX,
+                infoY,
+                INFO_WIDTH,
+                0xFFFFFFFF
+        );
+        infoY += 12;
+
         final int interventionsLeft = HeroStatsSystem.getMaxInterventions() - heroData.getInterventions();
 
         drawStat(

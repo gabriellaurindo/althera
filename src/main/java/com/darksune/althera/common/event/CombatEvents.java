@@ -65,7 +65,7 @@ public class CombatEvents {
         }
 
         // the hero didn't absorb it (invulnerable, damage cancelled...): the damage goes through to the player
-        if (!hero.hurt(event.getSource(), damage)) {
+        if (!hero.hurt(event.getSource(), damage) && !hero.hasDodgedThisTick()) {
             return;
         }
 
