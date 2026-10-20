@@ -58,6 +58,13 @@ runs {
         systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
     }
 
+    client2 {
+        runType 'client'
+        workingDirectory project.file('runs/client2')
+        systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+        arguments.addAll '--username', 'Dev2', '--quickPlayMultiplayer', 'localhost:25565'
+    }
+
     server {
         systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
         argument '--nogui'

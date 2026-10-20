@@ -53,6 +53,7 @@ and generates the GitHub Release, CurseForge and Discord notes from it.
 - Heroes now move at their class speed: Assassins and Lancers are faster, Shielders slower. The speed shown on the
   Choose your Hero screen was never applied before.
 - Attack animations play in full instead of being cut short (Aria, Clare and Zaya).
+- Zaya's upper corset lacing now matches the lower one (crossed laces with gold beads).
 - Zaya's attack animation keeps the staff in her hand instead of sliding it out of her grip.
 - Zaya's Ultimate animation: she raises her staff with both hands and slams it into the ground, right when the
   explosion goes off.
