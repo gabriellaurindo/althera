@@ -87,6 +87,9 @@ Mana is the primary resource used to maintain your Hero while summoned.
 
 - Heroes consume mana while active
 - Running out of mana prevents maintaining the summon
+- When the Hero is dismissed for lack of mana, your mana is **exhausted**: the Hero can't be summoned again (not even
+  by an intervention) until you recover **half of your max mana**. The mana bar pulses red and shows a mark at the
+  halfway point while exhausted
 - Efficient mana management is essential during extended combat
 
 This system creates a balance between combat power and resource management.

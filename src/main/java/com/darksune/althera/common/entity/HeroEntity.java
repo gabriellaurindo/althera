@@ -758,7 +758,9 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
         int cost = HeroSummonSystem.getManaCost(heroData);
 
         if (!manaData.hasEnoughMana(owner, cost)) {
-            owner.sendSystemMessage(Component.literal("Not enough mana! Summon dismissed."));
+            owner.sendSystemMessage(Component.literal("§cNot enough mana! Summon dismissed. Recover half your mana to summon it again."));
+            manaData.setExhausted(true);
+            manaData.sync(owner);
             HeroSummonSystem.dismissSummon(owner);
             return;
         }

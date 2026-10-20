@@ -34,6 +34,7 @@ public final class ManaHudRenderer {
     private static final int COLOR_TICK = 0x40000000;
     private static final int COLOR_TEXT = 0x9FE6FF;
     private static final int COLOR_TEXT_LOW = 0xFF8A8A;
+    private static final int COLOR_EXHAUSTED_MARK = 0xFFFF8A8A;
 
     private static float displayedRatio = -1;
     private static float trailRatio = -1;
@@ -63,7 +64,8 @@ public final class ManaHudRenderer {
 
         int filled = Math.round(BAR_WIDTH * displayedRatio);
         int trail = Math.round(BAR_WIDTH * trailRatio);
-        boolean low = !infinite && mana < LOW_MANA;
+        boolean exhausted = !infinite && manaData.isExhausted();
+        boolean low = !infinite && mana < LOW_MANA || exhausted;
         long now = Util.getMillis();
 
         GuiGraphics gui = event.getGuiGraphics();
@@ -86,6 +88,11 @@ public final class ManaHudRenderer {
         for (int i = 1; i < 10; i++) {
             int tickX = x + BAR_WIDTH * i / 10;
             gui.fill(tickX, y + 1, tickX + 1, y + BAR_HEIGHT - 1, COLOR_TICK);
+        }
+
+        if (exhausted) {
+            int markX = x + BAR_WIDTH / 2;
+            gui.fill(markX, y - 2, markX + 1, y + BAR_HEIGHT + 2, COLOR_EXHAUSTED_MARK);
         }
 
         gui.drawString(

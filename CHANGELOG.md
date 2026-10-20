@@ -61,6 +61,9 @@ and generates the GitHub Release, CurseForge and Discord notes from it.
   Datapacks can tune it with the new `armor_per_level` field in the hero `stats`.
 
 ### Changed
+- **Mana exhaustion**: when your hero is dismissed for lack of mana, you must recover half of your max mana before
+  it can be summoned again (by you or by an intervention), so it no longer pops in and out every few seconds. The
+  mana bar pulses red and marks the halfway point until then.
 - **Faster leveling**: heroes earn five times more experience per kill (half the defeated creature's max health:
   10 for a zombie, 50 for an Iron Golem, 250 for the Warden), and monsters you kill yourself while your hero is
   summoned now give it half of that. Reaching level 10 takes about 75 zombies instead of almost 370.

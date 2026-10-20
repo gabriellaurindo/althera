@@ -208,6 +208,14 @@ public class HeroSummonSystem {
         }
 
         final ManaData manaData = ManaData.get(player);
+        if (checkMana && manaData.isExhausted() && !ManaData.hasInfiniteMana(player)) {
+            if (sendMessage) {
+                player.sendSystemMessage(Component.literal("§eYour mana is exhausted. Recover half of it ("
+                        + manaData.getMaxMana() / 2 + ") to summon your hero again."));
+            }
+            return null;
+        }
+
         if (checkMana && !manaData.hasEnoughMana(player, getManaCost(heroData))) {
             if (sendMessage) {
                 player.sendSystemMessage(Component.literal("Not enough mana!"));
