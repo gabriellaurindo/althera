@@ -2,6 +2,8 @@
 
 Ultimates are data-driven: each one is a JSON file built from small, reusable **effects** (damage, knockback,
 particles, sounds...). A Hero picks its Ultimate with the `ultimate` field of its JSON, so several Heroes can share one.
+The same effects also power Hero attacks (`on_attack` / `on_hit`, see
+[Creating Custom Heroes](Creating-Custom-Heroes#-attack)).
 
 ---
 
@@ -64,14 +66,31 @@ Effects that act on creatures take a `target`:
 |---|---|
 | `"self"` | The Hero |
 | `"owner"` | The Hero's owner (you) |
-| `{ "area": 6 }` | Every creature within 6 blocks of the Hero, except the Hero and the owner |
-| `{ "line": 8, "width": 1.5 }` | Every creature on a straight line in front of the Hero, up to 8 blocks (stops at walls), within `width` blocks of it (default `1`), except the Hero and the owner |
+| `"target"` | Attacks only: the creature being attacked or hit. In an Ultimate it hits nobody |
+| `{ "area": 6 }` | Every creature within 6 blocks of the Hero (in an attack's `on_hit`: of the impact point) |
+| `{ "line": 8, "width": 1.5 }` | Every creature on a straight line in front of the Hero, up to 8 blocks (stops at walls), within `width` blocks of it (default `1`) |
+
+`area` and `line` never hit the Hero, the owner or their allies, and only hit other players when the owner could hurt
+them (server PvP on, not teammates without friendly fire), like tamed wolves.
 
 **Direction**: towards the point you (the owner) are looking at, up to 32 blocks away: the creature or block under
 your crosshair, otherwise straight ahead of your view. It is taken when each phase starts, so for `on_end` you can aim
 while the Hero channels. Lines, dashes and
 particle trails all start where the Hero stood when the phase began, so in `on_end` you can damage the line before
 or after the `dash`.
+
+**Filter**: `damage`, `knockback`, `ignite` and `mob_effect` take an optional `filter` that narrows their target down.
+Every field is optional and they all have to match:
+
+| Field | Default | |
+|---|---|---|
+| `entity_tag` | none | Only creatures in this entity type tag, e.g. `minecraft:undead`, `minecraft:arthropod` |
+| `hostile` | `false` | Only hostile creatures (zombies, skeletons, creepers, slimes...) |
+| `exclude_target` | `false` | Skip the creature being attacked (attacks only), e.g. to hit only what stands behind it |
+
+```json
+{ "type": "damage", "target": "target", "filter": { "entity_tag": "minecraft:undead" }, "attack_ratio": 0.5 }
+```
 
 ---
 
@@ -83,7 +102,12 @@ Positions (sounds, particles, explosions) are taken from the Hero's current posi
 | Field | Default | |
 |---|---|---|
 | `target` | — | Who takes damage |
-| `amount` | — | Damage (2 = one heart) |
+| `filter` | none | See **Filter** above |
+| `amount` | `0` | Flat damage (2 = one heart) |
+| `attack_ratio` | `0` | Extra damage as a share of the Hero's attack damage (`0.5` = half of it), so it grows with the Hero level |
+
+In an attack's `on_hit`, damage to the attacked creature always lands on top of the hit itself (it ignores the
+short invulnerability after being hit).
 
 ### `knockback`
 Pushes targets away from the Hero, stronger the farther they are.
@@ -91,19 +115,23 @@ Pushes targets away from the Hero, stronger the farther they are.
 | Field | Default | |
 |---|---|---|
 | `target` | — | |
+| `filter` | none | |
 | `horizontal` | `0` | Multiplier of the distance to the Hero |
 | `vertical` | `0` | Upward push |
+| `scale_with_distance` | `true` | `false` makes the push the same at any distance (`horizontal` is then the push itself); use it for ranged attacks |
 
 ### `ignite`
 | Field | Default | |
 |---|---|---|
 | `target` | — | |
+| `filter` | none | |
 | `ticks` | — | Burn time |
 
 ### `mob_effect`
 | Field | Default | |
 |---|---|---|
 | `target` | — | |
+| `filter` | none | |
 | `effect` | — | Effect id, e.g. `minecraft:slowness` |
 | `duration` | — | Ticks |
 | `amplifier` | `0` | `0` = level I |

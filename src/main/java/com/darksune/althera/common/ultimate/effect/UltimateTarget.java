@@ -34,6 +34,15 @@ public sealed interface UltimateTarget {
         }
     }
 
+    record Target() implements UltimateTarget {
+
+        @Override
+        public List<LivingEntity> resolve(UltimateContext context) {
+            LivingEntity target = context.target();
+            return target != null && target.isAlive() ? List.of(target) : List.of();
+        }
+    }
+
     record Area(double radius) implements UltimateTarget {
 
         static final Codec<Area> CODEC = RecordCodecBuilder.create(instance -> instance.group(
@@ -44,10 +53,9 @@ public sealed interface UltimateTarget {
         public List<LivingEntity> resolve(UltimateContext context) {
             return context.level().getEntitiesOfClass(
                     LivingEntity.class,
-                    context.hero().getBoundingBox().inflate(radius),
-                    entity -> entity != context.hero()
-                            && entity != context.owner()
-                            && entity.distanceToSqr(context.hero()) <= radius * radius
+                    AABB.ofSize(context.position(), 0, 0, 0).inflate(radius + 1),
+                    entity -> context.canAffect(entity)
+                            && entity.distanceToSqr(context.position()) <= radius * radius
             );
         }
     }
@@ -69,8 +77,7 @@ public sealed interface UltimateTarget {
             return context.level().getEntitiesOfClass(
                     LivingEntity.class,
                     new AABB(start, end).inflate(width + 1),
-                    entity -> entity != context.hero()
-                            && entity != context.owner()
+                    entity -> context.canAffect(entity)
                             && distanceToSegment(entity.getBoundingBox().getCenter(), start, end)
                             <= width + entity.getBbWidth() / 2
             );
@@ -96,6 +103,7 @@ public sealed interface UltimateTarget {
                 name -> switch (name) {
                     case "self" -> DataResult.success(new Self());
                     case "owner" -> DataResult.success(new Owner());
+                    case "target" -> DataResult.success(new Target());
                     default -> DataResult.error(() -> "Unknown ultimate target: " + name);
                 },
                 shape -> DataResult.success(shape.<UltimateTarget>map(area -> area, line -> line))
@@ -106,6 +114,7 @@ public sealed interface UltimateTarget {
         return switch (target) {
             case Self self -> Either.left("self");
             case Owner owner -> Either.left("owner");
+            case Target hit -> Either.left("target");
             case Area area -> Either.right(Either.left(area));
             case Line line -> Either.right(Either.right(line));
         };

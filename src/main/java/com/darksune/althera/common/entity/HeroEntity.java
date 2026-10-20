@@ -4,11 +4,14 @@ import com.darksune.althera.common.ai.goal.AssistOwnerGoal;
 import com.darksune.althera.common.ai.goal.EngageThreatsGoal;
 import com.darksune.althera.common.ai.goal.FollowOwnerGoal;
 import com.darksune.althera.common.ai.goal.HeroMeleeAttackGoal;
+import com.darksune.althera.common.ai.goal.HeroRangedAttackGoal;
 import com.darksune.althera.common.ai.goal.ProtectOwnerGoal;
 import com.darksune.althera.common.attachment.HeroData;
 import com.darksune.althera.common.attachment.ManaData;
+import com.darksune.althera.common.hero.HeroAttack;
 import com.darksune.althera.common.hero.HeroDefinition;
 import com.darksune.althera.common.hero.HeroRegistry;
+import com.darksune.althera.common.ultimate.effect.UltimateContext;
 import com.darksune.althera.common.system.HeroStatsSystem;
 import com.darksune.althera.common.system.HeroSummonSystem;
 import net.minecraft.core.BlockPos;
@@ -36,9 +39,12 @@ import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.ai.navigation.WaterBoundPathNavigation;
 import net.minecraft.world.entity.ai.util.DefaultRandomPos;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.level.pathfinder.PathType;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib.animatable.GeoEntity;
@@ -77,6 +83,7 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
 
     private UUID ownerUuid;
     private int dodgeTick = -1;
+    private boolean benchmark;
 
     boolean searchingForLand;
     protected final WaterBoundPathNavigation waterNavigation;
@@ -145,6 +152,67 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
         return id != null
                 ? HeroRegistry.get(id)
                 : null;
+    }
+
+    public HeroAttack getAttack() {
+        final HeroDefinition definition = getHeroDefinition();
+        return definition == null ? HeroAttack.MELEE : definition.getAttack();
+    }
+
+    public void performAttackEffects(@Nullable final LivingEntity target) {
+        final Player owner = findOwner();
+        if (owner != null) {
+            getAttack().attack(UltimateContext.attack(owner, this, target, null));
+        }
+    }
+
+    public void performHitEffects(@Nullable final LivingEntity target, final Vec3 position) {
+        final Player owner = findOwner();
+        if (owner != null) {
+            getAttack().hit(UltimateContext.attack(owner, this, target, position));
+        }
+    }
+
+    @Override
+    public boolean doHurtTarget(final Entity target) {
+        final boolean hurt = super.doHurtTarget(target);
+        if (hurt && target instanceof LivingEntity living) {
+            performHitEffects(living, living.position());
+        }
+        return hurt;
+    }
+
+    public Vec3 getProjectileOrigin() {
+        final Vec3 offset = getAttack().projectileOrigin().scale(getModelScale());
+        final float yaw = yBodyRot * Mth.DEG_TO_RAD;
+        final double sin = Mth.sin(yaw);
+        final double cos = Mth.cos(yaw);
+        final Vec3 center = getBoundingBox().getCenter();
+        final Vec3 origin = position().add(
+                -cos * offset.x - sin * offset.z,
+                offset.y,
+                -sin * offset.x + cos * offset.z
+        );
+        final BlockHitResult wall = level().clip(
+                new ClipContext(center, origin, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, this)
+        );
+        return wall.getType() == HitResult.Type.MISS
+                ? origin
+                : wall.getLocation().subtract(origin.subtract(center).normalize().scale(0.2D));
+    }
+
+    public void markAsBenchmark() {
+        this.benchmark = true;
+        this.setNoAi(true);
+    }
+
+    public boolean isBenchmark() {
+        return benchmark;
+    }
+
+    @Override
+    public boolean shouldBeSaved() {
+        return !benchmark && super.shouldBeSaved();
     }
 
     public int getAttackAnimationTicks() {
@@ -283,6 +351,7 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
         Level level = level();
         if (level.isClientSide) return;
         if (isDeadOrDying()) return;
+        if (benchmark) return;
 
         if (getAttackAnimationTicks() > 0) {
             setAttackAnimationTicks(getAttackAnimationTicks() - 1);
@@ -339,6 +408,7 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
 
         this.goalSelector.addGoal(1, new HeroEntitySwimUpGoal(this, 1.0, this.level().getSeaLevel()));
         this.goalSelector.addGoal(2, new HeroMeleeAttackGoal(this, 1.2D, true));
+        this.goalSelector.addGoal(2, new HeroRangedAttackGoal(this, 1.1D));
         this.goalSelector.addGoal(3, new FollowOwnerGoal(this, 1.1D, 5F, 2F));
         this.goalSelector.addGoal(4, new RandomLookAroundGoal(this));
 
@@ -350,6 +420,17 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
                 new AssistOwnerGoal<>(this)
         );
         this.targetSelector.addGoal(4, new EngageThreatsGoal(this));
+    }
+
+    @Override
+    public boolean canAttack(final LivingEntity target) {
+        if (target instanceof Player player && !canHarmPlayer(player)) return false;
+        return super.canAttack(target);
+    }
+
+    public boolean canHarmPlayer(final Player player) {
+        final Player owner = findOwner();
+        return owner != null && owner != player && owner.canHarmPlayer(player);
     }
 
     public boolean isThreat(final Mob mob) {

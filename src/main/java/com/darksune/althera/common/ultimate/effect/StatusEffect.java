@@ -10,11 +10,12 @@ import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
 
-public record StatusEffect(UltimateTarget target, Holder<MobEffect> effect, int duration, int amplifier,
+public record StatusEffect(UltimateTarget target, EntityFilter filter, Holder<MobEffect> effect, int duration, int amplifier,
                            boolean showParticles) implements UltimateEffect {
 
     public static final MapCodec<StatusEffect> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
             UltimateTarget.CODEC.fieldOf("target").forGetter(StatusEffect::target),
+            EntityFilter.CODEC.optionalFieldOf("filter", EntityFilter.ANY).forGetter(StatusEffect::filter),
             BuiltInRegistries.MOB_EFFECT.holderByNameCodec().fieldOf("effect").forGetter(StatusEffect::effect),
             ExtraCodecs.POSITIVE_INT.fieldOf("duration").forGetter(StatusEffect::duration),
             ExtraCodecs.NON_NEGATIVE_INT.optionalFieldOf("amplifier", 0).forGetter(StatusEffect::amplifier),
@@ -28,7 +29,7 @@ public record StatusEffect(UltimateTarget target, Holder<MobEffect> effect, int 
 
     @Override
     public void apply(UltimateContext context) {
-        for (LivingEntity entity : target.resolve(context)) {
+        for (LivingEntity entity : filter.resolve(target, context)) {
             entity.addEffect(new MobEffectInstance(effect, duration, amplifier, false, showParticles, true));
         }
     }

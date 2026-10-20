@@ -27,7 +27,6 @@ public class HeroData {
     private boolean isSaveDisabled = false;
     private boolean canResurrect = true;
     private ResourceLocation heroId = null;
-    private boolean heroChoiceDone = false;
 
     // =========================
     // CODEC (save/load)
@@ -67,15 +66,12 @@ public class HeroData {
                     Codec.STRING.optionalFieldOf("heroId", "")
                             .forGetter(data -> data.heroId != null
                                     ? data.heroId.toString()
-                                    : ""),
-
-                    Codec.BOOL.optionalFieldOf("heroChoiceDone", false)
-                            .forGetter(data -> data.heroChoiceDone)
+                                    : "")
 
             ).apply(instance, (level, xp, health, uuidStr,
                                interventions, defeated,
                                isHiddenHud, isSaveDisabled, canResurrect,
-                               heroIdStr, heroChoiceDone) -> {
+                               heroIdStr) -> {
                 HeroData data = new HeroData();
 
                 data.level = level;
@@ -86,7 +82,6 @@ public class HeroData {
                 data.isHiddenHud = isHiddenHud;
                 data.isSaveDisabled = isSaveDisabled;
                 data.canResurrect = canResurrect;
-                data.heroChoiceDone = heroChoiceDone;
 
                 if (!uuidStr.isEmpty()) {
                     data.summonUUID = UUID.fromString(uuidStr);
@@ -126,8 +121,6 @@ public class HeroData {
                 if (data.heroId != null) {
                     buf.writeResourceLocation(data.heroId);
                 }
-
-                buf.writeBoolean(data.heroChoiceDone);
             },
             buf -> {
                 HeroData data = new HeroData();
@@ -149,8 +142,6 @@ public class HeroData {
                 if (buf.readBoolean()) {
                     data.heroId = buf.readResourceLocation();
                 }
-
-                data.heroChoiceDone = buf.readBoolean();
 
                 return data;
             }
@@ -247,14 +238,6 @@ public class HeroData {
         }
 
         this.heroId = heroId;
-    }
-
-    public boolean isHeroChoiceDone() {
-        return heroChoiceDone;
-    }
-
-    public void setHeroChoiceDone(boolean heroChoiceDone) {
-        this.heroChoiceDone = heroChoiceDone;
     }
 
     // =========================

@@ -1,17 +1,21 @@
 package com.darksune.althera.network.packet;
 
 import com.darksune.althera.Althera;
+import com.darksune.althera.common.hero.HeroAttack;
 import com.darksune.althera.common.hero.HeroClass;
 import com.darksune.althera.common.hero.HeroDefinition;
 import com.darksune.althera.common.hero.HeroNature;
 import com.darksune.althera.common.hero.HeroRank;
 import com.darksune.althera.common.hero.HeroRegistry;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -20,10 +24,23 @@ public record SyncHeroesPacket(List<HeroDefinition> heroes) implements CustomPac
     public static final Type<SyncHeroesPacket> TYPE =
             new Type<>(ResourceLocation.fromNamespaceAndPath(Althera.MOD_ID, "sync_heroes"));
 
-    public static final StreamCodec<FriendlyByteBuf, SyncHeroesPacket> STREAM_CODEC =
+    private static final StreamCodec<RegistryFriendlyByteBuf, HeroAttack> ATTACK_CODEC =
+            ByteBufCodecs.fromCodecWithRegistries(HeroAttack.CODEC);
+
+    public static final StreamCodec<RegistryFriendlyByteBuf, SyncHeroesPacket> STREAM_CODEC =
             StreamCodec.of(
-                    (buf, packet) -> buf.writeCollection(packet.heroes, SyncHeroesPacket::writeHero),
-                    buf -> new SyncHeroesPacket(buf.readList(SyncHeroesPacket::readHero))
+                    (buf, packet) -> {
+                        buf.writeVarInt(packet.heroes.size());
+                        packet.heroes.forEach(hero -> writeHero(buf, hero));
+                    },
+                    buf -> {
+                        int size = buf.readVarInt();
+                        List<HeroDefinition> heroes = new ArrayList<>(size);
+                        for (int i = 0; i < size; i++) {
+                            heroes.add(readHero(buf));
+                        }
+                        return new SyncHeroesPacket(heroes);
+                    }
             );
 
     public static SyncHeroesPacket of(Collection<HeroDefinition> heroes) {
@@ -35,7 +52,7 @@ public record SyncHeroesPacket(List<HeroDefinition> heroes) implements CustomPac
         return TYPE;
     }
 
-    private static void writeHero(FriendlyByteBuf buf, HeroDefinition hero) {
+    private static void writeHero(RegistryFriendlyByteBuf buf, HeroDefinition hero) {
         buf.writeResourceLocation(hero.getId());
         buf.writeUtf(hero.getName());
         buf.writeUtf(hero.getDescription());
@@ -48,9 +65,18 @@ public record SyncHeroesPacket(List<HeroDefinition> heroes) implements CustomPac
         buf.writeUtf(hero.getPersonality());
         buf.writeFloat(hero.getScale());
         buf.writeResourceLocation(hero.getUltimate());
+        writeAttack(buf, hero.getAttack());
     }
 
-    private static HeroDefinition readHero(FriendlyByteBuf buf) {
+    private static void writeAttack(RegistryFriendlyByteBuf buf, HeroAttack attack) {
+        ATTACK_CODEC.encode(buf, attack);
+    }
+
+    private static HeroAttack readAttack(RegistryFriendlyByteBuf buf) {
+        return ATTACK_CODEC.decode(buf);
+    }
+
+    private static HeroDefinition readHero(RegistryFriendlyByteBuf buf) {
         return new HeroDefinition(
                 buf.readResourceLocation(),
                 buf.readUtf(),
@@ -63,7 +89,8 @@ public record SyncHeroesPacket(List<HeroDefinition> heroes) implements CustomPac
                 buf.readNullable(FriendlyByteBuf::readResourceLocation),
                 buf.readUtf(),
                 buf.readFloat(),
-                buf.readResourceLocation()
+                buf.readResourceLocation(),
+                readAttack(buf)
         );
     }
 

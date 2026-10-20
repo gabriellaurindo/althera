@@ -19,12 +19,38 @@ and generates the GitHub Release, CurseForge and Discord notes from it.
   path and leaving a crimson trail. She stops before walls.
 - **Ultimate tab** in the hero screen (G): click **Ultimate** to see your hero's Ultimate, with its key, mana cost,
   channel time, whether it is ready today and a short explanation of how it works.
+- **Zaya**, a new EX hero of the Caster class: a flame-sworn mage in crimson and gold with knee-length red hair, a
+  flame staff and a grimoire at her hip. She uses Explosion as her Ultimate.
+- **Ranged attacks**: Zaya now fights from a distance, hurling fire bolts from the tip of her staff at enemies up to 12
+  blocks away while keeping out of their reach, backing off when they get close. Her bolts set what they hit on fire.
+- **Custom attacks**: datapacks can shape how each hero fights with the new `attack` field of the hero JSON: melee or
+  ranged, attack speed, range, projectile speed, trail and where it leaves the weapon, plus `on_attack` / `on_hit`
+  effects built from the same effects as Ultimates (fire, knockback, mob effects, explosions, particles, sounds...).
+  See the wiki page "Creating Custom Heroes".
+- Every hero now has a signature attack:
+  - **Aria – Judgment**: as a paladin, her strikes deal 50% extra damage to hostile mobs and another 50% to the
+    undead, with a flash of holy light.
+  - **Valka – Piercing Thrust**: her spear goes through her target, hitting whoever stands a couple of blocks behind it
+    for 60% of her damage, and pushes the target back.
+  - **Clare**: her blades inflict a short Wither I.
+- **Class advantages** now matter when heroes fight each other: a hero deals 25% more damage to the class it beats
+  (with a burst of crits) and 25% less to the class that beats it. Saber > Lancer > Archer > Saber, Assassin > Caster,
+  Shielder > Assassin.
+- **Valka**, a new EX hero of the Lancer class: a swift spear fighter in light steel armor and teal cloth with a high
+  honey-blonde ponytail. She uses Crimson Requiem as her Ultimate.
 
 ### Changed
 - Each hero now has its own Ultimate. Aria keeps Explosion, which works exactly as before.
 - Using the Ultimate without your hero summoned now tells you to summon it.
+- The one-time hero switch from 3.0.0 is over: the **Choose your Hero** screen now only appears for players who don't
+  have a hero yet. To change heroes, use the ritual.
+- Removed the placeholder heroes that had no model of their own. If your hero was one of them, the **Choose your
+  Hero** screen opens on login and your hero level carries over to the hero you pick.
 
 ### Fixed
+- Heroes now follow the server's PvP setting, like tamed wolves: with PvP off (or between teammates without friendly
+  fire) they never attack other players, even when hit by one, and their shots and Ultimates don't hurt them.
+  Heroes of different players can still fight each other.
 - Heroes fight hordes properly: they now hit whichever enemy is attacking them within reach instead of chasing a single
   target through the crowd, keep fighting nearby enemies that are attacking them or you when their target dies, and no
   longer drop the enemy in front of them to run after a mob you hit some time ago.

@@ -40,7 +40,7 @@ public final class Althera {
     }
 
     private void onReloadListeners(AddReloadListenerEvent event) {
-        event.addListener(new HeroLoader());
+        event.addListener(new HeroLoader(event.getRegistryAccess()));
         event.addListener(new UltimateLoader(event.getRegistryAccess()));
     }
 

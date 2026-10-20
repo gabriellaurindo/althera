@@ -4,12 +4,16 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 
-public record DamageEffect(UltimateTarget target, float amount) implements UltimateEffect {
+public record DamageEffect(UltimateTarget target, EntityFilter filter, float amount,
+                           float attackRatio) implements UltimateEffect {
 
     public static final MapCodec<DamageEffect> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
             UltimateTarget.CODEC.fieldOf("target").forGetter(DamageEffect::target),
-            Codec.FLOAT.fieldOf("amount").forGetter(DamageEffect::amount)
+            EntityFilter.CODEC.optionalFieldOf("filter", EntityFilter.ANY).forGetter(DamageEffect::filter),
+            Codec.FLOAT.optionalFieldOf("amount", 0.0F).forGetter(DamageEffect::amount),
+            Codec.FLOAT.optionalFieldOf("attack_ratio", 0.0F).forGetter(DamageEffect::attackRatio)
     ).apply(instance, DamageEffect::new));
 
     @Override
@@ -19,8 +23,12 @@ public record DamageEffect(UltimateTarget target, float amount) implements Ultim
 
     @Override
     public void apply(UltimateContext context) {
-        for (LivingEntity entity : target.resolve(context)) {
-            entity.hurt(context.hero().damageSources().mobAttack(context.hero()), amount);
+        float damage = amount + attackRatio * (float) context.hero().getAttributeValue(Attributes.ATTACK_DAMAGE);
+        for (LivingEntity entity : filter.resolve(target, context)) {
+            if (entity == context.target()) {
+                entity.invulnerableTime = 0;
+            }
+            entity.hurt(context.hero().damageSources().mobAttack(context.hero()), damage);
         }
     }
 }

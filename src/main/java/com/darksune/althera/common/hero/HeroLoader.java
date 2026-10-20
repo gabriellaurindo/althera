@@ -4,6 +4,9 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.logging.LogUtils;
+import com.mojang.serialization.JsonOps;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
@@ -21,8 +24,11 @@ public class HeroLoader extends SimpleJsonResourceReloadListener {
 
     private static final String DEFAULT_ULTIMATE = "althera:explosion";
 
-    public HeroLoader() {
+    private final HolderLookup.Provider registries;
+
+    public HeroLoader(HolderLookup.Provider registries) {
         super(GSON, "hero");
+        this.registries = registries;
     }
 
     @Override
@@ -42,6 +48,8 @@ public class HeroLoader extends SimpleJsonResourceReloadListener {
 
         HeroRegistry.clear();
 
+        RegistryOps<JsonElement> ops = registries.createSerializationContext(JsonOps.INSTANCE);
+
         int failed = 0;
 
         for (Map.Entry<ResourceLocation, JsonElement> entry : map.entrySet()) {
@@ -51,7 +59,7 @@ public class HeroLoader extends SimpleJsonResourceReloadListener {
                 ResourceLocation id = entry.getKey();
                 JsonObject json = entry.getValue().getAsJsonObject();
 
-                HeroDefinition hero = parseHero(id, json);
+                HeroDefinition hero = parseHero(id, json, ops);
 
                 HeroRegistry.register(hero);
 
@@ -75,7 +83,8 @@ public class HeroLoader extends SimpleJsonResourceReloadListener {
 
     private HeroDefinition parseHero(
             ResourceLocation id,
-            JsonObject json
+            JsonObject json,
+            RegistryOps<JsonElement> ops
     ) {
 
         String name =
@@ -171,7 +180,17 @@ public class HeroLoader extends SimpleJsonResourceReloadListener {
                 animations,
                 personality,
                 GsonHelper.getAsFloat(json, "scale", 1.0f),
-                ResourceLocation.parse(GsonHelper.getAsString(json, "ultimate", DEFAULT_ULTIMATE))
+                ResourceLocation.parse(GsonHelper.getAsString(json, "ultimate", DEFAULT_ULTIMATE)),
+                parseAttack(json, ops)
         );
+    }
+
+    private HeroAttack parseAttack(JsonObject json, RegistryOps<JsonElement> ops) {
+
+        if (!json.has("attack")) {
+            return HeroAttack.MELEE;
+        }
+
+        return HeroAttack.CODEC.parse(ops, json.get("attack")).getOrThrow();
     }
 }

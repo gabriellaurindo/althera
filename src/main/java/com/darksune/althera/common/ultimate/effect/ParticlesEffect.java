@@ -31,7 +31,7 @@ public record ParticlesEffect(ParticleOptions particle, int count, Vec3 spread, 
     public void apply(UltimateContext context) {
 
         if (line <= 0) {
-            spawn(context, context.hero().position());
+            spawn(context, context.position());
             return;
         }
 

@@ -24,9 +24,9 @@ public record SoundEffect(SoundEvent sound, float volume, float pitch) implement
     public void apply(UltimateContext context) {
         context.level().playSound(
                 null,
-                context.hero().getX(),
-                context.hero().getY(),
-                context.hero().getZ(),
+                context.position().x,
+                context.position().y,
+                context.position().z,
                 sound,
                 SoundSource.HOSTILE,
                 volume,

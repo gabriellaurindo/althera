@@ -20,9 +20,9 @@ public record ExplosionEffect(float power) implements UltimateEffect {
     public void apply(UltimateContext context) {
         context.level().explode(
                 context.hero(),
-                context.hero().getX(),
-                context.hero().getY(),
-                context.hero().getZ(),
+                context.position().x,
+                context.position().y,
+                context.position().z,
                 power,
                 Level.ExplosionInteraction.NONE
         );

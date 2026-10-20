@@ -114,13 +114,17 @@ Example:
 | Shielder | High defense and survivability |
 | Assassin | Highest speed and high attack, but fragile |
 
-Class advantage relationships currently exist between:
+Class advantages apply when Heroes fight each other: a Hero deals **+25%** damage to the class it is strong against
+(with a burst of crit particles) and **−25%** to the class it is weak against. Every hit counts: attacks, projectiles
+and Ultimate effects.
 
 - Saber > Lancer
 - Lancer > Archer
 - Archer > Saber
 - Assassin > Caster
 - Shielder > Assassin
+
+Casters have no advantage over any class.
 
 ---
 
@@ -279,14 +283,73 @@ Heroes can share one; see [Creating Custom Ultimates](Creating-Custom-Ultimates)
 
 ---
 
+# 🏹 Attack
+
+Optional. How the Hero fights. Without it the Hero attacks in melee once per second with no extra effects.
+
+Every hit deals the Hero's attack damage (it grows with the Hero level, class, rank and nature). On top of that,
+`on_attack` and `on_hit` run **effects**, the same ones Ultimates use (damage, knockback, fire, mob effects,
+explosions, particles, sounds, dashes...); see [Creating Custom Ultimates](Creating-Custom-Ultimates#-effects).
+
+A **melee** Hero walks up to its target and strikes every `cooldown_ticks`.
+
+A **ranged** Hero keeps its distance: it walks closer while the target is out of `range` or out of sight, backs off
+when the target gets closer than half the `range`, and shoots a projectile every `cooldown_ticks` while it can see the
+target. The projectile flies straight, leaves a trail of `projectile_trail` and never hits the Hero's owner, so Heroes
+of different players can fight each other. The Hero plays its `attack` animation on every shot.
+
+```json
+"attack": {
+  "type": "ranged",
+  "range": 12,
+  "cooldown_ticks": 30,
+  "shoot_delay_ticks": 5,
+  "projectile_speed": 1.2,
+  "projectile_origin": [0.13, 2.72, 2.64],
+  "projectile_trail": { "type": "minecraft:flame" },
+  "on_attack": [
+    { "type": "sound", "sound": "minecraft:entity.blaze.shoot", "volume": 0.8, "pitch": 1.1 }
+  ],
+  "on_hit": [
+    { "type": "ignite", "target": "target", "ticks": 40 },
+    { "type": "particles", "particle": { "type": "minecraft:lava" }, "count": 3, "spread": [0.2, 0.2, 0.2] },
+    { "type": "sound", "sound": "minecraft:entity.generic.burn", "volume": 0.6, "pitch": 1.4 }
+  ]
+}
+```
+
+| Field | Default | Description |
+|---|---|---|
+| `type` | `melee` | `melee` or `ranged`. |
+| `cooldown_ticks` | `20` | Ticks between attacks (20 ticks = 1 second). |
+| `on_attack` | none | Effects when the Hero strikes (melee) or shoots (ranged). |
+| `on_hit` | none | Effects when the attack lands: a melee hit, a projectile hitting a creature, or a projectile hitting a block (then `"target"` hits nobody). A dodged attack doesn't trigger them. |
+| `range` | `12` | Ranged only. Distance in blocks from which the Hero shoots. |
+| `shoot_delay_ticks` | `0` | Ranged only. Ticks between the start of the `attack` animation and the shot, so the projectile leaves at the frame where the weapon is thrust forward. The animation plays at 1.2× speed, so a frame at `t` seconds in Blockbench is `t / 1.2 × 20` ticks. |
+| `projectile_speed` | `1.2` | Ranged only. Blocks per tick. |
+| `projectile_origin` | `[0, 1.26, 0]` | Ranged only. Where the projectile appears, in blocks from the Hero's feet: `[right, up, forward]`, at model size (multiplied by `scale`). It turns with the Hero's body. If a wall is in the way, the projectile starts in front of the wall. |
+| `projectile_trail` | `{ "type": "minecraft:flame" }` | Ranged only. Trail and impact particle, in the same format as the `particles` effect (dust colors work too). |
+
+Inside `on_attack` and `on_hit`:
+
+- the `"target"` target is the creature being attacked (or hit);
+- positions (particles, sounds, explosions, `area`) are the impact point in `on_hit`, and the Hero in `on_attack`;
+- lines and dashes point towards the creature being attacked;
+- `knockback` pushes away from the Hero; for ranged attacks set `"scale_with_distance": false`, or the push grows
+  with the distance of the shot.
+
+To find `projectile_origin`, add an empty bone called `projectile_origin` at the tip of the weapon in Blockbench
+(child of the weapon bone, so it follows the animation), go to the frame of the shot in the `attack` animation and read
+the bone's position in pixels: Blockbench +X is the model's right, +Y up and −Z forward. Divide by 16:
+`[x / 16, y / 16, −z / 16]`.
+
+---
+
 # ⭐ Choose your Hero
 
 Players without a Hero pick their first one on the **Choose your Hero** screen (on login, or when pressing the summon
 or hero key). Every Hero with its own `model`, `texture` and `animations` shows up there, so a new Hero with complete
 visuals becomes selectable automatically.
-
-In the current version only, players who already have a Hero can also use this screen once to switch Heroes while
-keeping their level; this will be removed in the next version.
 
 ---
 

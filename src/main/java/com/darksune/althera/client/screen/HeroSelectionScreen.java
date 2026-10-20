@@ -1,6 +1,5 @@
 package com.darksune.althera.client.screen;
 
-import com.darksune.althera.common.attachment.HeroData;
 import com.darksune.althera.common.entity.AltheraEntities;
 import com.darksune.althera.common.entity.HeroEntity;
 import com.darksune.althera.common.hero.HeroClass;
@@ -68,10 +67,6 @@ public class HeroSelectionScreen extends Screen {
             selected = -1;
         }
 
-        if (selected < 0) {
-            selected = currentHeroIndex();
-        }
-
         chooseButton = addRenderableWidget(
                 Button.builder(Component.literal("Choose"), button -> confirm())
                         .bounds(this.width / 2 - 70, cardsTop() + CARD_HEIGHT + 10, 140, 20)
@@ -103,15 +98,7 @@ public class HeroSelectionScreen extends Screen {
         final int top = cardsTop();
 
         gui.drawCenteredString(this.font, this.title, this.width / 2, top - 26, 0xFFFFFF);
-        gui.drawCenteredString(
-                this.font,
-                currentHeroIndex() >= 0
-                        ? "This version only: switch your hero once, your level carries over"
-                        : "Pick the hero who will answer your call",
-                this.width / 2,
-                top - 14,
-                0xAAAAAA
-        );
+        gui.drawCenteredString(this.font, "Pick the hero who will answer your call", this.width / 2, top - 14, 0xAAAAAA);
 
         for (int i = 0; i < heroes.size(); i++) {
             renderCard(gui, i, cardLeft(i), top, mouseX, mouseY);
@@ -148,11 +135,6 @@ public class HeroSelectionScreen extends Screen {
 
         final int centerX = x + CARD_WIDTH / 2;
         int textY = y + PREVIEW_HEIGHT + 10;
-
-        if (index == currentHeroIndex()) {
-            gui.fill(x + 4, y + 4, x + 48, y + 16, 0xCC000000);
-            gui.drawString(this.font, "Current", x + 7, y + 6, COLOR_SELECTED);
-        }
 
         gui.drawCenteredString(this.font, hero.getName(), centerX, textY, 0xFFFFFF);
         textY += 12;
@@ -214,30 +196,9 @@ public class HeroSelectionScreen extends Screen {
         }
 
         chooseButton.active = selected >= 0;
-
-        final String action = selected >= 0 && selected == currentHeroIndex() ? "Keep " : "Choose ";
         chooseButton.setMessage(Component.literal(
-                selected >= 0 ? action + heroes.get(selected).getName() : "Choose"
+                selected >= 0 ? "Choose " + heroes.get(selected).getName() : "Choose"
         ));
-    }
-
-    private int currentHeroIndex() {
-        final Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null) {
-            return -1;
-        }
-
-        final HeroDefinition current = HeroData.get(mc.player).getHeroDefinition();
-        if (current == null) {
-            return -1;
-        }
-
-        for (int i = 0; i < heroes.size(); i++) {
-            if (heroes.get(i).getId().equals(current.getId())) {
-                return i;
-            }
-        }
-        return -1;
     }
 
     private void confirm() {
