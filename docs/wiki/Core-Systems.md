@@ -34,13 +34,26 @@ Each Hero belongs to a specific class and possesses an internal rank that influe
 
 ### Current Classes
 
-- Saber
-- Assassin
-- Archer *(planned)*
-- Lancer *(planned)*
-- More classes planned
+| Class | Style | Knockback resistance | Dodge |
+|---|---|---|---|
+| Saber | Balanced offense and defense | 80% | 5% |
+| Caster | Very high attack, fragile | 50% | 0% |
+| Lancer | Fast, high attack | 75% | 5% |
+| Shielder | Highest health and armor, slow | 100% | 0% |
+| Archer | High attack, lower durability | 60% | 5% |
+| Assassin | Fastest, high attack, fragile | 60% | 10% |
 
-Classes are intended to define combat archetypes, future abilities, and gameplay specialization.
+Heroes move at their class speed: Assassins and Lancers are faster, Shielders slower. Knockback resistance keeps
+crowds of mobs from pushing a Hero away from its target. Dodging avoids the whole attack (explosions can't be
+dodged), and a dodge during an intervention still protects you. The hero screen (**G**) shows your Hero's dodge
+chance.
+
+Classes matter when Heroes fight each other: every class beats two classes and loses to two, dealing **+25%** damage
+to the classes it beats (with a burst of crits) and **−25%** to the ones that beat it:
+
+**Saber → Caster → Lancer → Shielder → Archer → Assassin → Saber** (each class beats the next two in the cycle)
+
+Datapacks can tweak the built-in classes or add new ones (see [Creating Custom Heroes](Creating-Custom-Heroes)).
 
 ### Hero Ranks
 
@@ -76,6 +89,31 @@ Some Heroes may also feature:
 - Custom textures
 - Exclusive animations
 - Distinct combat behavior
+
+---
+
+## 🗡 Combat
+
+Heroes fight whichever enemy is attacking them within reach, keep fighting nearby enemies that attack them or you
+when their target dies, and help you against what you hit.
+
+### Signature attacks
+
+| Hero | Attack |
+|---|---|
+| Aria | **Judgment**: her strikes deal 50% extra damage to hostile mobs and another 50% to the undead, with a flash of holy light |
+| Clare | Her blades inflict **Wither I** for 3 seconds |
+| Valka | **Piercing Thrust**: her spear goes through her target, hitting whoever stands up to 4.5 blocks behind it for 60% of her damage, and pushes the target back |
+| Zaya | Fights from a distance: hurls **fire bolts** from the tip of her staff at enemies up to 12 blocks away, backing off when they get close. Her bolts set what they hit on fire |
+
+### Hero vs Hero and PvP
+
+- Heroes of different players can always fight each other, with class advantages applied
+- A Hero remembers the player whose Hero (or who) fought it for **30 seconds**, renewed on every hit, and keeps
+  chasing that Hero up to **32 blocks**. When the enemy Hero falls or is dismissed, it goes after its owner instead,
+  if PvP allows it
+- Like tamed wolves, Heroes follow the server's PvP setting: with PvP off (or between teammates without friendly
+  fire) they never attack other players, even when hit by one, and their shots and Ultimates don't hurt them
 
 ---
 
@@ -156,6 +194,8 @@ Progression in Althera is continuous and centered around long-term Hero developm
 - Heroes grow stronger through combat
 - Experience is gained primarily through mob kills
 - Progression increases survivability and combat effectiveness
+- Heroes gain health, attack and **armor** as they level up (0.15 armor per level before the class, rank and nature
+  multipliers: at level 50 an EX Shielder has about 21 armor, an EX Saber about 14 and an EX Caster about 9)
 - The maximum Hero level is **50** for now; the hero screen (**G**) then shows **MAX** instead of the XP needed
 - New systems become available as development progresses
 
@@ -194,11 +234,12 @@ The system is designed to support future expansion and potentially community-cre
 More systems will be added as development continues.
 
 > [!IMPORTANT]
-> At the current stage of development, only two fully playable Heroes are publicly available.
+> At the current stage of development, only four fully playable Heroes are publicly available.
 >
 > This temporary limitation exists because the new model, texture, and animation pipeline is still being stabilized and expanded.
 >
-> Aria (EX Rank, Saber) and Clare (EX Rank, Assassin) are currently the showcase Heroes featuring:
+> Aria (EX Rank, Saber), Clare (EX Rank, Assassin), Zaya (EX Rank, Caster) and Valka (EX Rank, Lancer) are currently
+> the showcase Heroes featuring:
 >
 > - Custom model
 > - Custom textures

@@ -132,13 +132,13 @@ They reload with `/reload`.
 ```json
 {
   "name": "Saber",
-  "health": 1.15,
-  "attack": 1.15,
-  "armor": 1.15,
+  "health": 1.1,
+  "attack": 1.1,
+  "armor": 1.1,
   "speed": 1.0,
   "knockback_resistance": 0.8,
   "dodge_chance": 0.05,
-  "strong_against": ["althera:lancer"]
+  "strong_against": ["althera:caster", "althera:lancer"]
 }
 ```
 

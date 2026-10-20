@@ -78,8 +78,8 @@ Fully restores the summoned Hero's health.
 
 ## 💥 Ultimates
 
-Ultimates are the Hero's strongest abilities. Each Hero has its own Ultimate (**U**): Aria uses Explosion and
-Clare uses Crimson Requiem. To see how your Hero's Ultimate works, open the hero screen (**G**) and click
+Ultimates are the Hero's strongest abilities. Each Hero has its own Ultimate (**U**): Aria and Zaya use Explosion,
+Clare and Valka use Crimson Requiem. To see how your Hero's Ultimate works, open the hero screen (**G**) and click
 **Ultimate**: it shows its name, key, mana cost, channel time, whether it is ready today and a short description.
 Datapacks can create new ones: see [Creating Custom Ultimates](Creating-Custom-Ultimates).
 
@@ -90,7 +90,7 @@ Datapacks can create new ones: see [Creating Custom Ultimates](Creating-Custom-U
 
 ---
 
-### 🔥 Explosion (Aria)
+### 🔥 Explosion (Aria, Zaya)
 
 | Key | Mana | Requires summoned Hero |
 |---|---|---|
@@ -106,7 +106,7 @@ If the Hero is defeated or dismissed while channeling, the explosion is cancelle
 
 ---
 
-### 🗡 Crimson Requiem (Clare)
+### 🗡 Crimson Requiem (Clare, Valka)
 
 | Key | Mana | Requires summoned Hero |
 |---|---|---|

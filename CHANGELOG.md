@@ -6,6 +6,8 @@ and generates the GitHub Release, CurseForge and Discord notes from it.
 
 ## [Unreleased]
 
+## [4.0.0] - 2026-10-20 - Data-Driven Combat (feature + hotfix)
+
 ### Added
 - **Custom Ultimates**: Ultimates are now data-driven. Datapacks can create their own in `data/<namespace>/ultimate/`
   by combining effects (damage, knockback, fire, mob effects, explosions, dashes, particles, sounds and the hero's
