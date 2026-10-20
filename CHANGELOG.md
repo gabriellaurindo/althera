@@ -67,6 +67,7 @@ and generates the GitHub Release, CurseForge and Discord notes from it.
   Hero** screen opens on login and your hero level carries over to the hero you pick.
 
 ### Fixed
+- A resting hero could recover above its max health (e.g. 39/38) because the recovery rounded the max up.
 - Hero fights no longer fizzle out: a hero remembers the player whose hero (or who) fought it for 30 seconds, renewed
   on every hit, and keeps going after that hero, chasing it up to 32 blocks. When the enemy hero falls or is dismissed,
   it goes after its owner instead, if PvP allows it.
