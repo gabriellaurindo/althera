@@ -6,6 +6,7 @@ import com.darksune.althera.common.ai.goal.FollowOwnerGoal;
 import com.darksune.althera.common.ai.goal.HeroMeleeAttackGoal;
 import com.darksune.althera.common.ai.goal.HeroRangedAttackGoal;
 import com.darksune.althera.common.ai.goal.ProtectOwnerGoal;
+import com.darksune.althera.common.ai.goal.RivalTargetGoal;
 import com.darksune.althera.common.attachment.HeroData;
 import com.darksune.althera.common.attachment.ManaData;
 import com.darksune.althera.common.hero.HeroAnimation;
@@ -77,6 +78,7 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
                     HeroEntity.class,
                     EntityDataSerializers.INT
             );
+    private static final int RIVAL_MEMORY_TICKS = 600;
     private static final String ULTIMATE_CONTROLLER = "ultimate";
     private static final String ULTIMATE_ANIMATION = "ultimate";
     private static final String DEATH_ANIMATION = "death";
@@ -86,6 +88,9 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
     private UUID ownerUuid;
     private int dodgeTick = -1;
     private boolean benchmark;
+    @Nullable
+    private UUID rivalOwner;
+    private int rivalUntil;
 
     boolean searchingForLand;
     protected final WaterBoundPathNavigation waterNavigation;
@@ -429,7 +434,8 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
         this.targetSelector.addGoal(3,
                 new AssistOwnerGoal<>(this)
         );
-        this.targetSelector.addGoal(4, new EngageThreatsGoal(this));
+        this.targetSelector.addGoal(4, new RivalTargetGoal(this));
+        this.targetSelector.addGoal(5, new EngageThreatsGoal(this));
     }
 
     @Override
@@ -441,6 +447,45 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
     public boolean canHarmPlayer(final Player player) {
         final Player owner = findOwner();
         return owner != null && owner != player && owner.canHarmPlayer(player);
+    }
+
+    public void rememberRival(@Nullable final Entity enemy) {
+        if (level().isClientSide) return;
+
+        final UUID enemyOwner = enemy instanceof HeroEntity hero ? hero.getOwnerUUID()
+                : enemy instanceof Player player ? player.getUUID()
+                : null;
+
+        if (enemyOwner == null || enemyOwner.equals(ownerUuid)) return;
+
+        rivalOwner = enemyOwner;
+        rivalUntil = tickCount + RIVAL_MEMORY_TICKS;
+    }
+
+    @Nullable
+    public LivingEntity findRival(final double range) {
+        if (rivalOwner == null || !(level() instanceof ServerLevel serverLevel)) return null;
+
+        if (tickCount > rivalUntil) {
+            rivalOwner = null;
+            return null;
+        }
+
+        final Player rivalPlayer = serverLevel.getServer().getPlayerList().getPlayer(rivalOwner);
+        if (rivalPlayer == null) return null;
+
+        final HeroEntity rivalHero = HeroSummonSystem.getSummon(rivalPlayer);
+        if (isReachableRival(rivalHero, range)) return rivalHero;
+
+        return isReachableRival(rivalPlayer, range) ? rivalPlayer : null;
+    }
+
+    private boolean isReachableRival(@Nullable final LivingEntity rival, final double range) {
+        return rival != null
+                && rival.isAlive()
+                && rival.level() == level()
+                && distanceToSqr(rival) <= range * range
+                && canAttack(rival);
     }
 
     public boolean isThreat(final Mob mob) {
@@ -517,6 +562,8 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
         if (tryDodge(source)) {
             return false;
         }
+
+        rememberRival(source.getEntity());
 
         return super.hurt(source, amount);
     }
@@ -626,7 +673,8 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
                 .add(Attributes.MAX_HEALTH, 20.0D)
                 .add(Attributes.MOVEMENT_SPEED, 0.25D)
                 .add(Attributes.ATTACK_DAMAGE, 1.25D)
-                .add(Attributes.STEP_HEIGHT, 1.0);
+                .add(Attributes.STEP_HEIGHT, 1.0)
+                .add(Attributes.FOLLOW_RANGE, 32.0D);
     }
 
     public static HeroEntity create(final Player player) {

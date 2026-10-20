@@ -67,6 +67,9 @@ and generates the GitHub Release, CurseForge and Discord notes from it.
   Hero** screen opens on login and your hero level carries over to the hero you pick.
 
 ### Fixed
+- Hero fights no longer fizzle out: a hero remembers the player whose hero (or who) fought it for 30 seconds, renewed
+  on every hit, and keeps going after that hero, chasing it up to 32 blocks. When the enemy hero falls or is dismissed,
+  it goes after its owner instead, if PvP allows it.
 - Command Seal messages (hero needed, no charges, no mana, cooldown) were in Portuguese; they are now in English and
   say what to do.
 - `/althera_hero summon`, `rank` and `divine` with the hero out now update it right away (stats and full health)

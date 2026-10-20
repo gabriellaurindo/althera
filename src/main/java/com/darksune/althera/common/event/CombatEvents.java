@@ -136,6 +136,8 @@ public class CombatEvents {
         final HeroDefinition defenderHero = defender.getHeroDefinition();
         if (attackerHero == null || defenderHero == null) return;
 
+        attacker.rememberRival(defender);
+
         final float multiplier = attackerHero.getHeroClass().getMultiplierAgainst(defenderHero.getHeroClass());
         event.setAmount(event.getAmount() * multiplier);
 
