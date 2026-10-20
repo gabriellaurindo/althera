@@ -26,8 +26,8 @@ public class HeroData {
     private boolean isHiddenHud = false;
     private boolean isSaveDisabled = false;
     private boolean canResurrect = true;
+    private boolean disguised = false;
     private ResourceLocation heroId = null;
-    private boolean heroChoiceDone = false;
 
     // =========================
     // CODEC (save/load)
@@ -69,13 +69,13 @@ public class HeroData {
                                     ? data.heroId.toString()
                                     : ""),
 
-                    Codec.BOOL.optionalFieldOf("heroChoiceDone", false)
-                            .forGetter(data -> data.heroChoiceDone)
+                    Codec.BOOL.optionalFieldOf("disguised", false)
+                            .forGetter(data -> data.disguised)
 
             ).apply(instance, (level, xp, health, uuidStr,
                                interventions, defeated,
                                isHiddenHud, isSaveDisabled, canResurrect,
-                               heroIdStr, heroChoiceDone) -> {
+                               heroIdStr, disguised) -> {
                 HeroData data = new HeroData();
 
                 data.level = level;
@@ -86,7 +86,7 @@ public class HeroData {
                 data.isHiddenHud = isHiddenHud;
                 data.isSaveDisabled = isSaveDisabled;
                 data.canResurrect = canResurrect;
-                data.heroChoiceDone = heroChoiceDone;
+                data.disguised = disguised;
 
                 if (!uuidStr.isEmpty()) {
                     data.summonUUID = UUID.fromString(uuidStr);
@@ -127,7 +127,7 @@ public class HeroData {
                     buf.writeResourceLocation(data.heroId);
                 }
 
-                buf.writeBoolean(data.heroChoiceDone);
+                buf.writeBoolean(data.disguised);
             },
             buf -> {
                 HeroData data = new HeroData();
@@ -150,7 +150,7 @@ public class HeroData {
                     data.heroId = buf.readResourceLocation();
                 }
 
-                data.heroChoiceDone = buf.readBoolean();
+                data.disguised = buf.readBoolean();
 
                 return data;
             }
@@ -236,6 +236,14 @@ public class HeroData {
         this.canResurrect = canResurrect;
     }
 
+    public boolean isDisguised() {
+        return disguised;
+    }
+
+    public void setDisguised(boolean disguised) {
+        this.disguised = disguised;
+    }
+
     public HeroDefinition getHeroDefinition() {
         return heroId != null ? HeroRegistry.get(heroId) : null;
     }
@@ -247,14 +255,6 @@ public class HeroData {
         }
 
         this.heroId = heroId;
-    }
-
-    public boolean isHeroChoiceDone() {
-        return heroChoiceDone;
-    }
-
-    public void setHeroChoiceDone(boolean heroChoiceDone) {
-        this.heroChoiceDone = heroChoiceDone;
     }
 
     // =========================

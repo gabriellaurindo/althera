@@ -11,12 +11,16 @@ Heroes are powerful summoned companions that fight alongside the player and repr
 ### Basic Features
 
 - Can be summoned using **H**
+- Can be summoned disguised by holding **H** (see [Disguise](#-disguise))
 - Automatically follows and protects the player
 - Engages enemies during combat
 - Gains experience by defeating mobs
 - Levels up over time
 - Becomes stronger through progression
-- Must land the **final hit** to gain experience
+- Earns experience equal to half the defeated creature's max health when it lands the **final hit** (a zombie
+  gives 10, an Iron Golem 50)
+- Earns **half** of that when you kill a monster yourself while it is summoned (animals and other passive
+  creatures give nothing)
 - Follows you through teleports, ender pearls, respawns and dimension changes
 - Is dismissed when you log out
 
@@ -55,18 +59,11 @@ Ranks, from most common to rarest:
 
 Players without a Hero choose their first one on the **Choose your Hero** screen, which opens on login (and when
 pressing the summon or hero key). Every Hero with its own model, texture and animations can be chosen; for now that
-is Aria (Saber) and Clare (Assassin), both EX.
-
-> [!NOTE]
-> **Temporary, current version only:** players who already have a Hero also get this screen once on login and can
-> switch to another Hero, keeping their Hero level and XP, or keep their current one. Closing the screen keeps the
-> current Hero and the screen returns on the next login until a choice is made. This one-time switch will be removed
-> in the next version.
+is Aria (Saber), Clare (Assassin), Zaya (Caster) and Valka (Lancer), all EX.
 
 The ritual swaps your Hero: it rolls a new one, different from your current Hero, and your Hero level carries over
 (see [Ritual System](Ritual-System)). Rolls only consider Heroes with their own model, texture and animations, and only
-ranks that have at least one such Hero, so while Aria and Clare (both EX) are the only ones, every roll gives one of
-them.
+ranks that have at least one such Hero, so while every Hero is EX, every roll gives one of them.
 
 Higher-ranked Heroes generally possess:
 
@@ -90,9 +87,15 @@ Mana is the primary resource used to maintain your Hero while summoned.
 
 - Heroes consume mana while active
 - Running out of mana prevents maintaining the summon
+- When the Hero is dismissed for lack of mana, your mana is **exhausted**: the Hero can't be summoned again (not even
+  by an intervention) until you recover **half of your max mana**. The mana bar pulses red and shows a mark at the
+  halfway point while exhausted
 - Efficient mana management is essential during extended combat
 
 This system creates a balance between combat power and resource management.
+
+In **Creative** mode mana is infinite: summoning, keeping the Hero out, Command Seals and the Ultimate cost nothing,
+and the mana bar shows **∞**.
 
 Your mana is shown in the mana bar on screen. The mana bar and the Hero HUD are hidden together with the rest of the
 interface when you press **F1**.
@@ -116,6 +119,34 @@ The spirit orb always stays with you: it comes back after teleports, respawns, d
 
 ---
 
+## 🕶 Disguise
+
+Hold the summon key (**H**) for half a second to hide your Hero's identity. A short tap still summons and dismisses
+as usual.
+
+- Holding **H** in spirit form summons the Hero already disguised
+- Holding **H** with the Hero summoned swaps it between its true form and the disguise, keeping its health percentage
+- Hiding is instant, in a puff of smoke. Revealing takes **half a second**: particles spiral up the Hero before a
+  flash of light, so everyone nearby sees it coming. The Hero keeps its disguised stats until the flash
+
+While disguised, the Hero appears as a hooded figure with a shadowed face:
+
+- Loses **half of its base health, attack and armor**, but keeps everything it gained from levels: a high-level
+  Hero stays strong while disguised (roughly, it still beats the same Hero 8 to 10 levels below it)
+- **50%** of its speed, knockback resistance and dodge chance
+- Costs only **¼ of the mana** to summon and keep summoned
+- Can't use its **Ultimate** (it can't be disguised while channeling one either)
+- Keeps its melee or ranged attack, but without its signature effects (ranged attacks leave a plain smoke trail)
+- Command Seals still work
+
+Other players can't tell which Hero it is: its name shows as **Hooded Figure**, and its model, health and armor are
+hidden, also from tooltip mods such as Jade or WAILA. Your own hero screen (**G**) and Hero HUD still show its
+actual stats.
+
+The disguise ends when the Hero is dismissed or defeated.
+
+---
+
 ## 📈 Progression
 
 Progression in Althera is continuous and centered around long-term Hero development.
@@ -125,6 +156,7 @@ Progression in Althera is continuous and centered around long-term Hero developm
 - Heroes grow stronger through combat
 - Experience is gained primarily through mob kills
 - Progression increases survivability and combat effectiveness
+- The maximum Hero level is **50** for now; the hero screen (**G**) then shows **MAX** instead of the XP needed
 - New systems become available as development progresses
 
 Althera is designed around long-term expansion and customization, with future plans including:

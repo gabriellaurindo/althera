@@ -4,6 +4,9 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.logging.LogUtils;
+import com.mojang.serialization.JsonOps;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
@@ -19,8 +22,13 @@ public class HeroLoader extends SimpleJsonResourceReloadListener {
 
     private static final Gson GSON = new Gson();
 
-    public HeroLoader() {
+    private static final String DEFAULT_ULTIMATE = "althera:explosion";
+
+    private final HolderLookup.Provider registries;
+
+    public HeroLoader(HolderLookup.Provider registries) {
         super(GSON, "hero");
+        this.registries = registries;
     }
 
     @Override
@@ -40,6 +48,8 @@ public class HeroLoader extends SimpleJsonResourceReloadListener {
 
         HeroRegistry.clear();
 
+        RegistryOps<JsonElement> ops = registries.createSerializationContext(JsonOps.INSTANCE);
+
         int failed = 0;
 
         for (Map.Entry<ResourceLocation, JsonElement> entry : map.entrySet()) {
@@ -49,7 +59,7 @@ public class HeroLoader extends SimpleJsonResourceReloadListener {
                 ResourceLocation id = entry.getKey();
                 JsonObject json = entry.getValue().getAsJsonObject();
 
-                HeroDefinition hero = parseHero(id, json);
+                HeroDefinition hero = parseHero(id, json, ops);
 
                 HeroRegistry.register(hero);
 
@@ -73,7 +83,8 @@ public class HeroLoader extends SimpleJsonResourceReloadListener {
 
     private HeroDefinition parseHero(
             ResourceLocation id,
-            JsonObject json
+            JsonObject json,
+            RegistryOps<JsonElement> ops
     ) {
 
         String name =
@@ -90,13 +101,13 @@ public class HeroLoader extends SimpleJsonResourceReloadListener {
                         ""
                 );
 
-        HeroClass heroClass =
-                HeroClass.valueOf(
+        ResourceLocation heroClass =
+                HeroClass.parseId(
                         GsonHelper.getAsString(
                                 json,
                                 "class",
-                                "SABER"
-                        ).toUpperCase()
+                                "saber"
+                        )
                 );
 
         HeroRank rank =
@@ -168,7 +179,38 @@ public class HeroLoader extends SimpleJsonResourceReloadListener {
                 texture,
                 animations,
                 personality,
-                GsonHelper.getAsFloat(json, "scale", 1.0f)
+                GsonHelper.getAsFloat(json, "scale", 1.0f),
+                ResourceLocation.parse(GsonHelper.getAsString(json, "ultimate", DEFAULT_ULTIMATE)),
+                parseAttack(json, ops),
+                parseAnimation(json, ops),
+                parseStats(json, ops)
         );
+    }
+
+    private HeroStats parseStats(JsonObject json, RegistryOps<JsonElement> ops) {
+
+        if (!json.has("stats")) {
+            return HeroStats.DEFAULT;
+        }
+
+        return HeroStats.CODEC.parse(ops, json.get("stats")).getOrThrow();
+    }
+
+    private HeroAnimation parseAnimation(JsonObject json, RegistryOps<JsonElement> ops) {
+
+        if (!json.has("animation")) {
+            return HeroAnimation.DEFAULT;
+        }
+
+        return HeroAnimation.CODEC.parse(ops, json.get("animation")).getOrThrow();
+    }
+
+    private HeroAttack parseAttack(JsonObject json, RegistryOps<JsonElement> ops) {
+
+        if (!json.has("attack")) {
+            return HeroAttack.MELEE;
+        }
+
+        return HeroAttack.CODEC.parse(ops, json.get("attack")).getOrThrow();
     }
 }

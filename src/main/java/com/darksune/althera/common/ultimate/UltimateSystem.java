@@ -2,12 +2,13 @@ package com.darksune.althera.common.ultimate;
 
 import com.darksune.althera.common.attachment.ManaData;
 import com.darksune.althera.common.entity.HeroEntity;
+import com.darksune.althera.common.hero.HeroDefinition;
 import com.darksune.althera.common.skill.SkillEndReason;
 import com.darksune.althera.common.skill.SkillTimers;
 import com.darksune.althera.common.system.HeroSummonSystem;
-import com.darksune.althera.common.ultimate.skill.IUltimateSkill;
-import com.darksune.althera.common.ultimate.skill.UltimateSkillType;
+import com.darksune.althera.common.ultimate.effect.UltimateContext;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Nullable;
 
@@ -15,76 +16,86 @@ import org.jetbrains.annotations.Nullable;
 public class UltimateSystem {
 
     //todo block summon/dismiss while an ultimate is active
-    public static void activateSkill(Player player, UltimateSkillType ultimateSkillType) {
+    public static void activateUltimate(Player player) {
 
         HeroEntity heroEntity = HeroSummonSystem.getSummon(player);
 
-        if (ultimateSkillType.requiresHeroEntity() && heroEntity == null || !ultimateSkillType.requiresHeroEntity() && heroEntity != null) {
-            player.sendSystemMessage(Component.literal("Condicao nao atendida"));
+        if (heroEntity == null) {
+            player.sendSystemMessage(Component.literal("Summon your hero to use its ultimate."));
             return;
         }
+
+        if (heroEntity.isDisguised()) {
+            player.sendSystemMessage(Component.literal("§eYour hero can't use its ultimate while disguised."));
+            return;
+        }
+
+        HeroDefinition heroDefinition = heroEntity.getHeroDefinition();
+
+        UltimateDefinition ultimate = heroDefinition == null ? null : UltimateRegistry.get(heroDefinition.getUltimate());
+
+        if (ultimate == null) {
+            player.sendSystemMessage(Component.literal("Your hero has no ultimate."));
+            return;
+        }
+
+        ResourceLocation ultimateId = heroDefinition.getUltimate();
 
         UltimateData ultimateData = UltimateData.get(player);
 
         ManaData manaData = ManaData.get(player);
 
-        IUltimateSkill ultimateSkill = ultimateSkillType.getSkill();
-
-        if (!manaData.hasEnoughMana(ultimateSkill.getManaCost())) {
+        if (!manaData.hasEnoughMana(player, ultimate.manaCost())) {
             player.sendSystemMessage(Component.literal("Not enough mana"));
             return;
         }
 
-        if (ultimateData.wasUsedToday(ultimateSkillType)) {
+        if (ultimateData.wasUsedToday()) {
             player.sendSystemMessage(Component.literal("§eUltimate already used today. It recharges at the start of a new day."));
             return;
         }
 
-        if (ultimateData.isSkillOnCooldown(ultimateSkillType)) {
+        if (ultimateData.isSkillOnCooldown(ultimateId)) {
             player.sendSystemMessage(Component.literal("Ultimate on cooldown"));
             return;
         }
 
-        if (!ultimateSkill.canActivate(player, heroEntity)) {
-            return;
-        }
-
-        activateSkill(player, heroEntity, ultimateData, ultimateSkillType, manaData);
+        activateUltimate(player, heroEntity, ultimateData, ultimateId, ultimate, manaData);
     }
 
-    private static void activateSkill(Player player, HeroEntity heroEntity, UltimateData data, UltimateSkillType ultimateSkillType, ManaData manaData) {
+    private static void activateUltimate(Player player, HeroEntity heroEntity, UltimateData data, ResourceLocation ultimateId,
+                                         UltimateDefinition ultimate, ManaData manaData) {
 
-        IUltimateSkill ultimateSkill = ultimateSkillType.getSkill();
+        manaData.consumeMana(player, ultimate.manaCost());
 
-        manaData.consumeMana(player, ultimateSkill.getManaCost());
+        data.activateSkill(ultimateId, ultimate.channelTicks());
 
-        data.activateSkill(ultimateSkillType, ultimateSkill.getDurationTicks());
+        data.markUsedToday();
 
-        data.markUsedToday(ultimateSkillType);
+        data.startSkillCooldown(ultimateId, ultimate.cooldownTicks());
 
-        data.startSkillCooldown(ultimateSkillType, ultimateSkill.getCooldownTicks());
-
-        ultimateSkill.onCooldownStart(player);
-
-        ultimateSkill.execute(player, heroEntity);
+        ultimate.start(UltimateContext.of(player, heroEntity));
     }
 
     public static void tickActiveSkills(Player player, HeroEntity heroEntity, UltimateData data) {
         SkillTimers.tick(
                 data.getActiveSkills(),
-                (skillType, remainingTicks) -> {
-                    skillType.getSkill().tick(player, heroEntity, remainingTicks);
+                (ultimateId, remainingTicks) -> {
+                    UltimateDefinition ultimate = UltimateRegistry.get(ultimateId);
+                    if (ultimate != null) {
+                        ultimate.tick(UltimateContext.of(player, heroEntity));
+                    }
                     SkillTimers.markDirtyOnSyncTick(data, remainingTicks);
                 },
-                skillType -> skillType.getSkill().onEnd(player, heroEntity, SkillEndReason.EXPIRED)
+                ultimateId -> endUltimate(player, heroEntity, data, ultimateId, SkillEndReason.EXPIRED)
         );
     }
 
     public static void tickCooldownSkills(Player player, UltimateData data) {
         SkillTimers.tick(
                 data.getCooldownSkills(),
-                (skillType, remainingTicks) -> SkillTimers.markDirtyOnSyncTick(data, remainingTicks),
-                skillType -> skillType.getSkill().onCooldownExpire(player)
+                (ultimateId, remainingTicks) -> SkillTimers.markDirtyOnSyncTick(data, remainingTicks),
+                ultimateId -> data.markDirty()
         );
     }
 
@@ -92,9 +103,22 @@ public class UltimateSystem {
      * Ends every active skill with the given reason; each skill decides the consequence in onEnd.
      */
     public static void endActiveSkills(Player player, @Nullable HeroEntity heroEntity, SkillEndReason reason) {
+        UltimateData data = UltimateData.get(player);
         SkillTimers.endAll(
-                UltimateData.get(player).getActiveSkills(),
-                skillType -> skillType.getSkill().onEnd(player, heroEntity, reason)
+                data.getActiveSkills(),
+                ultimateId -> endUltimate(player, heroEntity, data, ultimateId, reason)
         );
+    }
+
+    private static void endUltimate(Player player, @Nullable HeroEntity heroEntity, UltimateData data,
+                                    ResourceLocation ultimateId, SkillEndReason reason) {
+
+        data.markDirty();
+
+        UltimateDefinition ultimate = UltimateRegistry.get(ultimateId);
+
+        if (reason == SkillEndReason.EXPIRED && heroEntity != null && ultimate != null) {
+            ultimate.end(UltimateContext.of(player, heroEntity));
+        }
     }
 }

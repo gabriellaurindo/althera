@@ -58,6 +58,13 @@ runs {
         systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
     }
 
+    client2 {
+        runType 'client'
+        workingDirectory project.file('runs/client2')
+        systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+        arguments.addAll '--username', 'Dev2', '--quickPlayMultiplayer', 'localhost:25565'
+    }
+
     server {
         systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
         argument '--nogui'
@@ -170,6 +177,8 @@ tasks.named('jar', Jar).configure {
         rename { name -> name.contains('.') ? name.replaceFirst(/\./, "${licenseSuffix}.") : "${name}${licenseSuffix}" }
     }
 }
+
+apply from: 'gradle/validate-data.gradle'
 
 // IDEA no longer automatically downloads sources/javadoc jars for dependencies, so we need to explicitly enable the behavior.
 idea {

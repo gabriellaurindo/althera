@@ -16,22 +16,26 @@ public class CommandSealSystem {
 
     public static void activateSkill(final Player player, final CommandSealSkillType commandSealSkillType) {
         final HeroEntity hero = HeroSummonSystem.getSummon(player);
-        if (commandSealSkillType.requiresHeroEntity() && hero == null || !commandSealSkillType.requiresHeroEntity() && hero != null) {
-            player.sendSystemMessage(Component.literal("Condicao nao atendida"));
+        if (commandSealSkillType.requiresHeroEntity() && hero == null) {
+            player.sendSystemMessage(Component.literal("§eSummon your hero to use this Command Seal."));
+            return;
+        }
+        if (!commandSealSkillType.requiresHeroEntity() && hero != null) {
+            player.sendSystemMessage(Component.literal("§eThis Command Seal only works while your hero is not summoned."));
             return;
         }
         final CommandSealData commandSealData = CommandSealData.get(player);
         if (!commandSealData.hasCharges()) {
-            player.sendSystemMessage(Component.literal("Sem charges"));
+            player.sendSystemMessage(Component.literal("§cNo Command Seal charges left. They recharge at the start of a new day."));
             return;
         }
         final ManaData manaData = ManaData.get(player);
-        if (!manaData.hasEnoughMana(commandSealSkillType.getSkill().getManaCost())) {
-            player.sendSystemMessage(Component.literal("Sem manaaa"));
+        if (!manaData.hasEnoughMana(player, commandSealSkillType.getSkill().getManaCost())) {
+            player.sendSystemMessage(Component.literal("§cNot enough mana."));
             return;
         }
         if (commandSealData.isSkillOnCooldown(commandSealSkillType)) {
-            player.sendSystemMessage(Component.literal("Skill em cooldown"));
+            player.sendSystemMessage(Component.literal("§eThis Command Seal is on cooldown."));
             return;
         }
         if (!commandSealSkillType.getSkill().canActivate(player, hero)) {

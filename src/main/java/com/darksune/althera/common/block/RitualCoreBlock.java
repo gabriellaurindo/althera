@@ -83,7 +83,7 @@ public class RitualCoreBlock extends Block {
                         "§aYou have formed a contract with §f"
                                 + heroDefinition.getName()
                                 + " §7["
-                                + heroDefinition.getHeroClass().name()
+                                + heroDefinition.getHeroClass().getDisplayName()
                                 + "] §6("
                                 + heroDefinition.getRank().name()
                                 + ")"

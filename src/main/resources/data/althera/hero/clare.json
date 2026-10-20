@@ -8,5 +8,15 @@
   "texture": "althera:textures/entity/hero/clare.png",
   "animations": "althera:animations/entity/hero/clare.animation.json",
   "personality": "Cold, quiet and loyal",
-  "scale": 0.8
+  "scale": 0.8,
+  "ultimate": "althera:crimson_requiem",
+  "animation": {
+    "attack_length": 0.85
+  },
+  "attack": {
+    "type": "melee",
+    "on_hit": [
+      { "type": "mob_effect", "target": "target", "effect": "minecraft:wither", "duration": 60, "amplifier": 0 }
+    ]
+  }
 }

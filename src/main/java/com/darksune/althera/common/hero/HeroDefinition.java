@@ -9,7 +9,7 @@ public class HeroDefinition {
     private final String name;
     private final String description;
 
-    private final HeroClass heroClass;
+    private final ResourceLocation heroClassId;
     private final HeroRank rank;
     private final HeroNature nature;
 
@@ -19,24 +19,32 @@ public class HeroDefinition {
 
     private final String personality;
     private final float scale;
+    private final ResourceLocation ultimate;
+    private final HeroAttack attack;
+    private final HeroAnimation animation;
+    private final HeroStats stats;
 
     public HeroDefinition(
             ResourceLocation id,
             String name,
             String description,
-            HeroClass heroClass,
+            ResourceLocation heroClassId,
             HeroRank rank,
             HeroNature nature,
             ResourceLocation model,
             ResourceLocation texture,
             ResourceLocation animations,
             String personality,
-            float scale
+            float scale,
+            ResourceLocation ultimate,
+            HeroAttack attack,
+            HeroAnimation animation,
+            HeroStats stats
     ) {
         this.id = id;
         this.name = name;
         this.description = description;
-        this.heroClass = heroClass;
+        this.heroClassId = heroClassId;
         this.rank = rank;
         this.nature = nature;
         this.model = model;
@@ -44,6 +52,10 @@ public class HeroDefinition {
         this.animations = animations;
         this.personality = personality;
         this.scale = scale;
+        this.ultimate = ultimate;
+        this.attack = attack;
+        this.animation = animation;
+        this.stats = stats;
     }
 
     public ResourceLocation getId() {
@@ -58,8 +70,12 @@ public class HeroDefinition {
         return description;
     }
 
+    public ResourceLocation getHeroClassId() {
+        return heroClassId;
+    }
+
     public HeroClass getHeroClass() {
-        return heroClass;
+        return HeroClassRegistry.get(heroClassId);
     }
 
     public HeroRank getRank() {
@@ -88,6 +104,22 @@ public class HeroDefinition {
 
     public float getScale() {
         return scale;
+    }
+
+    public ResourceLocation getUltimate() {
+        return ultimate;
+    }
+
+    public HeroAttack getAttack() {
+        return attack;
+    }
+
+    public HeroAnimation getAnimation() {
+        return animation;
+    }
+
+    public HeroStats getStats() {
+        return stats;
     }
 
     public boolean isRollable() {

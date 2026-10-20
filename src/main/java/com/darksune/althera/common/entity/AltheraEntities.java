@@ -37,6 +37,15 @@ public final class AltheraEntities {
                             .clientTrackingRange(8)
                             .build("summoned"));
 
+    public static final DeferredHolder<EntityType<?>, EntityType<HeroProjectileEntity>> HERO_PROJECTILE =
+            ENTITIES.register("hero_projectile",
+                    () -> EntityType.Builder
+                            .<HeroProjectileEntity>of(HeroProjectileEntity::new, MobCategory.MISC)
+                            .sized(0.3f, 0.3f)
+                            .clientTrackingRange(4)
+                            .updateInterval(10)
+                            .build("hero_projectile"));
+
     public static void register(final IEventBus bus) {
         ENTITIES.register(bus);
     }

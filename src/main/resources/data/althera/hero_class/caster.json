@@ -1,0 +1,13 @@
+{
+  "name": "Caster",
+  "health": 0.8,
+  "attack": 1.5,
+  "armor": 0.7,
+  "speed": 1.0,
+  "knockback_resistance": 0.5,
+  "dodge_chance": 0.0,
+  "strong_against": [
+    "althera:lancer",
+    "althera:shielder"
+  ]
+}

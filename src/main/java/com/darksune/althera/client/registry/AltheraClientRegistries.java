@@ -5,6 +5,7 @@ import com.darksune.althera.client.renderer.entity.HeroRenderer;
 import com.darksune.althera.client.renderer.entity.LightOrbRenderer;
 import com.darksune.althera.client.renderer.entity.SummonedRenderer;
 import com.darksune.althera.common.entity.AltheraEntities;
+import net.minecraft.client.renderer.entity.NoopRenderer;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
@@ -37,6 +38,11 @@ public final class AltheraClientRegistries {
         event.registerEntityRenderer(
                 AltheraEntities.SUMMONED.get(),
                 SummonedRenderer::new
+        );
+
+        event.registerEntityRenderer(
+                AltheraEntities.HERO_PROJECTILE.get(),
+                NoopRenderer::new
         );
     }
 }

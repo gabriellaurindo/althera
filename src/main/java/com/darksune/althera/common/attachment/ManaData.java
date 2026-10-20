@@ -12,6 +12,7 @@ public class ManaData {
     public int mana = 200;
     public int maxMana = 200;
     public int manaRegenerated = 0;
+    public boolean exhausted = false;
 
     public static final int MANA_REGEN = 10;
 
@@ -47,6 +48,18 @@ public class ManaData {
         this.manaRegenerated = value;
     }
 
+    public boolean isExhausted() {
+        return this.exhausted;
+    }
+
+    public void setExhausted(final boolean exhausted) {
+        this.exhausted = exhausted;
+    }
+
+    public boolean hasRecoveredFromExhaustion() {
+        return this.mana * 2 >= this.maxMana;
+    }
+
     // =========================
     // CODEC (save/load)
     // =========================
@@ -55,12 +68,14 @@ public class ManaData {
             instance.group(
                     Codec.INT.fieldOf("mana").forGetter(data -> data.mana),
                     Codec.INT.fieldOf("maxMana").forGetter(data -> data.maxMana),
-                    Codec.INT.fieldOf("manaRegenerated").forGetter(data -> data.manaRegenerated)
-            ).apply(instance, (mana, max, regen) -> {
+                    Codec.INT.fieldOf("manaRegenerated").forGetter(data -> data.manaRegenerated),
+                    Codec.BOOL.optionalFieldOf("exhausted", false).forGetter(data -> data.exhausted)
+            ).apply(instance, (mana, max, regen, exhausted) -> {
                 ManaData data = new ManaData();
                 data.mana = mana;
                 data.maxMana = max;
                 data.manaRegenerated = regen;
+                data.exhausted = exhausted;
                 return data;
             })
     );
@@ -74,12 +89,14 @@ public class ManaData {
                 buf.writeInt(data.mana);
                 buf.writeInt(data.maxMana);
                 buf.writeInt(data.manaRegenerated);
+                buf.writeBoolean(data.exhausted);
             },
             buf -> {
                 ManaData data = new ManaData();
                 data.mana = buf.readInt();
                 data.maxMana = buf.readInt();
                 data.manaRegenerated = buf.readInt();
+                data.exhausted = buf.readBoolean();
                 return data;
             }
     );
@@ -92,8 +109,15 @@ public class ManaData {
         player.setData(AltheraAttachments.MANA.get(), this);
     }
 
+    public static boolean hasInfiniteMana(final Player player) {
+        return player.getAbilities().instabuild;
+    }
+
     public boolean consumeMana(final Player player, int amount) {
-        if (!hasEnoughMana(amount)) {
+        if (hasInfiniteMana(player)) {
+            return true;
+        }
+        if (!hasEnoughMana(player, amount)) {
             return false;
         }
 
@@ -116,6 +140,10 @@ public class ManaData {
         if (newMana < max) {
             incrementMaxMana(MANA_REGEN);
         }
+
+        if (exhausted && hasRecoveredFromExhaustion()) {
+            exhausted = false;
+        }
         sync(player);
     }
 
@@ -131,7 +159,7 @@ public class ManaData {
         setMaxMana(getMaxMana() + levelsGained);
     }
 
-    public boolean hasEnoughMana(int amount) {
-        return this.mana >= amount;
+    public boolean hasEnoughMana(final Player player, int amount) {
+        return hasInfiniteMana(player) || this.mana >= amount;
     }
 }

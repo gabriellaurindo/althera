@@ -26,6 +26,24 @@ public class HeroModel extends GeoModel<HeroEntity> {
                     "animations/entity/hero/hero.animation.json"
             );
 
+    private static final ResourceLocation DISGUISE_MODEL =
+            ResourceLocation.fromNamespaceAndPath(
+                    "althera",
+                    "geo/entity/hero/disguise.geo.json"
+            );
+
+    private static final ResourceLocation DISGUISE_TEXTURE =
+            ResourceLocation.fromNamespaceAndPath(
+                    "althera",
+                    "textures/entity/hero/disguise.png"
+            );
+
+    private static final ResourceLocation DISGUISE_ANIMATION =
+            ResourceLocation.fromNamespaceAndPath(
+                    "althera",
+                    "animations/entity/hero/disguise.animation.json"
+            );
+
     private static final String ULTIMATE_EFFECT_BONE = "ultimate_effect";
 
     @Override
@@ -35,6 +53,10 @@ public class HeroModel extends GeoModel<HeroEntity> {
 
     @Override
     public ResourceLocation getModelResource(HeroEntity animatable) {
+
+        if (animatable.isDisguised()) {
+            return DISGUISE_MODEL;
+        }
 
         final HeroDefinition definition =
                 animatable.getHeroDefinition();
@@ -49,6 +71,10 @@ public class HeroModel extends GeoModel<HeroEntity> {
 
     @Override
     public ResourceLocation getTextureResource(HeroEntity animatable) {
+
+        if (animatable.isDisguised()) {
+            return DISGUISE_TEXTURE;
+        }
 
         final HeroDefinition definition =
                 animatable.getHeroDefinition();
@@ -77,6 +103,10 @@ public class HeroModel extends GeoModel<HeroEntity> {
 
     @Override
     public ResourceLocation getAnimationResource(HeroEntity animatable) {
+
+        if (animatable.isDisguised()) {
+            return DISGUISE_ANIMATION;
+        }
 
         final HeroDefinition definition =
                 animatable.getHeroDefinition();

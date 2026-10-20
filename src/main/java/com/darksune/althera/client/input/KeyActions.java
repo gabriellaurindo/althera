@@ -4,7 +4,7 @@ import com.darksune.althera.client.screen.HeroScreen;
 import com.darksune.althera.client.screen.HeroSelectionOpener;
 import com.darksune.althera.common.attachment.HeroData;
 import com.darksune.althera.common.commandseal.skill.CommandSealSkillType;
-import com.darksune.althera.common.ultimate.skill.UltimateSkillType;
+import com.darksune.althera.network.packet.DisguisePacket;
 import com.darksune.althera.network.packet.SummonPacket;
 import com.darksune.althera.network.packet.UseCommandSealSkillPacket;
 import com.darksune.althera.network.packet.UseUltimateSkillPacket;
@@ -14,6 +14,10 @@ public class KeyActions {
 
     public static void handleSummon() {
         Minecraft.getInstance().getConnection().send(new SummonPacket());
+    }
+
+    public static void handleDisguise() {
+        Minecraft.getInstance().getConnection().send(new DisguisePacket());
     }
 
     public static void handleHero() {
@@ -32,7 +36,7 @@ public class KeyActions {
         Minecraft.getInstance().getConnection().send(new UseCommandSealSkillPacket(skillType));
     }
 
-    public static void handleUltimateSkill(final UltimateSkillType skillType) {
-        Minecraft.getInstance().getConnection().send(new UseUltimateSkillPacket(skillType));
+    public static void handleUltimateSkill() {
+        Minecraft.getInstance().getConnection().send(new UseUltimateSkillPacket());
     }
 }

@@ -2,19 +2,16 @@ package com.darksune.althera.common.ultimate;
 
 import com.darksune.althera.common.attachment.AltheraAttachments;
 import com.darksune.althera.common.attachment.SyncableAttachment;
-import com.darksune.althera.common.ultimate.skill.UltimateSkillType;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 
-import java.util.EnumSet;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public class UltimateData extends SyncableAttachment {
 
@@ -24,28 +21,28 @@ public class UltimateData extends SyncableAttachment {
 
     private long lastUltimateResetDay;
 
-    private Map<UltimateSkillType, Integer> activeSkills = new HashMap<>();
+    private Map<ResourceLocation, Integer> activeSkills = new HashMap<>();
 
-    private Map<UltimateSkillType, Integer> cooldownSkills = new HashMap<>();
+    private Map<ResourceLocation, Integer> cooldownSkills = new HashMap<>();
 
-    // ultimates used since the last daily reset (day change or sleeping)
-    private Set<UltimateSkillType> usedToday = EnumSet.noneOf(UltimateSkillType.class);
+    // ultimate used since the last daily reset (day change or sleeping)
+    private boolean usedToday;
 
     // =========================
     // CODEC (save/load)
     // =========================
 
-    public static final Codec<Map<UltimateSkillType, Integer>> SKILL_MAP_CODEC = Codec.unboundedMap(UltimateSkillType.CODEC, Codec.INT);
+    public static final Codec<Map<ResourceLocation, Integer>> SKILL_MAP_CODEC = Codec.unboundedMap(ResourceLocation.CODEC, Codec.INT);
 
     public static final Codec<UltimateData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 
             Codec.LONG.optionalFieldOf("lastUltimateResetDay", 0L).forGetter(UltimateData::getLastUltimateResetDay),
 
-            SKILL_MAP_CODEC.optionalFieldOf("activeSkills", new HashMap<>()).forGetter(UltimateData::getActiveSkills),
+            SKILL_MAP_CODEC.optionalFieldOf("activeUltimates", new HashMap<>()).forGetter(UltimateData::getActiveSkills),
 
-            SKILL_MAP_CODEC.optionalFieldOf("cooldownSkills", new HashMap<>()).forGetter(UltimateData::getCooldownSkills),
+            SKILL_MAP_CODEC.optionalFieldOf("ultimateCooldowns", new HashMap<>()).forGetter(UltimateData::getCooldownSkills),
 
-            UltimateSkillType.CODEC.listOf().optionalFieldOf("usedToday", List.of()).forGetter(data -> List.copyOf(data.usedToday))
+            Codec.BOOL.optionalFieldOf("usedUltimateToday", false).forGetter(UltimateData::wasUsedToday)
 
     ).apply(instance, (lastUltimateResetDay, activeSkills, cooldownSkills, usedToday) -> {
 
@@ -57,7 +54,7 @@ public class UltimateData extends SyncableAttachment {
 
         data.cooldownSkills.putAll(cooldownSkills);
 
-        data.usedToday.addAll(usedToday);
+        data.usedToday = usedToday;
 
         return data;
     }));
@@ -72,42 +69,11 @@ public class UltimateData extends SyncableAttachment {
 
                 buf.writeLong(data.lastUltimateResetDay);
 
-                // =========================
-                // ACTIVE SKILLS
-                // =========================
+                buf.writeMap(data.activeSkills, FriendlyByteBuf::writeResourceLocation, FriendlyByteBuf::writeInt);
 
-                buf.writeInt(data.activeSkills.size());
+                buf.writeMap(data.cooldownSkills, FriendlyByteBuf::writeResourceLocation, FriendlyByteBuf::writeInt);
 
-                for (Map.Entry<UltimateSkillType, Integer> entry : data.activeSkills.entrySet()) {
-
-                    buf.writeEnum(entry.getKey());
-
-                    buf.writeInt(entry.getValue());
-                }
-
-                // =========================
-                // COOLDOWNS
-                // =========================
-
-                buf.writeInt(data.cooldownSkills.size());
-
-                for (Map.Entry<UltimateSkillType, Integer> entry : data.cooldownSkills.entrySet()) {
-
-                    buf.writeEnum(entry.getKey());
-
-                    buf.writeInt(entry.getValue());
-                }
-
-                // =========================
-                // USED TODAY
-                // =========================
-
-                buf.writeInt(data.usedToday.size());
-
-                for (UltimateSkillType skillType : data.usedToday) {
-
-                    buf.writeEnum(skillType);
-                }
+                buf.writeBoolean(data.usedToday);
             },
 
             buf -> {
@@ -116,46 +82,11 @@ public class UltimateData extends SyncableAttachment {
 
                 data.lastUltimateResetDay = buf.readLong();
 
-                // =========================
-                // ACTIVE SKILLS
-                // =========================
+                data.activeSkills.putAll(buf.readMap(FriendlyByteBuf::readResourceLocation, FriendlyByteBuf::readInt));
 
-                int activeSkillSize = buf.readInt();
+                data.cooldownSkills.putAll(buf.readMap(FriendlyByteBuf::readResourceLocation, FriendlyByteBuf::readInt));
 
-                for (int i = 0; i < activeSkillSize; i++) {
-
-                    UltimateSkillType skillType = buf.readEnum(UltimateSkillType.class);
-
-                    int timer = buf.readInt();
-
-                    data.activeSkills.put(skillType, timer);
-                }
-
-                // =========================
-                // COOLDOWNS
-                // =========================
-
-                int cooldownSkillSize = buf.readInt();
-
-                for (int i = 0; i < cooldownSkillSize; i++) {
-
-                    UltimateSkillType skillType = buf.readEnum(UltimateSkillType.class);
-
-                    int timer = buf.readInt();
-
-                    data.cooldownSkills.put(skillType, timer);
-                }
-
-                // =========================
-                // USED TODAY
-                // =========================
-
-                int usedTodaySize = buf.readInt();
-
-                for (int i = 0; i < usedTodaySize; i++) {
-
-                    data.usedToday.add(buf.readEnum(UltimateSkillType.class));
-                }
+                data.usedToday = buf.readBoolean();
 
                 return data;
             });
@@ -176,11 +107,11 @@ public class UltimateData extends SyncableAttachment {
         this.lastUltimateResetDay = lastUltimateResetDay;
     }
 
-    public Map<UltimateSkillType, Integer> getActiveSkills() {
+    public Map<ResourceLocation, Integer> getActiveSkills() {
         return activeSkills;
     }
 
-    public Map<UltimateSkillType, Integer> getCooldownSkills() {
+    public Map<ResourceLocation, Integer> getCooldownSkills() {
         return cooldownSkills;
     }
 
@@ -188,24 +119,24 @@ public class UltimateData extends SyncableAttachment {
     // STATE
     // =========================
 
-    public boolean isSkillOnCooldown(UltimateSkillType skillType) {
-        return cooldownSkills.containsKey(skillType);
+    public boolean isSkillOnCooldown(ResourceLocation ultimateId) {
+        return cooldownSkills.containsKey(ultimateId);
     }
 
-    public void activateSkill(UltimateSkillType skillType, int duration) {
-        activeSkills.put(skillType, duration);
+    public void activateSkill(ResourceLocation ultimateId, int duration) {
+        activeSkills.put(ultimateId, duration);
     }
 
-    public void startSkillCooldown(UltimateSkillType skillType, int cooldown) {
-        cooldownSkills.put(skillType, cooldown);
+    public void startSkillCooldown(ResourceLocation ultimateId, int cooldown) {
+        cooldownSkills.put(ultimateId, cooldown);
     }
 
-    public boolean wasUsedToday(UltimateSkillType skillType) {
-        return usedToday.contains(skillType);
+    public boolean wasUsedToday() {
+        return usedToday;
     }
 
-    public void markUsedToday(UltimateSkillType skillType) {
-        usedToday.add(skillType);
+    public void markUsedToday() {
+        usedToday = true;
         markDirty();
     }
 
@@ -213,7 +144,7 @@ public class UltimateData extends SyncableAttachment {
 
         cooldownSkills.clear();
 
-        usedToday.clear();
+        usedToday = false;
 
         markDirty();
     }

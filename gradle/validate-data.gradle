@@ -1,0 +1,268 @@
+import groovy.json.JsonSlurper
+
+class DataValidator {
+
+    static final Set<String> RANKS = ['F', 'E', 'D', 'C', 'B', 'A', 'S', 'EX'] as Set
+    static final Set<String> NATURES = ['COMMON', 'DIVINE'] as Set
+    static final Set<String> NAMED_TARGETS = ['self', 'owner', 'target'] as Set
+
+    static final Set<String> HERO_KEYS = ['name', 'description', 'class', 'rank', 'nature', 'model', 'texture',
+            'animations', 'personality', 'scale', 'ultimate', 'attack', 'animation', 'stats'] as Set
+    static final Set<String> ATTACK_KEYS = ['type', 'range', 'cooldown_ticks', 'shoot_frame', 'projectile_speed',
+            'projectile_origin', 'projectile_trail', 'on_attack', 'on_hit'] as Set
+    static final Set<String> ANIMATION_KEYS = ['attack_speed', 'attack_length', 'walk_speed', 'death_length'] as Set
+    static final Set<String> STATS_KEYS = ['health', 'health_per_level', 'attack', 'attack_per_level', 'armor', 'armor_per_level', 'speed'] as Set
+    static final Set<String> CLASS_KEYS = ['name', 'health', 'attack', 'armor', 'speed', 'knockback_resistance',
+            'dodge_chance', 'strong_against'] as Set
+    static final Set<String> ULTIMATE_KEYS = ['name', 'description', 'mana_cost', 'channel_ticks', 'cooldown_ticks',
+            'on_start', 'on_tick', 'on_end'] as Set
+    static final Set<String> FILTER_KEYS = ['entity_tag', 'hostile', 'exclude_target'] as Set
+
+    static final Map<String, Map<String, Boolean>> EFFECTS = [
+            damage            : [target: true, filter: false, amount: false, attack_ratio: false],
+            knockback         : [target: true, filter: false, horizontal: false, vertical: false, scale_with_distance: false],
+            ignite            : [target: true, filter: false, ticks: true],
+            mob_effect        : [target: true, filter: false, effect: true, duration: true, amplifier: false, show_particles: false],
+            explosion         : [power: false],
+            particles         : [particle: true, count: false, spread: false, speed: false, height: false, line: false],
+            sound             : [sound: true, volume: false, pitch: false],
+            dash              : [distance: true],
+            heal              : [target: true, filter: false, amount: false, max_health_ratio: false],
+            projectile        : [count: false, spread: false, speed: false, amount: false, attack_ratio: false, trail: false, on_hit: false],
+            ultimate_animation: [:]
+    ]
+
+    final File resources
+    final List<String> errors = []
+
+    DataValidator(File resources) {
+        this.resources = resources
+    }
+
+    static String toId(String raw, boolean lowercase) {
+        String value = lowercase ? raw.toLowerCase(Locale.ROOT) : raw
+        return value.contains(':') ? value : "althera:${value}"
+    }
+
+    File dataFile(String id, String folder) {
+        def (namespace, path) = id.split(':', 2)
+        return new File(resources, "data/${namespace}/${folder}/${path}.json")
+    }
+
+    File assetFile(String id) {
+        def (namespace, path) = id.split(':', 2)
+        return new File(resources, "assets/${namespace}/${path}")
+    }
+
+    boolean isOurs(String id) {
+        return id.startsWith('althera:')
+    }
+
+    void error(String where, String message) {
+        errors << "${where}: ${message}".toString()
+    }
+
+    void checkKeys(String where, Map json, Set<String> allowed) {
+        json.keySet().findAll { !allowed.contains(it) }.each { error(where, "unknown field '${it}'") }
+    }
+
+    void checkNumber(String where, Map json, String key, boolean required, Number min = null, Number max = null) {
+        if (!json.containsKey(key)) {
+            if (required) error(where, "missing '${key}'")
+            return
+        }
+        def value = json[key]
+        if (!(value instanceof Number)) {
+            error(where, "'${key}' must be a number")
+            return
+        }
+        if (min != null && value < min) error(where, "'${key}' must be at least ${min}")
+        if (max != null && value > max) error(where, "'${key}' must be at most ${max}")
+    }
+
+    void checkVector(String where, Map json, String key) {
+        if (!json.containsKey(key)) return
+        def value = json[key]
+        if (!(value instanceof List) || value.size() != 3 || value.any { !(it instanceof Number) }) {
+            error(where, "'${key}' must be [x, y, z]")
+        }
+    }
+
+    void checkParticle(String where, def particle) {
+        if (!(particle instanceof Map) || !(particle.type instanceof String)) {
+            error(where, 'particle must be an object with a "type", e.g. { "type": "minecraft:flame" }')
+        }
+    }
+
+    void checkTarget(String where, def target) {
+        if (target instanceof String) {
+            if (!NAMED_TARGETS.contains(target)) error(where, "unknown target '${target}' (self, owner, target, {area}, {line})")
+            return
+        }
+        if (target instanceof Map) {
+            if (target.containsKey('area')) {
+                checkKeys(where, target, ['area'] as Set)
+                checkNumber(where, target, 'area', true, 0)
+                return
+            }
+            if (target.containsKey('line')) {
+                checkKeys(where, target, ['line', 'width'] as Set)
+                checkNumber(where, target, 'line', true, 0)
+                checkNumber(where, target, 'width', false, 0)
+                return
+            }
+        }
+        error(where, 'target must be "self", "owner", "target", { "area": r } or { "line": l, "width": w }')
+    }
+
+    void checkEffects(String where, def effects) {
+        if (effects == null) return
+        if (!(effects instanceof List)) {
+            error(where, 'must be a list of effects')
+            return
+        }
+        effects.eachWithIndex { effect, i -> checkEffect("${where}[${i}]", effect) }
+    }
+
+    void checkEffect(String where, def effect) {
+        if (!(effect instanceof Map) || !(effect.type instanceof String)) {
+            error(where, 'effect needs a "type"')
+            return
+        }
+        Map<String, Boolean> fields = EFFECTS[effect.type]
+        if (fields == null) {
+            error(where, "unknown effect type '${effect.type}' (${EFFECTS.keySet().join(', ')})")
+            return
+        }
+        String at = "${where} (${effect.type})"
+        checkKeys(at, effect, (fields.keySet() + 'type') as Set)
+        fields.findAll { it.value && !effect.containsKey(it.key) }.each { error(at, "missing '${it.key}'") }
+        if (effect.containsKey('target')) checkTarget(at, effect.target)
+        if (effect.containsKey('filter')) {
+            if (effect.filter instanceof Map) checkKeys("${at} filter", effect.filter, FILTER_KEYS)
+            else error(at, 'filter must be an object')
+        }
+        if (effect.containsKey('particle')) checkParticle(at, effect.particle)
+        if (effect.containsKey('trail')) checkParticle(at, effect.trail)
+        if (effect.type == 'particles') checkVector(at, effect, 'spread')
+        if (effect.type == 'projectile') {
+            checkNumber(at, effect, 'count', false, 1)
+            checkEffects("${at} on_hit", effect.on_hit)
+        }
+    }
+
+    Map read(File file) {
+        try {
+            def json = new JsonSlurper().parse(file)
+            if (json instanceof Map) return json
+            error(file.name, 'must be a JSON object')
+        } catch (Exception e) {
+            error(file.name, "invalid JSON: ${e.message}")
+        }
+        return null
+    }
+
+    void validateHero(File file) {
+        String where = "hero/${file.name}"
+        Map json = read(file)
+        if (json == null) return
+        checkKeys(where, json, HERO_KEYS)
+
+        if (!(json.rank instanceof String)) error(where, "missing 'rank'")
+        else if (!RANKS.contains(json.rank.toUpperCase(Locale.ROOT))) error(where, "unknown rank '${json.rank}' (${RANKS.join(', ')})")
+
+        if (json.nature != null && !NATURES.contains(json.nature.toString().toUpperCase(Locale.ROOT))) {
+            error(where, "unknown nature '${json.nature}' (${NATURES.join(', ')})")
+        }
+
+        String heroClass = toId((json['class'] ?: 'saber').toString(), true)
+        if (isOurs(heroClass) && !dataFile(heroClass, 'hero_class').exists()) error(where, "class '${heroClass}' has no hero_class file")
+
+        String ultimate = toId((json.ultimate ?: 'althera:explosion').toString(), false)
+        if (isOurs(ultimate) && !dataFile(ultimate, 'ultimate').exists()) error(where, "ultimate '${ultimate}' has no ultimate file")
+
+        ['model', 'texture', 'animations'].each { key ->
+            if (json[key] == null) return
+            String id = toId(json[key].toString(), false)
+            if (isOurs(id) && !assetFile(id).exists()) error(where, "${key} file not found: assets/${id.replace(':', '/')}")
+        }
+
+        checkNumber(where, json, 'scale', false, 0)
+
+        if (json.animation != null) {
+            checkKeys("${where} animation", json.animation, ANIMATION_KEYS)
+            ANIMATION_KEYS.each { checkNumber("${where} animation", json.animation, it, false, 0) }
+        }
+
+        if (json.stats != null) {
+            checkKeys("${where} stats", json.stats, STATS_KEYS)
+            STATS_KEYS.each { checkNumber("${where} stats", json.stats, it, false, 0) }
+        }
+
+        if (json.attack != null) {
+            Map attack = json.attack
+            String at = "${where} attack"
+            checkKeys(at, attack, ATTACK_KEYS)
+            if (attack.type != null && !(attack.type in ['melee', 'ranged'])) error(at, "type must be 'melee' or 'ranged'")
+            checkNumber(at, attack, 'range', false, 0)
+            checkNumber(at, attack, 'cooldown_ticks', false, 1)
+            checkNumber(at, attack, 'shoot_frame', false, 0)
+            checkNumber(at, attack, 'projectile_speed', false, 0)
+            checkVector(at, attack, 'projectile_origin')
+            if (attack.containsKey('projectile_trail')) checkParticle(at, attack.projectile_trail)
+            checkEffects("${at} on_attack", attack.on_attack)
+            checkEffects("${at} on_hit", attack.on_hit)
+        }
+    }
+
+    void validateClass(File file) {
+        String where = "hero_class/${file.name}"
+        Map json = read(file)
+        if (json == null) return
+        checkKeys(where, json, CLASS_KEYS)
+        ['health', 'attack', 'armor', 'speed'].each { checkNumber(where, json, it, false, 0) }
+        checkNumber(where, json, 'knockback_resistance', false, 0, 1)
+        checkNumber(where, json, 'dodge_chance', false, 0, 1)
+        (json.strong_against ?: []).each { raw ->
+            String id = toId(raw.toString(), true)
+            if (isOurs(id) && !dataFile(id, 'hero_class').exists()) error(where, "strong_against '${id}' has no hero_class file")
+        }
+    }
+
+    void validateUltimate(File file) {
+        String where = "ultimate/${file.name}"
+        Map json = read(file)
+        if (json == null) return
+        checkKeys(where, json, ULTIMATE_KEYS)
+        checkNumber(where, json, 'mana_cost', true, 0)
+        checkNumber(where, json, 'channel_ticks', true, 1)
+        checkNumber(where, json, 'cooldown_ticks', false, 0)
+        ['on_start', 'on_tick', 'on_end'].each { checkEffects("${where} ${it}", json[it]) }
+    }
+
+    List<String> run() {
+        File data = new File(resources, 'data/althera')
+        new File(data, 'hero_class').listFiles({ it.name.endsWith('.json') } as FileFilter)?.sort()?.each { validateClass(it) }
+        new File(data, 'ultimate').listFiles({ it.name.endsWith('.json') } as FileFilter)?.sort()?.each { validateUltimate(it) }
+        new File(data, 'hero').listFiles({ it.name.endsWith('.json') } as FileFilter)?.sort()?.each { validateHero(it) }
+        return errors
+    }
+}
+
+tasks.register('validateData') {
+    group = 'verification'
+    description = 'Checks the hero, hero class and ultimate JSON files for typos and broken references.'
+    def resources = file('src/main/resources')
+    inputs.dir(resources)
+    doLast {
+        def errors = new DataValidator(resources).run()
+        if (!errors.isEmpty()) {
+            throw new GradleException("Invalid data files:\n - " + errors.join('\n - '))
+        }
+        logger.lifecycle('Data files OK')
+    }
+}
+
+tasks.named('check') {
+    dependsOn 'validateData'
+}

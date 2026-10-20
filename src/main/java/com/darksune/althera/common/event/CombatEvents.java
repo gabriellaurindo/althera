@@ -2,14 +2,18 @@ package com.darksune.althera.common.event;
 
 import com.darksune.althera.common.attachment.HeroData;
 import com.darksune.althera.common.entity.HeroEntity;
+import com.darksune.althera.common.hero.HeroDefinition;
 import com.darksune.althera.common.system.HeroProgressionSystem;
 import com.darksune.althera.common.system.HeroStatsSystem;
 import com.darksune.althera.common.system.HeroSummonSystem;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -21,15 +25,21 @@ public class CombatEvents {
 
     @SubscribeEvent
     public static void onDeath(LivingDeathEvent event) {
-        if (!(event.getSource().getEntity() instanceof HeroEntity hero)) return;
+        final Entity killer = event.getSource().getEntity();
 
-        final Player owner = hero.getOwner();
-
-        if (owner == null) {
+        if (killer instanceof HeroEntity hero) {
+            final Player owner = hero.getOwner();
+            if (owner != null) {
+                HeroProgressionSystem.addXp(owner, event.getEntity(), 1.0);
+            }
             return;
         }
 
-        HeroProgressionSystem.addXp(owner, event);
+        if (killer instanceof Player player
+                && event.getEntity() instanceof Enemy
+                && HeroSummonSystem.getSummon(player) != null) {
+            HeroProgressionSystem.addXp(player, event.getEntity(), HeroProgressionSystem.OWNER_KILL_XP_SHARE);
+        }
     }
 
     @SubscribeEvent
@@ -65,7 +75,7 @@ public class CombatEvents {
         }
 
         // the hero didn't absorb it (invulnerable, damage cancelled...): the damage goes through to the player
-        if (!hero.hurt(event.getSource(), damage)) {
+        if (!hero.hurt(event.getSource(), damage) && !hero.hasDodgedThisTick()) {
             return;
         }
 
@@ -122,6 +132,35 @@ public class CombatEvents {
                 0.25F,
                 1.4F
         );
+    }
+
+    @SubscribeEvent
+    public static void onHeroVersusHero(final LivingIncomingDamageEvent event) {
+        if (!(event.getSource().getEntity() instanceof HeroEntity attacker)) return;
+        if (!(event.getEntity() instanceof HeroEntity defender)) return;
+
+        final HeroDefinition attackerHero = attacker.getHeroDefinition();
+        final HeroDefinition defenderHero = defender.getHeroDefinition();
+        if (attackerHero == null || defenderHero == null) return;
+
+        attacker.rememberRival(defender);
+
+        final float multiplier = attackerHero.getHeroClass().getMultiplierAgainst(defenderHero.getHeroClass());
+        event.setAmount(event.getAmount() * multiplier);
+
+        if (multiplier > 1.0F && defender.level() instanceof ServerLevel level) {
+            level.sendParticles(
+                    ParticleTypes.CRIT,
+                    defender.getX(),
+                    defender.getY() + defender.getBbHeight() * 0.5,
+                    defender.getZ(),
+                    10,
+                    0.3,
+                    0.4,
+                    0.3,
+                    0.2
+            );
+        }
     }
 
     @SubscribeEvent

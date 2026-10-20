@@ -1,16 +1,26 @@
 package com.darksune.althera.common.entity;
 
 import com.darksune.althera.common.ai.goal.AssistOwnerGoal;
+import com.darksune.althera.common.ai.goal.EngageThreatsGoal;
 import com.darksune.althera.common.ai.goal.FollowOwnerGoal;
 import com.darksune.althera.common.ai.goal.HeroMeleeAttackGoal;
+import com.darksune.althera.common.ai.goal.HeroRangedAttackGoal;
 import com.darksune.althera.common.ai.goal.ProtectOwnerGoal;
+import com.darksune.althera.common.ai.goal.RivalTargetGoal;
 import com.darksune.althera.common.attachment.HeroData;
 import com.darksune.althera.common.attachment.ManaData;
+import com.darksune.althera.common.hero.HeroAnimation;
+import com.darksune.althera.common.hero.HeroAttack;
 import com.darksune.althera.common.hero.HeroDefinition;
 import com.darksune.althera.common.hero.HeroRegistry;
+import com.darksune.althera.common.hero.HeroStats;
+import com.darksune.althera.common.ultimate.effect.UltimateContext;
+import com.darksune.althera.common.ultimate.effect.UltimateEffect;
 import com.darksune.althera.common.system.HeroStatsSystem;
 import com.darksune.althera.common.system.HeroSummonSystem;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -18,10 +28,14 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.MoveControl;
@@ -32,9 +46,12 @@ import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.ai.navigation.WaterBoundPathNavigation;
 import net.minecraft.world.entity.ai.util.DefaultRandomPos;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.level.pathfinder.PathType;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib.animatable.GeoEntity;
@@ -45,7 +62,11 @@ import software.bernie.geckolib.animation.PlayState;
 import software.bernie.geckolib.animation.RawAnimation;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Predicate;
 
 import static com.darksune.althera.common.util.LightOrbUtil.habilitarEspirito;
 
@@ -61,14 +82,34 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
                     HeroEntity.class,
                     EntityDataSerializers.INT
             );
+    private static final EntityDataAccessor<Boolean> DISGUISED =
+            SynchedEntityData.defineId(
+                    HeroEntity.class,
+                    EntityDataSerializers.BOOLEAN
+            );
+    private static final EntityDataAccessor<Float> HEALTH_RATIO =
+            SynchedEntityData.defineId(
+                    HeroEntity.class,
+                    EntityDataSerializers.FLOAT
+            );
+    private static final float MASKED_MAX_HEALTH = 20.0F;
+    private static final int REVEAL_TICKS = 10;
+    private static final int RIVAL_MEMORY_TICKS = 600;
     private static final String ULTIMATE_CONTROLLER = "ultimate";
     private static final String ULTIMATE_ANIMATION = "ultimate";
     private static final String DEATH_ANIMATION = "death";
-    private static final int DEATH_ANIMATION_TICKS = 40;
 
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
 
     private UUID ownerUuid;
+    @Nullable
+    private ResourceLocation heroId;
+    private int dodgeTick = -1;
+    private int revealTicks;
+    private boolean benchmark;
+    @Nullable
+    private UUID rivalOwner;
+    private int rivalUntil;
 
     boolean searchingForLand;
     protected final WaterBoundPathNavigation waterNavigation;
@@ -116,10 +157,29 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
     }
 
     public void setHeroId(final ResourceLocation heroId) {
-        this.entityData.set(HERO_ID, heroId.toString());
+        this.heroId = heroId;
+        publishHeroId();
+    }
+
+    private void publishHeroId() {
+        this.entityData.set(HERO_ID, heroId == null || isDisguised() ? "" : heroId.toString());
+    }
+
+    public boolean isDisguised() {
+        return this.entityData.get(DISGUISED);
+    }
+
+    public void setDisguised(final boolean disguised) {
+        this.entityData.set(DISGUISED, disguised);
+        publishHeroId();
+        updateHealthRatio();
     }
 
     public ResourceLocation getHeroId() {
+
+        if (!level().isClientSide) {
+            return heroId;
+        }
 
         String raw = this.entityData.get(HERO_ID);
 
@@ -139,6 +199,76 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
                 : null;
     }
 
+    public HeroAnimation getAnimation() {
+        final HeroDefinition definition = getHeroDefinition();
+        return definition == null || isDisguised() ? HeroAnimation.DEFAULT : definition.getAnimation();
+    }
+
+    public HeroAttack getAttack() {
+        final HeroDefinition definition = getHeroDefinition();
+        if (definition == null) return HeroAttack.MELEE;
+        return isDisguised() ? definition.getAttack().disguised() : definition.getAttack();
+    }
+
+    public void performAttackEffects(@Nullable final LivingEntity target) {
+        applyEffects(getAttack().onAttack(), target, null);
+    }
+
+    public void performHitEffects(@Nullable final LivingEntity target, final Vec3 position) {
+        applyEffects(getAttack().onHit(), target, position);
+    }
+
+    public void applyEffects(final List<UltimateEffect> effects, @Nullable final LivingEntity target,
+                             @Nullable final Vec3 impact) {
+        final Player owner = findOwner();
+        if (owner == null || effects.isEmpty()) return;
+
+        final UltimateContext context = UltimateContext.attack(owner, this, target, impact);
+        effects.forEach(effect -> effect.apply(context));
+    }
+
+    @Override
+    public boolean doHurtTarget(final Entity target) {
+        final boolean hurt = super.doHurtTarget(target);
+        if (hurt && target instanceof LivingEntity living) {
+            performHitEffects(living, living.position());
+        }
+        return hurt;
+    }
+
+    public Vec3 getProjectileOrigin() {
+        final Vec3 offset = getAttack().projectileOrigin().scale(getModelScale());
+        final float yaw = yBodyRot * Mth.DEG_TO_RAD;
+        final double sin = Mth.sin(yaw);
+        final double cos = Mth.cos(yaw);
+        final Vec3 center = getBoundingBox().getCenter();
+        final Vec3 origin = position().add(
+                -cos * offset.x - sin * offset.z,
+                offset.y,
+                -sin * offset.x + cos * offset.z
+        );
+        final BlockHitResult wall = level().clip(
+                new ClipContext(center, origin, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, this)
+        );
+        return wall.getType() == HitResult.Type.MISS
+                ? origin
+                : wall.getLocation().subtract(origin.subtract(center).normalize().scale(0.2D));
+    }
+
+    public void markAsBenchmark() {
+        this.benchmark = true;
+        this.setNoAi(true);
+    }
+
+    public boolean isBenchmark() {
+        return benchmark;
+    }
+
+    @Override
+    public boolean shouldBeSaved() {
+        return !benchmark && super.shouldBeSaved();
+    }
+
     public int getAttackAnimationTicks() {
         return this.entityData.get(ATTACK_TICKS);
     }
@@ -148,7 +278,7 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
     }
 
     public void triggerAttackAnimation() {
-        setAttackAnimationTicks(10);
+        setAttackAnimationTicks(getAnimation().attackTicks());
     }
 
     @Override
@@ -165,13 +295,13 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
                         5,
                         state -> {
 
-                            if (isDeadOrDying()) {
+                            if (isDeadOrDying() && !isDisguised()) {
                                 state.getController().setAnimationSpeed(1D);
                                 return state.setAndContinue(RawAnimation.begin().thenPlayAndHold(DEATH_ANIMATION));
                             }
 
                             if (state.isMoving()) {
-                                state.getController().setAnimationSpeed(2D);
+                                state.getController().setAnimationSpeed(getAnimation().walkSpeed());
                                 return state.setAndContinue(RawAnimation.begin().thenLoop("walk")
                                 );
                             }
@@ -194,8 +324,8 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
                         0,
                         state -> {
 
-                            if (getAttackAnimationTicks() > 0 && !isDeadOrDying()) {
-                                state.getController().setAnimationSpeed(1.2D);
+                            if (getAttackAnimationTicks() > 0 && !isDeadOrDying() && !isDisguised()) {
+                                state.getController().setAnimationSpeed(getAnimation().attackSpeed());
                                 state.getController().setAnimation(RawAnimation.begin().thenPlay("attack"));
                                 return PlayState.CONTINUE;
                             }
@@ -222,7 +352,7 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
 
     public float getModelScale() {
         final HeroDefinition definition = getHeroDefinition();
-        return definition == null ? 1.0f : definition.getScale();
+        return definition == null || isDisguised() ? 1.0f : definition.getScale();
     }
 
     public boolean isPlayingUltimate() {
@@ -266,6 +396,40 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
 
         builder.define(HERO_ID, "");
         builder.define(ATTACK_TICKS, 0);
+        builder.define(DISGUISED, false);
+        builder.define(HEALTH_RATIO, 1.0F);
+    }
+
+    @Override
+    public float getHealth() {
+        return level().isClientSide && isDisguised()
+                ? this.entityData.get(HEALTH_RATIO) * MASKED_MAX_HEALTH
+                : super.getHealth();
+    }
+
+    @Override
+    public void setHealth(final float health) {
+        super.setHealth(health);
+        updateHealthRatio();
+    }
+
+    private void updateHealthRatio() {
+        if (level().isClientSide) return;
+        this.entityData.set(HEALTH_RATIO, getMaxHealth() > 0 ? super.getHealth() / getMaxHealth() : 0.0F);
+    }
+
+    private void maskDisguisedStats() {
+        if (!isDisguised()) return;
+        maskAttribute(Attributes.MAX_HEALTH, MASKED_MAX_HEALTH);
+        maskAttribute(Attributes.ARMOR, 0.0D);
+        maskAttribute(Attributes.MOVEMENT_SPEED, HeroStats.DEFAULT.speed());
+    }
+
+    private void maskAttribute(final Holder<Attribute> attribute, final double value) {
+        final AttributeInstance instance = getAttribute(attribute);
+        if (instance == null || instance.getValue() == value) return;
+        instance.removeModifiers();
+        instance.setBaseValue(value);
     }
 
     @Override
@@ -273,8 +437,12 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
         super.tick();
 
         Level level = level();
-        if (level.isClientSide) return;
+        if (level.isClientSide) {
+            maskDisguisedStats();
+            return;
+        }
         if (isDeadOrDying()) return;
+        if (benchmark) return;
 
         if (getAttackAnimationTicks() > 0) {
             setAttackAnimationTicks(getAttackAnimationTicks() - 1);
@@ -308,6 +476,12 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
             }
         }
 
+        if (heroData.isDisguised() != isDisguised()) {
+            HeroStatsSystem.applyAttributes(this, owner);
+        }
+
+        tickReveal(owner);
+
         // =========================
         // 🟣 REGEN / MANA (2s)
         // =========================
@@ -331,6 +505,7 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
 
         this.goalSelector.addGoal(1, new HeroEntitySwimUpGoal(this, 1.0, this.level().getSeaLevel()));
         this.goalSelector.addGoal(2, new HeroMeleeAttackGoal(this, 1.2D, true));
+        this.goalSelector.addGoal(2, new HeroRangedAttackGoal(this, 1.1D));
         this.goalSelector.addGoal(3, new FollowOwnerGoal(this, 1.1D, 5F, 2F));
         this.goalSelector.addGoal(4, new RandomLookAroundGoal(this));
 
@@ -341,6 +516,73 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
         this.targetSelector.addGoal(3,
                 new AssistOwnerGoal<>(this)
         );
+        this.targetSelector.addGoal(4, new RivalTargetGoal(this));
+        this.targetSelector.addGoal(5, new EngageThreatsGoal(this));
+    }
+
+    @Override
+    public boolean canAttack(final LivingEntity target) {
+        if (target instanceof Player player && !canHarmPlayer(player)) return false;
+        return super.canAttack(target);
+    }
+
+    public boolean canHarmPlayer(final Player player) {
+        final Player owner = findOwner();
+        return owner != null && owner != player && owner.canHarmPlayer(player);
+    }
+
+    public void rememberRival(@Nullable final Entity enemy) {
+        if (level().isClientSide) return;
+
+        final UUID enemyOwner = enemy instanceof HeroEntity hero ? hero.getOwnerUUID()
+                : enemy instanceof Player player ? player.getUUID()
+                : null;
+
+        if (enemyOwner == null || enemyOwner.equals(ownerUuid)) return;
+
+        rivalOwner = enemyOwner;
+        rivalUntil = tickCount + RIVAL_MEMORY_TICKS;
+    }
+
+    @Nullable
+    public LivingEntity findRival(final double range) {
+        if (rivalOwner == null || !(level() instanceof ServerLevel serverLevel)) return null;
+
+        if (tickCount > rivalUntil) {
+            rivalOwner = null;
+            return null;
+        }
+
+        final Player rivalPlayer = serverLevel.getServer().getPlayerList().getPlayer(rivalOwner);
+        if (rivalPlayer == null) return null;
+
+        final HeroEntity rivalHero = HeroSummonSystem.getSummon(rivalPlayer);
+        if (isReachableRival(rivalHero, range)) return rivalHero;
+
+        return isReachableRival(rivalPlayer, range) ? rivalPlayer : null;
+    }
+
+    private boolean isReachableRival(@Nullable final LivingEntity rival, final double range) {
+        return rival != null
+                && rival.isAlive()
+                && rival.level() == level()
+                && distanceToSqr(rival) <= range * range
+                && canAttack(rival);
+    }
+
+    public boolean isThreat(final Mob mob) {
+        if (mob == this || !mob.isAlive() || !canAttack(mob) || isAlliedTo(mob)) return false;
+
+        final LivingEntity mobTarget = mob.getTarget();
+        return mob == getLastHurtByMob()
+                || mobTarget == this
+                || (mobTarget != null && mobTarget == getOwner());
+    }
+
+    public Optional<Mob> findClosestThreat(final double radius, final Predicate<Mob> filter) {
+        return level().getEntitiesOfClass(Mob.class, getBoundingBox().inflate(radius), mob -> isThreat(mob) && filter.test(mob))
+                .stream()
+                .min(Comparator.comparingDouble(this::distanceToSqr));
     }
 
     @Override
@@ -359,7 +601,7 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
     @Override
     protected void tickDeath() {
         ++this.deathTime;
-        if (this.deathTime >= DEATH_ANIMATION_TICKS && !this.level().isClientSide() && !this.isRemoved()) {
+        if (this.deathTime >= getAnimation().deathTicks() && !this.level().isClientSide() && !this.isRemoved()) {
             this.level().broadcastEntityEvent(this, (byte) 60);
             this.remove(RemovalReason.KILLED);
         }
@@ -399,7 +641,86 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
             return false;
         }
 
+        if (tryDodge(source)) {
+            return false;
+        }
+
+        rememberRival(source.getEntity());
+
         return super.hurt(source, amount);
+    }
+
+    public boolean isRevealing() {
+        return revealTicks > 0;
+    }
+
+    public void startReveal() {
+        if (isRevealing() || !isDisguised()) return;
+
+        revealTicks = REVEAL_TICKS;
+        level().playSound(null, getX(), getY(), getZ(), SoundEvents.ILLUSIONER_PREPARE_MIRROR, getSoundSource(), 1.0F, 1.0F);
+    }
+
+    private void tickReveal(final Player owner) {
+        if (!isRevealing() || !(level() instanceof ServerLevel serverLevel)) return;
+
+        final double progress = 1.0D - (double) revealTicks / REVEAL_TICKS;
+        final double angle = tickCount * 0.9D;
+        final double height = getY() + getBbHeight() * progress;
+
+        for (int i = 0; i < 2; i++) {
+            final double side = angle + Math.PI * i;
+            serverLevel.sendParticles(ParticleTypes.REVERSE_PORTAL,
+                    getX() + Math.cos(side) * 0.6D, height, getZ() + Math.sin(side) * 0.6D, 2, 0.05, 0.05, 0.05, 0.0);
+        }
+        serverLevel.sendParticles(ParticleTypes.SMOKE, getX(), getY() + getBbHeight() * 0.9D, getZ(), 2, 0.2, 0.1, 0.2, 0.01);
+
+        if (--revealTicks > 0) return;
+
+        HeroSummonSystem.finishReveal(owner, this);
+        serverLevel.sendParticles(ParticleTypes.END_ROD, getX(), getY() + getBbHeight() * 0.5D, getZ(), 24, 0.4, 0.6, 0.4, 0.08);
+        serverLevel.sendParticles(ParticleTypes.CLOUD, getX(), getY() + 0.2D, getZ(), 12, 0.5, 0.1, 0.5, 0.03);
+        level().playSound(null, getX(), getY(), getZ(), SoundEvents.ILLUSIONER_MIRROR_MOVE, getSoundSource(), 1.0F, 1.0F);
+    }
+
+    public void playDisguiseEffects() {
+        if (!(level() instanceof ServerLevel serverLevel)) return;
+
+        serverLevel.sendParticles(ParticleTypes.LARGE_SMOKE, getX(), getY() + getBbHeight() * 0.5D, getZ(), 20, 0.35, 0.6, 0.35, 0.02);
+        level().playSound(null, getX(), getY(), getZ(), SoundEvents.ILLUSIONER_CAST_SPELL, getSoundSource(), 1.0F, 1.0F);
+    }
+
+    public boolean hasDodgedThisTick() {
+        return dodgeTick == tickCount;
+    }
+
+    private boolean tryDodge(final DamageSource source) {
+        if (level().isClientSide || invulnerableTime > 10 || !isDodgeable(source)) return false;
+
+        final HeroDefinition definition = getHeroDefinition();
+        final double dodgeChance = definition == null ? 0.0D
+                : definition.getHeroClass().getDodgeChance() * (isDisguised() ? HeroStatsSystem.DISGUISE_STAT_MULTIPLIER : 1.0D);
+        if (random.nextFloat() >= dodgeChance) return false;
+
+        dodgeTick = tickCount;
+        playDodgeEffects();
+        return true;
+    }
+
+    private boolean isDodgeable(final DamageSource source) {
+        final Entity attacker = source.getEntity();
+        return attacker != null
+                && attacker != getOwner()
+                && !source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)
+                && !source.is(DamageTypeTags.IS_EXPLOSION);
+    }
+
+    private void playDodgeEffects() {
+        level().playSound(null, getX(), getY(), getZ(), SoundEvents.PLAYER_ATTACK_NODAMAGE, getSoundSource(), 1.0F, 1.2F);
+
+        if (level() instanceof ServerLevel serverLevel) {
+            serverLevel.sendParticles(ParticleTypes.CLOUD, getX(), getY() + getBbHeight() * 0.5, getZ(), 6, 0.3, 0.3, 0.3, 0.02);
+        }
     }
 
     @Override
@@ -434,10 +755,12 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
     private void handleManaAndRegen(Player owner, HeroData heroData) {
         final ManaData manaData = ManaData.get(owner);
 
-        int cost = 20;
+        int cost = HeroSummonSystem.getManaCost(heroData);
 
-        if (manaData.getMana() < cost) {
-            owner.sendSystemMessage(Component.literal("Not enough mana! Summon dismissed."));
+        if (!manaData.hasEnoughMana(owner, cost)) {
+            owner.sendSystemMessage(Component.literal("§cNot enough mana! Summon dismissed. Recover half your mana to summon it again."));
+            manaData.setExhausted(true);
+            manaData.sync(owner);
             HeroSummonSystem.dismissSummon(owner);
             return;
         }
@@ -476,7 +799,8 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
                 .add(Attributes.MAX_HEALTH, 20.0D)
                 .add(Attributes.MOVEMENT_SPEED, 0.25D)
                 .add(Attributes.ATTACK_DAMAGE, 1.25D)
-                .add(Attributes.STEP_HEIGHT, 1.0);
+                .add(Attributes.STEP_HEIGHT, 1.0)
+                .add(Attributes.FOLLOW_RANGE, 32.0D);
     }
 
     public static HeroEntity create(final Player player) {

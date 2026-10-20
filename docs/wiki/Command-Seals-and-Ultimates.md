@@ -78,15 +78,19 @@ Fully restores the summoned Hero's health.
 
 ## 💥 Ultimates
 
-Ultimates are the Hero's strongest abilities.
+Ultimates are the Hero's strongest abilities. Each Hero has its own Ultimate (**U**): Aria uses Explosion and
+Clare uses Crimson Requiem. To see how your Hero's Ultimate works, open the hero screen (**G**) and click
+**Ultimate**: it shows its name, key, mana cost, channel time, whether it is ready today and a short description.
+Datapacks can create new ones: see [Creating Custom Ultimates](Creating-Custom-Ultimates).
 
-- Each Ultimate can be used **once per day**
+- The Ultimate can be used **once per day**
 - Ultimates are restored at the start of a new day (sleeping through the night also counts)
 - Ultimates do not use Command Seal charges
+- A disguised Hero can't use its Ultimate (see [Disguise](Core-Systems#-disguise))
 
 ---
 
-### 🔥 Explosion
+### 🔥 Explosion (Aria)
 
 | Key | Mana | Requires summoned Hero |
 |---|---|---|
@@ -102,7 +106,25 @@ If the Hero is defeated or dismissed while channeling, the explosion is cancelle
 
 ---
 
+### 🗡 Crimson Requiem (Clare)
+
+| Key | Mana | Requires summoned Hero |
+|---|---|---|
+| **U** | 200 | Yes |
+
+Clare stands still over a crimson mist with her magic circle open for about **1.5 seconds**, then dashes **8 blocks**
+in a straight line towards where **you** are looking (the creature or block under your crosshair; aim while she
+channels), stopping before walls:
+- Deals heavy damage to every creature in her path (except you)
+- Inflicts **Wither II** for 4 seconds
+- Leaves a crimson trail behind her
+
+If Clare is defeated or dismissed while channeling, the attack is cancelled.
+
+---
+
 ## 🔗 Related Pages
 
 - [Core Systems](Core-Systems)
 - [Commands](Commands)
+- [Creating Custom Ultimates](Creating-Custom-Ultimates)

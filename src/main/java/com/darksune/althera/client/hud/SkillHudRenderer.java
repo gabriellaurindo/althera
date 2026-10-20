@@ -7,14 +7,16 @@ import com.darksune.althera.common.attachment.ManaData;
 import com.darksune.althera.common.commandseal.CommandSealData;
 import com.darksune.althera.common.commandseal.skill.CommandSealSkillType;
 import com.darksune.althera.common.commandseal.skill.ICommandSealSkill;
+import com.darksune.althera.common.hero.HeroDefinition;
 import com.darksune.althera.common.ultimate.UltimateData;
-import com.darksune.althera.common.ultimate.skill.IUltimateSkill;
-import com.darksune.althera.common.ultimate.skill.UltimateSkillType;
+import com.darksune.althera.common.ultimate.UltimateDefinition;
+import com.darksune.althera.common.ultimate.UltimateRegistry;
 import net.minecraft.client.AttackIndicatorStatus;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.player.Player;
@@ -69,17 +71,19 @@ public final class SkillHudRenderer {
 
         HeroData heroData = HeroData.get(player);
 
-        if (heroData.isHiddenHud() || heroData.getHeroDefinition() == null) return;
+        HeroDefinition hero = heroData.getHeroDefinition();
+
+        if (heroData.isHiddenHud() || hero == null) return;
 
         CommandSealData sealData = CommandSealData.get(player);
         UltimateData ultimateData = UltimateData.get(player);
-        int mana = ManaData.get(player).getMana();
+        int mana = ManaData.hasInfiniteMana(player) ? Integer.MAX_VALUE : ManaData.get(player).getMana();
 
         List<SlotState> slots = List.of(
                 sealSlot(AltheraKeybinds.COMMAND_SEAL_SKILL_ONE, CommandSealSkillType.OVERDRIVE, sealData, mana),
                 sealSlot(AltheraKeybinds.COMMAND_SEAL_SKILL_TWO, CommandSealSkillType.REVIVE, sealData, mana),
                 sealSlot(AltheraKeybinds.COMMAND_SEAL_SKILL_THREE, CommandSealSkillType.HEAL, sealData, mana),
-                ultimateSlot(AltheraKeybinds.ULTIMATE_SKILL, UltimateSkillType.EXPLOSION, ultimateData, mana)
+                ultimateSlot(AltheraKeybinds.ULTIMATE_SKILL, hero.getUltimate(), ultimateData, mana, heroData.isDisguised())
         );
 
         GuiGraphics gui = event.getGuiGraphics();
@@ -107,15 +111,21 @@ public final class SkillHudRenderer {
                 available, false);
     }
 
-    private static SlotState ultimateSlot(KeyMapping key, UltimateSkillType type, UltimateData data, int mana) {
+    private static SlotState ultimateSlot(KeyMapping key, ResourceLocation ultimateId, UltimateData data, int mana,
+                                          boolean disguised) {
 
-        IUltimateSkill skill = type.getSkill();
-        boolean usedToday = data.wasUsedToday(type);
-        boolean available = !usedToday && mana >= skill.getManaCost();
+        UltimateDefinition ultimate = UltimateRegistry.get(ultimateId);
+        boolean usedToday = data.wasUsedToday();
+
+        if (ultimate == null) {
+            return slot(key, null, 0, null, 0, false, usedToday);
+        }
+
+        boolean available = !usedToday && !disguised && mana >= ultimate.manaCost();
 
         return slot(key,
-                data.getActiveSkills().get(type), skill.getDurationTicks(),
-                data.getCooldownSkills().get(type), skill.getCooldownTicks(),
+                data.getActiveSkills().get(ultimateId), ultimate.channelTicks(),
+                data.getCooldownSkills().get(ultimateId), ultimate.cooldownTicks(),
                 available, usedToday);
     }
 

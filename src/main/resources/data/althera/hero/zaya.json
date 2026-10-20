@@ -1,0 +1,33 @@
+{
+  "name": "Zaya",
+  "description": "A flame-sworn mage in crimson and gold whose staff carries a fire that has never gone out.",
+  "class": "CASTER",
+  "rank": "EX",
+  "nature": "COMMON",
+  "model": "althera:geo/entity/hero/zaya.geo.json",
+  "texture": "althera:textures/entity/hero/zaya.png",
+  "animations": "althera:animations/entity/hero/zaya.animation.json",
+  "personality": "Passionate and proud",
+  "scale": 0.7,
+  "ultimate": "althera:explosion",
+  "animation": {
+    "attack_length": 0.8
+  },
+  "attack": {
+    "type": "ranged",
+    "range": 12,
+    "cooldown_ticks": 30,
+    "projectile_speed": 1.2,
+    "projectile_origin": [0.27, 2.27, 1.9],
+    "shoot_frame": 0.3,
+    "projectile_trail": { "type": "minecraft:flame" },
+    "on_attack": [
+      { "type": "sound", "sound": "minecraft:entity.blaze.shoot", "volume": 0.8, "pitch": 1.1 }
+    ],
+    "on_hit": [
+      { "type": "ignite", "target": "target", "ticks": 40 },
+      { "type": "particles", "particle": { "type": "minecraft:lava" }, "count": 3, "spread": [0.2, 0.2, 0.2] },
+      { "type": "sound", "sound": "minecraft:entity.generic.burn", "volume": 0.6, "pitch": 1.4 }
+    ]
+  }
+}

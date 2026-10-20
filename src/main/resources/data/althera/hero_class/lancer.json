@@ -1,0 +1,13 @@
+{
+  "name": "Lancer",
+  "health": 1.0,
+  "attack": 1.25,
+  "armor": 0.85,
+  "speed": 1.25,
+  "knockback_resistance": 0.75,
+  "dodge_chance": 0.05,
+  "strong_against": [
+    "althera:shielder",
+    "althera:archer"
+  ]
+}
