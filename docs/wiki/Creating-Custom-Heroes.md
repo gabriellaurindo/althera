@@ -284,6 +284,7 @@ Optional. The Hero's base values before the class, rank and nature multipliers. 
   "attack": 1.125,
   "attack_per_level": 0.125,
   "armor": 2,
+  "armor_per_level": 0.15,
   "speed": 0.25
 }
 ```
@@ -295,6 +296,7 @@ Optional. The Hero's base values before the class, rank and nature multipliers. 
 | `attack` | `1.125` | Base attack damage |
 | `attack_per_level` | `0.125` | Attack damage gained per Hero level |
 | `armor` | `2` | Base armor |
+| `armor_per_level` | `0.15` | Armor gained per Hero level |
 | `speed` | `0.25` | Movement speed (the player walks at 0.1; mobs use about 0.25) |
 
 Final value = (base + per level × level) × class multiplier × rank multiplier × nature multiplier. Speed only uses

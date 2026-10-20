@@ -24,6 +24,7 @@ public record HeroAttack(
 ) {
 
     public static final Vec3 DEFAULT_PROJECTILE_ORIGIN = new Vec3(0.0D, 1.26D, 0.0D);
+    public static final float DISGUISED_SHOOT_FRAME = 0.3f;
 
     public static final Codec<HeroAttack> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Type.CODEC.optionalFieldOf("type", Type.MELEE).forGetter(HeroAttack::type),
@@ -51,6 +52,20 @@ public record HeroAttack(
 
     public boolean isRanged() {
         return type == Type.RANGED;
+    }
+
+    public HeroAttack disguised() {
+        return new HeroAttack(
+                type,
+                range,
+                cooldownTicks,
+                DISGUISED_SHOOT_FRAME,
+                projectileSpeed,
+                DEFAULT_PROJECTILE_ORIGIN,
+                ParticleTypes.SMOKE,
+                List.of(),
+                List.of()
+        );
     }
 
     public enum Type implements StringRepresentable {

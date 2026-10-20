@@ -86,6 +86,7 @@ Datapacks can create new ones: see [Creating Custom Ultimates](Creating-Custom-U
 - The Ultimate can be used **once per day**
 - Ultimates are restored at the start of a new day (sleeping through the night also counts)
 - Ultimates do not use Command Seal charges
+- A disguised Hero can't use its Ultimate (see [Disguise](Core-Systems#-disguise))
 
 ---
 

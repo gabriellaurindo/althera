@@ -263,10 +263,12 @@ public class HeroScreen extends Screen {
 
         final long currentXp = heroData.getXp();
         final long requiredXp = HeroProgressionSystem.getXpToNextLevel(heroData);
+        final boolean maxLevel = HeroProgressionSystem.isMaxLevel(heroData);
 
-        drawBar(gui, infoX, infoY, INFO_WIDTH, 6, requiredXp > 0 ? (float) currentXp / requiredXp : 0, COLOR_XP);
+        drawBar(gui, infoX, infoY, INFO_WIDTH, 6,
+                maxLevel ? 1 : requiredXp > 0 ? (float) currentXp / requiredXp : 0, COLOR_XP);
         infoY += 9;
-        drawStat(gui, "XP", currentXp + " / " + requiredXp, infoX, infoY, INFO_WIDTH, 0xFFFFFFFF);
+        drawStat(gui, "XP", maxLevel ? "MAX" : currentXp + " / " + requiredXp, infoX, infoY, INFO_WIDTH, 0xFFFFFFFF);
         infoY += 20;
 
         final double maxHealth = HeroStatsSystem.getMaxHealth(heroData);

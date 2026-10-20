@@ -11,9 +11,13 @@ import net.minecraft.world.entity.player.Player;
 public class HeroStatsSystem {
 
     private final static double BASE_KNOCKBACK_RESISTANCE = 0.8;
+    public static final double DISGUISE_STAT_MULTIPLIER = 0.5;
+    public static final String DISGUISED_NAME = "Hooded Figure";
     //todo centralize the max HP calculation
     public static void applyAttributes(final HeroEntity hero, final Player player) {
         final HeroData heroData = HeroData.get(player);
+
+        hero.setDisguised(heroData.isDisguised());
 
         var maxHealthAttr = hero.getAttribute(Attributes.MAX_HEALTH);
         var attackAttr = hero.getAttribute(Attributes.ATTACK_DAMAGE);
@@ -42,7 +46,9 @@ public class HeroStatsSystem {
         }
 
         // temp name
-        if (heroData.getHeroDefinition() != null) {
+        if (heroData.isDisguised()) {
+            hero.setCustomName(Component.literal(DISGUISED_NAME));
+        } else if (heroData.getHeroDefinition() != null) {
             hero.setCustomName(Component.literal(heroData.getHeroDefinition().getName()));
         }
 
@@ -54,7 +60,7 @@ public class HeroStatsSystem {
         HeroDefinition def = data.getHeroDefinition();
 
         HeroStats stats = def == null ? HeroStats.DEFAULT : def.getStats();
-        double base = stats.health() + stats.healthPerLevel() * data.getLevel();
+        double base = stats.health() * getDisguiseMultiplier(data) + stats.healthPerLevel() * data.getLevel();
 
         if (def == null) return base;
 
@@ -76,7 +82,7 @@ public class HeroStatsSystem {
         HeroDefinition def = data.getHeroDefinition();
 
         HeroStats stats = def == null ? HeroStats.DEFAULT : def.getStats();
-        double base = stats.attack() + stats.attackPerLevel() * data.getLevel();
+        double base = stats.attack() * getDisguiseMultiplier(data) + stats.attackPerLevel() * data.getLevel();
 
         if (def == null) return base;
 
@@ -97,7 +103,8 @@ public class HeroStatsSystem {
     public static double getArmor(final HeroData data) {
         HeroDefinition def = data.getHeroDefinition();
 
-        double base = def == null ? HeroStats.DEFAULT.armor() : def.getStats().armor();
+        HeroStats stats = def == null ? HeroStats.DEFAULT : def.getStats();
+        double base = stats.armor() * getDisguiseMultiplier(data) + stats.armorPerLevel() * data.getLevel();
 
         if (def == null) return base;
 
@@ -120,7 +127,7 @@ public class HeroStatsSystem {
 
         if (def == null) return HeroStats.DEFAULT.speed();
 
-        return def.getStats().speed() * def.getHeroClass().getSpeedMultiplier();
+        return def.getStats().speed() * def.getHeroClass().getSpeedMultiplier() * getDisguiseMultiplier(data);
     }
 
     public static double getKnockbackResistance(final HeroData data) {
@@ -128,7 +135,7 @@ public class HeroStatsSystem {
 
         if (def == null) return BASE_KNOCKBACK_RESISTANCE;
 
-        return def.getHeroClass().getKnockbackResistance();
+        return def.getHeroClass().getKnockbackResistance() * getDisguiseMultiplier(data);
     }
 
     public static double getDodgeChance(final HeroData data) {
@@ -136,7 +143,11 @@ public class HeroStatsSystem {
 
         if (def == null) return 0;
 
-        return def.getHeroClass().getDodgeChance();
+        return def.getHeroClass().getDodgeChance() * getDisguiseMultiplier(data);
+    }
+
+    public static double getDisguiseMultiplier(final HeroData data) {
+        return data.isDisguised() ? DISGUISE_STAT_MULTIPLIER : 1.0;
     }
 
     public static int getMaxInterventions() {

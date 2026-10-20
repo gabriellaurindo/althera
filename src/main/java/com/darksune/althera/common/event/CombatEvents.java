@@ -13,6 +13,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -24,15 +25,21 @@ public class CombatEvents {
 
     @SubscribeEvent
     public static void onDeath(LivingDeathEvent event) {
-        if (!(event.getSource().getEntity() instanceof HeroEntity hero)) return;
+        final Entity killer = event.getSource().getEntity();
 
-        final Player owner = hero.getOwner();
-
-        if (owner == null) {
+        if (killer instanceof HeroEntity hero) {
+            final Player owner = hero.getOwner();
+            if (owner != null) {
+                HeroProgressionSystem.addXp(owner, event.getEntity(), 1.0);
+            }
             return;
         }
 
-        HeroProgressionSystem.addXp(owner, event);
+        if (killer instanceof Player player
+                && event.getEntity() instanceof Enemy
+                && HeroSummonSystem.getSummon(player) != null) {
+            HeroProgressionSystem.addXp(player, event.getEntity(), HeroProgressionSystem.OWNER_KILL_XP_SHARE);
+        }
     }
 
     @SubscribeEvent

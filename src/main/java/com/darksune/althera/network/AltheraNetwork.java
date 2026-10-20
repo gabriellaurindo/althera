@@ -1,5 +1,6 @@
 package com.darksune.althera.network;
 
+import com.darksune.althera.network.packet.DisguisePacket;
 import com.darksune.althera.network.packet.OpenHeroSelectionPacket;
 import com.darksune.althera.network.packet.SelectHeroPacket;
 import com.darksune.althera.network.packet.SummonPacket;
@@ -22,12 +23,18 @@ public final class AltheraNetwork {
 
     private static void registerPayloads(RegisterPayloadHandlersEvent event) {
 
-        var registrar = event.registrar("5");
+        var registrar = event.registrar("6");
 
         registrar.playToServer(
                 SummonPacket.TYPE,
                 SummonPacket.STREAM_CODEC,
                 SummonPacket::handle
+        );
+
+        registrar.playToServer(
+                DisguisePacket.TYPE,
+                DisguisePacket.STREAM_CODEC,
+                DisguisePacket::handle
         );
 
         registrar.playToServer(

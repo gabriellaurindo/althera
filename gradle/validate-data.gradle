@@ -11,7 +11,7 @@ class DataValidator {
     static final Set<String> ATTACK_KEYS = ['type', 'range', 'cooldown_ticks', 'shoot_frame', 'projectile_speed',
             'projectile_origin', 'projectile_trail', 'on_attack', 'on_hit'] as Set
     static final Set<String> ANIMATION_KEYS = ['attack_speed', 'attack_length', 'walk_speed', 'death_length'] as Set
-    static final Set<String> STATS_KEYS = ['health', 'health_per_level', 'attack', 'attack_per_level', 'armor', 'speed'] as Set
+    static final Set<String> STATS_KEYS = ['health', 'health_per_level', 'attack', 'attack_per_level', 'armor', 'armor_per_level', 'speed'] as Set
     static final Set<String> CLASS_KEYS = ['name', 'health', 'attack', 'armor', 'speed', 'knockback_resistance',
             'dodge_chance', 'strong_against'] as Set
     static final Set<String> ULTIMATE_KEYS = ['name', 'description', 'mana_cost', 'channel_ticks', 'cooldown_ticks',

@@ -26,6 +26,7 @@ public class HeroData {
     private boolean isHiddenHud = false;
     private boolean isSaveDisabled = false;
     private boolean canResurrect = true;
+    private boolean disguised = false;
     private ResourceLocation heroId = null;
 
     // =========================
@@ -66,12 +67,15 @@ public class HeroData {
                     Codec.STRING.optionalFieldOf("heroId", "")
                             .forGetter(data -> data.heroId != null
                                     ? data.heroId.toString()
-                                    : "")
+                                    : ""),
+
+                    Codec.BOOL.optionalFieldOf("disguised", false)
+                            .forGetter(data -> data.disguised)
 
             ).apply(instance, (level, xp, health, uuidStr,
                                interventions, defeated,
                                isHiddenHud, isSaveDisabled, canResurrect,
-                               heroIdStr) -> {
+                               heroIdStr, disguised) -> {
                 HeroData data = new HeroData();
 
                 data.level = level;
@@ -82,6 +86,7 @@ public class HeroData {
                 data.isHiddenHud = isHiddenHud;
                 data.isSaveDisabled = isSaveDisabled;
                 data.canResurrect = canResurrect;
+                data.disguised = disguised;
 
                 if (!uuidStr.isEmpty()) {
                     data.summonUUID = UUID.fromString(uuidStr);
@@ -121,6 +126,8 @@ public class HeroData {
                 if (data.heroId != null) {
                     buf.writeResourceLocation(data.heroId);
                 }
+
+                buf.writeBoolean(data.disguised);
             },
             buf -> {
                 HeroData data = new HeroData();
@@ -142,6 +149,8 @@ public class HeroData {
                 if (buf.readBoolean()) {
                     data.heroId = buf.readResourceLocation();
                 }
+
+                data.disguised = buf.readBoolean();
 
                 return data;
             }
@@ -225,6 +234,14 @@ public class HeroData {
 
     public void setCanResurrect(boolean canResurrect) {
         this.canResurrect = canResurrect;
+    }
+
+    public boolean isDisguised() {
+        return disguised;
+    }
+
+    public void setDisguised(boolean disguised) {
+        this.disguised = disguised;
     }
 
     public HeroDefinition getHeroDefinition() {

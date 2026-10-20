@@ -7,6 +7,7 @@ import com.darksune.althera.common.entity.AltheraEntities;
 import com.darksune.althera.common.entity.HeroEntity;
 import com.darksune.althera.common.hero.HeroDefinition;
 import com.darksune.althera.common.skill.SkillEndReason;
+import com.darksune.althera.common.ultimate.UltimateData;
 import com.darksune.althera.common.ultimate.UltimateSystem;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -26,6 +27,12 @@ public class HeroSummonSystem {
 
     // beyond this the hero is probably in a non-ticking chunk (the hero teleports by itself from 30 on)
     private static final double RECALL_DISTANCE = 48;
+    private static final int SUMMON_MANA_COST = 20;
+    private static final int DISGUISE_MANA_DIVISOR = 4;
+
+    public static int getManaCost(final HeroData heroData) {
+        return heroData.isDisguised() ? SUMMON_MANA_COST / DISGUISE_MANA_DIVISOR : SUMMON_MANA_COST;
+    }
 
     public static HeroEntity getSummon(final Player player) {
         final UUID uuid = HeroData.get(player).getSummonUUID();
@@ -62,6 +69,78 @@ public class HeroSummonSystem {
         spawnSummon(player);
     }
 
+    /**
+     * Hold-summon key: summons the hero disguised, or swaps a summoned hero between its real form and the disguise.
+     */
+    public static void toggleDisguise(final Player player) {
+        final HeroData heroData = HeroData.get(player);
+        final HeroEntity summon = getSummon(player);
+
+        if (summon == null) {
+            if (heroData.isSummoned()) return;
+            setDisguised(heroData, true);
+            final HeroEntity disguised = spawnSummon(player);
+            if (disguised != null) {
+                disguised.playDisguiseEffects();
+                player.sendSystemMessage(Component.literal("§7Your hero answers your call disguised."));
+            }
+            return;
+        }
+
+        if (heroData.isDisguised()) {
+            summon.startReveal();
+            return;
+        }
+
+        if (!UltimateData.get(player).getActiveSkills().isEmpty()) {
+            player.sendSystemMessage(Component.literal("§eYour hero can't disguise while channeling its ultimate."));
+            return;
+        }
+
+        changeDisguise(player, summon, true);
+        summon.playDisguiseEffects();
+        player.sendSystemMessage(Component.literal("§7Your hero hides its identity."));
+    }
+
+    /**
+     * Called by the hero once its reveal effect ends.
+     */
+    public static void finishReveal(final Player player, final HeroEntity summon) {
+        if (!HeroData.get(player).isDisguised()) return;
+
+        changeDisguise(player, summon, false);
+        player.sendSystemMessage(Component.literal("§7Your hero reveals its true form."));
+    }
+
+    private static void changeDisguise(final Player player, final HeroEntity summon, final boolean disguised) {
+        final HeroData heroData = HeroData.get(player);
+        heroData.setHealth(summon.getHealth());
+        setDisguised(heroData, disguised);
+        HeroStatsSystem.applyAttributes(summon, player);
+        heroData.sync(player);
+    }
+
+    /**
+     * Keeps the health ratio when the disguise changes the max health.
+     */
+    private static void setDisguised(final HeroData heroData, final boolean disguised) {
+        if (heroData.isDisguised() == disguised) return;
+
+        final double maxHealth = HeroStatsSystem.getMaxHealth(heroData);
+        final double ratio = maxHealth > 0 ? heroData.getHealth() / maxHealth : 0;
+
+        heroData.setDisguised(disguised);
+        heroData.setHealth(ratio * HeroStatsSystem.getMaxHealth(heroData));
+    }
+
+    private static void endDisguise(final Player player) {
+        final HeroData heroData = HeroData.get(player);
+        if (!heroData.isDisguised()) return;
+
+        setDisguised(heroData, false);
+        heroData.sync(player);
+    }
+
     public static HeroEntity spawnSummon(final Player player) {
         return spawnSummon(player, true);
     }
@@ -76,6 +155,14 @@ public class HeroSummonSystem {
      * @param checkMana false when the caller already charged its own cost (e.g. revive skill)
      */
     public static HeroEntity spawnSummon(final Player player, final boolean sendMessage, final boolean checkMana) {
+        final HeroEntity summon = createSummon(player, sendMessage, checkMana);
+        if (summon == null && !HeroData.get(player).isSummoned()) {
+            endDisguise(player);
+        }
+        return summon;
+    }
+
+    private static HeroEntity createSummon(final Player player, final boolean sendMessage, final boolean checkMana) {
         final HeroData heroData = HeroData.get(player);
         if (HeroSelectionSystem.needsSelection(player)) {
             if (sendMessage) {
@@ -121,7 +208,7 @@ public class HeroSummonSystem {
         }
 
         final ManaData manaData = ManaData.get(player);
-        if (checkMana && !manaData.hasEnoughMana(player, 20)) {
+        if (checkMana && !manaData.hasEnoughMana(player, getManaCost(heroData))) {
             if (sendMessage) {
                 player.sendSystemMessage(Component.literal("Not enough mana!"));
             }
@@ -157,6 +244,7 @@ public class HeroSummonSystem {
             habilitarEspirito(player);
         }
 
+        endDisguise(player);
         endActiveSkills(player, null, SkillEndReason.HERO_DISMISSED);
     }
 
@@ -210,6 +298,7 @@ public class HeroSummonSystem {
         final HeroData heroData = HeroData.get(player);
         heroData.clearSummon();
         heroData.setDefeated(true);
+        heroData.setDisguised(false);
         heroData.setHealth(0);
         heroData.sync(player);
         habilitarEspirito(player);

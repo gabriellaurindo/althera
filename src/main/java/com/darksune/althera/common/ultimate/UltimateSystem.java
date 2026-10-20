@@ -25,6 +25,11 @@ public class UltimateSystem {
             return;
         }
 
+        if (heroEntity.isDisguised()) {
+            player.sendSystemMessage(Component.literal("§eYour hero can't use its ultimate while disguised."));
+            return;
+        }
+
         HeroDefinition heroDefinition = heroEntity.getHeroDefinition();
 
         UltimateDefinition ultimate = heroDefinition == null ? null : UltimateRegistry.get(heroDefinition.getUltimate());

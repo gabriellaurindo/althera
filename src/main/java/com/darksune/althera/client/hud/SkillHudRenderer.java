@@ -83,7 +83,7 @@ public final class SkillHudRenderer {
                 sealSlot(AltheraKeybinds.COMMAND_SEAL_SKILL_ONE, CommandSealSkillType.OVERDRIVE, sealData, mana),
                 sealSlot(AltheraKeybinds.COMMAND_SEAL_SKILL_TWO, CommandSealSkillType.REVIVE, sealData, mana),
                 sealSlot(AltheraKeybinds.COMMAND_SEAL_SKILL_THREE, CommandSealSkillType.HEAL, sealData, mana),
-                ultimateSlot(AltheraKeybinds.ULTIMATE_SKILL, hero.getUltimate(), ultimateData, mana)
+                ultimateSlot(AltheraKeybinds.ULTIMATE_SKILL, hero.getUltimate(), ultimateData, mana, heroData.isDisguised())
         );
 
         GuiGraphics gui = event.getGuiGraphics();
@@ -111,7 +111,8 @@ public final class SkillHudRenderer {
                 available, false);
     }
 
-    private static SlotState ultimateSlot(KeyMapping key, ResourceLocation ultimateId, UltimateData data, int mana) {
+    private static SlotState ultimateSlot(KeyMapping key, ResourceLocation ultimateId, UltimateData data, int mana,
+                                          boolean disguised) {
 
         UltimateDefinition ultimate = UltimateRegistry.get(ultimateId);
         boolean usedToday = data.wasUsedToday();
@@ -120,7 +121,7 @@ public final class SkillHudRenderer {
             return slot(key, null, 0, null, 0, false, usedToday);
         }
 
-        boolean available = !usedToday && mana >= ultimate.manaCost();
+        boolean available = !usedToday && !disguised && mana >= ultimate.manaCost();
 
         return slot(key,
                 data.getActiveSkills().get(ultimateId), ultimate.channelTicks(),

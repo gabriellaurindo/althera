@@ -46,8 +46,24 @@ and generates the GitHub Release, CurseForge and Discord notes from it.
   Archer and Assassin, Archer beats Assassin and Saber, Assassin beats Saber and Caster.
 - **Valka**, a new EX hero of the Lancer class: a swift spear fighter in light steel armor and teal cloth with a high
   honey-blonde ponytail. She uses Crimson Requiem as her Ultimate.
+- **Disguise**: hold the summon key (**H**) to summon your hero disguised as a hooded figure with a shadowed face, or
+  to swap a summoned hero between its true form and the disguise. A tap still summons and dismisses as before.
+  Hiding is instant, in a puff of smoke; revealing takes half a second of rising particles before a flash of light,
+  so everyone nearby sees it coming.
+  While disguised your hero loses half of its base health, attack and armor (what it gained from levels is kept, so
+  a high-level hero stays strong), half its speed, knockback resistance and dodge chance, can't use its Ultimate and
+  attacks without its signature effects, but costs only a quarter of the mana to keep summoned.
+  Other players can't tell who it is: its name, model and stats stay hidden, even from tooltip mods like Jade or
+  WAILA. The disguise ends when the hero is dismissed or defeated.
+- **Max level**: heroes now stop at level 50. The hero screen (G) shows **MAX** instead of the XP needed.
+- **Armor grows with level**: heroes gain armor as they level up (0.15 per level before the class, rank and nature
+  multipliers), so at level 50 an EX Shielder has about 21 armor, an EX Saber about 14 and an EX Caster about 9.
+  Datapacks can tune it with the new `armor_per_level` field in the hero `stats`.
 
 ### Changed
+- **Faster leveling**: heroes earn five times more experience per kill (half the defeated creature's max health:
+  10 for a zombie, 50 for an Iron Golem, 250 for the Warden), and monsters you kill yourself while your hero is
+  summoned now give it half of that. Reaching level 10 takes about 75 zombies instead of almost 370.
 - Class balance: Sabers have slightly less health, attack and armor (×1.1 instead of ×1.15), Archers and Casters a
   bit more health (×0.9 and ×0.8) and Shielders more attack (×0.85), so no class wins most duels on stats alone.
 - Heroes now move at their class speed: Assassins and Lancers are faster, Shielders slower. The speed shown on the
