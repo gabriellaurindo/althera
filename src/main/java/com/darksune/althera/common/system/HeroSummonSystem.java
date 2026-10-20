@@ -43,6 +43,17 @@ public class HeroSummonSystem {
         return null;
     }
 
+    public static void refreshSummon(final Player player) {
+        final HeroEntity summon = getSummon(player);
+        if (summon == null) return;
+
+        final HeroDefinition definition = HeroData.get(player).getHeroDefinition();
+        if (definition != null) {
+            summon.setHeroId(definition.getId());
+        }
+        HeroStatsSystem.applyAttributes(summon, player);
+    }
+
     public static void toggleSummon(final Player player) {
         if (getSummon(player) != null) {
             dismissSummon(player);
@@ -110,7 +121,7 @@ public class HeroSummonSystem {
         }
 
         final ManaData manaData = ManaData.get(player);
-        if (checkMana && !manaData.hasEnoughMana(20)) {
+        if (checkMana && !manaData.hasEnoughMana(player, 20)) {
             if (sendMessage) {
                 player.sendSystemMessage(Component.literal("Not enough mana!"));
             }

@@ -1,5 +1,6 @@
 package com.darksune.althera.common.entity;
 
+import com.darksune.althera.common.ultimate.effect.UltimateEffect;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -19,6 +20,8 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.event.EventHooks;
 
+import java.util.List;
+
 public class HeroProjectileEntity extends Projectile {
 
     private static final EntityDataAccessor<ParticleOptions> PARTICLE =
@@ -29,28 +32,32 @@ public class HeroProjectileEntity extends Projectile {
     private static final int MAX_LIFE_TICKS = 40;
 
     private float damage;
+    private List<UltimateEffect> onHit = List.of();
 
     public HeroProjectileEntity(EntityType<? extends Projectile> type, Level level) {
         super(type, level);
         this.setNoGravity(true);
     }
 
+    public static Vec3 aimAt(final Vec3 from, final LivingEntity target) {
+        return target.position().add(0, target.getBbHeight() * 0.5, 0).subtract(from);
+    }
+
     public static HeroProjectileEntity shoot(
             final HeroEntity hero,
-            final LivingEntity target,
+            final Vec3 from,
+            final Vec3 direction,
             final float damage,
             final float speed,
-            final ParticleOptions particle
+            final ParticleOptions particle,
+            final List<UltimateEffect> onHit
     ) {
         final HeroProjectileEntity projectile = AltheraEntities.HERO_PROJECTILE.get().create(hero.level());
         if (projectile == null) return null;
 
-        final Vec3 from = hero.getProjectileOrigin();
-        final Vec3 to = target.position().add(0, target.getBbHeight() * 0.5, 0);
-        final Vec3 direction = to.subtract(from);
-
         projectile.setOwner(hero);
         projectile.damage = damage;
+        projectile.onHit = onHit;
         projectile.entityData.set(PARTICLE, particle);
         projectile.moveTo(from.x, from.y, from.z, hero.getYRot(), 0);
         projectile.shoot(direction.x, direction.y, direction.z, speed, 0.0f);
@@ -68,7 +75,7 @@ public class HeroProjectileEntity extends Projectile {
         super.tick();
 
         if (!level().isClientSide) {
-            if (tickCount > MAX_LIFE_TICKS) {
+            if (tickCount > MAX_LIFE_TICKS || !(getOwner() instanceof HeroEntity)) {
                 discard();
                 return;
             }
@@ -126,7 +133,7 @@ public class HeroProjectileEntity extends Projectile {
         final LivingEntity attacker = owner instanceof LivingEntity living ? living : null;
         final boolean hurt = result.getEntity().hurt(damageSources().mobProjectile(this, attacker), damage);
         if (hurt && owner instanceof HeroEntity hero && result.getEntity() instanceof LivingEntity target) {
-            hero.performHitEffects(target, result.getLocation());
+            hero.applyEffects(onHit, target, result.getLocation());
         }
     }
 
@@ -134,7 +141,7 @@ public class HeroProjectileEntity extends Projectile {
     protected void onHitBlock(final BlockHitResult result) {
         super.onHitBlock(result);
         if (getOwner() instanceof HeroEntity hero) {
-            hero.performHitEffects(null, result.getLocation());
+            hero.applyEffects(onHit, null, result.getLocation());
         }
     }
 

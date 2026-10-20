@@ -101,13 +101,13 @@ public class HeroLoader extends SimpleJsonResourceReloadListener {
                         ""
                 );
 
-        HeroClass heroClass =
-                HeroClass.valueOf(
+        ResourceLocation heroClass =
+                HeroClass.parseId(
                         GsonHelper.getAsString(
                                 json,
                                 "class",
-                                "SABER"
-                        ).toUpperCase()
+                                "saber"
+                        )
                 );
 
         HeroRank rank =
@@ -181,8 +181,28 @@ public class HeroLoader extends SimpleJsonResourceReloadListener {
                 personality,
                 GsonHelper.getAsFloat(json, "scale", 1.0f),
                 ResourceLocation.parse(GsonHelper.getAsString(json, "ultimate", DEFAULT_ULTIMATE)),
-                parseAttack(json, ops)
+                parseAttack(json, ops),
+                parseAnimation(json, ops),
+                parseStats(json, ops)
         );
+    }
+
+    private HeroStats parseStats(JsonObject json, RegistryOps<JsonElement> ops) {
+
+        if (!json.has("stats")) {
+            return HeroStats.DEFAULT;
+        }
+
+        return HeroStats.CODEC.parse(ops, json.get("stats")).getOrThrow();
+    }
+
+    private HeroAnimation parseAnimation(JsonObject json, RegistryOps<JsonElement> ops) {
+
+        if (!json.has("animation")) {
+            return HeroAnimation.DEFAULT;
+        }
+
+        return HeroAnimation.CODEC.parse(ops, json.get("animation")).getOrThrow();
     }
 
     private HeroAttack parseAttack(JsonObject json, RegistryOps<JsonElement> ops) {

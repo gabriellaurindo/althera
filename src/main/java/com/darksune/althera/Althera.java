@@ -4,6 +4,8 @@ import com.darksune.althera.common.command.AltheraCommands;
 import com.darksune.althera.common.entity.AltheraEntities;
 import com.darksune.althera.common.entity.HeroEntity;
 import com.darksune.althera.common.entity.SummonedEntity;
+import com.darksune.althera.common.hero.HeroClassLoader;
+import com.darksune.althera.common.hero.HeroClassRegistry;
 import com.darksune.althera.common.hero.HeroLoader;
 import com.darksune.althera.common.hero.HeroRegistry;
 import com.darksune.althera.common.registry.AltheraRegistries;
@@ -11,6 +13,7 @@ import com.darksune.althera.common.ultimate.UltimateLoader;
 import com.darksune.althera.common.ultimate.UltimateRegistry;
 import com.darksune.althera.config.AltheraConfig;
 import com.darksune.althera.network.AltheraNetwork;
+import com.darksune.althera.network.packet.SyncHeroClassesPacket;
 import com.darksune.althera.network.packet.SyncHeroesPacket;
 import com.darksune.althera.network.packet.SyncUltimatesPacket;
 import net.neoforged.bus.api.IEventBus;
@@ -40,15 +43,17 @@ public final class Althera {
     }
 
     private void onReloadListeners(AddReloadListenerEvent event) {
+        event.addListener(new HeroClassLoader());
         event.addListener(new HeroLoader(event.getRegistryAccess()));
         event.addListener(new UltimateLoader(event.getRegistryAccess()));
     }
 
     @SubscribeEvent
     public static void onDatapackSync(OnDatapackSyncEvent event) {
+        SyncHeroClassesPacket classes = new SyncHeroClassesPacket(HeroClassRegistry.getAll());
         SyncHeroesPacket heroes = SyncHeroesPacket.of(HeroRegistry.getAll());
         SyncUltimatesPacket ultimates = new SyncUltimatesPacket(UltimateRegistry.getAll());
-        event.getRelevantPlayers().forEach(player -> PacketDistributor.sendToPlayer(player, heroes, ultimates));
+        event.getRelevantPlayers().forEach(player -> PacketDistributor.sendToPlayer(player, classes, heroes, ultimates));
     }
 
     @SubscribeEvent

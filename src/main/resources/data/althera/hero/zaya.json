@@ -10,13 +10,16 @@
   "personality": "Passionate and proud",
   "scale": 0.7,
   "ultimate": "althera:explosion",
+  "animation": {
+    "attack_length": 0.8
+  },
   "attack": {
     "type": "ranged",
     "range": 12,
     "cooldown_ticks": 30,
     "projectile_speed": 1.2,
-    "projectile_origin": [0.13, 2.72, 2.64],
-    "shoot_delay_ticks": 5,
+    "projectile_origin": [0.27, 2.27, 1.9],
+    "shoot_frame": 0.3,
     "projectile_trail": { "type": "minecraft:flame" },
     "on_attack": [
       { "type": "sound", "sound": "minecraft:entity.blaze.shoot", "volume": 0.8, "pitch": 1.1 }

@@ -48,9 +48,10 @@ public final class ManaHudRenderer {
 
         final ManaData manaData = player.getData(AltheraAttachments.MANA.get());
 
+        boolean infinite = ManaData.hasInfiniteMana(player);
         int mana = manaData.getMana();
         int manaMax = manaData.getMaxMana();
-        float ratio = manaMax > 0 ? Mth.clamp((float) mana / manaMax, 0, 1) : 0;
+        float ratio = infinite ? 1 : manaMax > 0 ? Mth.clamp((float) mana / manaMax, 0, 1) : 0;
 
         updateAnimation(ratio);
 
@@ -62,7 +63,7 @@ public final class ManaHudRenderer {
 
         int filled = Math.round(BAR_WIDTH * displayedRatio);
         int trail = Math.round(BAR_WIDTH * trailRatio);
-        boolean low = mana < LOW_MANA;
+        boolean low = !infinite && mana < LOW_MANA;
         long now = Util.getMillis();
 
         GuiGraphics gui = event.getGuiGraphics();
@@ -89,7 +90,7 @@ public final class ManaHudRenderer {
 
         gui.drawString(
                 mc.font,
-                mana + "/" + manaMax,
+                infinite ? "∞" : mana + "/" + manaMax,
                 x + BAR_WIDTH + 5,
                 y + (BAR_HEIGHT - mc.font.lineHeight) / 2 + 1,
                 low ? COLOR_TEXT_LOW : COLOR_TEXT

@@ -87,6 +87,9 @@ Mana is the primary resource used to maintain your Hero while summoned.
 
 This system creates a balance between combat power and resource management.
 
+In **Creative** mode mana is infinite: summoning, keeping the Hero out, Command Seals and the Ultimate cost nothing,
+and the mana bar shows **∞**.
+
 Your mana is shown in the mana bar on screen. The mana bar and the Hero HUD are hidden together with the rest of the
 interface when you press **F1**.
 

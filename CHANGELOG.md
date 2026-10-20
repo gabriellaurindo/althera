@@ -33,13 +33,31 @@ and generates the GitHub Release, CurseForge and Discord notes from it.
   - **Valka – Piercing Thrust**: her spear goes through her target, hitting whoever stands a couple of blocks behind it
     for 60% of her damage, and pushes the target back.
   - **Clare**: her blades inflict a short Wither I.
+- **Custom classes**: hero classes are now data-driven. Datapacks can tweak the built-in ones or add new ones in
+  `data/<namespace>/hero_class/` (health, attack, armor and speed multipliers, knockback resistance, dodge chance and
+  which classes they beat).
+- **Hero stats and animation timing** in the hero JSON: base health, attack, armor and speed (and how they grow per
+  level), plus attack and walk animation speed and the length of the attack and death animations.
+- **New effects** for Ultimates and attacks: `heal` (flat or a share of max health) and `projectile` (one or a fan of
+  projectiles with their own on-hit effects).
 - **Class advantages** now matter when heroes fight each other: a hero deals 25% more damage to the class it beats
-  (with a burst of crits) and 25% less to the class that beats it. Saber > Lancer > Archer > Saber, Assassin > Caster,
-  Shielder > Assassin.
+  (with a burst of crits) and 25% less to the class that beats it. Every class beats two classes and loses to two:
+  Saber beats Caster and Lancer, Caster beats Lancer and Shielder, Lancer beats Shielder and Archer, Shielder beats
+  Archer and Assassin, Archer beats Assassin and Saber, Assassin beats Saber and Caster.
 - **Valka**, a new EX hero of the Lancer class: a swift spear fighter in light steel armor and teal cloth with a high
   honey-blonde ponytail. She uses Crimson Requiem as her Ultimate.
 
 ### Changed
+- Class balance: Sabers have slightly less health, attack and armor (×1.1 instead of ×1.15), Archers and Casters a
+  bit more health (×0.9 and ×0.8) and Shielders more attack (×0.85), so no class wins most duels on stats alone.
+- Heroes now move at their class speed: Assassins and Lancers are faster, Shielders slower. The speed shown on the
+  Choose your Hero screen was never applied before.
+- Attack animations play in full instead of being cut short (Aria, Clare and Zaya).
+- Zaya's attack animation keeps the staff in her hand instead of sliding it out of her grip.
+- Zaya's Ultimate animation: she raises her staff with both hands and slams it into the ground, right when the
+  explosion goes off.
+- Mana is infinite in Creative mode: summoning, keeping your hero out, Command Seals and the Ultimate cost nothing, and
+  the mana bar shows ∞.
 - Each hero now has its own Ultimate. Aria keeps Explosion, which works exactly as before.
 - Using the Ultimate without your hero summoned now tells you to summon it.
 - The one-time hero switch from 3.0.0 is over: the **Choose your Hero** screen now only appears for players who don't
@@ -48,6 +66,8 @@ and generates the GitHub Release, CurseForge and Discord notes from it.
   Hero** screen opens on login and your hero level carries over to the hero you pick.
 
 ### Fixed
+- `/althera_hero summon`, `rank` and `divine` with the hero out now update it right away (stats and full health)
+  instead of keeping the old max health.
 - Heroes now follow the server's PvP setting, like tamed wolves: with PvP off (or between teammates without friendly
   fire) they never attack other players, even when hit by one, and their shots and Ultimates don't hurt them.
   Heroes of different players can still fight each other.

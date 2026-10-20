@@ -1,77 +1,73 @@
 package com.darksune.althera.common.hero;
 
-import java.util.EnumSet;
+import com.darksune.althera.Althera;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.ExtraCodecs;
 
-public enum HeroClass {
+import java.util.List;
+import java.util.Locale;
 
-    SABER("Saber", 1.15f, 1.15f, 1.15f, 1.0f, 0.8f, 0.05f),
-    LANCER("Lancer", 1.0f, 1.25f, 0.85f, 1.25f, 0.75f, 0.05f),
-    ARCHER("Archer", 0.85f, 1.35f, 0.75f, 1.1f, 0.6f, 0.05f),
-    CASTER("Caster", 0.75f, 1.5f, 0.7f, 1.0f, 0.5f, 0.0f),
-    SHIELDER("Shielder", 1.5f, 0.7f, 1.6f, 0.75f, 1.0f, 0.0f),
-    ASSASSIN("Assassin", 0.8f, 1.4f, 0.7f, 1.3f, 0.6f, 0.1f);
+public record HeroClass(
+        ResourceLocation id,
+        String displayName,
+        float healthMultiplier,
+        float attackMultiplier,
+        float armorMultiplier,
+        float speedMultiplier,
+        float knockbackResistance,
+        float dodgeChance,
+        List<ResourceLocation> strongAgainst
+) {
 
-    private final String displayName;
+    public static final float ADVANTAGE_MULTIPLIER = 1.25f;
+    public static final float DISADVANTAGE_MULTIPLIER = 0.75f;
 
-    private final float healthMultiplier;
-    private final float attackMultiplier;
-    private final float armorMultiplier;
-    private final float speedMultiplier;
-    private final float knockbackResistance;
-    private final float dodgeChance;
+    public static final HeroClass NONE = new HeroClass(
+            ResourceLocation.fromNamespaceAndPath(Althera.MOD_ID, "none"),
+            "Unknown",
+            1.0f, 1.0f, 1.0f, 1.0f, 0.8f, 0.0f,
+            List.of()
+    );
 
-    private EnumSet<HeroClass> strongAgainst;
-    private EnumSet<HeroClass> weakAgainst;
+    public static final Codec<HeroClass> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+            Codec.STRING.optionalFieldOf("name", "Unknown").forGetter(HeroClass::displayName),
+            ExtraCodecs.POSITIVE_FLOAT.optionalFieldOf("health", 1.0f).forGetter(HeroClass::healthMultiplier),
+            ExtraCodecs.POSITIVE_FLOAT.optionalFieldOf("attack", 1.0f).forGetter(HeroClass::attackMultiplier),
+            ExtraCodecs.POSITIVE_FLOAT.optionalFieldOf("armor", 1.0f).forGetter(HeroClass::armorMultiplier),
+            ExtraCodecs.POSITIVE_FLOAT.optionalFieldOf("speed", 1.0f).forGetter(HeroClass::speedMultiplier),
+            Codec.floatRange(0.0f, 1.0f).optionalFieldOf("knockback_resistance", 0.0f).forGetter(HeroClass::knockbackResistance),
+            Codec.floatRange(0.0f, 1.0f).optionalFieldOf("dodge_chance", 0.0f).forGetter(HeroClass::dodgeChance),
+            ResourceLocation.CODEC.listOf().optionalFieldOf("strong_against", List.of()).forGetter(HeroClass::strongAgainst)
+    ).apply(instance, (name, health, attack, armor, speed, knockback, dodge, strong) ->
+            new HeroClass(NONE.id, name, health, attack, armor, speed, knockback, dodge, strong)));
 
-    HeroClass(String displayName,
-              float healthMultiplier,
-              float attackMultiplier,
-              float armorMultiplier,
-              float speedMultiplier,
-              float knockbackResistance,
-              float dodgeChance) {
-
-        this.displayName = displayName;
-        this.healthMultiplier = healthMultiplier;
-        this.attackMultiplier = attackMultiplier;
-        this.armorMultiplier = armorMultiplier;
-        this.speedMultiplier = speedMultiplier;
-        this.knockbackResistance = knockbackResistance;
-        this.dodgeChance = dodgeChance;
+    public static ResourceLocation parseId(String raw) {
+        String value = raw.toLowerCase(Locale.ROOT);
+        return value.contains(":")
+                ? ResourceLocation.parse(value)
+                : ResourceLocation.fromNamespaceAndPath(Althera.MOD_ID, value);
     }
 
-    static {
-        SABER.setRelations(EnumSet.of(LANCER), EnumSet.of(ARCHER));
-        LANCER.setRelations(EnumSet.of(ARCHER), EnumSet.of(SABER));
-        ARCHER.setRelations(EnumSet.of(SABER), EnumSet.of(LANCER));
-
-        CASTER.setRelations(EnumSet.noneOf(HeroClass.class), EnumSet.of(ASSASSIN));
-        SHIELDER.setRelations(EnumSet.of(ASSASSIN), EnumSet.noneOf(HeroClass.class));
-        ASSASSIN.setRelations(EnumSet.of(CASTER), EnumSet.of(SHIELDER));
+    public HeroClass withId(ResourceLocation id) {
+        return new HeroClass(id, displayName, healthMultiplier, attackMultiplier, armorMultiplier, speedMultiplier,
+                knockbackResistance, dodgeChance, strongAgainst);
     }
 
-    private void setRelations(final EnumSet<HeroClass> strongAgainst, final EnumSet<HeroClass> weakAgainst) {
-        this.strongAgainst = strongAgainst;
-        this.weakAgainst = weakAgainst;
+    public boolean isStrongAgainst(HeroClass other) {
+        return strongAgainst.contains(other.id);
     }
 
-    public boolean isStrongAgainst(final HeroClass other) {
-        return strongAgainst.contains(other);
+    public boolean isWeakAgainst(HeroClass other) {
+        return other.strongAgainst.contains(id);
     }
 
-    public boolean isWeakAgainst(final HeroClass other) {
-        return weakAgainst.contains(other);
-    }
-
-    public float getMultiplierAgainst(final HeroClass other) {
-        if (isStrongAgainst(other)) return 1.25f;
-        if (isWeakAgainst(other)) return 0.75f;
+    public float getMultiplierAgainst(HeroClass other) {
+        if (isStrongAgainst(other)) return ADVANTAGE_MULTIPLIER;
+        if (isWeakAgainst(other)) return DISADVANTAGE_MULTIPLIER;
         return 1.0f;
     }
-
-    // =========================
-    // GETTERS
-    // =========================
 
     public String getDisplayName() {
         return displayName;

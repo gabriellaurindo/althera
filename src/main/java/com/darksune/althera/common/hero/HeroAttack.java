@@ -1,6 +1,5 @@
 package com.darksune.althera.common.hero;
 
-import com.darksune.althera.common.ultimate.effect.UltimateContext;
 import com.darksune.althera.common.ultimate.effect.UltimateEffect;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -16,7 +15,7 @@ public record HeroAttack(
         Type type,
         double range,
         int cooldownTicks,
-        int shootDelayTicks,
+        float shootFrame,
         float projectileSpeed,
         Vec3 projectileOrigin,
         ParticleOptions projectileTrail,
@@ -30,7 +29,7 @@ public record HeroAttack(
             Type.CODEC.optionalFieldOf("type", Type.MELEE).forGetter(HeroAttack::type),
             Codec.DOUBLE.optionalFieldOf("range", 12.0D).forGetter(HeroAttack::range),
             ExtraCodecs.POSITIVE_INT.optionalFieldOf("cooldown_ticks", 20).forGetter(HeroAttack::cooldownTicks),
-            ExtraCodecs.NON_NEGATIVE_INT.optionalFieldOf("shoot_delay_ticks", 0).forGetter(HeroAttack::shootDelayTicks),
+            Codec.floatRange(0.0f, Float.MAX_VALUE).optionalFieldOf("shoot_frame", 0.0f).forGetter(HeroAttack::shootFrame),
             Codec.FLOAT.optionalFieldOf("projectile_speed", 1.2f).forGetter(HeroAttack::projectileSpeed),
             Vec3.CODEC.optionalFieldOf("projectile_origin", DEFAULT_PROJECTILE_ORIGIN).forGetter(HeroAttack::projectileOrigin),
             ParticleTypes.CODEC.optionalFieldOf("projectile_trail", ParticleTypes.FLAME).forGetter(HeroAttack::projectileTrail),
@@ -42,7 +41,7 @@ public record HeroAttack(
             Type.MELEE,
             12.0D,
             20,
-            0,
+            0.0f,
             1.2f,
             DEFAULT_PROJECTILE_ORIGIN,
             ParticleTypes.FLAME,
@@ -52,14 +51,6 @@ public record HeroAttack(
 
     public boolean isRanged() {
         return type == Type.RANGED;
-    }
-
-    public void attack(UltimateContext context) {
-        onAttack.forEach(effect -> effect.apply(context));
-    }
-
-    public void hit(UltimateContext context) {
-        onHit.forEach(effect -> effect.apply(context));
     }
 
     public enum Type implements StringRepresentable {

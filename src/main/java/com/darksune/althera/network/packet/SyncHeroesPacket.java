@@ -1,12 +1,13 @@
 package com.darksune.althera.network.packet;
 
 import com.darksune.althera.Althera;
+import com.darksune.althera.common.hero.HeroAnimation;
 import com.darksune.althera.common.hero.HeroAttack;
-import com.darksune.althera.common.hero.HeroClass;
 import com.darksune.althera.common.hero.HeroDefinition;
 import com.darksune.althera.common.hero.HeroNature;
 import com.darksune.althera.common.hero.HeroRank;
 import com.darksune.althera.common.hero.HeroRegistry;
+import com.darksune.althera.common.hero.HeroStats;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -26,6 +27,12 @@ public record SyncHeroesPacket(List<HeroDefinition> heroes) implements CustomPac
 
     private static final StreamCodec<RegistryFriendlyByteBuf, HeroAttack> ATTACK_CODEC =
             ByteBufCodecs.fromCodecWithRegistries(HeroAttack.CODEC);
+
+    private static final StreamCodec<RegistryFriendlyByteBuf, HeroAnimation> ANIMATION_CODEC =
+            ByteBufCodecs.fromCodecWithRegistries(HeroAnimation.CODEC);
+
+    private static final StreamCodec<RegistryFriendlyByteBuf, HeroStats> STATS_CODEC =
+            ByteBufCodecs.fromCodecWithRegistries(HeroStats.CODEC);
 
     public static final StreamCodec<RegistryFriendlyByteBuf, SyncHeroesPacket> STREAM_CODEC =
             StreamCodec.of(
@@ -56,7 +63,7 @@ public record SyncHeroesPacket(List<HeroDefinition> heroes) implements CustomPac
         buf.writeResourceLocation(hero.getId());
         buf.writeUtf(hero.getName());
         buf.writeUtf(hero.getDescription());
-        buf.writeEnum(hero.getHeroClass());
+        buf.writeResourceLocation(hero.getHeroClassId());
         buf.writeEnum(hero.getRank());
         buf.writeEnum(hero.getNature());
         buf.writeNullable(hero.getModel(), FriendlyByteBuf::writeResourceLocation);
@@ -66,6 +73,8 @@ public record SyncHeroesPacket(List<HeroDefinition> heroes) implements CustomPac
         buf.writeFloat(hero.getScale());
         buf.writeResourceLocation(hero.getUltimate());
         writeAttack(buf, hero.getAttack());
+        ANIMATION_CODEC.encode(buf, hero.getAnimation());
+        STATS_CODEC.encode(buf, hero.getStats());
     }
 
     private static void writeAttack(RegistryFriendlyByteBuf buf, HeroAttack attack) {
@@ -81,7 +90,7 @@ public record SyncHeroesPacket(List<HeroDefinition> heroes) implements CustomPac
                 buf.readResourceLocation(),
                 buf.readUtf(),
                 buf.readUtf(),
-                buf.readEnum(HeroClass.class),
+                buf.readResourceLocation(),
                 buf.readEnum(HeroRank.class),
                 buf.readEnum(HeroNature.class),
                 buf.readNullable(FriendlyByteBuf::readResourceLocation),
@@ -90,7 +99,9 @@ public record SyncHeroesPacket(List<HeroDefinition> heroes) implements CustomPac
                 buf.readUtf(),
                 buf.readFloat(),
                 buf.readResourceLocation(),
-                readAttack(buf)
+                readAttack(buf),
+                ANIMATION_CODEC.decode(buf),
+                STATS_CODEC.decode(buf)
         );
     }
 

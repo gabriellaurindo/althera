@@ -40,7 +40,7 @@ public class UltimateSystem {
 
         ManaData manaData = ManaData.get(player);
 
-        if (!manaData.hasEnoughMana(ultimate.manaCost())) {
+        if (!manaData.hasEnoughMana(player, ultimate.manaCost())) {
             player.sendSystemMessage(Component.literal("Not enough mana"));
             return;
         }

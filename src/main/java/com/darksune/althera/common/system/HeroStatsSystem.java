@@ -3,15 +3,13 @@ package com.darksune.althera.common.system;
 import com.darksune.althera.common.attachment.HeroData;
 import com.darksune.althera.common.entity.HeroEntity;
 import com.darksune.althera.common.hero.HeroDefinition;
+import com.darksune.althera.common.hero.HeroStats;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 
 public class HeroStatsSystem {
 
-    private final static int BASE_HEALTH = 19;
-    private final static double BASE_ATTACK = 1.125;
-    private final static double BASE_ARMOR = 2.0;
     private final static double BASE_KNOCKBACK_RESISTANCE = 0.8;
     //todo centralize the max HP calculation
     public static void applyAttributes(final HeroEntity hero, final Player player) {
@@ -21,6 +19,7 @@ public class HeroStatsSystem {
         var attackAttr = hero.getAttribute(Attributes.ATTACK_DAMAGE);
         var armorAttr = hero.getAttribute(Attributes.ARMOR);
         var knockbackResistanceAttr = hero.getAttribute(Attributes.KNOCKBACK_RESISTANCE);
+        var speedAttr = hero.getAttribute(Attributes.MOVEMENT_SPEED);
 
         if (maxHealthAttr != null) {
             maxHealthAttr.setBaseValue(getMaxHealth(heroData));
@@ -38,6 +37,10 @@ public class HeroStatsSystem {
             knockbackResistanceAttr.setBaseValue(getKnockbackResistance(heroData));
         }
 
+        if (speedAttr != null) {
+            speedAttr.setBaseValue(getSpeed(heroData));
+        }
+
         // temp name
         if (heroData.getHeroDefinition() != null) {
             hero.setCustomName(Component.literal(heroData.getHeroDefinition().getName()));
@@ -50,7 +53,8 @@ public class HeroStatsSystem {
     public static double getMaxHealth(final HeroData data) {
         HeroDefinition def = data.getHeroDefinition();
 
-        double base = BASE_HEALTH + data.getLevel();
+        HeroStats stats = def == null ? HeroStats.DEFAULT : def.getStats();
+        double base = stats.health() + stats.healthPerLevel() * data.getLevel();
 
         if (def == null) return base;
 
@@ -71,7 +75,8 @@ public class HeroStatsSystem {
     public static double getAttack(final HeroData data) {
         HeroDefinition def = data.getHeroDefinition();
 
-        double base = BASE_ATTACK + (0.125 * data.getLevel());
+        HeroStats stats = def == null ? HeroStats.DEFAULT : def.getStats();
+        double base = stats.attack() + stats.attackPerLevel() * data.getLevel();
 
         if (def == null) return base;
 
@@ -92,7 +97,7 @@ public class HeroStatsSystem {
     public static double getArmor(final HeroData data) {
         HeroDefinition def = data.getHeroDefinition();
 
-        double base = BASE_ARMOR;
+        double base = def == null ? HeroStats.DEFAULT.armor() : def.getStats().armor();
 
         if (def == null) return base;
 
@@ -108,6 +113,14 @@ public class HeroStatsSystem {
         result *= def.getNature().getGlobalMultiplier();
 
         return result;
+    }
+
+    public static double getSpeed(final HeroData data) {
+        HeroDefinition def = data.getHeroDefinition();
+
+        if (def == null) return HeroStats.DEFAULT.speed();
+
+        return def.getStats().speed() * def.getHeroClass().getSpeedMultiplier();
     }
 
     public static double getKnockbackResistance(final HeroData data) {

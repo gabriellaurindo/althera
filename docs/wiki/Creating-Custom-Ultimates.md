@@ -170,6 +170,35 @@ Moves the Hero instantly in a straight line in front of it, stopping before wall
 |---|---|---|
 | `distance` | — | Blocks |
 
+### `heal`
+| Field | Default | |
+|---|---|---|
+| `target` | — | Who is healed, e.g. `"self"` or `"owner"` |
+| `filter` | none | |
+| `amount` | `0` | Flat healing (2 = one heart) |
+| `max_health_ratio` | `0` | Extra healing as a share of the target's max health (`0.25` = a quarter) |
+
+### `projectile`
+Shoots projectiles from the Hero (from its attack's `projectile_origin`) towards the attacked creature, or in the
+Ultimate's direction. They fly straight, never hit the owner and run their own `on_hit` effects where they land
+(`"target"` there is the creature they hit, positions are the impact point).
+
+| Field | Default | |
+|---|---|---|
+| `count` | `1` | How many projectiles |
+| `spread` | `0` | Fan angle in degrees, split evenly between them |
+| `speed` | `1.2` | Blocks per tick |
+| `amount` | `0` | Flat damage of each projectile |
+| `attack_ratio` | `0` | Extra damage as a share of the Hero's attack damage |
+| `trail` | `{ "type": "minecraft:flame" }` | Trail and impact particle |
+| `on_hit` | none | Effects applied where each projectile lands |
+
+```json
+{ "type": "projectile", "count": 5, "spread": 40, "attack_ratio": 1.5,
+  "trail": { "type": "minecraft:soul_fire_flame" },
+  "on_hit": [ { "type": "ignite", "target": "target", "ticks": 60 } ] }
+```
+
 ### `ultimate_animation`
 Plays the `ultimate` animation of the Hero model (if it has one). No fields.
 

@@ -249,6 +249,7 @@ public class HeroCommand {
         data.setHero(def.getId());
         data.setHealth(HeroStatsSystem.getMaxHealth(data));
         data.sync(player);
+        HeroSummonSystem.refreshSummon(player);
 
         source.sendSuccess(() -> Component.literal("§aRandom hero assigned."), false);
         return 1;
@@ -276,6 +277,7 @@ public class HeroCommand {
         data.setHero(def.getId());
         data.setHealth(HeroStatsSystem.getMaxHealth(data));
         data.sync(player);
+        HeroSummonSystem.refreshSummon(player);
 
         source.sendSuccess(() -> Component.literal("§dDivine hero granted."), false);
         return 1;
@@ -311,6 +313,7 @@ public class HeroCommand {
         data.setHero(def.getId());
         data.setHealth(HeroStatsSystem.getMaxHealth(data));
         data.sync(player);
+        HeroSummonSystem.refreshSummon(player);
 
         source.sendSuccess(() -> Component.literal("§aHero granted (" + rank + ")"), false);
         return 1;

@@ -3,6 +3,7 @@ package com.darksune.althera.network;
 import com.darksune.althera.network.packet.OpenHeroSelectionPacket;
 import com.darksune.althera.network.packet.SelectHeroPacket;
 import com.darksune.althera.network.packet.SummonPacket;
+import com.darksune.althera.network.packet.SyncHeroClassesPacket;
 import com.darksune.althera.network.packet.SyncHeroesPacket;
 import com.darksune.althera.network.packet.SyncUltimatesPacket;
 import com.darksune.althera.network.packet.ToggleHeroSettingPacket;
@@ -57,6 +58,12 @@ public final class AltheraNetwork {
                 SyncHeroesPacket.TYPE,
                 SyncHeroesPacket.STREAM_CODEC,
                 SyncHeroesPacket::handle
+        );
+
+        registrar.playToClient(
+                SyncHeroClassesPacket.TYPE,
+                SyncHeroClassesPacket.STREAM_CODEC,
+                SyncHeroClassesPacket::handle
         );
 
         registrar.playToClient(

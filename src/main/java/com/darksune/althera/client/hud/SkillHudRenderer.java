@@ -77,7 +77,7 @@ public final class SkillHudRenderer {
 
         CommandSealData sealData = CommandSealData.get(player);
         UltimateData ultimateData = UltimateData.get(player);
-        int mana = ManaData.get(player).getMana();
+        int mana = ManaData.hasInfiniteMana(player) ? Integer.MAX_VALUE : ManaData.get(player).getMana();
 
         List<SlotState> slots = List.of(
                 sealSlot(AltheraKeybinds.COMMAND_SEAL_SKILL_ONE, CommandSealSkillType.OVERDRIVE, sealData, mana),

@@ -26,7 +26,7 @@ public class CommandSealSystem {
             return;
         }
         final ManaData manaData = ManaData.get(player);
-        if (!manaData.hasEnoughMana(commandSealSkillType.getSkill().getManaCost())) {
+        if (!manaData.hasEnoughMana(player, commandSealSkillType.getSkill().getManaCost())) {
             player.sendSystemMessage(Component.literal("Sem manaaa"));
             return;
         }

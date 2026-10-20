@@ -10,6 +10,9 @@
   "personality": "Honorable and calm",
   "scale": 0.72,
   "ultimate": "althera:explosion",
+  "animation": {
+    "attack_length": 0.85
+  },
   "attack": {
     "type": "melee",
     "on_hit": [

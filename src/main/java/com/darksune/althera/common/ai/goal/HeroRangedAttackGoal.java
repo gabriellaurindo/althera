@@ -91,7 +91,7 @@ public class HeroRangedAttackGoal extends Goal {
         if (canSee && distance <= attack.range()) {
             hero.triggerAttackAnimation();
             cooldown = attack.cooldownTicks();
-            pendingShotTicks = attack.shootDelayTicks();
+            pendingShotTicks = hero.getAnimation().attackFrameTicks(attack.shootFrame());
             if (pendingShotTicks == 0) {
                 shoot(target, attack);
             }
@@ -116,12 +116,15 @@ public class HeroRangedAttackGoal extends Goal {
 
     private void shoot(final LivingEntity target, final HeroAttack attack) {
         hero.performAttackEffects(target);
+        final Vec3 from = hero.getProjectileOrigin();
         HeroProjectileEntity.shoot(
                 hero,
-                target,
+                from,
+                HeroProjectileEntity.aimAt(from, target),
                 (float) hero.getAttributeValue(Attributes.ATTACK_DAMAGE),
                 attack.projectileSpeed(),
-                attack.projectileTrail()
+                attack.projectileTrail(),
+                attack.onHit()
         );
     }
 }

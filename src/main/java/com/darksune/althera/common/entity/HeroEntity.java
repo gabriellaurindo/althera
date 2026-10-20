@@ -8,10 +8,12 @@ import com.darksune.althera.common.ai.goal.HeroRangedAttackGoal;
 import com.darksune.althera.common.ai.goal.ProtectOwnerGoal;
 import com.darksune.althera.common.attachment.HeroData;
 import com.darksune.althera.common.attachment.ManaData;
+import com.darksune.althera.common.hero.HeroAnimation;
 import com.darksune.althera.common.hero.HeroAttack;
 import com.darksune.althera.common.hero.HeroDefinition;
 import com.darksune.althera.common.hero.HeroRegistry;
 import com.darksune.althera.common.ultimate.effect.UltimateContext;
+import com.darksune.althera.common.ultimate.effect.UltimateEffect;
 import com.darksune.althera.common.system.HeroStatsSystem;
 import com.darksune.althera.common.system.HeroSummonSystem;
 import net.minecraft.core.BlockPos;
@@ -56,6 +58,7 @@ import software.bernie.geckolib.animation.RawAnimation;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
 import java.util.Comparator;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Predicate;
@@ -77,7 +80,6 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
     private static final String ULTIMATE_CONTROLLER = "ultimate";
     private static final String ULTIMATE_ANIMATION = "ultimate";
     private static final String DEATH_ANIMATION = "death";
-    private static final int DEATH_ANIMATION_TICKS = 40;
 
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
 
@@ -154,23 +156,31 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
                 : null;
     }
 
+    public HeroAnimation getAnimation() {
+        final HeroDefinition definition = getHeroDefinition();
+        return definition == null ? HeroAnimation.DEFAULT : definition.getAnimation();
+    }
+
     public HeroAttack getAttack() {
         final HeroDefinition definition = getHeroDefinition();
         return definition == null ? HeroAttack.MELEE : definition.getAttack();
     }
 
     public void performAttackEffects(@Nullable final LivingEntity target) {
-        final Player owner = findOwner();
-        if (owner != null) {
-            getAttack().attack(UltimateContext.attack(owner, this, target, null));
-        }
+        applyEffects(getAttack().onAttack(), target, null);
     }
 
     public void performHitEffects(@Nullable final LivingEntity target, final Vec3 position) {
+        applyEffects(getAttack().onHit(), target, position);
+    }
+
+    public void applyEffects(final List<UltimateEffect> effects, @Nullable final LivingEntity target,
+                             @Nullable final Vec3 impact) {
         final Player owner = findOwner();
-        if (owner != null) {
-            getAttack().hit(UltimateContext.attack(owner, this, target, position));
-        }
+        if (owner == null || effects.isEmpty()) return;
+
+        final UltimateContext context = UltimateContext.attack(owner, this, target, impact);
+        effects.forEach(effect -> effect.apply(context));
     }
 
     @Override
@@ -224,7 +234,7 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
     }
 
     public void triggerAttackAnimation() {
-        setAttackAnimationTicks(10);
+        setAttackAnimationTicks(getAnimation().attackTicks());
     }
 
     @Override
@@ -247,7 +257,7 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
                             }
 
                             if (state.isMoving()) {
-                                state.getController().setAnimationSpeed(2D);
+                                state.getController().setAnimationSpeed(getAnimation().walkSpeed());
                                 return state.setAndContinue(RawAnimation.begin().thenLoop("walk")
                                 );
                             }
@@ -271,7 +281,7 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
                         state -> {
 
                             if (getAttackAnimationTicks() > 0 && !isDeadOrDying()) {
-                                state.getController().setAnimationSpeed(1.2D);
+                                state.getController().setAnimationSpeed(getAnimation().attackSpeed());
                                 state.getController().setAnimation(RawAnimation.begin().thenPlay("attack"));
                                 return PlayState.CONTINUE;
                             }
@@ -464,7 +474,7 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
     @Override
     protected void tickDeath() {
         ++this.deathTime;
-        if (this.deathTime >= DEATH_ANIMATION_TICKS && !this.level().isClientSide() && !this.isRemoved()) {
+        if (this.deathTime >= getAnimation().deathTicks() && !this.level().isClientSide() && !this.isRemoved()) {
             this.level().broadcastEntityEvent(this, (byte) 60);
             this.remove(RemovalReason.KILLED);
         }
@@ -576,7 +586,7 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
 
         int cost = 20;
 
-        if (manaData.getMana() < cost) {
+        if (!manaData.hasEnoughMana(owner, cost)) {
             owner.sendSystemMessage(Component.literal("Not enough mana! Summon dismissed."));
             HeroSummonSystem.dismissSummon(owner);
             return;

@@ -1,0 +1,13 @@
+{
+  "name": "Shielder",
+  "health": 1.5,
+  "attack": 0.85,
+  "armor": 1.6,
+  "speed": 0.75,
+  "knockback_resistance": 1.0,
+  "dodge_chance": 0.0,
+  "strong_against": [
+    "althera:archer",
+    "althera:assassin"
+  ]
+}

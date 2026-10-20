@@ -92,8 +92,15 @@ public class ManaData {
         player.setData(AltheraAttachments.MANA.get(), this);
     }
 
+    public static boolean hasInfiniteMana(final Player player) {
+        return player.getAbilities().instabuild;
+    }
+
     public boolean consumeMana(final Player player, int amount) {
-        if (!hasEnoughMana(amount)) {
+        if (hasInfiniteMana(player)) {
+            return true;
+        }
+        if (!hasEnoughMana(player, amount)) {
             return false;
         }
 
@@ -131,7 +138,7 @@ public class ManaData {
         setMaxMana(getMaxMana() + levelsGained);
     }
 
-    public boolean hasEnoughMana(int amount) {
-        return this.mana >= amount;
+    public boolean hasEnoughMana(final Player player, int amount) {
+        return hasInfiniteMana(player) || this.mana >= amount;
     }
 }

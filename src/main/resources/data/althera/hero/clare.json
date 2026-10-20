@@ -10,6 +10,9 @@
   "personality": "Cold, quiet and loyal",
   "scale": 0.8,
   "ultimate": "althera:crimson_requiem",
+  "animation": {
+    "attack_length": 0.85
+  },
   "attack": {
     "type": "melee",
     "on_hit": [
