@@ -23,8 +23,8 @@ public final class AltheraItems {
 
     public static final DeferredItem<SummonSealItem> SUMMON_SEAL = register(AltheraItemId.SUMMON_SEAL, SummonSealItem::create);
 
-    public static final DeferredItem<DeferredSpawnEggItem> NOBLE_MAGE_SPAWN_EGG = register(AltheraItemId.NOBLE_MAGE_SPAWN_EGG,
-            () -> new DeferredSpawnEggItem(AltheraEntities.NOBLE_MAGE, 0xF2EEE4, 0xD4AF37, new Item.Properties()));
+    public static final DeferredItem<DeferredSpawnEggItem> ENEMY_MAGE_SPAWN_EGG = register(AltheraItemId.ENEMY_MAGE_SPAWN_EGG,
+            () -> new DeferredSpawnEggItem(AltheraEntities.ENEMY_MAGE, 0xF2EEE4, 0xD4AF37, new Item.Properties()));
 
     // Block items
     public static final DeferredHolder<Item, Item> RITUAL_CORE = register(AltheraItemId.RITUAL_CORE, RitualCoreItem::create);

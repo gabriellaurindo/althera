@@ -1,0 +1,28 @@
+{
+  "name": "Noble",
+  "faction": "althera:nobles",
+  "stats": { "health": 20, "attack": 1, "armor": 0, "speed": 0.3, "follow_range": 24, "knockback_resistance": 0, "xp": 60 },
+  "spells": ["althera:fire_bolt", "althera:frost_shard", "althera:lightning_strike"],
+  "targets": ["minecraft:player", "althera:hero", "minecraft:villager", "minecraft:wandering_trader"],
+  "servant": {
+    "ranks": ["EX"],
+    "heroes": [],
+    "stat_share": 0.25,
+    "damage_share": 0.75,
+    "recall_ticks": 200,
+    "spirit_regen": { "amount": 1, "interval_ticks": 40 }
+  },
+  "tiers": [
+    { "level": 20, "texture": "althera:textures/entity/noble_mage_green.png" },
+    { "level": 30, "texture": "althera:textures/entity/noble_mage_yellow.png" },
+    { "level": 40, "texture": "althera:textures/entity/noble_mage_red.png" }
+  ],
+  "command_seals": {
+    "charges": 3,
+    "heal": { "health_ratio": 0.2 },
+    "revive": { "delay_ticks": 20 },
+    "overdrive": { "health_ratio": 0.3, "after_revive": true }
+  },
+  "ultimate": { "health_ratio": 0.5 },
+  "home": { "radius": 16, "respawn_ticks": 24000, "activation_range": 32 }
+}

@@ -37,6 +37,14 @@ Use it if your Hero cannot be summoned or behaves inconsistently.
 
 ---
 
+## 🧙 Enemy mages — `/althera_mage`
+
+| Command | Permission | Description |
+|---|---|---|
+| `/althera_mage spawn <mage>` | Cheats | Spawns an enemy mage where you stand, for example `althera:noble` (see [Creating Custom Enemy Mages](Creating-Custom-Enemy-Mages)) |
+
+---
+
 ## 🔗 Related Pages
 
 - [Core Systems](Core-Systems)

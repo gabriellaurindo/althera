@@ -24,7 +24,7 @@ public final class AltheraCreativeTabs {
                                 // your items here
                                 output.accept(AltheraItems.SUMMON_SEAL.get());
                                 output.accept(AltheraItems.RITUAL_CORE.get());
-                                output.accept(AltheraItems.NOBLE_MAGE_SPAWN_EGG.get());
+                                output.accept(AltheraItems.ENEMY_MAGE_SPAWN_EGG.get());
                                 output.accept(AltheraItems.NOBLE_SIGIL.get());
 
                             })

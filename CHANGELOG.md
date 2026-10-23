@@ -25,6 +25,11 @@ and generates the GitHub Release, CurseForge and Discord notes from it.
 - **Noble shrines**: rare quartz and gold platforms in the Overworld, with four lantern-topped pillars and a **Noble
   Sigil** in the middle. A Noble guards each shrine and stays near it; when he is slain, a new Noble (with a new hero
   and spell) appears one in-game day later, as soon as a player comes close. The sigil can be found in the creative tab.
+- **Custom enemy mages**: datapacks can define enemy mages in `data/<namespace>/enemy_mage/` (name, faction, stats,
+  spells, targets, Hero, robes per Hero level, Command Seals, Ultimate and shrine settings). The Noble is one of them
+  (`althera:noble`), so a datapack can also rebalance him. Mages of different factions fight each other, and a
+  datapack can add shrines that spawn its own mage. See the wiki page "Creating Custom Enemy Mages".
+- `/althera_mage spawn <mage>` (cheats): spawns an enemy mage (for example `althera:noble`) where you stand.
 
 ## [4.0.0] - 2026-10-20 - Data-Driven Combat (feature + hotfix)
 

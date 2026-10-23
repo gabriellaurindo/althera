@@ -1,10 +1,13 @@
 package com.darksune.althera.common.block.entity;
 
+import com.darksune.althera.common.enemy.EnemyMageDefinition;
+import com.darksune.althera.common.enemy.EnemyMageRegistry;
 import com.darksune.althera.common.entity.AltheraEntities;
-import com.darksune.althera.common.entity.NobleMageEntity;
+import com.darksune.althera.common.entity.EnemyMageEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.MobSpawnType;
@@ -20,9 +23,8 @@ public class NobleSigilBlockEntity extends BlockEntity {
 
     private static final int CHECK_INTERVAL = 20;
     private static final int MAX_MISSING_CHECKS = 10;
-    private static final long RESPAWN_DELAY_TICKS = 24000L;
-    private static final double SPAWN_PLAYER_RANGE = 32.0D;
 
+    private ResourceLocation mageDefinition = EnemyMageRegistry.DEFAULT_ID;
     @Nullable
     private UUID mageUuid;
     private long respawnAt;
@@ -39,13 +41,23 @@ public class NobleSigilBlockEntity extends BlockEntity {
             sigil.checkMage(serverLevel);
         } else if (level.getGameTime() >= sigil.respawnAt
                 && level.getDifficulty() != Difficulty.PEACEFUL
-                && level.hasNearbyAlivePlayer(pos.getX() + 0.5D, pos.getY(), pos.getZ() + 0.5D, SPAWN_PLAYER_RANGE)) {
+                && level.hasNearbyAlivePlayer(pos.getX() + 0.5D, pos.getY(), pos.getZ() + 0.5D, sigil.getHome().activationRange())) {
             sigil.spawnMage(serverLevel, pos);
         }
     }
 
+    public void setMageDefinition(final ResourceLocation id) {
+        mageDefinition = id;
+        setChanged();
+    }
+
+    private EnemyMageDefinition.Home getHome() {
+        final EnemyMageDefinition definition = EnemyMageRegistry.getOrDefault(mageDefinition);
+        return definition != null ? definition.home() : EnemyMageDefinition.Home.DEFAULT;
+    }
+
     private void checkMage(final ServerLevel level) {
-        if (level.getEntity(mageUuid) instanceof NobleMageEntity mage && mage.isAlive()) {
+        if (level.getEntity(mageUuid) instanceof EnemyMageEntity mage && mage.isAlive()) {
             missingChecks = 0;
             return;
         }
@@ -55,9 +67,10 @@ public class NobleSigilBlockEntity extends BlockEntity {
     }
 
     private void spawnMage(final ServerLevel level, final BlockPos pos) {
-        final NobleMageEntity mage = AltheraEntities.NOBLE_MAGE.get().create(level);
+        final EnemyMageEntity mage = AltheraEntities.ENEMY_MAGE.get().create(level);
         if (mage == null) return;
 
+        mage.setDefinition(mageDefinition);
         mage.moveTo(pos.getX() + 0.5D, pos.getY() + 1.0D, pos.getZ() + 0.5D, level.random.nextFloat() * 360.0F, 0.0F);
         EventHooks.finalizeMobSpawn(mage, level, level.getCurrentDifficultyAt(pos), MobSpawnType.STRUCTURE, null);
         mage.bindToSigil(pos);
@@ -67,7 +80,7 @@ public class NobleSigilBlockEntity extends BlockEntity {
         setChanged();
     }
 
-    public boolean claim(final NobleMageEntity mage) {
+    public boolean claim(final EnemyMageEntity mage) {
         if (mageUuid != null && !mageUuid.equals(mage.getUUID())) return false;
 
         if (mageUuid == null) {
@@ -78,7 +91,7 @@ public class NobleSigilBlockEntity extends BlockEntity {
         return true;
     }
 
-    public void onMageDied(final NobleMageEntity mage) {
+    public void onMageDied(final EnemyMageEntity mage) {
         if (!mage.getUUID().equals(mageUuid) || level == null) return;
         startRespawnTimer(level);
     }
@@ -86,7 +99,7 @@ public class NobleSigilBlockEntity extends BlockEntity {
     private void startRespawnTimer(final Level level) {
         mageUuid = null;
         missingChecks = 0;
-        respawnAt = level.getGameTime() + RESPAWN_DELAY_TICKS;
+        respawnAt = level.getGameTime() + getHome().respawnTicks();
         setChanged();
     }
 
@@ -97,6 +110,7 @@ public class NobleSigilBlockEntity extends BlockEntity {
             tag.putUUID("Mage", mageUuid);
         }
         tag.putLong("RespawnAt", respawnAt);
+        tag.putString("MageDefinition", mageDefinition.toString());
     }
 
     @Override
@@ -104,5 +118,7 @@ public class NobleSigilBlockEntity extends BlockEntity {
         super.loadAdditional(tag, registries);
         mageUuid = tag.hasUUID("Mage") ? tag.getUUID("Mage") : null;
         respawnAt = tag.getLong("RespawnAt");
+        final ResourceLocation id = tag.contains("MageDefinition") ? ResourceLocation.tryParse(tag.getString("MageDefinition")) : null;
+        mageDefinition = id != null ? id : EnemyMageRegistry.DEFAULT_ID;
     }
 }

@@ -1,9 +1,9 @@
 {
   "item.althera.summon_seal": "Summon seal",
   "item.althera.ritual_core": "Ritual core",
-  "item.althera.noble_mage_spawn_egg": "Noble Spawn Egg",
+  "item.althera.enemy_mage_spawn_egg": "Noble Spawn Egg",
 
-  "entity.althera.noble_mage": "Noble",
+  "entity.althera.enemy_mage": "Enemy Mage",
 
   "key.categories.althera": "Althera",
   "key.althera.summon": "Summon",

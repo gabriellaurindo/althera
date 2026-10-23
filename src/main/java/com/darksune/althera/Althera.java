@@ -1,9 +1,11 @@
 package com.darksune.althera;
 
 import com.darksune.althera.common.command.AltheraCommands;
+import com.darksune.althera.common.enemy.EnemyMageLoader;
+import com.darksune.althera.common.enemy.EnemyMageRegistry;
 import com.darksune.althera.common.entity.AltheraEntities;
 import com.darksune.althera.common.entity.HeroEntity;
-import com.darksune.althera.common.entity.NobleMageEntity;
+import com.darksune.althera.common.entity.EnemyMageEntity;
 import com.darksune.althera.common.entity.SummonedEntity;
 import com.darksune.althera.common.hero.HeroClassLoader;
 import com.darksune.althera.common.hero.HeroClassRegistry;
@@ -15,6 +17,7 @@ import com.darksune.althera.common.ultimate.UltimateLoader;
 import com.darksune.althera.common.ultimate.UltimateRegistry;
 import com.darksune.althera.config.AltheraConfig;
 import com.darksune.althera.network.AltheraNetwork;
+import com.darksune.althera.network.packet.SyncEnemyMagesPacket;
 import com.darksune.althera.network.packet.SyncHeroClassesPacket;
 import com.darksune.althera.network.packet.SyncHeroesPacket;
 import com.darksune.althera.network.packet.SyncUltimatesPacket;
@@ -49,6 +52,7 @@ public final class Althera {
         event.addListener(new HeroLoader(event.getRegistryAccess()));
         event.addListener(new UltimateLoader(event.getRegistryAccess()));
         event.addListener(new SpellLoader(event.getRegistryAccess()));
+        event.addListener(new EnemyMageLoader(event.getRegistryAccess()));
     }
 
     @SubscribeEvent
@@ -56,7 +60,8 @@ public final class Althera {
         SyncHeroClassesPacket classes = new SyncHeroClassesPacket(HeroClassRegistry.getAll());
         SyncHeroesPacket heroes = SyncHeroesPacket.of(HeroRegistry.getAll());
         SyncUltimatesPacket ultimates = new SyncUltimatesPacket(UltimateRegistry.getAll());
-        event.getRelevantPlayers().forEach(player -> PacketDistributor.sendToPlayer(player, classes, heroes, ultimates));
+        SyncEnemyMagesPacket mages = new SyncEnemyMagesPacket(EnemyMageRegistry.getAll());
+        event.getRelevantPlayers().forEach(player -> PacketDistributor.sendToPlayer(player, classes, heroes, ultimates, mages));
     }
 
     @SubscribeEvent
@@ -75,8 +80,8 @@ public final class Althera {
                 SummonedEntity.createAttributes().build()
         );
         event.put(
-                AltheraEntities.NOBLE_MAGE.get(),
-                NobleMageEntity.createAttributes().build()
+                AltheraEntities.ENEMY_MAGE.get(),
+                EnemyMageEntity.createAttributes().build()
         );
     }
 

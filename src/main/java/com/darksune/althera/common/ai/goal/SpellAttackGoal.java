@@ -1,6 +1,6 @@
 package com.darksune.althera.common.ai.goal;
 
-import com.darksune.althera.common.entity.NobleMageEntity;
+import com.darksune.althera.common.entity.EnemyMageEntity;
 import com.darksune.althera.common.spell.SpellDefinition;
 import com.darksune.althera.common.ultimate.effect.UltimateContext;
 import net.minecraft.world.entity.LivingEntity;
@@ -17,14 +17,14 @@ public class SpellAttackGoal extends Goal {
     private static final int RETREAT_HEIGHT = 3;
     private static final int REPATH_TICKS = 10;
 
-    private final NobleMageEntity mage;
+    private final EnemyMageEntity mage;
     private final double speedModifier;
 
     private int cooldown;
     private int repathDelay;
     private int pendingCastTicks;
 
-    public SpellAttackGoal(NobleMageEntity mage, double speedModifier) {
+    public SpellAttackGoal(EnemyMageEntity mage, double speedModifier) {
         this.mage = mage;
         this.speedModifier = speedModifier;
         this.setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));

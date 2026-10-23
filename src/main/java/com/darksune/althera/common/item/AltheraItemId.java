@@ -8,7 +8,7 @@ public class AltheraItemId {
 
     public static final ResourceLocation SUMMON_SEAL = id("summon_seal");
 
-    public static final ResourceLocation NOBLE_MAGE_SPAWN_EGG = id("noble_mage_spawn_egg");
+    public static final ResourceLocation ENEMY_MAGE_SPAWN_EGG = id("enemy_mage_spawn_egg");
 
     //Block items
     public static final ResourceLocation RITUAL_CORE = id("ritual_core");

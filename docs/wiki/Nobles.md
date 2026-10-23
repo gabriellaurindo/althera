@@ -14,7 +14,7 @@ mana. He has a player's base stats (20 health, no armor) plus **25%** of his Her
 ### Who he attacks
 - Players
 - Players' Heroes
-- Villagers
+- Villagers and wandering traders
 
 Nobles never attack each other or each other's Heroes.
 
@@ -123,9 +123,17 @@ Example (Fire Bolt, `data/althera/spell/fire_bolt.json`):
 }
 ```
 
-> **Note:** Nobles currently pick among the three built-in spells (`althera:fire_bolt`, `althera:frost_shard`,
-> `althera:lightning_strike`). A datapack can change how they behave by overriding those files; new spell files load
-> but are not used by anyone yet.
+Nobles pick among the three built-in spells (`althera:fire_bolt`, `althera:frost_shard`, `althera:lightning_strike`).
+A datapack can change how they behave by overriding those files, or give new spells to a mage through its `spells`
+list.
+
+---
+
+## 🛠 Customizing Nobles
+
+The Noble himself is data-driven: `data/althera/enemy_mage/noble.json` holds his stats, spells, targets, Hero,
+robes, Command Seals, Ultimate trigger and shrine settings. A datapack can override it, or add new enemy mages of
+other factions with their own shrines. See [Creating Custom Enemy Mages](Creating-Custom-Enemy-Mages).
 
 ---
 
@@ -134,3 +142,4 @@ Example (Fire Bolt, `data/althera/spell/fire_bolt.json`):
 - [Core Systems](Core-Systems)
 - [Command Seals & Ultimates](Command-Seals-and-Ultimates)
 - [Creating Custom Ultimates](Creating-Custom-Ultimates)
+- [Creating Custom Enemy Mages](Creating-Custom-Enemy-Mages)

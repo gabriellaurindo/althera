@@ -3,8 +3,9 @@ package com.darksune.althera.common.entity;
 import com.darksune.althera.common.ai.goal.SpellAttackGoal;
 import com.darksune.althera.common.block.entity.NobleSigilBlockEntity;
 import com.darksune.althera.common.commandseal.skill.OverdriveCommandSealSkill;
+import com.darksune.althera.common.enemy.EnemyMageDefinition;
+import com.darksune.althera.common.enemy.EnemyMageRegistry;
 import com.darksune.althera.common.hero.HeroDefinition;
-import com.darksune.althera.common.hero.HeroRank;
 import com.darksune.althera.common.hero.HeroRegistry;
 import com.darksune.althera.common.spell.SpellDefinition;
 import com.darksune.althera.common.spell.SpellRegistry;
@@ -14,8 +15,10 @@ import com.darksune.althera.common.ultimate.UltimateRegistry;
 import com.darksune.althera.common.ultimate.effect.UltimateContext;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -24,6 +27,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
@@ -42,7 +46,6 @@ import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.monster.Enemy;
-import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
@@ -51,41 +54,25 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class NobleMageEntity extends CasterMob implements Enemy, HeroSummoner {
+public class EnemyMageEntity extends CasterMob implements Enemy, HeroSummoner {
 
+    private static final EntityDataAccessor<String> DEFINITION =
+            SynchedEntityData.defineId(EnemyMageEntity.class, EntityDataSerializers.STRING);
     private static final EntityDataAccessor<Integer> CAST_TICKS =
-            SynchedEntityData.defineId(NobleMageEntity.class, EntityDataSerializers.INT);
+            SynchedEntityData.defineId(EnemyMageEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Boolean> SERVANT_SPIRIT =
-            SynchedEntityData.defineId(NobleMageEntity.class, EntityDataSerializers.BOOLEAN);
+            SynchedEntityData.defineId(EnemyMageEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Integer> SERVANT_LEVEL =
-            SynchedEntityData.defineId(NobleMageEntity.class, EntityDataSerializers.INT);
+            SynchedEntityData.defineId(EnemyMageEntity.class, EntityDataSerializers.INT);
 
-    private static final List<ResourceLocation> SPELLS = List.of(
-            ResourceLocation.fromNamespaceAndPath("althera", "fire_bolt"),
-            ResourceLocation.fromNamespaceAndPath("althera", "frost_shard"),
-            ResourceLocation.fromNamespaceAndPath("althera", "lightning_strike")
-    );
-    public static final List<Integer> SERVANT_LEVELS = List.of(20, 30, 40);
-    private static final double BASE_HEALTH = 20.0D;
-    private static final double BASE_ATTACK = 1.0D;
-    private static final double BASE_ARMOR = 0.0D;
-    private static final double SERVANT_STAT_SHARE = 0.25D;
-    private static final int RECALL_AFTER_TICKS = 200;
-    private static final int SPIRIT_REGEN_INTERVAL = 40;
-    private static final float MAGE_DAMAGE_SHARE = 0.25F;
+    private static final int DEFAULT_SERVANT_LEVEL = 20;
     private static final int CAST_POSE_EXTRA_TICKS = 5;
     private static final Vec3 HAND_OFFSET = new Vec3(0.35D, 1.35D, 0.6D);
-    private static final int SEAL_CHARGES = 3;
-    private static final int REVIVE_DELAY_TICKS = 20;
-    private static final float ULTIMATE_HEALTH_RATIO = 0.5F;
-    private static final float OVERDRIVE_HEALTH_RATIO = 0.3F;
-    private static final float HEAL_HEALTH_RATIO = 0.2F;
-    private static final int SIGIL_RADIUS = 16;
     private static final int SIGIL_CHECK_INTERVAL = 100;
 
     @Nullable
     private ResourceLocation servantHeroId;
-    private int servantLevel = SERVANT_LEVELS.getFirst();
+    private int servantLevel = DEFAULT_SERVANT_LEVEL;
     private float servantHealth = -1.0F;
     private boolean servantFallen;
     @Nullable
@@ -95,7 +82,7 @@ public class NobleMageEntity extends CasterMob implements Enemy, HeroSummoner {
     @Nullable
     private BlockPos sigilPos;
     private int ticksWithoutTarget;
-    private int sealCharges = SEAL_CHARGES;
+    private int sealCharges;
     private boolean healUsed;
     private boolean reviveUsed;
     private boolean overdriveUsed;
@@ -105,32 +92,36 @@ public class NobleMageEntity extends CasterMob implements Enemy, HeroSummoner {
     private int overdriveTicks;
     private int ultimateTicks;
 
-    public NobleMageEntity(EntityType<? extends PathfinderMob> type, Level level) {
+    public EnemyMageEntity(EntityType<? extends PathfinderMob> type, Level level) {
         super(type, level);
-        this.xpReward = 60;
+        this.xpReward = EnemyMageDefinition.Stats.DEFAULT.xp();
         this.setPersistenceRequired();
     }
 
     public static AttributeSupplier.Builder createAttributes() {
+        final EnemyMageDefinition.Stats stats = EnemyMageDefinition.Stats.DEFAULT;
         return PathfinderMob.createMobAttributes()
-                .add(Attributes.MAX_HEALTH, BASE_HEALTH)
-                .add(Attributes.ARMOR, BASE_ARMOR)
-                .add(Attributes.MOVEMENT_SPEED, 0.3D)
-                .add(Attributes.FOLLOW_RANGE, 24.0D)
-                .add(Attributes.ATTACK_DAMAGE, BASE_ATTACK);
+                .add(Attributes.MAX_HEALTH, stats.health())
+                .add(Attributes.ARMOR, stats.armor())
+                .add(Attributes.MOVEMENT_SPEED, stats.speed())
+                .add(Attributes.FOLLOW_RANGE, stats.followRange())
+                .add(Attributes.ATTACK_DAMAGE, stats.attack());
     }
 
-    public static boolean isPureblood(final Entity entity) {
-        return entity instanceof NobleMageEntity
-                || entity instanceof HeroEntity hero && hero.getSummoner() instanceof NobleMageEntity;
+    @Nullable
+    public static ResourceLocation getFaction(final Entity entity) {
+        if (entity instanceof EnemyMageEntity mage) return mage.getFaction();
+        if (entity instanceof HeroEntity hero && hero.getSummoner() instanceof EnemyMageEntity mage) return mage.getFaction();
+        return null;
     }
 
     @Override
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
         super.defineSynchedData(builder);
+        builder.define(DEFINITION, EnemyMageRegistry.DEFAULT_ID.toString());
         builder.define(CAST_TICKS, 0);
         builder.define(SERVANT_SPIRIT, false);
-        builder.define(SERVANT_LEVEL, SERVANT_LEVELS.getFirst());
+        builder.define(SERVANT_LEVEL, DEFAULT_SERVANT_LEVEL);
     }
 
     @Override
@@ -143,37 +134,96 @@ public class NobleMageEntity extends CasterMob implements Enemy, HeroSummoner {
         this.goalSelector.addGoal(8, new RandomLookAroundGoal(this));
 
         this.targetSelector.addGoal(1, new HurtByTargetGoal(this).setAlertOthers());
-        this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, true));
-        this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, HeroEntity.class, true));
-        this.targetSelector.addGoal(4, new NearestAttackableTargetGoal<>(this, AbstractVillager.class, true));
+        this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, LivingEntity.class, 10, true, false,
+                this::isTargetType));
+    }
+
+    private boolean isTargetType(final LivingEntity entity) {
+        final EnemyMageDefinition definition = getDefinition();
+        if (definition == null) return false;
+
+        for (final var target : definition.targets()) {
+            if (target.tag()
+                    ? entity.getType().is(TagKey.create(Registries.ENTITY_TYPE, target.id()))
+                    : EntityType.getKey(entity.getType()).equals(target.id())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public ResourceLocation getDefinitionId() {
+        final ResourceLocation id = ResourceLocation.tryParse(this.entityData.get(DEFINITION));
+        return id != null ? id : EnemyMageRegistry.DEFAULT_ID;
+    }
+
+    public void setDefinition(final ResourceLocation id) {
+        this.entityData.set(DEFINITION, id.toString());
+    }
+
+    @Nullable
+    public EnemyMageDefinition getDefinition() {
+        return EnemyMageRegistry.getOrDefault(getDefinitionId());
+    }
+
+    @Nullable
+    public ResourceLocation getFaction() {
+        final EnemyMageDefinition definition = getDefinition();
+        return definition == null ? null : definition.faction();
+    }
+
+    @Override
+    protected Component getTypeName() {
+        final EnemyMageDefinition definition = getDefinition();
+        return definition == null ? super.getTypeName() : Component.literal(definition.name());
     }
 
     @Nullable
     @Override
     public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, MobSpawnType spawnType,
                                         @Nullable SpawnGroupData spawnGroupData) {
-        final List<HeroDefinition> candidates = HeroRegistry.getRollable().stream()
-                .filter(hero -> hero.getRank() == HeroRank.EX)
-                .toList();
-        if (candidates.isEmpty()) {
-            servantFallen = true;
-        } else {
-            servantHeroId = candidates.get(random.nextInt(candidates.size())).getId();
+        final EnemyMageDefinition definition = getDefinition();
+        if (definition != null) {
+            final List<HeroDefinition> candidates = getServantCandidates(definition.servant());
+            if (candidates.isEmpty()) {
+                servantFallen = true;
+            } else {
+                servantHeroId = candidates.get(random.nextInt(candidates.size())).getId();
+            }
+            final List<EnemyMageDefinition.Tier> tiers = definition.tiers();
+            setServantLevel(tiers.get(random.nextInt(tiers.size())).level());
+            spellId = definition.spells().get(random.nextInt(definition.spells().size()));
+            applyStats(definition);
         }
-        setServantLevel(SERVANT_LEVELS.get(random.nextInt(SERVANT_LEVELS.size())));
-        spellId = SPELLS.get(random.nextInt(SPELLS.size()));
-        applyServantShare();
         return super.finalizeSpawn(level, difficulty, spawnType, spawnGroupData);
     }
 
-    private void applyServantShare() {
-        final HeroDefinition definition = getServantDefinition();
+    private static List<HeroDefinition> getServantCandidates(final EnemyMageDefinition.Servant servant) {
+        if (!servant.heroes().isEmpty()) {
+            return servant.heroes().stream()
+                    .map(HeroRegistry::get)
+                    .filter(hero -> hero != null && hero.isRollable())
+                    .toList();
+        }
+        return HeroRegistry.getRollable().stream()
+                .filter(hero -> servant.ranks().contains(hero.getRank()))
+                .toList();
+    }
+
+    private void applyStats(final EnemyMageDefinition definition) {
+        final EnemyMageDefinition.Stats stats = definition.stats();
+        final double share = definition.servant().statShare();
+        final HeroDefinition hero = getServantDefinition();
         getAttribute(Attributes.MAX_HEALTH).setBaseValue(
-                BASE_HEALTH + SERVANT_STAT_SHARE * HeroStatsSystem.getMaxHealth(definition, servantLevel, 1.0D));
+                stats.health() + share * HeroStatsSystem.getMaxHealth(hero, servantLevel, 1.0D));
         getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(
-                BASE_ATTACK + SERVANT_STAT_SHARE * HeroStatsSystem.getAttack(definition, servantLevel, 1.0D));
+                stats.attack() + share * HeroStatsSystem.getAttack(hero, servantLevel, 1.0D));
         getAttribute(Attributes.ARMOR).setBaseValue(
-                BASE_ARMOR + SERVANT_STAT_SHARE * HeroStatsSystem.getArmor(definition, servantLevel, 1.0D));
+                stats.armor() + share * HeroStatsSystem.getArmor(hero, servantLevel, 1.0D));
+        getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(stats.speed());
+        getAttribute(Attributes.FOLLOW_RANGE).setBaseValue(stats.followRange());
+        getAttribute(Attributes.KNOCKBACK_RESISTANCE).setBaseValue(stats.knockbackResistance());
+        xpReward = stats.xp();
         setHealth(getMaxHealth());
     }
 
@@ -201,7 +251,13 @@ public class NobleMageEntity extends CasterMob implements Enemy, HeroSummoner {
 
     public void bindToSigil(final BlockPos pos) {
         sigilPos = pos.immutable();
-        restrictTo(sigilPos, SIGIL_RADIUS);
+        restrictToHome();
+    }
+
+    private void restrictToHome() {
+        final EnemyMageDefinition definition = getDefinition();
+        final int radius = definition != null ? definition.home().radius() : EnemyMageDefinition.Home.DEFAULT.radius();
+        restrictTo(sigilPos, radius);
     }
 
     private void checkSigil() {
@@ -235,7 +291,8 @@ public class NobleMageEntity extends CasterMob implements Enemy, HeroSummoner {
 
     @Override
     public boolean isAlly(final Entity entity) {
-        return isPureblood(entity);
+        final ResourceLocation faction = getFaction();
+        return faction != null && faction.equals(getFaction(entity));
     }
 
     @Override
@@ -275,6 +332,12 @@ public class NobleMageEntity extends CasterMob implements Enemy, HeroSummoner {
             return;
         }
 
+        final EnemyMageDefinition definition = getDefinition();
+        if (definition == null) {
+            discard();
+            return;
+        }
+
         if (getCastTicks() > 0) {
             this.entityData.set(CAST_TICKS, getCastTicks() - 1);
         }
@@ -286,16 +349,16 @@ public class NobleMageEntity extends CasterMob implements Enemy, HeroSummoner {
             if (isRemoved()) return;
         }
 
-        resetDailySeals();
+        resetDailySeals(definition.commandSeals());
         tickRevive();
-        tickServant();
-        tickSeals();
+        tickServant(definition.servant());
+        tickSeals(definition);
         tickUltimate();
         tickOverdrive();
         this.entityData.set(SERVANT_SPIRIT, hasServant() && servant == null);
     }
 
-    private void tickServant() {
+    private void tickServant(final EnemyMageDefinition.Servant config) {
         if (servant != null && servant.isRemoved()) {
             servant = null;
         }
@@ -307,8 +370,8 @@ public class NobleMageEntity extends CasterMob implements Enemy, HeroSummoner {
         if (servant == null) {
             if (target != null && target.isAlive()) {
                 manifestServant(target);
-            } else if (tickCount % SPIRIT_REGEN_INTERVAL == 0) {
-                servantHealth = Math.min(getServantHealth() + 1.0F, getServantMaxHealth());
+            } else if (tickCount % config.spiritRegen().intervalTicks() == 0) {
+                servantHealth = Math.min(getServantHealth() + config.spiritRegen().amount(), getServantMaxHealth());
             }
             return;
         }
@@ -317,18 +380,18 @@ public class NobleMageEntity extends CasterMob implements Enemy, HeroSummoner {
 
         if (target != null && servant.getTarget() == null) {
             servant.commandAttack(target);
-        } else if (ticksWithoutTarget >= RECALL_AFTER_TICKS && servant.getTarget() == null
+        } else if (ticksWithoutTarget >= config.recallTicks() && servant.getTarget() == null
                 && ultimateTicks == 0 && overdriveTicks == 0) {
             recallServant();
         }
     }
 
-    private void resetDailySeals() {
+    private void resetDailySeals(final EnemyMageDefinition.CommandSeals seals) {
         final long day = level().getDayTime() / 24000L;
         if (day == lastDay) return;
 
         lastDay = day;
-        sealCharges = SEAL_CHARGES;
+        sealCharges = seals.charges();
         healUsed = false;
         reviveUsed = false;
         overdriveUsed = false;
@@ -341,19 +404,27 @@ public class NobleMageEntity extends CasterMob implements Enemy, HeroSummoner {
         return true;
     }
 
-    private void tickSeals() {
+    private void tickSeals(final EnemyMageDefinition definition) {
         if (!hasServant()) return;
 
         final float healthRatio = getServantHealth() / getServantMaxHealth();
 
-        if (!ultimateUsed && healthRatio <= ULTIMATE_HEALTH_RATIO) {
+        if (!ultimateUsed && definition.ultimate().filter(ultimate -> healthRatio <= ultimate.healthRatio()).isPresent()) {
             startUltimate();
         }
 
-        if (!overdriveUsed && reviveUsed && healthRatio <= OVERDRIVE_HEALTH_RATIO && useSealCharge()) {
+        final EnemyMageDefinition.CommandSeals seals = definition.commandSeals();
+        final boolean overdriveReady = !overdriveUsed && seals.overdrive()
+                .filter(overdrive -> (reviveUsed || !overdrive.afterRevive()) && healthRatio <= overdrive.healthRatio())
+                .isPresent();
+        final boolean healReady = !healUsed && seals.heal()
+                .filter(heal -> healthRatio <= heal.healthRatio())
+                .isPresent();
+
+        if (overdriveReady && useSealCharge()) {
             overdriveUsed = true;
             startOverdrive();
-        } else if (!healUsed && healthRatio <= HEAL_HEALTH_RATIO && useSealCharge()) {
+        } else if (healReady && useSealCharge()) {
             healUsed = true;
             healServant();
         }
@@ -507,13 +578,15 @@ public class NobleMageEntity extends CasterMob implements Enemy, HeroSummoner {
 
     @Override
     public boolean hurt(final DamageSource source, final float amount) {
-        if (level().isClientSide || !hasServant() || source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
+        final EnemyMageDefinition definition = getDefinition();
+        if (level().isClientSide || definition == null || !hasServant() || source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
             return super.hurt(source, amount);
         }
 
-        if (!super.hurt(source, amount * MAGE_DAMAGE_SHARE)) return false;
+        final float servantShare = definition.servant().damageShare();
+        if (!super.hurt(source, amount * (1.0F - servantShare))) return false;
 
-        damageServant(amount * (1.0F - MAGE_DAMAGE_SHARE));
+        damageServant(amount * servantShare);
 
         if (hasServant() && source.getEntity() instanceof LivingEntity attacker && canAttack(attacker)) {
             if (servant != null) {
@@ -555,9 +628,11 @@ public class NobleMageEntity extends CasterMob implements Enemy, HeroSummoner {
         overdriveTicks = 0;
         ultimateTicks = 0;
 
-        if (!reviveUsed && useSealCharge()) {
+        final EnemyMageDefinition definition = getDefinition();
+        final var revive = definition == null ? null : definition.commandSeals().revive().orElse(null);
+        if (revive != null && !reviveUsed && useSealCharge()) {
             reviveUsed = true;
-            reviveTicks = REVIVE_DELAY_TICKS;
+            reviveTicks = Math.max(1, revive.delayTicks());
             playSealEffects(this);
             return;
         }
@@ -589,6 +664,7 @@ public class NobleMageEntity extends CasterMob implements Enemy, HeroSummoner {
     @Override
     public void addAdditionalSaveData(CompoundTag compound) {
         super.addAdditionalSaveData(compound);
+        compound.putString("Definition", getDefinitionId().toString());
         if (servantHeroId != null) {
             compound.putString("ServantHero", servantHeroId.toString());
         }
@@ -614,6 +690,12 @@ public class NobleMageEntity extends CasterMob implements Enemy, HeroSummoner {
     @Override
     public void readAdditionalSaveData(CompoundTag compound) {
         super.readAdditionalSaveData(compound);
+        final ResourceLocation definitionId = ResourceLocation.tryParse(compound.getString("Definition"));
+        setDefinition(definitionId != null && EnemyMageRegistry.get(definitionId) != null ? definitionId : EnemyMageRegistry.DEFAULT_ID);
+        final EnemyMageDefinition definition = getDefinition();
+        if (definition != null) {
+            xpReward = definition.stats().xp();
+        }
         servantHeroId = compound.contains("ServantHero") ? ResourceLocation.tryParse(compound.getString("ServantHero")) : null;
         setServantLevel(compound.getInt("ServantLevel"));
         servantHealth = compound.contains("ServantHealth") ? compound.getFloat("ServantHealth") : -1.0F;
@@ -621,9 +703,9 @@ public class NobleMageEntity extends CasterMob implements Enemy, HeroSummoner {
         spellId = compound.contains("Spell") ? ResourceLocation.tryParse(compound.getString("Spell")) : null;
         sigilPos = NbtUtils.readBlockPos(compound, "Sigil").orElse(null);
         if (sigilPos != null) {
-            restrictTo(sigilPos, SIGIL_RADIUS);
+            restrictToHome();
         }
-        sealCharges = compound.contains("SealCharges") ? compound.getInt("SealCharges") : SEAL_CHARGES;
+        sealCharges = compound.getInt("SealCharges");
         healUsed = compound.getBoolean("HealUsed");
         reviveUsed = compound.getBoolean("ReviveUsed");
         overdriveUsed = compound.getBoolean("OverdriveUsed");

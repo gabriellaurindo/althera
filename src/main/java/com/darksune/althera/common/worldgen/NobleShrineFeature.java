@@ -1,6 +1,7 @@
 package com.darksune.althera.common.worldgen;
 
 import com.darksune.althera.common.block.AltheraBlocks;
+import com.darksune.althera.common.block.entity.NobleSigilBlockEntity;
 import com.mojang.serialization.Codec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.tags.BlockTags;
@@ -10,21 +11,20 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
-import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 
-public class NobleShrineFeature extends Feature<NoneFeatureConfiguration> {
+public class NobleShrineFeature extends Feature<EnemyShrineConfiguration> {
 
     private static final int RADIUS = 3;
     private static final int CLEAR_HEIGHT = 5;
     private static final int PILLAR_HEIGHT = 3;
     private static final int MAX_SUPPORT_DEPTH = 8;
 
-    public NobleShrineFeature(Codec<NoneFeatureConfiguration> codec) {
+    public NobleShrineFeature(Codec<EnemyShrineConfiguration> codec) {
         super(codec);
     }
 
     @Override
-    public boolean place(FeaturePlaceContext<NoneFeatureConfiguration> context) {
+    public boolean place(FeaturePlaceContext<EnemyShrineConfiguration> context) {
         final WorldGenLevel level = context.level();
         final BlockPos center = context.origin().below();
         if (!isValidGround(level, center)) return false;
@@ -47,6 +47,9 @@ public class NobleShrineFeature extends Feature<NoneFeatureConfiguration> {
         }
 
         place(level, center, AltheraBlocks.NOBLE_SIGIL.get().defaultBlockState());
+        if (level.getBlockEntity(center) instanceof NobleSigilBlockEntity sigil) {
+            sigil.setMageDefinition(context.config().mage());
+        }
         return true;
     }
 

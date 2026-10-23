@@ -18,6 +18,14 @@ class DataValidator {
             'on_start', 'on_tick', 'on_end'] as Set
     static final Set<String> SPELL_KEYS = ['name', 'range', 'cooldown_ticks', 'cast_ticks', 'on_cast'] as Set
     static final Set<String> FILTER_KEYS = ['entity_tag', 'hostile', 'exclude_target'] as Set
+    static final Set<String> ENEMY_MAGE_KEYS = ['name', 'faction', 'stats', 'spells', 'targets', 'servant', 'tiers',
+            'command_seals', 'ultimate', 'home'] as Set
+    static final Set<String> ENEMY_STATS_KEYS = ['health', 'attack', 'armor', 'speed', 'follow_range', 'knockback_resistance', 'xp'] as Set
+    static final Set<String> SERVANT_KEYS = ['ranks', 'heroes', 'stat_share', 'damage_share', 'recall_ticks', 'spirit_regen'] as Set
+    static final Set<String> SPIRIT_REGEN_KEYS = ['amount', 'interval_ticks'] as Set
+    static final Set<String> TIER_KEYS = ['level', 'texture'] as Set
+    static final Set<String> COMMAND_SEALS_KEYS = ['charges', 'heal', 'revive', 'overdrive'] as Set
+    static final Set<String> HOME_KEYS = ['radius', 'respawn_ticks', 'activation_range'] as Set
 
     static final Map<String, Map<String, Boolean>> EFFECTS = [
             damage            : [target: true, filter: false, amount: false, attack_ratio: false],
@@ -253,19 +261,147 @@ class DataValidator {
         checkEffects("${where} on_cast", json.on_cast)
     }
 
+    boolean checkObject(String where, Map json, String key, Set<String> allowed) {
+        if (!json.containsKey(key)) return false
+        if (!(json[key] instanceof Map)) {
+            error(where, "'${key}' must be an object")
+            return false
+        }
+        checkKeys("${where} ${key}", json[key], allowed)
+        return true
+    }
+
+    void checkIdList(String where, Map json, String key, String folder, boolean required) {
+        if (!json.containsKey(key)) {
+            if (required) error(where, "missing '${key}'")
+            return
+        }
+        if (!(json[key] instanceof List)) {
+            error(where, "'${key}' must be a list")
+            return
+        }
+        if (required && json[key].isEmpty()) error(where, "'${key}' must not be empty")
+        json[key].each { raw ->
+            String id = toId(raw.toString(), false)
+            if (isOurs(id) && !dataFile(id, folder).exists()) error(where, "${key} entry '${id}' has no ${folder} file")
+        }
+    }
+
+    void validateEnemyMage(File file) {
+        String where = "enemy_mage/${file.name}"
+        Map json = read(file)
+        if (json == null) return
+        checkKeys(where, json, ENEMY_MAGE_KEYS)
+
+        if (!(json.faction instanceof String)) error(where, "missing 'faction'")
+        checkIdList(where, json, 'spells', 'spell', true)
+
+        if (json.containsKey('targets')) {
+            if (!(json.targets instanceof List) || json.targets.any { !(it instanceof String) }) {
+                error(where, "'targets' must be a list of entity ids or #tags")
+            }
+        }
+
+        if (checkObject(where, json, 'stats', ENEMY_STATS_KEYS)) {
+            ENEMY_STATS_KEYS.each { checkNumber("${where} stats", json.stats, it, false, 0) }
+            checkNumber("${where} stats", json.stats, 'knockback_resistance', false, 0, 1)
+        }
+
+        if (checkObject(where, json, 'servant', SERVANT_KEYS)) {
+            Map servant = json.servant
+            String at = "${where} servant"
+            (servant.ranks ?: []).each { rank ->
+                if (!RANKS.contains(rank.toString().toUpperCase(Locale.ROOT))) error(at, "unknown rank '${rank}' (${RANKS.join(', ')})")
+            }
+            checkIdList(at, servant, 'heroes', 'hero', false)
+            checkNumber(at, servant, 'stat_share', false, 0)
+            checkNumber(at, servant, 'damage_share', false, 0, 1)
+            checkNumber(at, servant, 'recall_ticks', false, 1)
+            if (checkObject(at, servant, 'spirit_regen', SPIRIT_REGEN_KEYS)) {
+                checkNumber("${at} spirit_regen", servant.spirit_regen, 'amount', false, 0)
+                checkNumber("${at} spirit_regen", servant.spirit_regen, 'interval_ticks', false, 1)
+            }
+        }
+
+        if (json.containsKey('tiers')) {
+            if (!(json.tiers instanceof List) || json.tiers.isEmpty()) {
+                error(where, "'tiers' must be a non-empty list")
+            } else {
+                json.tiers.eachWithIndex { tier, i ->
+                    String at = "${where} tiers[${i}]"
+                    if (!(tier instanceof Map)) {
+                        error(at, 'must be an object')
+                        return
+                    }
+                    checkKeys(at, tier, TIER_KEYS)
+                    checkNumber(at, tier, 'level', true, 1)
+                    if (!(tier.texture instanceof String)) {
+                        error(at, "missing 'texture'")
+                        return
+                    }
+                    String id = toId(tier.texture, false)
+                    if (isOurs(id) && !assetFile(id).exists()) error(at, "texture file not found: assets/${id.replace(':', '/')}")
+                }
+            }
+        }
+
+        if (checkObject(where, json, 'command_seals', COMMAND_SEALS_KEYS)) {
+            Map seals = json.command_seals
+            String at = "${where} command_seals"
+            checkNumber(at, seals, 'charges', false, 0)
+            if (checkObject(at, seals, 'heal', ['health_ratio'] as Set)) checkNumber("${at} heal", seals.heal, 'health_ratio', false, 0, 1)
+            if (checkObject(at, seals, 'revive', ['delay_ticks'] as Set)) checkNumber("${at} revive", seals.revive, 'delay_ticks', false, 0)
+            if (checkObject(at, seals, 'overdrive', ['health_ratio', 'after_revive'] as Set)) {
+                checkNumber("${at} overdrive", seals.overdrive, 'health_ratio', false, 0, 1)
+                if (seals.overdrive.containsKey('after_revive') && !(seals.overdrive.after_revive instanceof Boolean)) {
+                    error("${at} overdrive", "'after_revive' must be true or false")
+                }
+            }
+        }
+
+        if (checkObject(where, json, 'ultimate', ['health_ratio'] as Set)) checkNumber("${where} ultimate", json.ultimate, 'health_ratio', false, 0, 1)
+
+        if (checkObject(where, json, 'home', HOME_KEYS)) {
+            checkNumber("${where} home", json.home, 'radius', false, 1)
+            checkNumber("${where} home", json.home, 'respawn_ticks', false, 0)
+            checkNumber("${where} home", json.home, 'activation_range', false, 1)
+        }
+    }
+
+    void validateShrine(File file) {
+        String where = "worldgen/configured_feature/${file.name}"
+        Map json = read(file)
+        if (json == null || json.type != 'althera:noble_shrine') return
+        if (!(json.config instanceof Map)) {
+            error(where, "missing 'config'")
+            return
+        }
+        checkKeys(where, json.config, ['mage'] as Set)
+        if (json.config.containsKey('mage')) {
+            if (!(json.config.mage instanceof String)) {
+                error(where, "'mage' must be an enemy mage id")
+                return
+            }
+            String id = toId(json.config.mage, false)
+            if (isOurs(id) && !dataFile(id, 'enemy_mage').exists()) error(where, "mage '${id}' has no enemy_mage file")
+        }
+    }
+
     List<String> run() {
         File data = new File(resources, 'data/althera')
         new File(data, 'hero_class').listFiles({ it.name.endsWith('.json') } as FileFilter)?.sort()?.each { validateClass(it) }
         new File(data, 'ultimate').listFiles({ it.name.endsWith('.json') } as FileFilter)?.sort()?.each { validateUltimate(it) }
         new File(data, 'hero').listFiles({ it.name.endsWith('.json') } as FileFilter)?.sort()?.each { validateHero(it) }
         new File(data, 'spell').listFiles({ it.name.endsWith('.json') } as FileFilter)?.sort()?.each { validateSpell(it) }
+        new File(data, 'enemy_mage').listFiles({ it.name.endsWith('.json') } as FileFilter)?.sort()?.each { validateEnemyMage(it) }
+        new File(data, 'worldgen/configured_feature').listFiles({ it.name.endsWith('.json') } as FileFilter)?.sort()?.each { validateShrine(it) }
         return errors
     }
 }
 
 tasks.register('validateData') {
     group = 'verification'
-    description = 'Checks the hero, hero class, ultimate and spell JSON files for typos and broken references.'
+    description = 'Checks the hero, hero class, ultimate, spell, enemy mage and shrine JSON files for typos and broken references.'
     def resources = file('src/main/resources')
     inputs.dir(resources)
     doLast {

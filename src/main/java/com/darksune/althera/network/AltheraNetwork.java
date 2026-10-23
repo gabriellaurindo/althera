@@ -4,6 +4,7 @@ import com.darksune.althera.network.packet.DisguisePacket;
 import com.darksune.althera.network.packet.OpenHeroSelectionPacket;
 import com.darksune.althera.network.packet.SelectHeroPacket;
 import com.darksune.althera.network.packet.SummonPacket;
+import com.darksune.althera.network.packet.SyncEnemyMagesPacket;
 import com.darksune.althera.network.packet.SyncHeroClassesPacket;
 import com.darksune.althera.network.packet.SyncHeroesPacket;
 import com.darksune.althera.network.packet.SyncUltimatesPacket;
@@ -23,7 +24,7 @@ public final class AltheraNetwork {
 
     private static void registerPayloads(RegisterPayloadHandlersEvent event) {
 
-        var registrar = event.registrar("6");
+        var registrar = event.registrar("7");
 
         registrar.playToServer(
                 SummonPacket.TYPE,
@@ -77,6 +78,12 @@ public final class AltheraNetwork {
                 SyncUltimatesPacket.TYPE,
                 SyncUltimatesPacket.STREAM_CODEC,
                 SyncUltimatesPacket::handle
+        );
+
+        registrar.playToClient(
+                SyncEnemyMagesPacket.TYPE,
+                SyncEnemyMagesPacket.STREAM_CODEC,
+                SyncEnemyMagesPacket::handle
         );
 
         registrar.playToClient(

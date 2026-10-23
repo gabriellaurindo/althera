@@ -15,6 +15,7 @@ This wiki contains detailed explanations of the mod’s systems, mechanics, and 
 - [Creating Custom Heroes](Creating-Custom-Heroes)
 - [Creating Custom Ultimates](Creating-Custom-Ultimates)
 - [Nobles](Nobles)
+- [Creating Custom Enemy Mages](Creating-Custom-Enemy-Mages)
 - More systems coming soon...
 
 ---
