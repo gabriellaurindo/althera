@@ -22,6 +22,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
@@ -49,6 +50,7 @@ import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
+import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
@@ -176,6 +178,16 @@ public class EnemyMageEntity extends CasterMob implements Enemy, HeroSummoner {
     protected Component getTypeName() {
         final EnemyMageDefinition definition = getDefinition();
         return definition == null ? super.getTypeName() : Component.literal(definition.name());
+    }
+
+    @Override
+    protected ResourceKey<LootTable> getDefaultLootTable() {
+        final EnemyMageDefinition definition = getDefinition();
+        return definition == null
+                ? super.getDefaultLootTable()
+                : definition.lootTableFor(servantLevel)
+                        .map(id -> ResourceKey.create(Registries.LOOT_TABLE, id))
+                        .orElseGet(super::getDefaultLootTable);
     }
 
     @Nullable
@@ -578,6 +590,10 @@ public class EnemyMageEntity extends CasterMob implements Enemy, HeroSummoner {
 
     @Override
     public boolean hurt(final DamageSource source, final float amount) {
+        if (!level().isClientSide && source.getEntity() instanceof HeroEntity hero && hero.getOwner() instanceof Player player) {
+            setLastHurtByPlayer(player);
+        }
+
         final EnemyMageDefinition definition = getDefinition();
         if (level().isClientSide || definition == null || !hasServant() || source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
             return super.hurt(source, amount);

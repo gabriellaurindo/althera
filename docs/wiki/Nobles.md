@@ -69,6 +69,20 @@ Seals and the Ultimate come back each new day, like a player's.
 
 ---
 
+## 💎 Reward
+
+A Noble slain by a player or a player's Hero drops a reward that grows with his robe:
+
+| Robe | Drop |
+|---|---|
+| 🟩 Green | 1 diamond |
+| 🟨 Yellow | 3-4 diamonds |
+| 🟥 Red | 1 diamond block |
+
+Nobles killed by anything else (iron golems, other mobs, lava...) drop nothing.
+
+---
+
 ## 🏛 Noble Shrines
 
 Nobles only appear at **Noble shrines**: rare quartz platforms in the Overworld with four quartz pillars topped with

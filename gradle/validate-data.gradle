@@ -19,11 +19,11 @@ class DataValidator {
     static final Set<String> SPELL_KEYS = ['name', 'range', 'cooldown_ticks', 'cast_ticks', 'on_cast'] as Set
     static final Set<String> FILTER_KEYS = ['entity_tag', 'hostile', 'exclude_target'] as Set
     static final Set<String> ENEMY_MAGE_KEYS = ['name', 'faction', 'stats', 'spells', 'targets', 'servant', 'tiers',
-            'command_seals', 'ultimate', 'home'] as Set
+            'command_seals', 'ultimate', 'home', 'loot_table'] as Set
     static final Set<String> ENEMY_STATS_KEYS = ['health', 'attack', 'armor', 'speed', 'follow_range', 'knockback_resistance', 'xp'] as Set
     static final Set<String> SERVANT_KEYS = ['ranks', 'heroes', 'stat_share', 'damage_share', 'recall_ticks', 'spirit_regen'] as Set
     static final Set<String> SPIRIT_REGEN_KEYS = ['amount', 'interval_ticks'] as Set
-    static final Set<String> TIER_KEYS = ['level', 'texture'] as Set
+    static final Set<String> TIER_KEYS = ['level', 'texture', 'loot_table'] as Set
     static final Set<String> COMMAND_SEALS_KEYS = ['charges', 'heal', 'revive', 'overdrive'] as Set
     static final Set<String> HOME_KEYS = ['radius', 'respawn_ticks', 'activation_range'] as Set
 
@@ -335,6 +335,7 @@ class DataValidator {
                     }
                     checkKeys(at, tier, TIER_KEYS)
                     checkNumber(at, tier, 'level', true, 1)
+                    checkLootTable(at, tier)
                     if (!(tier.texture instanceof String)) {
                         error(at, "missing 'texture'")
                         return
@@ -366,6 +367,18 @@ class DataValidator {
             checkNumber("${where} home", json.home, 'respawn_ticks', false, 0)
             checkNumber("${where} home", json.home, 'activation_range', false, 1)
         }
+
+        checkLootTable(where, json)
+    }
+
+    void checkLootTable(String where, Map json) {
+        if (!json.containsKey('loot_table')) return
+        if (!(json.loot_table instanceof String)) {
+            error(where, "'loot_table' must be a loot table id")
+            return
+        }
+        String id = toId(json.loot_table, false)
+        if (isOurs(id) && !dataFile(id, 'loot_table').exists()) error(where, "loot_table '${id}' has no loot_table file")
     }
 
     void validateShrine(File file) {

@@ -21,7 +21,8 @@ and generates the GitHub Release, CurseForge and Discord notes from it.
   Each day he has three Command Seals: he heals his hero when it drops to 20% health, revives it once when it
   falls and, after that, overdrives it at 30% health (stronger, tougher and faster for 30 seconds, then it falls for
   good). When his hero drops to half health he casts its own Ultimate, once per day. If his hero falls for good, it
-  never comes back.
+  never comes back. A Noble slain by a player or their hero drops a reward based on his robe: 1 diamond (green),
+  3-4 diamonds (yellow) or a diamond block (red).
 - **Noble shrines**: rare quartz and gold platforms in the Overworld, with four lantern-topped pillars and a **Noble
   Sigil** in the middle. A Noble guards each shrine and stays near it; when he is slain, a new Noble (with a new hero
   and spell) appears one in-game day later, as soon as a player comes close. The sigil can be found in the creative tab.

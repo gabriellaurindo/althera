@@ -13,9 +13,9 @@
     "spirit_regen": { "amount": 1, "interval_ticks": 40 }
   },
   "tiers": [
-    { "level": 20, "texture": "althera:textures/entity/noble_mage_green.png" },
-    { "level": 30, "texture": "althera:textures/entity/noble_mage_yellow.png" },
-    { "level": 40, "texture": "althera:textures/entity/noble_mage_red.png" }
+    { "level": 20, "texture": "althera:textures/entity/noble_mage_green.png", "loot_table": "althera:entities/noble_green" },
+    { "level": 30, "texture": "althera:textures/entity/noble_mage_yellow.png", "loot_table": "althera:entities/noble_yellow" },
+    { "level": 40, "texture": "althera:textures/entity/noble_mage_red.png", "loot_table": "althera:entities/noble_red" }
   ],
   "command_seals": {
     "charges": 3,

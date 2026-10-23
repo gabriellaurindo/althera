@@ -20,7 +20,8 @@ public record EnemyMageDefinition(
         List<Tier> tiers,
         CommandSeals commandSeals,
         Optional<UltimateTrigger> ultimate,
-        Home home
+        Home home,
+        Optional<ResourceLocation> lootTable
 ) {
 
     public static final List<ExtraCodecs.TagOrElementLocation> DEFAULT_TARGETS = List.of(
@@ -31,9 +32,9 @@ public record EnemyMageDefinition(
     );
 
     public static final List<Tier> DEFAULT_TIERS = List.of(
-            new Tier(20, texture("noble_mage_green")),
-            new Tier(30, texture("noble_mage_yellow")),
-            new Tier(40, texture("noble_mage_red"))
+            new Tier(20, texture("noble_mage_green"), Optional.empty()),
+            new Tier(30, texture("noble_mage_yellow"), Optional.empty()),
+            new Tier(40, texture("noble_mage_red"), Optional.empty())
     );
 
     public static final Codec<EnemyMageDefinition> CODEC = RecordCodecBuilder.create(instance -> instance.group(
@@ -46,8 +47,23 @@ public record EnemyMageDefinition(
             ExtraCodecs.nonEmptyList(Tier.CODEC.listOf()).optionalFieldOf("tiers", DEFAULT_TIERS).forGetter(EnemyMageDefinition::tiers),
             CommandSeals.CODEC.optionalFieldOf("command_seals", CommandSeals.NONE).forGetter(EnemyMageDefinition::commandSeals),
             UltimateTrigger.CODEC.optionalFieldOf("ultimate").forGetter(EnemyMageDefinition::ultimate),
-            Home.CODEC.optionalFieldOf("home", Home.DEFAULT).forGetter(EnemyMageDefinition::home)
+            Home.CODEC.optionalFieldOf("home", Home.DEFAULT).forGetter(EnemyMageDefinition::home),
+            ResourceLocation.CODEC.optionalFieldOf("loot_table").forGetter(EnemyMageDefinition::lootTable)
     ).apply(instance, EnemyMageDefinition::new));
+
+    public Tier tierFor(final int level) {
+        Tier match = tiers.getFirst();
+        for (final Tier tier : tiers) {
+            if (tier.level() <= level && (match.level() > level || tier.level() > match.level())) {
+                match = tier;
+            }
+        }
+        return match;
+    }
+
+    public Optional<ResourceLocation> lootTableFor(final int level) {
+        return tierFor(level).lootTable().or(this::lootTable);
+    }
 
     private static ExtraCodecs.TagOrElementLocation element(final String namespace, final String path) {
         return new ExtraCodecs.TagOrElementLocation(ResourceLocation.fromNamespaceAndPath(namespace, path), false);
@@ -98,11 +114,12 @@ public record EnemyMageDefinition(
         ).apply(instance, Servant::new));
     }
 
-    public record Tier(int level, ResourceLocation texture) {
+    public record Tier(int level, ResourceLocation texture, Optional<ResourceLocation> lootTable) {
 
         public static final Codec<Tier> CODEC = RecordCodecBuilder.create(instance -> instance.group(
                 ExtraCodecs.POSITIVE_INT.fieldOf("level").forGetter(Tier::level),
-                ResourceLocation.CODEC.fieldOf("texture").forGetter(Tier::texture)
+                ResourceLocation.CODEC.fieldOf("texture").forGetter(Tier::texture),
+                ResourceLocation.CODEC.optionalFieldOf("loot_table").forGetter(Tier::lootTable)
         ).apply(instance, Tier::new));
     }
 

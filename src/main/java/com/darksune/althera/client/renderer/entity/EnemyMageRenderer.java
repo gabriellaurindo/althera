@@ -21,13 +21,6 @@ public class EnemyMageRenderer extends HumanoidMobRenderer<EnemyMageEntity, Enem
         final EnemyMageDefinition definition = entity.getDefinition();
         if (definition == null) return FALLBACK;
 
-        final int level = entity.getServantLevel();
-        EnemyMageDefinition.Tier match = definition.tiers().getFirst();
-        for (final EnemyMageDefinition.Tier tier : definition.tiers()) {
-            if (tier.level() <= level && (match.level() > level || tier.level() > match.level())) {
-                match = tier;
-            }
-        }
-        return match.texture();
+        return definition.tierFor(entity.getServantLevel()).texture();
     }
 }

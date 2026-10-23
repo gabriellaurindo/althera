@@ -40,9 +40,9 @@ Only `faction` and `spells` are required. Every other field falls back to the No
     "spirit_regen": { "amount": 1, "interval_ticks": 40 }
   },
   "tiers": [
-    { "level": 20, "texture": "althera:textures/entity/noble_mage_green.png" },
-    { "level": 30, "texture": "althera:textures/entity/noble_mage_yellow.png" },
-    { "level": 40, "texture": "althera:textures/entity/noble_mage_red.png" }
+    { "level": 20, "texture": "althera:textures/entity/noble_mage_green.png", "loot_table": "althera:entities/noble_green" },
+    { "level": 30, "texture": "althera:textures/entity/noble_mage_yellow.png", "loot_table": "althera:entities/noble_yellow" },
+    { "level": 40, "texture": "althera:textures/entity/noble_mage_red.png", "loot_table": "althera:entities/noble_red" }
   ],
   "command_seals": {
     "charges": 3,
@@ -67,6 +67,7 @@ Only `faction` and `spells` are required. Every other field falls back to the No
 | `faction` | required | Faction id. Mages of the same faction (and their Heroes) never fight each other |
 | `spells` | required | Spell ids. Each mage picks **one** of them at random when it appears (see [Nobles](Nobles#-custom-spells-datapacks)) |
 | `targets` | Noble's list | Entity type ids or `#tags` the mage attacks. The nearest one is chosen. Heroes of the same faction are never targeted |
+| `loot_table` | none | Loot table dropped when the mage is slain, used by tiers without their own `loot_table` (a regular `minecraft:entity` loot table in `data/<namespace>/loot_table/`). Leave both out and the mage drops nothing |
 
 ## `stats`
 
@@ -101,7 +102,11 @@ If no Hero matches, the mage fights alone.
 ## `tiers`
 
 One tier is picked at random when the mage appears. `level` is its Hero's level and `texture` is the mage's skin: a
-64 x 64 player skin (same layout as a Minecraft skin).
+64 x 64 player skin (same layout as a Minecraft skin). The optional `loot_table` is what that tier drops, so tougher
+tiers can give better rewards; without it the mage's own `loot_table` is used.
+
+A kill by a player's Hero counts as a kill by that player, so loot tables can use the vanilla
+`minecraft:killed_by_player` condition (the Noble's do) to stop iron golem or other mob farms.
 
 ## `command_seals`
 
