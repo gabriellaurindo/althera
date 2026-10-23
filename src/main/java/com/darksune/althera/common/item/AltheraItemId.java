@@ -8,8 +8,11 @@ public class AltheraItemId {
 
     public static final ResourceLocation SUMMON_SEAL = id("summon_seal");
 
+    public static final ResourceLocation NOBLE_MAGE_SPAWN_EGG = id("noble_mage_spawn_egg");
+
     //Block items
     public static final ResourceLocation RITUAL_CORE = id("ritual_core");
+    public static final ResourceLocation NOBLE_SIGIL = id("noble_sigil");
 
     public static ResourceLocation id(final String name) {
         return ResourceLocation.fromNamespaceAndPath(MOD_ID, name);

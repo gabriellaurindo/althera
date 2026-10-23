@@ -1,6 +1,6 @@
 package com.darksune.althera.common.ultimate.effect;
 
-import com.darksune.althera.common.entity.HeroEntity;
+import com.darksune.althera.common.entity.CasterMob;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -21,7 +21,7 @@ public record DashEffect(double distance) implements UltimateEffect {
     @Override
     public void apply(UltimateContext context) {
 
-        HeroEntity hero = context.hero();
+        CasterMob hero = context.caster();
         Vec3 end = context.reach(distance);
         float yaw = (float) (Mth.atan2(context.direction().z, context.direction().x) * Mth.RAD_TO_DEG) - 90.0F;
 

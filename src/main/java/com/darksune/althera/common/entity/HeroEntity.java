@@ -14,8 +14,6 @@ import com.darksune.althera.common.hero.HeroAttack;
 import com.darksune.althera.common.hero.HeroDefinition;
 import com.darksune.althera.common.hero.HeroRegistry;
 import com.darksune.althera.common.hero.HeroStats;
-import com.darksune.althera.common.ultimate.effect.UltimateContext;
-import com.darksune.althera.common.ultimate.effect.UltimateEffect;
 import com.darksune.althera.common.system.HeroStatsSystem;
 import com.darksune.althera.common.system.HeroSummonSystem;
 import net.minecraft.core.BlockPos;
@@ -46,12 +44,9 @@ import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.ai.navigation.WaterBoundPathNavigation;
 import net.minecraft.world.entity.ai.util.DefaultRandomPos;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.level.pathfinder.PathType;
-import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib.animatable.GeoEntity;
@@ -70,7 +65,7 @@ import java.util.function.Predicate;
 
 import static com.darksune.althera.common.util.LightOrbUtil.habilitarEspirito;
 
-public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntity {
+public class HeroEntity extends CasterMob implements GeoEntity, OwnableEntity {
 
     private static final EntityDataAccessor<String> HERO_ID =
             SynchedEntityData.defineId(
@@ -102,6 +97,8 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
 
     private UUID ownerUuid;
+    @Nullable
+    private HeroSummoner summoner;
     @Nullable
     private ResourceLocation heroId;
     private int dodgeTick = -1;
@@ -136,7 +133,19 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
         this.ownerUuid = ownerUuid;
     }
 
-    public Player getOwner() {
+    public void setSummoner(final HeroSummoner summoner) {
+        this.summoner = summoner;
+    }
+
+    @Nullable
+    public HeroSummoner getSummoner() {
+        return summoner;
+    }
+
+    @Nullable
+    @Override
+    public LivingEntity getOwner() {
+        if (summoner != null) return summoner.asEntity();
         if (ownerUuid == null) return null;
         return this.level().getPlayerByUUID(ownerUuid);
     }
@@ -147,7 +156,7 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
     @Nullable
     public Player findOwner() {
         if (ownerUuid == null || !(level() instanceof ServerLevel serverLevel)) {
-            return getOwner();
+            return ownerUuid == null ? null : level().getPlayerByUUID(ownerUuid);
         }
         return serverLevel.getServer().getPlayerList().getPlayer(ownerUuid);
     }
@@ -218,13 +227,10 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
         applyEffects(getAttack().onHit(), target, position);
     }
 
-    public void applyEffects(final List<UltimateEffect> effects, @Nullable final LivingEntity target,
-                             @Nullable final Vec3 impact) {
-        final Player owner = findOwner();
-        if (owner == null || effects.isEmpty()) return;
-
-        final UltimateContext context = UltimateContext.attack(owner, this, target, impact);
-        effects.forEach(effect -> effect.apply(context));
+    @Nullable
+    @Override
+    public LivingEntity getEffectOwner() {
+        return summoner != null ? summoner.asEntity() : findOwner();
     }
 
     @Override
@@ -236,23 +242,9 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
         return hurt;
     }
 
+    @Override
     public Vec3 getProjectileOrigin() {
-        final Vec3 offset = getAttack().projectileOrigin().scale(getModelScale());
-        final float yaw = yBodyRot * Mth.DEG_TO_RAD;
-        final double sin = Mth.sin(yaw);
-        final double cos = Mth.cos(yaw);
-        final Vec3 center = getBoundingBox().getCenter();
-        final Vec3 origin = position().add(
-                -cos * offset.x - sin * offset.z,
-                offset.y,
-                -sin * offset.x + cos * offset.z
-        );
-        final BlockHitResult wall = level().clip(
-                new ClipContext(center, origin, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, this)
-        );
-        return wall.getType() == HitResult.Type.MISS
-                ? origin
-                : wall.getLocation().subtract(origin.subtract(center).normalize().scale(0.2D));
+        return bodyRelativePoint(getAttack().projectileOrigin().scale(getModelScale()));
     }
 
     public void markAsBenchmark() {
@@ -266,7 +258,7 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
 
     @Override
     public boolean shouldBeSaved() {
-        return !benchmark && super.shouldBeSaved();
+        return !benchmark && summoner == null && super.shouldBeSaved();
     }
 
     public int getAttackAnimationTicks() {
@@ -346,6 +338,7 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
         );
     }
 
+    @Override
     public void triggerUltimateAnimation() {
         triggerAnim(ULTIMATE_CONTROLLER, ULTIMATE_ANIMATION);
     }
@@ -448,6 +441,11 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
             setAttackAnimationTicks(getAttackAnimationTicks() - 1);
         }
 
+        if (summoner != null) {
+            tickServant(summoner.asEntity());
+            return;
+        }
+
         final Player owner = findOwner();
         if (owner == null) {
             // owner offline: don't leave the hero abandoned in the world
@@ -520,13 +518,41 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
         this.targetSelector.addGoal(5, new EngageThreatsGoal(this));
     }
 
+    private void tickServant(final LivingEntity master) {
+        if (master.isRemoved() || !master.isAlive() || master.level() != level()) {
+            discard();
+            return;
+        }
+        handleTeleport(master);
+    }
+
+    public void commandAttack(final LivingEntity target) {
+        if (target == this || !canAttack(target)) return;
+        setTarget(target);
+    }
+
+    public static void knockBackAttacker(final LivingEntity attacker, final Entity defended) {
+        double dx = attacker.getX() - defended.getX();
+        double dz = attacker.getZ() - defended.getZ();
+        final double length = Math.sqrt(dx * dx + dz * dz);
+        if (length <= 0.001D) return;
+
+        dx /= length;
+        dz /= length;
+        attacker.push(dx * 1.2D, 0.25D, dz * 1.2D);
+        attacker.hurtMarked = true;
+    }
+
     @Override
     public boolean canAttack(final LivingEntity target) {
+        if (summoner != null && summoner.isAlly(target)) return false;
         if (target instanceof Player player && !canHarmPlayer(player)) return false;
         return super.canAttack(target);
     }
 
+    @Override
     public boolean canHarmPlayer(final Player player) {
+        if (summoner != null) return !summoner.isAlly(player);
         final Player owner = findOwner();
         return owner != null && owner != player && owner.canHarmPlayer(player);
     }
@@ -591,6 +617,11 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
             super.die(source);
             return;
         }
+        if (summoner != null) {
+            summoner.onServantDefeated(this);
+            super.die(source);
+            return;
+        }
         final Player owner = findOwner();
         if (owner != null) {
             HeroSummonSystem.handleDefeat(owner, this);
@@ -615,6 +646,7 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
     @Override
     public boolean isAlliedTo(final Entity entity) {
         if (entity == getOwner()) return true;
+        if (summoner != null && summoner.isAlly(entity)) return true;
         return super.isAlliedTo(entity);
     }
 
@@ -782,7 +814,7 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
         }
     }
 
-    private void handleTeleport(Player owner) {
+    private void handleTeleport(LivingEntity owner) {
         double distance = distanceTo(owner);
 
         if (distance > 30) {

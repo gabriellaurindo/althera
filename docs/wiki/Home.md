@@ -14,6 +14,7 @@ This wiki contains detailed explanations of the mod’s systems, mechanics, and 
 - [Ritual System](Ritual-System)
 - [Creating Custom Heroes](Creating-Custom-Heroes)
 - [Creating Custom Ultimates](Creating-Custom-Ultimates)
+- [Nobles](Nobles)
 - More systems coming soon...
 
 ---

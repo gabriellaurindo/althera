@@ -37,6 +37,14 @@ public final class AltheraEntities {
                             .clientTrackingRange(8)
                             .build("summoned"));
 
+    public static final DeferredHolder<EntityType<?>, EntityType<NobleMageEntity>> NOBLE_MAGE =
+            ENTITIES.register("noble_mage",
+                    () -> EntityType.Builder
+                            .of(NobleMageEntity::new, MobCategory.MONSTER)
+                            .sized(0.6f, 1.8f)
+                            .clientTrackingRange(10)
+                            .build("noble_mage"));
+
     public static final DeferredHolder<EntityType<?>, EntityType<HeroProjectileEntity>> HERO_PROJECTILE =
             ENTITIES.register("hero_projectile",
                     () -> EntityType.Builder

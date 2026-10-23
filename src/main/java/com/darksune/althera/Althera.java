@@ -3,12 +3,14 @@ package com.darksune.althera;
 import com.darksune.althera.common.command.AltheraCommands;
 import com.darksune.althera.common.entity.AltheraEntities;
 import com.darksune.althera.common.entity.HeroEntity;
+import com.darksune.althera.common.entity.NobleMageEntity;
 import com.darksune.althera.common.entity.SummonedEntity;
 import com.darksune.althera.common.hero.HeroClassLoader;
 import com.darksune.althera.common.hero.HeroClassRegistry;
 import com.darksune.althera.common.hero.HeroLoader;
 import com.darksune.althera.common.hero.HeroRegistry;
 import com.darksune.althera.common.registry.AltheraRegistries;
+import com.darksune.althera.common.spell.SpellLoader;
 import com.darksune.althera.common.ultimate.UltimateLoader;
 import com.darksune.althera.common.ultimate.UltimateRegistry;
 import com.darksune.althera.config.AltheraConfig;
@@ -46,6 +48,7 @@ public final class Althera {
         event.addListener(new HeroClassLoader());
         event.addListener(new HeroLoader(event.getRegistryAccess()));
         event.addListener(new UltimateLoader(event.getRegistryAccess()));
+        event.addListener(new SpellLoader(event.getRegistryAccess()));
     }
 
     @SubscribeEvent
@@ -70,6 +73,10 @@ public final class Althera {
         event.put(
                 AltheraEntities.SUMMONED.get(),
                 SummonedEntity.createAttributes().build()
+        );
+        event.put(
+                AltheraEntities.NOBLE_MAGE.get(),
+                NobleMageEntity.createAttributes().build()
         );
     }
 

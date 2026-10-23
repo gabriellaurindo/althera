@@ -1,6 +1,6 @@
 package com.darksune.althera.common.ultimate.effect;
 
-import com.darksune.althera.common.entity.HeroEntity;
+import com.darksune.althera.common.entity.CasterMob;
 import com.darksune.althera.common.entity.HeroProjectileEntity;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
@@ -34,7 +34,7 @@ public record ProjectileEffect(int count, float spread, float speed, float amoun
 
     @Override
     public void apply(UltimateContext context) {
-        HeroEntity hero = context.hero();
+        CasterMob hero = context.caster();
         Vec3 from = hero.getProjectileOrigin();
         Vec3 aim = context.target() != null
                 ? HeroProjectileEntity.aimAt(from, context.target())

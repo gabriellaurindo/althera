@@ -16,6 +16,7 @@ class DataValidator {
             'dodge_chance', 'strong_against'] as Set
     static final Set<String> ULTIMATE_KEYS = ['name', 'description', 'mana_cost', 'channel_ticks', 'cooldown_ticks',
             'on_start', 'on_tick', 'on_end'] as Set
+    static final Set<String> SPELL_KEYS = ['name', 'range', 'cooldown_ticks', 'cast_ticks', 'on_cast'] as Set
     static final Set<String> FILTER_KEYS = ['entity_tag', 'hostile', 'exclude_target'] as Set
 
     static final Map<String, Map<String, Boolean>> EFFECTS = [
@@ -29,6 +30,7 @@ class DataValidator {
             dash              : [distance: true],
             heal              : [target: true, filter: false, amount: false, max_health_ratio: false],
             projectile        : [count: false, spread: false, speed: false, amount: false, attack_ratio: false, trail: false, on_hit: false],
+            lightning         : [:],
             ultimate_animation: [:]
     ]
 
@@ -240,18 +242,30 @@ class DataValidator {
         ['on_start', 'on_tick', 'on_end'].each { checkEffects("${where} ${it}", json[it]) }
     }
 
+    void validateSpell(File file) {
+        String where = "spell/${file.name}"
+        Map json = read(file)
+        if (json == null) return
+        checkKeys(where, json, SPELL_KEYS)
+        checkNumber(where, json, 'range', false, 0)
+        checkNumber(where, json, 'cooldown_ticks', false, 1)
+        checkNumber(where, json, 'cast_ticks', false, 0)
+        checkEffects("${where} on_cast", json.on_cast)
+    }
+
     List<String> run() {
         File data = new File(resources, 'data/althera')
         new File(data, 'hero_class').listFiles({ it.name.endsWith('.json') } as FileFilter)?.sort()?.each { validateClass(it) }
         new File(data, 'ultimate').listFiles({ it.name.endsWith('.json') } as FileFilter)?.sort()?.each { validateUltimate(it) }
         new File(data, 'hero').listFiles({ it.name.endsWith('.json') } as FileFilter)?.sort()?.each { validateHero(it) }
+        new File(data, 'spell').listFiles({ it.name.endsWith('.json') } as FileFilter)?.sort()?.each { validateSpell(it) }
         return errors
     }
 }
 
 tasks.register('validateData') {
     group = 'verification'
-    description = 'Checks the hero, hero class and ultimate JSON files for typos and broken references.'
+    description = 'Checks the hero, hero class, ultimate and spell JSON files for typos and broken references.'
     def resources = file('src/main/resources')
     inputs.dir(resources)
     doLast {

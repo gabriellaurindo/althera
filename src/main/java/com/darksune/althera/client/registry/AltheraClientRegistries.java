@@ -3,6 +3,7 @@ package com.darksune.althera.client.registry;
 import com.darksune.althera.client.input.AltheraKeybinds;
 import com.darksune.althera.client.renderer.entity.HeroRenderer;
 import com.darksune.althera.client.renderer.entity.LightOrbRenderer;
+import com.darksune.althera.client.renderer.entity.NobleMageRenderer;
 import com.darksune.althera.client.renderer.entity.SummonedRenderer;
 import com.darksune.althera.common.entity.AltheraEntities;
 import net.minecraft.client.renderer.entity.NoopRenderer;
@@ -38,6 +39,11 @@ public final class AltheraClientRegistries {
         event.registerEntityRenderer(
                 AltheraEntities.SUMMONED.get(),
                 SummonedRenderer::new
+        );
+
+        event.registerEntityRenderer(
+                AltheraEntities.NOBLE_MAGE.get(),
+                NobleMageRenderer::new
         );
 
         event.registerEntityRenderer(

@@ -23,12 +23,12 @@ public record DamageEffect(UltimateTarget target, EntityFilter filter, float amo
 
     @Override
     public void apply(UltimateContext context) {
-        float damage = amount + attackRatio * (float) context.hero().getAttributeValue(Attributes.ATTACK_DAMAGE);
+        float damage = amount + attackRatio * (float) context.caster().getAttributeValue(Attributes.ATTACK_DAMAGE);
         for (LivingEntity entity : filter.resolve(target, context)) {
             if (entity == context.target()) {
                 entity.invulnerableTime = 0;
             }
-            entity.hurt(context.hero().damageSources().mobAttack(context.hero()), damage);
+            entity.hurt(context.caster().damageSources().mobAttack(context.caster()), damage);
         }
     }
 }

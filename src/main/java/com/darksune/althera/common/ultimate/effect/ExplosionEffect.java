@@ -19,7 +19,7 @@ public record ExplosionEffect(float power) implements UltimateEffect {
     @Override
     public void apply(UltimateContext context) {
         context.level().explode(
-                context.hero(),
+                context.caster(),
                 context.position().x,
                 context.position().y,
                 context.position().z,

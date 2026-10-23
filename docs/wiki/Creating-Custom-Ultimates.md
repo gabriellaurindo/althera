@@ -199,6 +199,14 @@ Ultimate's direction. They fly straight, never hit the owner and run their own `
   "on_hit": [ { "type": "ignite", "target": "target", "ticks": 60 } ] }
 ```
 
+### `lightning`
+Calls a lightning bolt down where the effect happens (the impact point, or the Hero). Only visual: no fire and no
+damage, so pair it with a `damage` effect. No fields.
+
+```json
+{ "type": "lightning" }
+```
+
 ### `ultimate_animation`
 Plays the `ultimate` animation of the Hero model (if it has one). No fields.
 
@@ -278,3 +286,4 @@ Channels for 1.5 seconds over a crimson mist, then dashes 8 blocks through every
 
 - [Creating Custom Heroes](Creating-Custom-Heroes)
 - [Command Seals & Ultimates](Command-Seals-and-Ultimates)
+- [Nobles](Nobles) (spells use the same effects)

@@ -28,7 +28,7 @@ public class CombatEvents {
         final Entity killer = event.getSource().getEntity();
 
         if (killer instanceof HeroEntity hero) {
-            final Player owner = hero.getOwner();
+            final Player owner = hero.findOwner();
             if (owner != null) {
                 HeroProgressionSystem.addXp(owner, event.getEntity(), 1.0);
             }
@@ -102,22 +102,7 @@ public class CombatEvents {
         // =====================================
 
         if (attacker instanceof LivingEntity livingAttacker) {
-
-            double dx = livingAttacker.getX() - player.getX();
-            double dz = livingAttacker.getZ() - player.getZ();
-
-            double length = Math.sqrt(dx * dx + dz * dz);
-
-            if (length > 0.001D) {
-
-                dx /= length;
-                dz /= length;
-
-                // Push attacker backwards
-                livingAttacker.push(dx * 1.2D, 0.25D, dz * 1.2D);
-
-                livingAttacker.hurtMarked = true;
-            }
+            HeroEntity.knockBackAttacker(livingAttacker, player);
         }
 
         // =====================================

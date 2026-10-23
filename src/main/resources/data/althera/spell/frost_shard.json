@@ -1,0 +1,20 @@
+{
+  "name": "Frost Shard",
+  "range": 16,
+  "cooldown_ticks": 40,
+  "cast_ticks": 10,
+  "on_cast": [
+    { "type": "sound", "sound": "minecraft:entity.player.hurt_freeze", "volume": 1.0, "pitch": 1.4 },
+    {
+      "type": "projectile",
+      "speed": 1.6,
+      "amount": 5,
+      "trail": { "type": "minecraft:snowflake" },
+      "on_hit": [
+        { "type": "mob_effect", "target": "target", "effect": "minecraft:slowness", "duration": 60, "amplifier": 1 },
+        { "type": "particles", "particle": { "type": "minecraft:snowflake" }, "count": 12, "spread": [0.3, 0.3, 0.3], "speed": 0.05 },
+        { "type": "sound", "sound": "minecraft:block.glass.break", "volume": 0.7, "pitch": 1.5 }
+      ]
+    }
+  ]
+}

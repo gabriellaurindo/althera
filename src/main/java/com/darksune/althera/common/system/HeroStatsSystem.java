@@ -4,9 +4,13 @@ import com.darksune.althera.common.attachment.HeroData;
 import com.darksune.althera.common.entity.HeroEntity;
 import com.darksune.althera.common.hero.HeroDefinition;
 import com.darksune.althera.common.hero.HeroStats;
+import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
+import org.jetbrains.annotations.Nullable;
 
 public class HeroStatsSystem {
 
@@ -56,11 +60,33 @@ public class HeroStatsSystem {
         hero.setOwnerUuid(player.getUUID());
     }
 
-    public static double getMaxHealth(final HeroData data) {
-        HeroDefinition def = data.getHeroDefinition();
+    public static void applyServantAttributes(final HeroEntity hero, final HeroDefinition def, final int level,
+                                              final float health) {
+        setBase(hero, Attributes.MAX_HEALTH, getMaxHealth(def, level, 1.0));
+        setBase(hero, Attributes.ATTACK_DAMAGE, getAttack(def, level, 1.0));
+        setBase(hero, Attributes.ARMOR, getArmor(def, level, 1.0));
+        setBase(hero, Attributes.KNOCKBACK_RESISTANCE, getKnockbackResistance(def, 1.0));
+        setBase(hero, Attributes.MOVEMENT_SPEED, getSpeed(def, 1.0));
 
+        hero.setHeroId(def.getId());
+        hero.setCustomName(Component.literal(def.getName()));
+        hero.setHealth(Math.min(health, hero.getMaxHealth()));
+    }
+
+    private static void setBase(final HeroEntity hero, final Holder<Attribute> attribute, final double value) {
+        final AttributeInstance instance = hero.getAttribute(attribute);
+        if (instance != null) {
+            instance.setBaseValue(value);
+        }
+    }
+
+    public static double getMaxHealth(final HeroData data) {
+        return getMaxHealth(data.getHeroDefinition(), data.getLevel(), getDisguiseMultiplier(data));
+    }
+
+    public static double getMaxHealth(@Nullable final HeroDefinition def, final int level, final double disguise) {
         HeroStats stats = def == null ? HeroStats.DEFAULT : def.getStats();
-        double base = stats.health() * getDisguiseMultiplier(data) + stats.healthPerLevel() * data.getLevel();
+        double base = stats.health() * disguise + stats.healthPerLevel() * level;
 
         if (def == null) return base;
 
@@ -79,10 +105,12 @@ public class HeroStatsSystem {
     }
 
     public static double getAttack(final HeroData data) {
-        HeroDefinition def = data.getHeroDefinition();
+        return getAttack(data.getHeroDefinition(), data.getLevel(), getDisguiseMultiplier(data));
+    }
 
+    public static double getAttack(@Nullable final HeroDefinition def, final int level, final double disguise) {
         HeroStats stats = def == null ? HeroStats.DEFAULT : def.getStats();
-        double base = stats.attack() * getDisguiseMultiplier(data) + stats.attackPerLevel() * data.getLevel();
+        double base = stats.attack() * disguise + stats.attackPerLevel() * level;
 
         if (def == null) return base;
 
@@ -101,10 +129,12 @@ public class HeroStatsSystem {
     }
 
     public static double getArmor(final HeroData data) {
-        HeroDefinition def = data.getHeroDefinition();
+        return getArmor(data.getHeroDefinition(), data.getLevel(), getDisguiseMultiplier(data));
+    }
 
+    public static double getArmor(@Nullable final HeroDefinition def, final int level, final double disguise) {
         HeroStats stats = def == null ? HeroStats.DEFAULT : def.getStats();
-        double base = stats.armor() * getDisguiseMultiplier(data) + stats.armorPerLevel() * data.getLevel();
+        double base = stats.armor() * disguise + stats.armorPerLevel() * level;
 
         if (def == null) return base;
 
@@ -123,19 +153,23 @@ public class HeroStatsSystem {
     }
 
     public static double getSpeed(final HeroData data) {
-        HeroDefinition def = data.getHeroDefinition();
+        return getSpeed(data.getHeroDefinition(), getDisguiseMultiplier(data));
+    }
 
+    public static double getSpeed(@Nullable final HeroDefinition def, final double disguise) {
         if (def == null) return HeroStats.DEFAULT.speed();
 
-        return def.getStats().speed() * def.getHeroClass().getSpeedMultiplier() * getDisguiseMultiplier(data);
+        return def.getStats().speed() * def.getHeroClass().getSpeedMultiplier() * disguise;
     }
 
     public static double getKnockbackResistance(final HeroData data) {
-        HeroDefinition def = data.getHeroDefinition();
+        return getKnockbackResistance(data.getHeroDefinition(), getDisguiseMultiplier(data));
+    }
 
+    public static double getKnockbackResistance(@Nullable final HeroDefinition def, final double disguise) {
         if (def == null) return BASE_KNOCKBACK_RESISTANCE;
 
-        return def.getHeroClass().getKnockbackResistance() * getDisguiseMultiplier(data);
+        return def.getHeroClass().getKnockbackResistance() * disguise;
     }
 
     public static double getDodgeChance(final HeroData data) {

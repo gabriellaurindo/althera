@@ -6,6 +6,26 @@ and generates the GitHub Release, CurseForge and Discord notes from it.
 
 ## [Unreleased]
 
+### Added
+- `/althera_hero level <level> [player]` (cheats): sets a hero's level (1-50), resets its XP and heals it to full
+  (a defeated hero stays in spirit form).
+- **Lightning effect** for custom Ultimates and hero attacks: `{ "type": "lightning" }` calls a lightning bolt down
+  where the effect happens. It is only visual (no fire, no damage), so pair it with a `damage` effect.
+- **Spells**: datapacks can define spells in `data/<namespace>/spell/` (name, range, cooldown, cast time and a list of
+  effects on cast, the same effects Ultimates use). Fire Bolt, Frost Shard and Lightning Strike come with the mod and are cast by Nobles. See the wiki page "Nobles".
+- **Noble**, a mini boss and the first member of the Nobles faction: a white-haired pureblood mage who attacks players, their
+  heroes and villagers with one spell (Fire Bolt, Frost Shard or Lightning Strike) and keeps his distance. He is bound
+  to a level 20, 30 or 40 EX hero that waits beside him as a spirit and manifests when he finds a target. His robe
+  shows the hero's level: green (20), yellow (30) or red (40). He has a player's base stats plus a quarter of his
+  hero's health, attack and armor. While his hero lives, the Noble only takes a quarter of the damage: the rest hits his hero, even in spirit form.
+  Each day he has three Command Seals: he heals his hero when it drops to 20% health, revives it once when it
+  falls and, after that, overdrives it at 30% health (stronger, tougher and faster for 30 seconds, then it falls for
+  good). When his hero drops to half health he casts its own Ultimate, once per day. If his hero falls for good, it
+  never comes back.
+- **Noble shrines**: rare quartz and gold platforms in the Overworld, with four lantern-topped pillars and a **Noble
+  Sigil** in the middle. A Noble guards each shrine and stays near it; when he is slain, a new Noble (with a new hero
+  and spell) appears one in-game day later, as soon as a player comes close. The sigil can be found in the creative tab.
+
 ## [4.0.0] - 2026-10-20 - Data-Driven Combat (feature + hotfix)
 
 ### Added
