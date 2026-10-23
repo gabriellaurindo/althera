@@ -33,6 +33,12 @@ If you are interested in creating your own Heroes:
 
 ---
 
+## 📖 About
+
+- [Origin of the Name](Origin-of-the-Name)
+
+---
+
 ## 💬 Community
 
 Questions, suggestions or bugs? Join the [Althera Discord](https://discord.gg/mvkUSnWtm6).
