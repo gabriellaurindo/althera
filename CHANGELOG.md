@@ -7,6 +7,8 @@ and generates the GitHub Release, CurseForge and Discord notes from it.
 ## [Unreleased]
 
 ### Added
+- New wiki page **Heroes**: every hero you can summon, with rarity, class matchups, combat style, signature attack and
+  Ultimate.
 - `/althera_hero level <level> [player]` (cheats): sets a hero's level (1-50), resets its XP and heals it to full
   (a defeated hero stays in spirit form).
 - **Lightning effect** for custom Ultimates and hero attacks: `{ "type": "lightning" }` calls a lightning bolt down

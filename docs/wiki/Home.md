@@ -8,6 +8,7 @@ This wiki contains detailed explanations of the mod’s systems, mechanics, and 
 
 ## 📚 Systems
 
+- [Heroes](Heroes)
 - [Core Systems](Core-Systems)
 - [Command Seals & Ultimates](Command-Seals-and-Ultimates)
 - [Commands](Commands)
