@@ -8,7 +8,7 @@
     {
       "type": "projectile",
       "speed": 1.6,
-      "amount": 5,
+      "attack_multiplier": 1.5,
       "trail": { "type": "minecraft:snowflake" },
       "on_hit": [
         { "type": "mob_effect", "target": "target", "effect": "minecraft:slowness", "duration": 60, "amplifier": 1 },

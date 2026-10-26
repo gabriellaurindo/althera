@@ -34,6 +34,16 @@ and generates the GitHub Release, CurseForge and Discord notes from it.
   datapack can add shrines that spawn its own mage. See the wiki page "Creating Custom Enemy Mages".
 - `/althera_mage spawn <mage>` (cheats): spawns an enemy mage (for example `althera:noble`) where you stand.
 
+### Changed
+- **Ultimates now scale with your hero's attack** instead of dealing fixed damage, so they keep up as your hero levels
+  up. Explosion deals 180% of the hero's attack to everything around it, Crimson Requiem 210% along its path. At low
+  levels they hit softer than before, at high levels much harder.
+- **Noble spells scale with the Noble's attack**: Fire Bolt, Frost Shard and Lightning Strike hit harder on Nobles
+  with stronger heroes (yellow and red robes).
+- Datapack fields renamed: `attack_ratio` is now `attack_multiplier` (`damage` and `projectile` effects) and
+  `max_health_ratio` is now `max_health_multiplier` (`heal` effect). **The old names still work for now, but support
+  will be removed in a future version**: update your datapacks.
+
 ## [4.0.0] - 2026-10-20 - Data-Driven Combat (feature + hotfix)
 
 ### Added

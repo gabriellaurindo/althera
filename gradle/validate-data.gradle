@@ -28,7 +28,7 @@ class DataValidator {
     static final Set<String> HOME_KEYS = ['radius', 'respawn_ticks', 'activation_range'] as Set
 
     static final Map<String, Map<String, Boolean>> EFFECTS = [
-            damage            : [target: true, filter: false, amount: false, attack_ratio: false],
+            damage            : [target: true, filter: false, amount: false, attack_multiplier: false],
             knockback         : [target: true, filter: false, horizontal: false, vertical: false, scale_with_distance: false],
             ignite            : [target: true, filter: false, ticks: true],
             mob_effect        : [target: true, filter: false, effect: true, duration: true, amplifier: false, show_particles: false],
@@ -36,8 +36,8 @@ class DataValidator {
             particles         : [particle: true, count: false, spread: false, speed: false, height: false, line: false],
             sound             : [sound: true, volume: false, pitch: false],
             dash              : [distance: true],
-            heal              : [target: true, filter: false, amount: false, max_health_ratio: false],
-            projectile        : [count: false, spread: false, speed: false, amount: false, attack_ratio: false, trail: false, on_hit: false],
+            heal              : [target: true, filter: false, amount: false, max_health_multiplier: false],
+            projectile        : [count: false, spread: false, speed: false, amount: false, attack_multiplier: false, trail: false, on_hit: false],
             lightning         : [:],
             ultimate_animation: [:]
     ]

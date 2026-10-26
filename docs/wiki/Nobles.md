@@ -27,6 +27,8 @@ Each Noble knows **one spell**, chosen when he appears:
 | **Frost Shard** | A fast ice shard that slows its target |
 | **Lightning Strike** | Calls lightning on its target, also hurting whoever stands next to it |
 
+Spell damage grows with the Noble's attack, so Nobles bound to stronger Heroes hit harder.
+
 He fights from a distance: he closes in when you are out of range and backs off when you get too close.
 
 ---
@@ -127,7 +129,7 @@ Example (Fire Bolt, `data/althera/spell/fire_bolt.json`):
     {
       "type": "projectile",
       "speed": 1.3,
-      "amount": 6,
+      "attack_multiplier": 1.8,
       "trail": { "type": "minecraft:flame" },
       "on_hit": [
         { "type": "ignite", "target": "target", "ticks": 80 }

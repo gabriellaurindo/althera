@@ -8,12 +8,12 @@
     {
       "type": "projectile",
       "speed": 2.2,
-      "amount": 4,
+      "attack_multiplier": 1.2,
       "trail": { "type": "minecraft:electric_spark" },
       "on_hit": [
         { "type": "lightning" },
-        { "type": "damage", "target": { "area": 1.5 }, "filter": { "exclude_target": true }, "amount": 3 },
-        { "type": "damage", "target": "target", "amount": 4 }
+        { "type": "damage", "target": { "area": 1.5 }, "filter": { "exclude_target": true }, "attack_multiplier": 0.9 },
+        { "type": "damage", "target": "target", "attack_multiplier": 1.2 }
       ]
     }
   ]
