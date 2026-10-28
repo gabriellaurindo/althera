@@ -37,10 +37,10 @@ Each Hero belongs to a specific class and possesses an internal rank that influe
 | Class | Style | Knockback resistance | Dodge |
 |---|---|---|---|
 | Saber | Balanced offense and defense | 80% | 5% |
-| Caster | Very high attack, fragile | 50% | 0% |
+| Caster | Very high attack, fragile | 50% | 5% |
 | Lancer | Fast, high attack | 75% | 5% |
 | Shielder | Highest health and armor, slow | 100% | 0% |
-| Archer | High attack, lower durability | 60% | 5% |
+| Archer | High attack, lower durability | 60% | 10% |
 | Assassin | Fastest, high attack, fragile | 60% | 10% |
 
 Heroes move at their class speed: Assassins and Lancers are faster, Shielders slower. Knockback resistance keeps
@@ -209,8 +209,8 @@ Progression in Althera is continuous and centered around long-term Hero developm
 - Heroes grow stronger through combat
 - Experience is gained primarily through mob kills
 - Progression increases survivability and combat effectiveness
-- Heroes gain health, attack and **armor** as they level up (0.15 armor per level before the class, rank and nature
-  multipliers: at level 50 an EX Shielder has about 21 armor, an EX Saber about 14 and an EX Caster about 9)
+- Heroes gain health, attack and **armor** as they level up (1.65 health, 0.18 attack and 0.06 armor per level before the
+  class, rank and nature multipliers: at level 50 an EX Saber has about 213 health, 16 attack and 6 armor)
 - The maximum Hero level is **50** for now; the hero screen (**G**) then shows **MAX** instead of the XP needed
 - New systems become available as development progresses
 

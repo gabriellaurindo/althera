@@ -52,6 +52,13 @@ and generates the GitHub Release, CurseForge and Discord notes from it.
 - **Hero health regeneration grows with level**: every level adds 0.1 health per 2 seconds in spirit form and 0.05
   while summoned (level 1: 2 and 1, level 50: 6.9 and 3.45). High-level heroes no longer take minutes to recover from
   a defeat.
+- **Hero balance and power buff**: heroes gain much more health (1.65 per level instead of 1) and attack (0.18 per
+  level instead of 0.125) as they level up, but less armor (0.06 per level instead of 0.15), so high-level heroes
+  hit harder and survive through health instead of armor. A level 50 Aria now has about 213 health and 16 attack
+  (was 133 and 12). Classes were rebalanced so every Hero fares about the same against strong mobs: Clare and other
+  Assassins no longer end a fight against an Iron Golem almost dead while Aria keeps most of her health. Class
+  matchups stay the same (each class still beats the next two), and Saber vs Shielder, Caster vs Archer and Lancer
+  vs Assassin are now close fights. Casters gain a 5% dodge chance and Archers 10%.
 - New icon for the Althera creative tab: the golden sword of the Althera emblem.
 - Removed the unused **Summon seal** item from the creative tab. Command Seals are cast from the new wheel instead.
 - **New hero HUD** in the top-left corner: your hero's face, its level, a health bar, your mana bar and the
@@ -67,6 +74,10 @@ and generates the GitHub Release, CurseForge and Discord notes from it.
 - Datapack fields renamed: `attack_ratio` is now `attack_multiplier` (`damage` and `projectile` effects) and
   `max_health_ratio` is now `max_health_multiplier` (`heal` effect). **The old names still work for now, but support
   will be removed in a future version**: update your datapacks.
+
+### Fixed
+- Heroes no longer stand still staring at each other in melee fights: after a hit pushes the enemy out of reach,
+  the Hero now walks back to it right away.
 
 ## [4.0.0] - 2026-10-20 - Data-Driven Combat (feature + hotfix)
 

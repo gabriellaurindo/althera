@@ -7,14 +7,17 @@ import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
 public class HeroMeleeAttackGoal extends MeleeAttackGoal {
 
     private static final double REACH_SEARCH_RADIUS = 2.0D;
+    private static final int CHASE_INTERVAL_TICKS = 5;
 
     private final HeroEntity hero;
+    private final double speedModifier;
 
     private int lastAttackTick = Integer.MIN_VALUE / 2;
 
     public HeroMeleeAttackGoal(HeroEntity hero, double speedModifier, boolean followingTargetEvenIfNotSeen) {
         super(hero, speedModifier, followingTargetEvenIfNotSeen);
         this.hero = hero;
+        this.speedModifier = speedModifier;
     }
 
     @Override
@@ -31,6 +34,7 @@ public class HeroMeleeAttackGoal extends MeleeAttackGoal {
     public void tick() {
         switchToThreatInReach();
         super.tick();
+        keepChasing();
     }
 
     @Override
@@ -55,6 +59,14 @@ public class HeroMeleeAttackGoal extends MeleeAttackGoal {
             return;
         }
         hero.findClosestThreat(REACH_SEARCH_RADIUS, this::canReach).ifPresent(hero::setTarget);
+    }
+
+    private void keepChasing() {
+        LivingEntity target = hero.getTarget();
+        if (target == null || hero.tickCount % CHASE_INTERVAL_TICKS != 0) return;
+        if (!hero.getNavigation().isDone() || canReach(target)) return;
+
+        hero.getNavigation().moveTo(target, speedModifier);
     }
 
     private boolean canReach(LivingEntity entity) {
