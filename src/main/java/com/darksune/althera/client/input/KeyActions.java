@@ -1,5 +1,6 @@
 package com.darksune.althera.client.input;
 
+import com.darksune.althera.Althera;
 import com.darksune.althera.client.screen.HeroScreen;
 import com.darksune.althera.client.screen.HeroSelectionOpener;
 import com.darksune.althera.common.attachment.HeroData;
@@ -9,6 +10,8 @@ import com.darksune.althera.network.packet.SummonPacket;
 import com.darksune.althera.network.packet.UseCommandSealSkillPacket;
 import com.darksune.althera.network.packet.UseUltimateSkillPacket;
 import net.minecraft.client.Minecraft;
+import net.neoforged.fml.ModList;
+import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 
 public class KeyActions {
 
@@ -30,6 +33,14 @@ public class KeyActions {
         } else {
             mc.setScreen(null);
         }
+    }
+
+    public static void handleConfig() {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.screen != null) return;
+
+        ModList.get().getModContainerById(Althera.MOD_ID)
+                .ifPresent(container -> mc.setScreen(new ConfigurationScreen(container, null)));
     }
 
     public static void handleCommandSealSkill(final CommandSealSkillType skillType) {

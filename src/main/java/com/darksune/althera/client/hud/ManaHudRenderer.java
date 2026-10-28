@@ -17,7 +17,7 @@ import net.neoforged.neoforge.client.event.RenderGuiEvent;
 @EventBusSubscriber(modid = Althera.MOD_ID, value = Dist.CLIENT)
 public final class ManaHudRenderer {
 
-    private static final int BAR_WIDTH = SummonHudRenderer.BAR_WIDTH;
+    private static final int BAR_WIDTH = HeroHudLayout.BAR_WIDTH;
     private static final int BAR_HEIGHT = 6;
     private static final int LOW_MANA = 20;
 
@@ -56,8 +56,9 @@ public final class ManaHudRenderer {
 
         updateAnimation(ratio);
 
-        int x = SummonHudRenderer.BAR_X;
-        int y = SummonHudRenderer.MANA_Y;
+        HeroHudLayout layout = HeroHudLayout.current(mc);
+        int x = layout.barX();
+        int y = layout.manaY();
 
         int filled = Math.round(BAR_WIDTH * displayedRatio);
         int trail = Math.round(BAR_WIDTH * trailRatio);
@@ -92,10 +93,11 @@ public final class ManaHudRenderer {
             gui.fill(markX, y - 2, markX + 1, y + BAR_HEIGHT + 2, COLOR_EXHAUSTED_MARK);
         }
 
+        String label = infinite ? "∞" : mana + "/" + manaMax;
         gui.drawString(
                 mc.font,
-                infinite ? "∞" : mana + "/" + manaMax,
-                x + BAR_WIDTH + 5,
+                label,
+                layout.labelX(mc.font, label),
                 y + (BAR_HEIGHT - mc.font.lineHeight) / 2 + 1,
                 low ? COLOR_TEXT_LOW : COLOR_TEXT
         );

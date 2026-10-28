@@ -40,7 +40,9 @@ and generates the GitHub Release, CurseForge and Discord notes from it.
 ### Changed
 - New icon for the Althera creative tab: the golden sword of the Althera emblem.
 - **New hero HUD** in the top-left corner: your hero's face, its level, a health bar, your mana bar and the
-  interventions as three green diamonds. The mana bar moved here from above the hotbar.
+  interventions as three green diamonds. The mana bar moved here from above the hotbar. Pick its corner and
+  offset in the mod's config (Mods > Althera > Config, or the new "Open Config" key, unbound by
+  default).
 - **Ultimates now scale with your hero's attack** instead of dealing fixed damage, so they keep up as your hero levels
   up. Explosion deals 180% of the hero's attack to everything around it, Crimson Requiem 210% along its path. At low
   levels they hit softer than before, at high levels much harder. The Ultimate tab of the Hero screen (G) now shows

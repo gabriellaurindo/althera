@@ -24,15 +24,6 @@ import software.bernie.geckolib.renderer.GeoEntityRenderer;
 @EventBusSubscriber(modid = Althera.MOD_ID, value = Dist.CLIENT)
 public final class SummonHudRenderer {
 
-    public static final int MARGIN = 6;
-    public static final int PORTRAIT_SIZE = 34;
-    public static final int BAR_X = MARGIN + PORTRAIT_SIZE + 5;
-    public static final int BAR_WIDTH = 90;
-    public static final int HEALTH_Y = MARGIN + 4;
-    public static final int HEALTH_HEIGHT = 8;
-    public static final int MANA_Y = HEALTH_Y + HEALTH_HEIGHT + 4;
-    public static final int INTERVENTIONS_Y = MANA_Y + 11;
-
     private static final float PORTRAIT_SCALE = 38.0F;
     private static final float PORTRAIT_YAW = 200.0F;
     private static final float HEAD_CENTER_ABOVE_PIVOT = 4.0F;
@@ -68,16 +59,18 @@ public final class SummonHudRenderer {
         if (heroData.isHiddenHud() || heroData.getHeroDefinition() == null) return;
 
         final GuiGraphics gui = event.getGuiGraphics();
+        final HeroHudLayout layout = HeroHudLayout.current(mc);
 
-        renderPortraitFrame(gui, mc, heroData);
-        renderHealth(gui, mc, heroData);
-        renderInterventions(gui, heroData);
+        renderPortraitFrame(gui, mc, heroData, layout);
+        renderHealth(gui, mc, heroData, layout);
+        renderInterventions(gui, heroData, layout);
     }
 
-    private static void renderPortraitFrame(final GuiGraphics gui, final Minecraft mc, final HeroData heroData) {
-        final int x = MARGIN;
-        final int y = MARGIN;
-        final int size = PORTRAIT_SIZE;
+    private static void renderPortraitFrame(final GuiGraphics gui, final Minecraft mc, final HeroData heroData,
+                                            final HeroHudLayout layout) {
+        final int x = layout.portraitX();
+        final int y = layout.portraitY();
+        final int size = HeroHudLayout.PORTRAIT_SIZE;
 
         gui.fill(x - 1, y - 1, x + size + 1, y + size + 1, COLOR_SHADOW);
         gui.fill(x, y, x + size, y + size, COLOR_GOLD);
@@ -111,37 +104,40 @@ public final class SummonHudRenderer {
         gui.pose().popPose();
     }
 
-    private static void renderHealth(final GuiGraphics gui, final Minecraft mc, final HeroData heroData) {
+    private static void renderHealth(final GuiGraphics gui, final Minecraft mc, final HeroData heroData,
+                                     final HeroHudLayout layout) {
         final double maxHealth = HeroStatsSystem.getMaxHealth(heroData);
         final float ratio = maxHealth > 0 ? Mth.clamp((float) (heroData.getHealth() / maxHealth), 0, 1) : 0;
-        final int filled = Math.round(BAR_WIDTH * ratio);
-        final int x = BAR_X;
-        final int y = HEALTH_Y;
+        final int filled = Math.round(HeroHudLayout.BAR_WIDTH * ratio);
+        final int x = layout.barX();
+        final int y = layout.healthY();
+        final String label = (int) Math.ceil(heroData.getHealth()) + "/" + (int) Math.ceil(maxHealth);
 
-        gui.fill(x - 2, y - 2, x + BAR_WIDTH + 2, y + HEALTH_HEIGHT + 2, COLOR_SHADOW);
-        gui.fill(x - 1, y - 1, x + BAR_WIDTH + 1, y + HEALTH_HEIGHT + 1, COLOR_GOLD_DARK);
-        gui.fillGradient(x, y, x + BAR_WIDTH, y + HEALTH_HEIGHT, COLOR_NAVY_TOP, COLOR_NAVY_BOTTOM);
+        gui.fill(x - 2, y - 2, x + HeroHudLayout.BAR_WIDTH + 2, y + HeroHudLayout.HEALTH_HEIGHT + 2, COLOR_SHADOW);
+        gui.fill(x - 1, y - 1, x + HeroHudLayout.BAR_WIDTH + 1, y + HeroHudLayout.HEALTH_HEIGHT + 1, COLOR_GOLD_DARK);
+        gui.fillGradient(x, y, x + HeroHudLayout.BAR_WIDTH, y + HeroHudLayout.HEALTH_HEIGHT, COLOR_NAVY_TOP, COLOR_NAVY_BOTTOM);
 
         if (filled > 0) {
-            gui.fillGradient(x, y, x + filled, y + HEALTH_HEIGHT, COLOR_HEALTH_TOP, COLOR_HEALTH_BOTTOM);
+            gui.fillGradient(x, y, x + filled, y + HeroHudLayout.HEALTH_HEIGHT, COLOR_HEALTH_TOP, COLOR_HEALTH_BOTTOM);
             gui.fill(x, y, x + filled, y + 1, 0x55FFFFFF);
         }
 
         gui.drawString(
                 mc.font,
-                (int) Math.ceil(heroData.getHealth()) + "/" + (int) Math.ceil(maxHealth),
-                x + BAR_WIDTH + 5,
-                y + (HEALTH_HEIGHT - mc.font.lineHeight) / 2 + 1,
+                label,
+                layout.labelX(mc.font, label),
+                y + (HeroHudLayout.HEALTH_HEIGHT - mc.font.lineHeight) / 2 + 1,
                 COLOR_HEALTH_TEXT
         );
     }
 
-    private static void renderInterventions(final GuiGraphics gui, final HeroData heroData) {
+    private static void renderInterventions(final GuiGraphics gui, final HeroData heroData, final HeroHudLayout layout) {
         final int max = HeroStatsSystem.getMaxInterventions();
         final int remaining = Math.max(0, max - heroData.getInterventions());
 
         for (int i = 0; i < max; i++) {
-            drawDiamond(gui, BAR_X + i * 9, INTERVENTIONS_Y, i < remaining ? COLOR_INTERVENTION : COLOR_INTERVENTION_USED);
+            final int x = layout.mirrored() ? layout.barX() + HeroHudLayout.BAR_WIDTH - 7 - i * 9 : layout.barX() + i * 9;
+            drawDiamond(gui, x, layout.interventionsY(), i < remaining ? COLOR_INTERVENTION : COLOR_INTERVENTION_USED);
         }
     }
 

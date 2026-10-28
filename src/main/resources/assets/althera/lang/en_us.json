@@ -15,9 +15,20 @@
   "key.althera.commandseal.skill.three": "Heal",
 
   "key.althera.ultimate.skill": "Explosion",
+  "key.althera.config": "Open Config",
 
   "block.althera.ritual_core": "Ritual core",
   "block.althera.noble_sigil": "Noble Sigil",
+
+  "althera.configuration.title": "Althera Configuration",
+  "althera.configuration.section.althera.client.toml": "Client Settings",
+  "althera.configuration.section.althera.client.toml.title": "Client Settings",
+  "althera.configuration.heroHudCorner": "Hero HUD Corner",
+  "althera.configuration.heroHudCorner.tooltip": "Screen corner of the hero HUD (portrait, health, mana and interventions)",
+  "althera.configuration.heroHudOffsetX": "Hero HUD Horizontal Offset",
+  "althera.configuration.heroHudOffsetX.tooltip": "Horizontal distance of the hero HUD from its corner, in GUI pixels",
+  "althera.configuration.heroHudOffsetY": "Hero HUD Vertical Offset",
+  "althera.configuration.heroHudOffsetY.tooltip": "Vertical distance of the hero HUD from its corner, in GUI pixels",
 
   "advancements.althera.root.title": "Althera",
   "advancements.althera.root.description": "Every summoner begins somewhere",

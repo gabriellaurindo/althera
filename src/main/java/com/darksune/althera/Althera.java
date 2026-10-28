@@ -15,7 +15,6 @@ import com.darksune.althera.common.registry.AltheraRegistries;
 import com.darksune.althera.common.spell.SpellLoader;
 import com.darksune.althera.common.ultimate.UltimateLoader;
 import com.darksune.althera.common.ultimate.UltimateRegistry;
-import com.darksune.althera.config.AltheraConfig;
 import com.darksune.althera.network.AltheraNetwork;
 import com.darksune.althera.network.packet.SyncEnemyMagesPacket;
 import com.darksune.althera.network.packet.SyncHeroClassesPacket;
@@ -26,7 +25,6 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
-import net.neoforged.fml.config.ModConfig;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.event.OnDatapackSyncEvent;
@@ -43,7 +41,6 @@ public final class Althera {
     public Althera(final IEventBus modEventBus, final ModContainer modContainer) {
         AltheraRegistries.register(modEventBus);
         AltheraNetwork.register(modEventBus);
-        modContainer.registerConfig(ModConfig.Type.COMMON, AltheraConfig.SPEC);
         NeoForge.EVENT_BUS.addListener(this::onReloadListeners);
     }
 

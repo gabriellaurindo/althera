@@ -138,6 +138,8 @@ and the mana bar shows **∞**.
 The **Hero HUD** in the top-left corner shows your hero's face and level, its health, your mana bar and the
 interventions left (green diamonds). The face is dimmed while the hero is not summoned and turns red when it is
 defeated. The Hero HUD is hidden with **F1**; its hero part can also be hidden in the hero screen settings.
+Its corner (top/bottom, left/right) and distance from it can be changed in the client config: **Mods > Althera >
+Config**, the **Open Config** key (unbound by default, set it in Controls) or `config/althera-client.toml`.
 
 ---
 

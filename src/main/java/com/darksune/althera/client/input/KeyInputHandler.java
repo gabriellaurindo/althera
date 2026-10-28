@@ -38,6 +38,10 @@ public class KeyInputHandler {
         if (AltheraKeybinds.ULTIMATE_SKILL.consumeClick()) {
             KeyActions.handleUltimateSkill();
         }
+
+        if (AltheraKeybinds.OPEN_CONFIG.consumeClick()) {
+            KeyActions.handleConfig();
+        }
     }
 
     private static void handleSummonKey() {
