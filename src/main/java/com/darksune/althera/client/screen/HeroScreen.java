@@ -370,6 +370,12 @@ public class HeroScreen extends Screen {
         drawStat(gui, "Channel", formatSeconds(ultimate.channelTicks()), x, y, CONTENT_WIDTH, 0xFFFFFFFF);
         y += 12;
 
+        final double damage = ultimate.damage(HeroStatsSystem.getAttack(heroData));
+        if (damage > 0) {
+            drawStat(gui, "Damage", formatDamage(ultimate, damage), x, y, CONTENT_WIDTH, 0xFFFFFFFF);
+            y += 12;
+        }
+
         final boolean usedToday = UltimateData.get(mc.player).wasUsedToday();
         drawStat(gui, "Once per day", usedToday ? "Used" : "Ready", x, y, CONTENT_WIDTH, usedToday ? COLOR_USED : COLOR_READY);
         y += 14;
@@ -394,6 +400,19 @@ public class HeroScreen extends Screen {
     private static UltimateDefinition ultimate(HeroData heroData) {
         final HeroDefinition definition = heroData.getHeroDefinition();
         return definition == null ? null : UltimateRegistry.get(definition.getUltimate());
+    }
+
+    private static String formatDamage(UltimateDefinition ultimate, double damage) {
+        final double flat = ultimate.damage(0);
+        final double attackPercent = (ultimate.damage(1) - flat) * 100;
+
+        if (attackPercent <= 0) {
+            return String.format(Locale.ROOT, "%.1f", damage);
+        }
+        if (flat <= 0) {
+            return String.format(Locale.ROOT, "%.0f%% ATK (%.1f)", attackPercent, damage);
+        }
+        return String.format(Locale.ROOT, "%.0f + %.0f%% ATK (%.1f)", flat, attackPercent, damage);
     }
 
     private static String formatSeconds(int ticks) {

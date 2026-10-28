@@ -37,7 +37,8 @@ and generates the GitHub Release, CurseForge and Discord notes from it.
 ### Changed
 - **Ultimates now scale with your hero's attack** instead of dealing fixed damage, so they keep up as your hero levels
   up. Explosion deals 180% of the hero's attack to everything around it, Crimson Requiem 210% along its path. At low
-  levels they hit softer than before, at high levels much harder.
+  levels they hit softer than before, at high levels much harder. The Ultimate tab of the Hero screen (G) now shows
+  its damage, for example "180% ATK (21.2)".
 - **Noble spells scale with the Noble's attack**: Fire Bolt, Frost Shard and Lightning Strike hit harder on Nobles
   with stronger heroes (yellow and red robes).
 - Datapack fields renamed: `attack_ratio` is now `attack_multiplier` (`damage` and `projectile` effects) and

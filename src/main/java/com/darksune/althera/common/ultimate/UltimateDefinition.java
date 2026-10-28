@@ -1,5 +1,7 @@
 package com.darksune.althera.common.ultimate;
 
+import com.darksune.althera.common.ultimate.effect.DamageEffect;
+import com.darksune.althera.common.ultimate.effect.ProjectileEffect;
 import com.darksune.althera.common.ultimate.effect.UltimateContext;
 import com.darksune.althera.common.ultimate.effect.UltimateEffect;
 import com.mojang.serialization.Codec;
@@ -7,6 +9,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.util.ExtraCodecs;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 public record UltimateDefinition(
         String name,
@@ -40,6 +43,14 @@ public record UltimateDefinition(
 
     public void end(UltimateContext context) {
         apply(onEnd, context);
+    }
+
+    public double damage(double attack) {
+        return Stream.concat(onStart.stream(), onEnd.stream()).mapToDouble(effect -> switch (effect) {
+            case DamageEffect damage -> damage.amount() + damage.attackMultiplier() * attack;
+            case ProjectileEffect projectile -> projectile.count() * (projectile.amount() + projectile.attackMultiplier() * attack);
+            default -> 0;
+        }).sum();
     }
 
     private static void apply(List<UltimateEffect> effects, UltimateContext context) {
