@@ -6,6 +6,7 @@ import com.darksune.althera.common.hero.HeroDefinition;
 import com.darksune.althera.common.skill.SkillEndReason;
 import com.darksune.althera.common.skill.SkillTimers;
 import com.darksune.althera.common.system.HeroSummonSystem;
+import com.darksune.althera.common.system.SealTattooSystem;
 import com.darksune.althera.common.ultimate.effect.UltimateContext;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -75,6 +76,8 @@ public class UltimateSystem {
         data.startSkillCooldown(ultimateId, ultimate.cooldownTicks());
 
         ultimate.start(UltimateContext.of(player, heroEntity));
+
+        SealTattooSystem.glow(player);
     }
 
     public static void tickActiveSkills(Player player, HeroEntity heroEntity, UltimateData data) {

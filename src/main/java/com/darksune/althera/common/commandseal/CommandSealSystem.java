@@ -7,6 +7,7 @@ import com.darksune.althera.common.entity.HeroEntity;
 import com.darksune.althera.common.skill.SkillEndReason;
 import com.darksune.althera.common.skill.SkillTimers;
 import com.darksune.althera.common.system.HeroSummonSystem;
+import com.darksune.althera.common.system.SealTattooSystem;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Nullable;
@@ -58,6 +59,8 @@ public class CommandSealSystem {
         commandSealSkill.onCooldownStart(player);
 
         commandSealSkill.execute(player, heroEntity);
+
+        SealTattooSystem.glow(player);
     }
 
     public static void tickActiveSkills(Player player, HeroEntity heroEntity, CommandSealData data) {

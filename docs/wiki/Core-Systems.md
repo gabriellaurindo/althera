@@ -154,6 +154,18 @@ When dismissed, Heroes enter a spirit state instead of remaining physically acti
 - The player gains:
   - **Resistance I**
 
+### Health regeneration
+
+Heroes recover health every 2 seconds, faster as they level up:
+
+| | Level 1 | Level 50 |
+|---|---|---|
+| Spirit form (or defeated) | 2 health | 6.9 health |
+| Summoned | 1 health | 3.45 health |
+
+Each level adds **0.1** health in spirit form and **0.05** while summoned. A defeated Hero recovers in spirit form
+until its health is full, then can be summoned again.
+
 Spirit form allows Heroes to recover safely before being summoned again.
 
 The spirit orb always stays with you: it comes back after teleports, respawns, dimension changes and logging in.

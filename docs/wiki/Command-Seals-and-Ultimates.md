@@ -13,10 +13,53 @@ Next to the hotbar (right side) there is one slot per skill, labeled with its ke
 - **◆◆◆** above the seal slots: Command Seal charges left today
 - **Gold border + seconds**: the skill is active (e.g. Overdrive's remaining time)
 - **Light overlay + seconds**: the skill is on cooldown
-- **Grayed out**: not enough mana, or no Command Seal charges left
+- **Grayed out**: the skill can't be used right now (not enough mana, no Command Seal charges left, Hero summoned or
+  not summoned when the skill needs the opposite)
 - **Red ✕** on an Ultimate: already used today
 
 The HUD is hidden together with the Hero HUD (hero screen settings) and with **F1**.
+
+---
+
+## 🖐 Seal key (R)
+
+One key gives orders to your Hero:
+
+| Action | What it does |
+|---|---|
+| **Tap R** | Marks the creature or player under your crosshair as your Hero's target |
+| **Hold R** | Opens the **Command Seal wheel** |
+
+### 🎯 Mark a target
+
+Tap **R** while looking at a creature or player (up to **32 blocks**, in line of sight). Your summoned Hero attacks it,
+ignoring other fights, until it dies, gets more than **48 blocks** away or **30 seconds** pass.
+
+- Marking is free (no mana, no charges)
+- Only you see the mark (a burst of sparks and a chime)
+- It needs a summoned Hero
+- Marking a player only works where your Hero could hurt them: PvP on and not on your team
+- Tapping at nothing does nothing
+
+### 🔘 Command Seal wheel
+
+Hold **R** to open a wheel with **Overdrive**, **Revive** and **Heal**. Point at a seal with the mouse and **release R**
+to cast it. Releasing in the centre (or pressing **Esc**) cancels.
+
+Each seal shows its mana cost and its state: ready, active, on cooldown or blocked (no charges, not enough mana,
+Hero summoned or not, Hero not defeated for Revive). You can't walk while the wheel is open.
+
+**J**, **K** and **V** still cast the seals directly. The Ultimate stays on **U** and is not on the wheel.
+
+---
+
+## ✋ Command Seal tattoo
+
+Every player has a Command Seal tattoo on the back of the right hand, in a random colour. Casting a Command Seal or
+your Hero's Ultimate makes it glow in that colour, with sparks and a chime, and raises your hand in first person.
+Other players see the tattoo and the glow too.
+
+Don't like the colour? `/althera_seal color` rolls a new one.
 
 ---
 

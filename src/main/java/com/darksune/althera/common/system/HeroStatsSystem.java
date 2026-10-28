@@ -17,6 +17,10 @@ public class HeroStatsSystem {
     private final static double BASE_KNOCKBACK_RESISTANCE = 0.8;
     public static final double DISGUISE_STAT_MULTIPLIER = 0.5;
     public static final String DISGUISED_NAME = "Hooded Figure";
+    private static final double SPIRIT_REGEN_BASE = 2.0;
+    private static final double SPIRIT_REGEN_PER_LEVEL = 0.1;
+    private static final double SUMMONED_REGEN_BASE = 1.0;
+    private static final double SUMMONED_REGEN_PER_LEVEL = 0.05;
     //todo centralize the max HP calculation
     public static void applyAttributes(final HeroEntity hero, final Player player) {
         final HeroData heroData = HeroData.get(player);
@@ -78,6 +82,14 @@ public class HeroStatsSystem {
         if (instance != null) {
             instance.setBaseValue(value);
         }
+    }
+
+    public static double getSpiritRegen(final HeroData data) {
+        return SPIRIT_REGEN_BASE + SPIRIT_REGEN_PER_LEVEL * (data.getLevel() - 1);
+    }
+
+    public static double getSummonedRegen(final HeroData data) {
+        return SUMMONED_REGEN_BASE + SUMMONED_REGEN_PER_LEVEL * (data.getLevel() - 1);
     }
 
     public static double getMaxHealth(final HeroData data) {

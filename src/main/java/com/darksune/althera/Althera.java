@@ -81,20 +81,4 @@ public final class Althera {
                 EnemyMageEntity.createAttributes().build()
         );
     }
-
-    // todo: commented out for now
-//    @SubscribeEvent
-//    public static void onAddLayers(EntityRenderersEvent.AddLayers event) {
-//
-//        var defaultSkin = event.getSkin(PlayerSkin.Model.WIDE);
-//        var slimSkin = event.getSkin(PlayerSkin.Model.SLIM);
-//
-//        if (defaultSkin instanceof PlayerRenderer renderer) {
-//            renderer.addLayer(new SealLayer(renderer));
-//        }
-//
-//        if (slimSkin instanceof PlayerRenderer renderer) {
-//            renderer.addLayer(new SealLayer(renderer));
-//        }
-//    }
 }

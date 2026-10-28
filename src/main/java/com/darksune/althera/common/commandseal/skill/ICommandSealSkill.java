@@ -1,5 +1,6 @@
 package com.darksune.althera.common.commandseal.skill;
 
+import com.darksune.althera.common.attachment.HeroData;
 import com.darksune.althera.common.entity.HeroEntity;
 import com.darksune.althera.common.skill.SkillEndReason;
 import net.minecraft.world.entity.player.Player;
@@ -13,6 +14,11 @@ public interface ICommandSealSkill {
      */
     default boolean canActivate(Player player, @Nullable HeroEntity heroEntity) {
         return true;
+    }
+
+    @Nullable
+    default String unavailableReason(HeroData heroData) {
+        return null;
     }
 
     void execute(Player player, HeroEntity heroEntity);

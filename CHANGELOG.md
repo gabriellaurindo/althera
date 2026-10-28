@@ -7,6 +7,17 @@ and generates the GitHub Release, CurseForge and Discord notes from it.
 ## [Unreleased]
 
 ### Added
+- **Command Seal wheel**: hold **R** to open a wheel with Overdrive, Revive and Heal. Point at one with the mouse and
+  release R to cast it; release in the centre to cancel. Each seal shows its mana cost and whether it is ready, active,
+  on cooldown or blocked (no charges, not enough mana, hero summoned or not, hero not defeated for Revive). J/K/V
+  still work as direct shortcuts.
+- **Mark a target**: tap **R** while looking at a creature or player (up to 32 blocks) and your hero attacks it,
+  ignoring other fights, until it dies, gets more than 48 blocks away or 30 seconds pass. Only you see the mark.
+  Marking a player only works where your hero could hurt them (PvP on, not on your team).
+- **Command Seal tattoo**: every player gets a seal tattoo on the back of the right hand, in a random
+  colour. Casting a Command Seal or your hero's Ultimate makes it glow in that colour and raises your hand in first
+  person, with sparks and a chime. Other players see the tattoo and the glow too. Don't like the colour? `/althera_seal color`
+  rolls a new one.
 - New wiki page **Heroes**: every hero you can summon, with rarity, class matchups, combat style, signature attack and
   Ultimate.
 - `/althera_hero level <level> [player]` (cheats): sets a hero's level (1-50), resets its XP and heals it to full
@@ -38,7 +49,11 @@ and generates the GitHub Release, CurseForge and Discord notes from it.
   High Noble).
 
 ### Changed
+- **Hero health regeneration grows with level**: every level adds 0.1 health per 2 seconds in spirit form and 0.05
+  while summoned (level 1: 2 and 1, level 50: 6.9 and 3.45). High-level heroes no longer take minutes to recover from
+  a defeat.
 - New icon for the Althera creative tab: the golden sword of the Althera emblem.
+- Removed the unused **Summon seal** item from the creative tab. Command Seals are cast from the new wheel instead.
 - **New hero HUD** in the top-left corner: your hero's face, its level, a health bar, your mana bar and the
   interventions as three green diamonds. The mana bar moved here from above the hotbar. Pick its corner and
   offset in the mod's config (Mods > Althera > Config, or the new "Open Config" key, unbound by

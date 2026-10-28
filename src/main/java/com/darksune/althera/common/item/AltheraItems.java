@@ -21,8 +21,6 @@ public final class AltheraItems {
 
     public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(MOD_ID);
 
-    public static final DeferredItem<SummonSealItem> SUMMON_SEAL = register(AltheraItemId.SUMMON_SEAL, SummonSealItem::create);
-
     public static final DeferredItem<DeferredSpawnEggItem> ENEMY_MAGE_SPAWN_EGG = register(AltheraItemId.ENEMY_MAGE_SPAWN_EGG,
             () -> new DeferredSpawnEggItem(AltheraEntities.ENEMY_MAGE, 0xF2EEE4, 0xD4AF37, new Item.Properties()));
 

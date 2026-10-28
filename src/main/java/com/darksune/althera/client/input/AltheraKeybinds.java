@@ -24,6 +24,13 @@ public class AltheraKeybinds {
             "key.categories.althera"
     );
 
+    public static final KeyMapping SEAL = new KeyMapping(
+            "key.althera.seal",
+            InputConstants.Type.KEYSYM,
+            GLFW.GLFW_KEY_R,
+            "key.categories.althera"
+    );
+
     public static final KeyMapping COMMAND_SEAL_SKILL_ONE = new KeyMapping(
             "key.althera.commandseal.skill.one",
             InputConstants.Type.KEYSYM,

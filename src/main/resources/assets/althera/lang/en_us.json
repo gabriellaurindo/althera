@@ -1,5 +1,4 @@
 {
-  "item.althera.summon_seal": "Summon seal",
   "item.althera.ritual_core": "Ritual core",
   "item.althera.enemy_mage_spawn_egg": "Noble Spawn Egg",
   "item.althera.emblem": "Althera Emblem",
@@ -9,6 +8,7 @@
   "key.categories.althera": "Althera",
   "key.althera.summon": "Summon",
   "key.althera.hero.screen": "Hero Menu",
+  "key.althera.seal": "Command Seal Wheel (hold)",
 
   "key.althera.commandseal.skill.one": "Overdrive",
   "key.althera.commandseal.skill.two": "Revive",
@@ -16,6 +16,10 @@
 
   "key.althera.ultimate.skill": "Explosion",
   "key.althera.config": "Open Config",
+
+  "althera.commandseal.overdrive": "Overdrive",
+  "althera.commandseal.revive": "Revive",
+  "althera.commandseal.heal": "Heal",
 
   "block.althera.ritual_core": "Ritual core",
   "block.althera.noble_sigil": "Noble Sigil",

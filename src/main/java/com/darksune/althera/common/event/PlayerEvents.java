@@ -6,6 +6,7 @@ import com.darksune.althera.common.attachment.ManaData;
 import com.darksune.althera.common.system.HeroSelectionSystem;
 import com.darksune.althera.common.system.HeroStatsSystem;
 import com.darksune.althera.common.system.HeroSummonSystem;
+import com.darksune.althera.common.system.SealTattooSystem;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
@@ -51,7 +52,7 @@ public final class PlayerEvents {
                 double maxHealth = HeroStatsSystem.getMaxHealth(heroData);
 
                 double newHealth = Math.min(
-                        heroData.getHealth() + 2,
+                        heroData.getHealth() + HeroStatsSystem.getSpiritRegen(heroData),
                         maxHealth
                 );
 
@@ -87,6 +88,15 @@ public final class PlayerEvents {
 
         HeroSummonSystem.restorePresence(player);
         HeroSelectionSystem.requestSelection(player);
+        SealTattooSystem.announce(player);
+    }
+
+    @SubscribeEvent
+    public static void onStartTracking(PlayerEvent.StartTracking event) {
+        if (!(event.getEntity() instanceof ServerPlayer viewer)) return;
+        if (!(event.getTarget() instanceof ServerPlayer player)) return;
+
+        SealTattooSystem.showTo(player, viewer);
     }
 
     @SubscribeEvent

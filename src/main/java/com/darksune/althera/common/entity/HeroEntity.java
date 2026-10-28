@@ -1,6 +1,7 @@
 package com.darksune.althera.common.entity;
 
 import com.darksune.althera.common.ai.goal.AssistOwnerGoal;
+import com.darksune.althera.common.ai.goal.CommandedTargetGoal;
 import com.darksune.althera.common.ai.goal.EngageThreatsGoal;
 import com.darksune.althera.common.ai.goal.FollowOwnerGoal;
 import com.darksune.althera.common.ai.goal.HeroMeleeAttackGoal;
@@ -90,6 +91,8 @@ public class HeroEntity extends CasterMob implements GeoEntity, OwnableEntity {
     private static final float MASKED_MAX_HEALTH = 20.0F;
     private static final int REVEAL_TICKS = 10;
     private static final int RIVAL_MEMORY_TICKS = 600;
+    private static final int COMMANDED_TARGET_TICKS = 600;
+    private static final double COMMANDED_TARGET_RANGE = 48.0D;
     private static final String ULTIMATE_CONTROLLER = "ultimate";
     private static final String ULTIMATE_ANIMATION = "ultimate";
     private static final String DEATH_ANIMATION = "death";
@@ -107,6 +110,9 @@ public class HeroEntity extends CasterMob implements GeoEntity, OwnableEntity {
     @Nullable
     private UUID rivalOwner;
     private int rivalUntil;
+    @Nullable
+    private LivingEntity commandedTarget;
+    private int commandedUntil;
 
     boolean searchingForLand;
     protected final WaterBoundPathNavigation waterNavigation;
@@ -507,6 +513,7 @@ public class HeroEntity extends CasterMob implements GeoEntity, OwnableEntity {
         this.goalSelector.addGoal(3, new FollowOwnerGoal(this, 1.1D, 5F, 2F));
         this.goalSelector.addGoal(4, new RandomLookAroundGoal(this));
 
+        this.targetSelector.addGoal(0, new CommandedTargetGoal(this));
         this.targetSelector.addGoal(1, new HurtByTargetGoal(this));
         this.targetSelector.addGoal(2,
                 new ProtectOwnerGoal<>(this)
@@ -529,6 +536,26 @@ public class HeroEntity extends CasterMob implements GeoEntity, OwnableEntity {
     public void commandAttack(final LivingEntity target) {
         if (target == this || !canAttack(target)) return;
         setTarget(target);
+    }
+
+    public void markTarget(final LivingEntity target) {
+        commandedTarget = target;
+        commandedUntil = tickCount + COMMANDED_TARGET_TICKS;
+        setTarget(target);
+    }
+
+    @Nullable
+    public LivingEntity getCommandedTarget() {
+        if (commandedTarget == null) return null;
+
+        if (tickCount > commandedUntil
+                || !commandedTarget.isAlive()
+                || commandedTarget.level() != level()
+                || distanceToSqr(commandedTarget) > COMMANDED_TARGET_RANGE * COMMANDED_TARGET_RANGE
+                || !canAttack(commandedTarget)) {
+            commandedTarget = null;
+        }
+        return commandedTarget;
     }
 
     public static void knockBackAttacker(final LivingEntity attacker, final Entity defended) {
@@ -800,7 +827,7 @@ public class HeroEntity extends CasterMob implements GeoEntity, OwnableEntity {
         manaData.consumeMana(owner, cost);
 
         if (getHealth() < HeroStatsSystem.getMaxHealth(heroData)) {
-            heal(1.0F);
+            heal((float) HeroStatsSystem.getSummonedRegen(heroData));
         }
     }
 

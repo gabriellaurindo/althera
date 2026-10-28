@@ -12,12 +12,18 @@ public class KeyInputHandler {
 
     private static final int DISGUISE_HOLD_TICKS = 10;
 
+    private static final int SEAL_WHEEL_HOLD_TICKS = 4;
+
     private static int summonHeldTicks;
+
+    private static int sealHeldTicks;
 
     @SubscribeEvent
     public static void onClientTick(ClientTickEvent.Post event) {
 
         handleSummonKey();
+
+        handleSealKey();
 
         if (AltheraKeybinds.HERO_SCREEN.consumeClick()) {
             KeyActions.handleHero();
@@ -61,5 +67,24 @@ public class KeyInputHandler {
             KeyActions.handleSummon();
         }
         summonHeldTicks = 0;
+    }
+
+    private static void handleSealKey() {
+        boolean clicked = false;
+        while (AltheraKeybinds.SEAL.consumeClick()) {
+            clicked = true;
+        }
+
+        if (AltheraKeybinds.SEAL.isDown()) {
+            if (++sealHeldTicks == SEAL_WHEEL_HOLD_TICKS) {
+                KeyActions.handleSealWheel();
+            }
+            return;
+        }
+
+        if (sealHeldTicks < SEAL_WHEEL_HOLD_TICKS && (clicked || sealHeldTicks > 0)) {
+            KeyActions.handleSealTap();
+        }
+        sealHeldTicks = 0;
     }
 }

@@ -37,6 +37,14 @@ Use it if your Hero cannot be summoned or behaves inconsistently.
 
 ---
 
+## ✋ Command Seal — `/althera_seal`
+
+| Command | Permission | Description |
+|---|---|---|
+| `/althera_seal color` | Everyone | Rolls a new colour for your Command Seal tattoo (see [Command Seals & Ultimates](Command-Seals-and-Ultimates#-command-seal-tattoo)) |
+
+---
+
 ## 🧙 Enemy mages — `/althera_mage`
 
 | Command | Permission | Description |
