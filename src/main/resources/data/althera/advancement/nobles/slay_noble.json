@@ -1,0 +1,20 @@
+{
+  "parent": "althera:root",
+  "display": {
+    "icon": { "id": "althera:noble_sigil" },
+    "title": { "translate": "advancements.althera.slay_noble.title" },
+    "description": { "translate": "advancements.althera.slay_noble.description" },
+    "frame": "goal"
+  },
+  "criteria": {
+    "slay_noble": {
+      "trigger": "minecraft:player_killed_entity",
+      "conditions": {
+        "entity": {
+          "type": "althera:enemy_mage",
+          "nbt": "{Definition:\"althera:noble\"}"
+        }
+      }
+    }
+  }
+}

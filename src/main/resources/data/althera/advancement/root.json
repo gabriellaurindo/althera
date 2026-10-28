@@ -1,0 +1,13 @@
+{
+  "display": {
+    "icon": { "id": "althera:emblem" },
+    "title": { "translate": "advancements.althera.root.title" },
+    "description": { "translate": "advancements.althera.root.description" },
+    "background": "minecraft:textures/block/quartz_block_side.png",
+    "show_toast": false,
+    "announce_to_chat": false
+  },
+  "criteria": {
+    "tick": { "trigger": "minecraft:tick" }
+  }
+}

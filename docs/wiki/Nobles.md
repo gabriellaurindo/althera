@@ -45,7 +45,8 @@ Every Noble is bound to a random **EX** Hero of **level 20, 30 or 40**. His robe
 
 - While the Noble has no target, his Hero waits beside him in **spirit form** (a small light at his side) and slowly
   recovers health.
-- As soon as he finds a target, the Hero **manifests** next to him and attacks it.
+- As soon as he finds a target, the Hero **manifests** next to him and attacks it. Players within 32 blocks see it in
+  chat ("The Noble calls forth Aria!"), so you know which Hero you are facing.
 - After about 10 seconds without a target, the Hero returns to spirit form, keeping its health.
 
 ### Damage split
@@ -82,6 +83,9 @@ A Noble slain by a player or a player's Hero drops a reward that grows with his 
 | 🟥 Red | 1 diamond block |
 
 Nobles killed by anything else (iron golems, other mobs, lava...) drop nothing.
+
+Slaying Nobles also unlocks two advancements in the Althera tab: **Noble Hunter** (defeat a Noble) and the
+challenge **High Noble Hunter** (defeat a High Noble).
 
 ---
 

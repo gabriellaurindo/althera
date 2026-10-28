@@ -71,6 +71,7 @@ public class EnemyMageEntity extends CasterMob implements Enemy, HeroSummoner {
     private static final int CAST_POSE_EXTRA_TICKS = 5;
     private static final Vec3 HAND_OFFSET = new Vec3(0.35D, 1.35D, 0.6D);
     private static final int SIGIL_CHECK_INTERVAL = 100;
+    private static final double ANNOUNCE_RANGE = 32.0D;
 
     @Nullable
     private ResourceLocation servantHeroId;
@@ -560,6 +561,17 @@ public class EnemyMageEntity extends CasterMob implements Enemy, HeroSummoner {
         }
         hero.commandAttack(target);
         playServantShift(hero, SoundEvents.ILLUSIONER_MIRROR_MOVE);
+        announceServant(definition);
+    }
+
+    private void announceServant(final HeroDefinition definition) {
+        final Component message = Component.literal("§5The " + getDisplayName().getString() + " calls forth "
+                + definition.getName() + "!");
+        for (Player player : level().players()) {
+            if (player.distanceToSqr(this) <= ANNOUNCE_RANGE * ANNOUNCE_RANGE) {
+                player.sendSystemMessage(message);
+            }
+        }
     }
 
     private void recallServant() {

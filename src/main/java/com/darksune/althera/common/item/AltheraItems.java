@@ -26,6 +26,8 @@ public final class AltheraItems {
     public static final DeferredItem<DeferredSpawnEggItem> ENEMY_MAGE_SPAWN_EGG = register(AltheraItemId.ENEMY_MAGE_SPAWN_EGG,
             () -> new DeferredSpawnEggItem(AltheraEntities.ENEMY_MAGE, 0xF2EEE4, 0xD4AF37, new Item.Properties()));
 
+    public static final DeferredItem<Item> EMBLEM = register(AltheraItemId.EMBLEM, () -> new Item(new Item.Properties()));
+
     // Block items
     public static final DeferredHolder<Item, Item> RITUAL_CORE = register(AltheraItemId.RITUAL_CORE, RitualCoreItem::create);
     public static final DeferredItem<BlockItem> NOBLE_SIGIL = register(AltheraItemId.NOBLE_SIGIL,

@@ -1,0 +1,21 @@
+{
+  "parent": "althera:nobles/slay_noble",
+  "display": {
+    "icon": { "id": "minecraft:diamond_block" },
+    "title": { "translate": "advancements.althera.slay_red_noble.title" },
+    "description": { "translate": "advancements.althera.slay_red_noble.description" },
+    "frame": "challenge"
+  },
+  "criteria": {
+    "slay_red_noble": {
+      "trigger": "minecraft:player_killed_entity",
+      "conditions": {
+        "entity": {
+          "type": "althera:enemy_mage",
+          "nbt": "{Definition:\"althera:noble\",ServantLevel:40}"
+        }
+      }
+    }
+  },
+  "rewards": { "experience": 100 }
+}

@@ -2,6 +2,7 @@
   "item.althera.summon_seal": "Summon seal",
   "item.althera.ritual_core": "Ritual core",
   "item.althera.enemy_mage_spawn_egg": "Noble Spawn Egg",
+  "item.althera.emblem": "Althera Emblem",
 
   "entity.althera.enemy_mage": "Enemy Mage",
 
@@ -16,5 +17,12 @@
   "key.althera.ultimate.skill": "Explosion",
 
   "block.althera.ritual_core": "Ritual core",
-  "block.althera.noble_sigil": "Noble Sigil"
+  "block.althera.noble_sigil": "Noble Sigil",
+
+  "advancements.althera.root.title": "Althera",
+  "advancements.althera.root.description": "Every summoner begins somewhere",
+  "advancements.althera.slay_noble.title": "Noble Hunter",
+  "advancements.althera.slay_noble.description": "Defeat a Noble",
+  "advancements.althera.slay_red_noble.title": "High Noble Hunter",
+  "advancements.althera.slay_red_noble.description": "Defeat a High Noble"
 }

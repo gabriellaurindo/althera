@@ -33,8 +33,14 @@ and generates the GitHub Release, CurseForge and Discord notes from it.
   (`althera:noble`), so a datapack can also rebalance him. Mages of different factions fight each other, and a
   datapack can add shrines that spawn its own mage. See the wiki page "Creating Custom Enemy Mages".
 - `/althera_mage spawn <mage>` (cheats): spawns an enemy mage (for example `althera:noble`) where you stand.
+- When a Noble's Hero manifests, players within 32 blocks see it in chat ("The Noble calls forth Aria!").
+- An **Althera** advancements tab: **Noble Hunter** (defeat a Noble) and the challenge **High Noble Hunter** (defeat a
+  High Noble).
 
 ### Changed
+- New icon for the Althera creative tab: the golden sword of the Althera emblem.
+- **New hero HUD** in the top-left corner: your hero's face, its level, a health bar, your mana bar and the
+  interventions as three green diamonds. The mana bar moved here from above the hotbar.
 - **Ultimates now scale with your hero's attack** instead of dealing fixed damage, so they keep up as your hero levels
   up. Explosion deals 180% of the hero's attack to everything around it, Crimson Requiem 210% along its path. At low
   levels they hit softer than before, at high levels much harder. The Ultimate tab of the Hero screen (G) now shows

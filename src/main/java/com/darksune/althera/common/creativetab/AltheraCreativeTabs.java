@@ -18,7 +18,7 @@ public final class AltheraCreativeTabs {
             TABS.register("main",
                     () -> CreativeModeTab.builder()
                             .title(Component.literal("Althera"))
-                            .icon(() -> new ItemStack(AltheraItems.SUMMON_SEAL.get()))
+                            .icon(() -> new ItemStack(AltheraItems.EMBLEM.get()))
                             .displayItems((parameters, output) -> {
 
                                 // your items here

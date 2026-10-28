@@ -135,8 +135,9 @@ This system creates a balance between combat power and resource management.
 In **Creative** mode mana is infinite: summoning, keeping the Hero out, Command Seals and the Ultimate cost nothing,
 and the mana bar shows **∞**.
 
-Your mana is shown in the mana bar on screen. The mana bar and the Hero HUD are hidden together with the rest of the
-interface when you press **F1**.
+The **Hero HUD** in the top-left corner shows your hero's face and level, its health, your mana bar and the
+interventions left (green diamonds). The face is dimmed while the hero is not summoned and turns red when it is
+defeated. The Hero HUD is hidden with **F1**; its hero part can also be hidden in the hero screen settings.
 
 ---
 
