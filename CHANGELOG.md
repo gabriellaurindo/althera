@@ -11,6 +11,9 @@ and generates the GitHub Release, CurseForge and Discord notes from it.
   release R to cast it; release in the centre to cancel. Each seal shows its mana cost and whether it is ready, active,
   on cooldown or blocked (no charges, not enough mana, hero summoned or not, hero not defeated for Revive). J/K/V
   still work as direct shortcuts.
+- **Hero blink**: a melee Hero that can't get any closer to its target for 5 seconds (you hid in water, on a pillar,
+  in a boat...) vanishes and reappears next to it. With no ground there, it hovers in the air beside its target for up
+  to 4 seconds. This works for your Hero and for a Noble's Hero alike.
 - **Mark a target**: tap **R** while looking at a creature or player (up to 32 blocks) and your hero attacks it,
   ignoring other fights, until it dies, gets more than 48 blocks away or 30 seconds pass. Only you see the mark.
   Marking a player only works where your hero could hurt them (PvP on, not on your team).
@@ -76,6 +79,8 @@ and generates the GitHub Release, CurseForge and Discord notes from it.
   will be removed in a future version**: update your datapacks.
 
 ### Fixed
+- Heroes swim about ten times faster: they used to float almost still in water, an easy target for anyone fighting
+  them from there.
 - Heroes no longer stand still staring at each other in melee fights: after a hit pushes the enemy out of reach,
   the Hero now walks back to it right away.
 

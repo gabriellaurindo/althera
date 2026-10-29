@@ -293,6 +293,10 @@ public class EnemyMageEntity extends CasterMob implements Enemy, HeroSummoner {
         return servantHeroId == null ? null : HeroRegistry.get(servantHeroId);
     }
 
+    public boolean isServantFighting() {
+        return servant != null && servant.isAlive() && servant.getTarget() != null;
+    }
+
     public boolean hasServant() {
         return !servantFallen && reviveTicks == 0 && getServantDefinition() != null;
     }

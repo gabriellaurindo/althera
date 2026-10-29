@@ -29,7 +29,9 @@ Each Noble knows **one spell**, chosen when he appears:
 
 Spell damage grows with the Noble's attack, so Nobles bound to stronger Heroes hit harder.
 
-He fights from a distance: he closes in when you are out of range and backs off when you get too close.
+He fights from a distance: he closes in when you are out of range and backs off when you get right next to him
+(about 4 blocks). While his Hero is fighting he follows the fight, even away from his shrine; otherwise he stays at
+his shrine and casts at you from there while you are within his spell's range. After the fight he walks back home.
 
 ---
 

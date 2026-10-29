@@ -97,6 +97,10 @@ Some Heroes may also feature:
 Heroes fight whichever enemy is attacking them within reach, keep fighting nearby enemies that attack them or you
 when their target dies, and help you against what you hit.
 
+A melee Hero that can't get any closer to its target for **5 seconds** (the target is in water, on a pillar, in a
+boat...) **blinks**: it vanishes and reappears next to the target. If there is no ground next to the target, the Hero
+hovers in the air beside it for up to 4 seconds, then falls. Enemy Heroes, like a Noble's, do the same.
+
 ### Signature attacks
 
 | Hero | Attack |

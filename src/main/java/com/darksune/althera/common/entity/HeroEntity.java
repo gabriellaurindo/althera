@@ -48,6 +48,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.level.pathfinder.PathType;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib.animatable.GeoEntity;
@@ -96,6 +97,14 @@ public class HeroEntity extends CasterMob implements GeoEntity, OwnableEntity {
     private static final String ULTIMATE_CONTROLLER = "ultimate";
     private static final String ULTIMATE_ANIMATION = "ultimate";
     private static final String DEATH_ANIMATION = "death";
+    private static final double SWIM_ACCELERATION = 0.05D;
+    private static final int BLINK_ATTEMPTS = 12;
+    private static final double BLINK_DISTANCE = 1.0D;
+    private static final int HOVER_TICKS = 80;
+    private static final double HOVER_REACH = 3.0D;
+    private static final double SUPPORT_HALF_WIDTH = 0.1D;
+    private static final double SERVANT_COMBAT_LEASH = 48.0D;
+    private static final int[] BLINK_HEIGHTS = {0, 1, -1};
 
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
 
@@ -106,6 +115,7 @@ public class HeroEntity extends CasterMob implements GeoEntity, OwnableEntity {
     private ResourceLocation heroId;
     private int dodgeTick = -1;
     private int revealTicks;
+    private int hoverTicks;
     private boolean benchmark;
     @Nullable
     private UUID rivalOwner;
@@ -441,6 +451,7 @@ public class HeroEntity extends CasterMob implements GeoEntity, OwnableEntity {
             return;
         }
         if (isDeadOrDying()) return;
+        tickHover();
         if (benchmark) return;
 
         if (getAttackAnimationTicks() > 0) {
@@ -530,6 +541,8 @@ public class HeroEntity extends CasterMob implements GeoEntity, OwnableEntity {
             discard();
             return;
         }
+        if (getTarget() != null && distanceTo(master) <= SERVANT_COMBAT_LEASH) return;
+
         handleTeleport(master);
     }
 
@@ -774,6 +787,80 @@ public class HeroEntity extends CasterMob implements GeoEntity, OwnableEntity {
                 && !source.is(DamageTypeTags.IS_EXPLOSION);
     }
 
+    public boolean blinkTo(final LivingEntity target) {
+        if (blinkTo(target, true)) return true;
+        if (!blinkTo(target, false)) return false;
+
+        hoverTicks = HOVER_TICKS;
+        setNoGravity(true);
+        setDeltaMovement(Vec3.ZERO);
+        return true;
+    }
+
+    private boolean blinkTo(final LivingEntity target, final boolean needsSupport) {
+        for (int attempt = 0; attempt < BLINK_ATTEMPTS; attempt++) {
+            final double angle = random.nextDouble() * Math.PI * 2.0D;
+            final double x = target.getX() + Math.cos(angle) * BLINK_DISTANCE;
+            final double z = target.getZ() + Math.sin(angle) * BLINK_DISTANCE;
+
+            for (final int height : BLINK_HEIGHTS) {
+                final double y = target.getY() + height;
+                if (!isFreeAt(x, y, z) || needsSupport && !hasSupportAt(x, y, z)) continue;
+
+                playBlinkEffects();
+                teleportTo(x, y, z);
+                getNavigation().stop();
+                playBlinkEffects();
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private AABB boxAt(final double x, final double y, final double z) {
+        return getBoundingBox().move(x - getX(), y - getY(), z - getZ());
+    }
+
+    private boolean isFreeAt(final double x, final double y, final double z) {
+        return level().noCollision(this, boxAt(x, y, z));
+    }
+
+    private boolean hasSupportAt(final double x, final double y, final double z) {
+        final AABB feet = new AABB(x - SUPPORT_HALF_WIDTH, y - 0.5D, z - SUPPORT_HALF_WIDTH,
+                x + SUPPORT_HALF_WIDTH, y, z + SUPPORT_HALF_WIDTH);
+        return level().containsAnyLiquid(boxAt(x, y, z)) || !level().noCollision(this, feet);
+    }
+
+    private void tickHover() {
+        if (hoverTicks <= 0) {
+            if (isNoGravity()) setNoGravity(false);
+            return;
+        }
+
+        final LivingEntity target = getTarget();
+        hoverTicks--;
+        if (target == null || distanceTo(target) > HOVER_REACH || isInWater()) {
+            hoverTicks = 0;
+        }
+        if (hoverTicks == 0) {
+            setNoGravity(false);
+            return;
+        }
+
+        setDeltaMovement(Vec3.ZERO);
+        if (tickCount % 4 == 0 && level() instanceof ServerLevel serverLevel) {
+            serverLevel.sendParticles(ParticleTypes.END_ROD, getX(), getY() - 0.05D, getZ(), 3, 0.25, 0.0, 0.25, 0.0);
+        }
+    }
+
+    private void playBlinkEffects() {
+        level().playSound(null, getX(), getY(), getZ(), SoundEvents.ILLUSIONER_MIRROR_MOVE, getSoundSource(), 1.0F, 1.3F);
+
+        if (level() instanceof ServerLevel serverLevel) {
+            serverLevel.sendParticles(ParticleTypes.REVERSE_PORTAL, getX(), getY() + getBbHeight() * 0.5, getZ(), 20, 0.3, 0.6, 0.3, 0.05);
+        }
+    }
+
     private void playDodgeEffects() {
         level().playSound(null, getX(), getY(), getZ(), SoundEvents.PLAYER_ATTACK_NODAMAGE, getSoundSource(), 1.0F, 1.2F);
 
@@ -934,14 +1021,16 @@ public class HeroEntity extends CasterMob implements GeoEntity, OwnableEntity {
                 double d1 = this.wantedY - this.heroEntity.getY();
                 double d2 = this.wantedZ - this.heroEntity.getZ();
                 double d3 = Math.sqrt(d0 * d0 + d1 * d1 + d2 * d2);
+                d0 /= d3;
                 d1 /= d3;
+                d2 /= d3;
                 float f = (float)(Mth.atan2(d2, d0) * 180.0F / (float)Math.PI) - 90.0F;
                 this.heroEntity.setYRot(this.rotlerp(this.heroEntity.getYRot(), f, 90.0F));
                 this.heroEntity.yBodyRot = this.heroEntity.getYRot();
                 float f1 = (float)(this.speedModifier * this.heroEntity.getAttributeValue(Attributes.MOVEMENT_SPEED));
                 float f2 = Mth.lerp(0.125F, this.heroEntity.getSpeed(), f1);
                 this.heroEntity.setSpeed(f2);
-                this.heroEntity.setDeltaMovement(this.heroEntity.getDeltaMovement().add((double)f2 * d0 * 0.005, (double)f2 * d1 * 0.1, (double)f2 * d2 * 0.005));
+                this.heroEntity.setDeltaMovement(this.heroEntity.getDeltaMovement().add((double)f2 * d0 * SWIM_ACCELERATION, (double)f2 * d1 * 0.1, (double)f2 * d2 * SWIM_ACCELERATION));
             } else {
                 if (!this.heroEntity.onGround()) {
                     this.heroEntity.setDeltaMovement(this.heroEntity.getDeltaMovement().add(0.0, -0.008, 0.0));

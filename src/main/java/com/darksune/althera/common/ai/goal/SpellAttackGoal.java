@@ -12,7 +12,7 @@ import java.util.EnumSet;
 
 public class SpellAttackGoal extends Goal {
 
-    private static final double MIN_DISTANCE_RATIO = 0.5D;
+    private static final double MIN_DISTANCE_RATIO = 0.25D;
     private static final int RETREAT_DISTANCE = 6;
     private static final int RETREAT_HEIGHT = 3;
     private static final int REPATH_TICKS = 10;
@@ -33,12 +33,20 @@ public class SpellAttackGoal extends Goal {
     @Override
     public boolean canUse() {
         final LivingEntity target = mage.getTarget();
-        return target != null && target.isAlive() && mage.getSpell() != null;
+        final SpellDefinition spell = mage.getSpell();
+        return target != null && target.isAlive() && spell != null && isWithinFightingArea(target, spell);
     }
 
     @Override
     public boolean canContinueToUse() {
-        return canUse() && mage.isWithinRestriction(mage.getTarget().blockPosition());
+        return canUse();
+    }
+
+    private boolean isWithinFightingArea(final LivingEntity target, final SpellDefinition spell) {
+        if (!mage.hasRestriction() || mage.isServantFighting()) return true;
+
+        final double reach = mage.getRestrictRadius() + spell.range();
+        return mage.getRestrictCenter().getCenter().distanceToSqr(target.position()) <= reach * reach;
     }
 
     @Override
@@ -98,6 +106,10 @@ public class SpellAttackGoal extends Goal {
     }
 
     private void chase(final LivingEntity target) {
+        if (!mage.isServantFighting() && !mage.isWithinRestriction(target.blockPosition())) {
+            mage.getNavigation().stop();
+            return;
+        }
         if (--repathDelay > 0) return;
 
         mage.getNavigation().moveTo(target, speedModifier);
