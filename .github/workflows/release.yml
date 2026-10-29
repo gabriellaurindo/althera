@@ -1,7 +1,7 @@
 name: Release
 
 # Triggered by pushing a release tag created by the /release flow, e.g. althera-v2.2.0-neoforge-1.21.1.
-# Publishes the jar built from the tagged commit to GitHub Releases, CurseForge and Discord.
+# Publishes the jar built from the tagged commit to GitHub Releases, CurseForge, Modrinth and Discord.
 on:
   push:
     tags:
@@ -16,6 +16,8 @@ jobs:
     env:
       CURSEFORGE_TOKEN: ${{ secrets.CURSEFORGE_TOKEN }}
       CURSEFORGE_PROJECT_ID: ${{ vars.CURSEFORGE_PROJECT_ID }}
+      MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
+      MODRINTH_PROJECT_ID: ${{ vars.MODRINTH_PROJECT_ID }}
       DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
     steps:
       - name: Checkout repository
@@ -89,6 +91,23 @@ jobs:
           java: 21
           dependencies: |
             geckolib(required){curseforge:geckolib}
+
+      - name: Publish to Modrinth
+        if: env.MODRINTH_TOKEN != '' && env.MODRINTH_PROJECT_ID != ''
+        uses: Kir-Antipov/mc-publish@v3.3
+        with:
+          modrinth-id: ${{ env.MODRINTH_PROJECT_ID }}
+          modrinth-token: ${{ env.MODRINTH_TOKEN }}
+          files: ${{ steps.jar.outputs.path }}
+          name: Althera ${{ steps.meta.outputs.version }}
+          version: ${{ steps.meta.outputs.version }}
+          version-type: release
+          changelog-file: ${{ steps.meta.outputs.notes }}/curseforge.md
+          loaders: neoforge
+          game-versions: 1.21.1
+          java: 21
+          dependencies: |
+            geckolib(required){modrinth:8BmcQJ2H}
 
       - name: Announce on Discord
         if: env.DISCORD_WEBHOOK != ''
