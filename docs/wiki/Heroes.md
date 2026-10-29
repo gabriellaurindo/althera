@@ -10,6 +10,8 @@ Classes follow a cycle: each one is strong against two others (+25% damage) and 
 
 ## Aria
 
+<p align="center"><img src="https://media.forgecdn.net/attachments/2065/934/2026-10-17_01-50-05-jpg.jpg" alt="Aria" width="320"></p>
+
 *A graceful swordswoman of the old order, known for her unwavering discipline and elegant blade technique.*
 
 | | |
@@ -28,6 +30,8 @@ Classes follow a cycle: each one is strong against two others (+25% damage) and 
 ---
 
 ## Clare
+
+<p align="center"><img src="https://media.forgecdn.net/attachments/2065/933/2026-10-17_01-51-21-jpg.jpg" alt="Clare" width="320"></p>
 
 *A silent blade in crimson and black who strikes from the shadows and is gone before the echo fades.*
 
@@ -48,6 +52,8 @@ Classes follow a cycle: each one is strong against two others (+25% damage) and 
 
 ## Valka
 
+<p align="center"><img src="https://media.forgecdn.net/attachments/2082/878/2026-10-20_12_51_09-jpg.jpg" alt="Valka" width="320"></p>
+
 *A swift lancer in steel and teal who trades heavy armor for speed, striking before her foes can raise a guard.*
 
 | | |
@@ -66,6 +72,8 @@ Classes follow a cycle: each one is strong against two others (+25% damage) and 
 ---
 
 ## Zaya
+
+<p align="center"><img src="https://media.forgecdn.net/attachments/2082/876/2026-10-20_12_50_24-jpg.jpg" alt="Zaya" width="320"></p>
 
 *A flame-sworn mage in crimson and gold whose staff carries a fire that has never gone out.*
 

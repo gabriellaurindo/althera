@@ -6,6 +6,8 @@ and generates the GitHub Release, CurseForge and Discord notes from it.
 
 ## [Unreleased]
 
+## [4.1.0] - 2026-10-29 - The Nobles Rise (feature + hotfix)
+
 ### Added
 - **Command Seal wheel**: hold **R** to open a wheel with Overdrive, Revive and Heal. Point at one with the mouse and
   release R to cast it; release in the centre to cancel. Each seal shows its mana cost and whether it is ready, active,
