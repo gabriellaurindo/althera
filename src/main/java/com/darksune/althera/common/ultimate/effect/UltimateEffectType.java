@@ -16,6 +16,7 @@ public enum UltimateEffectType implements StringRepresentable {
     DASH("dash", DashEffect.CODEC),
     HEAL("heal", HealEffect.CODEC),
     PROJECTILE("projectile", ProjectileEffect.CODEC),
+    LIGHTNING("lightning", LightningEffect.CODEC),
     ULTIMATE_ANIMATION("ultimate_animation", UltimateAnimationEffect.CODEC);
 
     public static final Codec<UltimateEffectType> CODEC = StringRepresentable.fromEnum(UltimateEffectType::values);

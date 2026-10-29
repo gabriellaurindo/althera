@@ -1,0 +1,6 @@
+{
+  "type": "althera:noble_shrine",
+  "config": {
+    "mage": "althera:noble"
+  }
+}

@@ -1,18 +1,22 @@
 package com.darksune.althera;
 
 import com.darksune.althera.common.command.AltheraCommands;
+import com.darksune.althera.common.enemy.EnemyMageLoader;
+import com.darksune.althera.common.enemy.EnemyMageRegistry;
 import com.darksune.althera.common.entity.AltheraEntities;
 import com.darksune.althera.common.entity.HeroEntity;
+import com.darksune.althera.common.entity.EnemyMageEntity;
 import com.darksune.althera.common.entity.SummonedEntity;
 import com.darksune.althera.common.hero.HeroClassLoader;
 import com.darksune.althera.common.hero.HeroClassRegistry;
 import com.darksune.althera.common.hero.HeroLoader;
 import com.darksune.althera.common.hero.HeroRegistry;
 import com.darksune.althera.common.registry.AltheraRegistries;
+import com.darksune.althera.common.spell.SpellLoader;
 import com.darksune.althera.common.ultimate.UltimateLoader;
 import com.darksune.althera.common.ultimate.UltimateRegistry;
-import com.darksune.althera.config.AltheraConfig;
 import com.darksune.althera.network.AltheraNetwork;
+import com.darksune.althera.network.packet.SyncEnemyMagesPacket;
 import com.darksune.althera.network.packet.SyncHeroClassesPacket;
 import com.darksune.althera.network.packet.SyncHeroesPacket;
 import com.darksune.althera.network.packet.SyncUltimatesPacket;
@@ -21,7 +25,6 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
-import net.neoforged.fml.config.ModConfig;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.event.OnDatapackSyncEvent;
@@ -38,7 +41,6 @@ public final class Althera {
     public Althera(final IEventBus modEventBus, final ModContainer modContainer) {
         AltheraRegistries.register(modEventBus);
         AltheraNetwork.register(modEventBus);
-        modContainer.registerConfig(ModConfig.Type.COMMON, AltheraConfig.SPEC);
         NeoForge.EVENT_BUS.addListener(this::onReloadListeners);
     }
 
@@ -46,6 +48,8 @@ public final class Althera {
         event.addListener(new HeroClassLoader());
         event.addListener(new HeroLoader(event.getRegistryAccess()));
         event.addListener(new UltimateLoader(event.getRegistryAccess()));
+        event.addListener(new SpellLoader(event.getRegistryAccess()));
+        event.addListener(new EnemyMageLoader(event.getRegistryAccess()));
     }
 
     @SubscribeEvent
@@ -53,7 +57,8 @@ public final class Althera {
         SyncHeroClassesPacket classes = new SyncHeroClassesPacket(HeroClassRegistry.getAll());
         SyncHeroesPacket heroes = SyncHeroesPacket.of(HeroRegistry.getAll());
         SyncUltimatesPacket ultimates = new SyncUltimatesPacket(UltimateRegistry.getAll());
-        event.getRelevantPlayers().forEach(player -> PacketDistributor.sendToPlayer(player, classes, heroes, ultimates));
+        SyncEnemyMagesPacket mages = new SyncEnemyMagesPacket(EnemyMageRegistry.getAll());
+        event.getRelevantPlayers().forEach(player -> PacketDistributor.sendToPlayer(player, classes, heroes, ultimates, mages));
     }
 
     @SubscribeEvent
@@ -71,21 +76,9 @@ public final class Althera {
                 AltheraEntities.SUMMONED.get(),
                 SummonedEntity.createAttributes().build()
         );
+        event.put(
+                AltheraEntities.ENEMY_MAGE.get(),
+                EnemyMageEntity.createAttributes().build()
+        );
     }
-
-    // todo: commented out for now
-//    @SubscribeEvent
-//    public static void onAddLayers(EntityRenderersEvent.AddLayers event) {
-//
-//        var defaultSkin = event.getSkin(PlayerSkin.Model.WIDE);
-//        var slimSkin = event.getSkin(PlayerSkin.Model.SLIM);
-//
-//        if (defaultSkin instanceof PlayerRenderer renderer) {
-//            renderer.addLayer(new SealLayer(renderer));
-//        }
-//
-//        if (slimSkin instanceof PlayerRenderer renderer) {
-//            renderer.addLayer(new SealLayer(renderer));
-//        }
-//    }
 }

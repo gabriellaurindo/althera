@@ -1,8 +1,8 @@
 {
   "name": "Assassin",
-  "health": 0.8,
-  "attack": 1.4,
-  "armor": 0.7,
+  "health": 0.85,
+  "attack": 1.45,
+  "armor": 0.65,
   "speed": 1.3,
   "knockback_resistance": 0.6,
   "dodge_chance": 0.1,

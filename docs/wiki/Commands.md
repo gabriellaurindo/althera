@@ -15,6 +15,8 @@ Commands marked with **cheats** require cheats enabled (singleplayer) or operato
 | `/althera_hero summon` | Cheats | Assigns you a random Hero |
 | `/althera_hero rank <rank>` | Cheats | Assigns you a random Hero of the given rank (`F`, `E`, `D`, `C`, `B`, `A`, `S`, `EX`) |
 | `/althera_hero divine` | Cheats | Assigns you a random Divine Hero |
+| `/althera_hero level <level>` | Cheats | Sets your Hero's level (1-50), resets its experience and heals it to full |
+| `/althera_hero level <level> <player>` | Cheats | Same, for another player |
 
 ### What `unstuck` does
 
@@ -32,6 +34,22 @@ Use it if your Hero cannot be summoned or behaves inconsistently.
 |---|---|---|
 | `/althera_mana refill` | Cheats | Refills your mana |
 | `/althera_mana refill <players>` | Cheats | Refills the mana of the given players |
+
+---
+
+## ✋ Command Seal — `/althera_seal`
+
+| Command | Permission | Description |
+|---|---|---|
+| `/althera_seal color` | Everyone | Rolls a new colour for your Command Seal tattoo (see [Command Seals & Ultimates](Command-Seals-and-Ultimates#-command-seal-tattoo)) |
+
+---
+
+## 🧙 Enemy mages — `/althera_mage`
+
+| Command | Permission | Description |
+|---|---|---|
+| `/althera_mage spawn <mage>` | Cheats | Spawns an enemy mage where you stand, for example `althera:noble` (see [Creating Custom Enemy Mages](Creating-Custom-Enemy-Mages)) |
 
 ---
 

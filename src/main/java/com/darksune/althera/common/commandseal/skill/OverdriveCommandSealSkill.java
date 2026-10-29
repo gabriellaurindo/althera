@@ -6,11 +6,12 @@ import com.darksune.althera.common.skill.SkillEndReason;
 import com.darksune.althera.common.system.HeroSummonSystem;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 
 public class OverdriveCommandSealSkill extends AbstractCommandSealSkill {
 
-    private static final int DURATION_TICKS = 20 * 30;
+    public static final int DURATION_TICKS = 20 * 30;
     private static final int COOLDOWN_TICKS = DURATION_TICKS + 20;
 
     //todo add levels: level 1 = 30s and stats +1, level 2 = 20s and stats +2, level 3 = 10s and stats +3
@@ -21,21 +22,26 @@ public class OverdriveCommandSealSkill extends AbstractCommandSealSkill {
 
         heroData.setCanResurrect(false);
 
-        heroEntity.addEffect(new MobEffectInstance(
+        empower(heroEntity, DURATION_TICKS);
+    }
+
+    public static void empower(LivingEntity entity, int durationTicks) {
+
+        entity.addEffect(new MobEffectInstance(
                 MobEffects.DAMAGE_BOOST,
-                DURATION_TICKS,
+                durationTicks,
                 0
         ));
 
-        heroEntity.addEffect(new MobEffectInstance(
+        entity.addEffect(new MobEffectInstance(
                 MobEffects.DAMAGE_RESISTANCE,
-                DURATION_TICKS,
+                durationTicks,
                 0
         ));
 
-        heroEntity.addEffect(new MobEffectInstance(
+        entity.addEffect(new MobEffectInstance(
                 MobEffects.MOVEMENT_SPEED,
-                DURATION_TICKS,
+                durationTicks,
                 0
         ));
     }

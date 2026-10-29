@@ -7,6 +7,7 @@ import com.darksune.althera.common.entity.HeroEntity;
 import com.darksune.althera.common.hero.HeroDefinition;
 import com.darksune.althera.common.hero.HeroRank;
 import com.darksune.althera.common.hero.HeroRegistry;
+import com.darksune.althera.common.system.HeroProgressionSystem;
 import com.darksune.althera.common.system.HeroRollSystem;
 import com.darksune.althera.common.system.HeroStatsSystem;
 import com.darksune.althera.common.system.HeroSummonSystem;
@@ -68,6 +69,24 @@ public class HeroCommand {
                                                 ctx.getSource(),
                                                 StringArgumentType.getString(ctx, "rank")
                                         ))
+                                )
+                        )
+
+                        .then(Commands.literal("level")
+                                .requires(AltheraCommands::hasCheats)
+                                .then(Commands.argument("level", IntegerArgumentType.integer(1, HeroProgressionSystem.MAX_LEVEL))
+                                        .executes(ctx -> setLevel(
+                                                ctx.getSource(),
+                                                ctx.getSource().getPlayerOrException(),
+                                                IntegerArgumentType.getInteger(ctx, "level")
+                                        ))
+                                        .then(Commands.argument("target", EntityArgument.player())
+                                                .executes(ctx -> setLevel(
+                                                        ctx.getSource(),
+                                                        EntityArgument.getPlayer(ctx, "target"),
+                                                        IntegerArgumentType.getInteger(ctx, "level")
+                                                ))
+                                        )
                                 )
                         )
 
@@ -216,6 +235,30 @@ public class HeroCommand {
     // =========================
     // UNSTUCK
     // =========================
+
+    private static int setLevel(CommandSourceStack source, ServerPlayer player, int level) {
+        HeroData data = HeroData.get(player);
+        if (data.getHeroDefinition() == null) {
+            source.sendFailure(Component.literal("§c" + player.getName().getString() + " has no hero."));
+            return 0;
+        }
+
+        data.setLevel(level);
+        data.setXp(0);
+        if (!data.isDefeated()) {
+            data.setHealth(HeroStatsSystem.getMaxHealth(data));
+        }
+        data.sync(player);
+        HeroSummonSystem.refreshSummon(player);
+
+        HeroEntity summon = HeroSummonSystem.getSummon(player);
+        if (summon != null) {
+            summon.setHealth(summon.getMaxHealth());
+        }
+
+        source.sendSuccess(() -> Component.literal("§aHero of " + player.getName().getString() + " set to level " + level + "."), true);
+        return 1;
+    }
 
     private static int unstuckHero(CommandSourceStack source, ServerPlayer player) {
         if (HeroData.get(player).getHeroDefinition() == null) {

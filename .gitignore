@@ -45,11 +45,14 @@ CLAUDE.local.md
 # Manual-paste docs (local only)
 # =========================
 docs/curseforge/
+docs/modrinth/
 docs/patreon/
 docs/chatgpt/
 docs/discord/
 docs/TODO.md
+docs/plans/
 scripts/compress-cover.py
+scripts/store-description.py
 
 # Private repo (gabriellaurindo/althera-private) for the local-only files above
 .private.git/

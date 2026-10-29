@@ -132,9 +132,9 @@ They reload with `/reload`.
 ```json
 {
   "name": "Saber",
-  "health": 1.1,
+  "health": 1.2,
   "attack": 1.1,
-  "armor": 1.1,
+  "armor": 0.9,
   "speed": 1.0,
   "knockback_resistance": 0.8,
   "dodge_chance": 0.05,
@@ -280,11 +280,11 @@ Optional. The Hero's base values before the class, rank and nature multipliers. 
 ```json
 "stats": {
   "health": 19,
-  "health_per_level": 1,
+  "health_per_level": 1.65,
   "attack": 1.125,
-  "attack_per_level": 0.125,
+  "attack_per_level": 0.18,
   "armor": 2,
-  "armor_per_level": 0.15,
+  "armor_per_level": 0.06,
   "speed": 0.25
 }
 ```
@@ -292,11 +292,11 @@ Optional. The Hero's base values before the class, rank and nature multipliers. 
 | Field | Default | Description |
 |---|---|---|
 | `health` | `19` | Base max health (2 = one heart) |
-| `health_per_level` | `1` | Max health gained per Hero level |
+| `health_per_level` | `1.65` | Max health gained per Hero level |
 | `attack` | `1.125` | Base attack damage |
-| `attack_per_level` | `0.125` | Attack damage gained per Hero level |
+| `attack_per_level` | `0.18` | Attack damage gained per Hero level |
 | `armor` | `2` | Base armor |
-| `armor_per_level` | `0.15` | Armor gained per Hero level |
+| `armor_per_level` | `0.06` | Armor gained per Hero level |
 | `speed` | `0.25` | Movement speed (the player walks at 0.1; mobs use about 0.25) |
 
 Final value = (base + per level × level) × class multiplier × rank multiplier × nature multiplier. Speed only uses

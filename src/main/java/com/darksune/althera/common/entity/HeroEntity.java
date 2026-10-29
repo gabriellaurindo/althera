@@ -1,6 +1,7 @@
 package com.darksune.althera.common.entity;
 
 import com.darksune.althera.common.ai.goal.AssistOwnerGoal;
+import com.darksune.althera.common.ai.goal.CommandedTargetGoal;
 import com.darksune.althera.common.ai.goal.EngageThreatsGoal;
 import com.darksune.althera.common.ai.goal.FollowOwnerGoal;
 import com.darksune.althera.common.ai.goal.HeroMeleeAttackGoal;
@@ -14,8 +15,6 @@ import com.darksune.althera.common.hero.HeroAttack;
 import com.darksune.althera.common.hero.HeroDefinition;
 import com.darksune.althera.common.hero.HeroRegistry;
 import com.darksune.althera.common.hero.HeroStats;
-import com.darksune.althera.common.ultimate.effect.UltimateContext;
-import com.darksune.althera.common.ultimate.effect.UltimateEffect;
 import com.darksune.althera.common.system.HeroStatsSystem;
 import com.darksune.althera.common.system.HeroSummonSystem;
 import net.minecraft.core.BlockPos;
@@ -46,12 +45,10 @@ import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.ai.navigation.WaterBoundPathNavigation;
 import net.minecraft.world.entity.ai.util.DefaultRandomPos;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.level.pathfinder.PathType;
-import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib.animatable.GeoEntity;
@@ -70,7 +67,7 @@ import java.util.function.Predicate;
 
 import static com.darksune.althera.common.util.LightOrbUtil.habilitarEspirito;
 
-public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntity {
+public class HeroEntity extends CasterMob implements GeoEntity, OwnableEntity {
 
     private static final EntityDataAccessor<String> HERO_ID =
             SynchedEntityData.defineId(
@@ -95,21 +92,37 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
     private static final float MASKED_MAX_HEALTH = 20.0F;
     private static final int REVEAL_TICKS = 10;
     private static final int RIVAL_MEMORY_TICKS = 600;
+    private static final int COMMANDED_TARGET_TICKS = 600;
+    private static final double COMMANDED_TARGET_RANGE = 48.0D;
     private static final String ULTIMATE_CONTROLLER = "ultimate";
     private static final String ULTIMATE_ANIMATION = "ultimate";
     private static final String DEATH_ANIMATION = "death";
+    private static final double SWIM_ACCELERATION = 0.05D;
+    private static final int BLINK_ATTEMPTS = 12;
+    private static final double BLINK_DISTANCE = 1.0D;
+    private static final int HOVER_TICKS = 80;
+    private static final double HOVER_REACH = 3.0D;
+    private static final double SUPPORT_HALF_WIDTH = 0.1D;
+    private static final double SERVANT_COMBAT_LEASH = 48.0D;
+    private static final int[] BLINK_HEIGHTS = {0, 1, -1};
 
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
 
     private UUID ownerUuid;
     @Nullable
+    private HeroSummoner summoner;
+    @Nullable
     private ResourceLocation heroId;
     private int dodgeTick = -1;
     private int revealTicks;
+    private int hoverTicks;
     private boolean benchmark;
     @Nullable
     private UUID rivalOwner;
     private int rivalUntil;
+    @Nullable
+    private LivingEntity commandedTarget;
+    private int commandedUntil;
 
     boolean searchingForLand;
     protected final WaterBoundPathNavigation waterNavigation;
@@ -136,7 +149,19 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
         this.ownerUuid = ownerUuid;
     }
 
-    public Player getOwner() {
+    public void setSummoner(final HeroSummoner summoner) {
+        this.summoner = summoner;
+    }
+
+    @Nullable
+    public HeroSummoner getSummoner() {
+        return summoner;
+    }
+
+    @Nullable
+    @Override
+    public LivingEntity getOwner() {
+        if (summoner != null) return summoner.asEntity();
         if (ownerUuid == null) return null;
         return this.level().getPlayerByUUID(ownerUuid);
     }
@@ -147,7 +172,7 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
     @Nullable
     public Player findOwner() {
         if (ownerUuid == null || !(level() instanceof ServerLevel serverLevel)) {
-            return getOwner();
+            return ownerUuid == null ? null : level().getPlayerByUUID(ownerUuid);
         }
         return serverLevel.getServer().getPlayerList().getPlayer(ownerUuid);
     }
@@ -218,13 +243,10 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
         applyEffects(getAttack().onHit(), target, position);
     }
 
-    public void applyEffects(final List<UltimateEffect> effects, @Nullable final LivingEntity target,
-                             @Nullable final Vec3 impact) {
-        final Player owner = findOwner();
-        if (owner == null || effects.isEmpty()) return;
-
-        final UltimateContext context = UltimateContext.attack(owner, this, target, impact);
-        effects.forEach(effect -> effect.apply(context));
+    @Nullable
+    @Override
+    public LivingEntity getEffectOwner() {
+        return summoner != null ? summoner.asEntity() : findOwner();
     }
 
     @Override
@@ -236,23 +258,9 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
         return hurt;
     }
 
+    @Override
     public Vec3 getProjectileOrigin() {
-        final Vec3 offset = getAttack().projectileOrigin().scale(getModelScale());
-        final float yaw = yBodyRot * Mth.DEG_TO_RAD;
-        final double sin = Mth.sin(yaw);
-        final double cos = Mth.cos(yaw);
-        final Vec3 center = getBoundingBox().getCenter();
-        final Vec3 origin = position().add(
-                -cos * offset.x - sin * offset.z,
-                offset.y,
-                -sin * offset.x + cos * offset.z
-        );
-        final BlockHitResult wall = level().clip(
-                new ClipContext(center, origin, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, this)
-        );
-        return wall.getType() == HitResult.Type.MISS
-                ? origin
-                : wall.getLocation().subtract(origin.subtract(center).normalize().scale(0.2D));
+        return bodyRelativePoint(getAttack().projectileOrigin().scale(getModelScale()));
     }
 
     public void markAsBenchmark() {
@@ -266,7 +274,7 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
 
     @Override
     public boolean shouldBeSaved() {
-        return !benchmark && super.shouldBeSaved();
+        return !benchmark && summoner == null && super.shouldBeSaved();
     }
 
     public int getAttackAnimationTicks() {
@@ -346,6 +354,7 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
         );
     }
 
+    @Override
     public void triggerUltimateAnimation() {
         triggerAnim(ULTIMATE_CONTROLLER, ULTIMATE_ANIMATION);
     }
@@ -442,10 +451,16 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
             return;
         }
         if (isDeadOrDying()) return;
+        tickHover();
         if (benchmark) return;
 
         if (getAttackAnimationTicks() > 0) {
             setAttackAnimationTicks(getAttackAnimationTicks() - 1);
+        }
+
+        if (summoner != null) {
+            tickServant(summoner.asEntity());
+            return;
         }
 
         final Player owner = findOwner();
@@ -509,6 +524,7 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
         this.goalSelector.addGoal(3, new FollowOwnerGoal(this, 1.1D, 5F, 2F));
         this.goalSelector.addGoal(4, new RandomLookAroundGoal(this));
 
+        this.targetSelector.addGoal(0, new CommandedTargetGoal(this));
         this.targetSelector.addGoal(1, new HurtByTargetGoal(this));
         this.targetSelector.addGoal(2,
                 new ProtectOwnerGoal<>(this)
@@ -520,13 +536,63 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
         this.targetSelector.addGoal(5, new EngageThreatsGoal(this));
     }
 
+    private void tickServant(final LivingEntity master) {
+        if (master.isRemoved() || !master.isAlive() || master.level() != level()) {
+            discard();
+            return;
+        }
+        if (getTarget() != null && distanceTo(master) <= SERVANT_COMBAT_LEASH) return;
+
+        handleTeleport(master);
+    }
+
+    public void commandAttack(final LivingEntity target) {
+        if (target == this || !canAttack(target)) return;
+        setTarget(target);
+    }
+
+    public void markTarget(final LivingEntity target) {
+        commandedTarget = target;
+        commandedUntil = tickCount + COMMANDED_TARGET_TICKS;
+        setTarget(target);
+    }
+
+    @Nullable
+    public LivingEntity getCommandedTarget() {
+        if (commandedTarget == null) return null;
+
+        if (tickCount > commandedUntil
+                || !commandedTarget.isAlive()
+                || commandedTarget.level() != level()
+                || distanceToSqr(commandedTarget) > COMMANDED_TARGET_RANGE * COMMANDED_TARGET_RANGE
+                || !canAttack(commandedTarget)) {
+            commandedTarget = null;
+        }
+        return commandedTarget;
+    }
+
+    public static void knockBackAttacker(final LivingEntity attacker, final Entity defended) {
+        double dx = attacker.getX() - defended.getX();
+        double dz = attacker.getZ() - defended.getZ();
+        final double length = Math.sqrt(dx * dx + dz * dz);
+        if (length <= 0.001D) return;
+
+        dx /= length;
+        dz /= length;
+        attacker.push(dx * 1.2D, 0.25D, dz * 1.2D);
+        attacker.hurtMarked = true;
+    }
+
     @Override
     public boolean canAttack(final LivingEntity target) {
+        if (summoner != null && summoner.isAlly(target)) return false;
         if (target instanceof Player player && !canHarmPlayer(player)) return false;
         return super.canAttack(target);
     }
 
+    @Override
     public boolean canHarmPlayer(final Player player) {
+        if (summoner != null) return !summoner.isAlly(player);
         final Player owner = findOwner();
         return owner != null && owner != player && owner.canHarmPlayer(player);
     }
@@ -591,6 +657,11 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
             super.die(source);
             return;
         }
+        if (summoner != null) {
+            summoner.onServantDefeated(this);
+            super.die(source);
+            return;
+        }
         final Player owner = findOwner();
         if (owner != null) {
             HeroSummonSystem.handleDefeat(owner, this);
@@ -615,6 +686,7 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
     @Override
     public boolean isAlliedTo(final Entity entity) {
         if (entity == getOwner()) return true;
+        if (summoner != null && summoner.isAlly(entity)) return true;
         return super.isAlliedTo(entity);
     }
 
@@ -715,6 +787,80 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
                 && !source.is(DamageTypeTags.IS_EXPLOSION);
     }
 
+    public boolean blinkTo(final LivingEntity target) {
+        if (blinkTo(target, true)) return true;
+        if (!blinkTo(target, false)) return false;
+
+        hoverTicks = HOVER_TICKS;
+        setNoGravity(true);
+        setDeltaMovement(Vec3.ZERO);
+        return true;
+    }
+
+    private boolean blinkTo(final LivingEntity target, final boolean needsSupport) {
+        for (int attempt = 0; attempt < BLINK_ATTEMPTS; attempt++) {
+            final double angle = random.nextDouble() * Math.PI * 2.0D;
+            final double x = target.getX() + Math.cos(angle) * BLINK_DISTANCE;
+            final double z = target.getZ() + Math.sin(angle) * BLINK_DISTANCE;
+
+            for (final int height : BLINK_HEIGHTS) {
+                final double y = target.getY() + height;
+                if (!isFreeAt(x, y, z) || needsSupport && !hasSupportAt(x, y, z)) continue;
+
+                playBlinkEffects();
+                teleportTo(x, y, z);
+                getNavigation().stop();
+                playBlinkEffects();
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private AABB boxAt(final double x, final double y, final double z) {
+        return getBoundingBox().move(x - getX(), y - getY(), z - getZ());
+    }
+
+    private boolean isFreeAt(final double x, final double y, final double z) {
+        return level().noCollision(this, boxAt(x, y, z));
+    }
+
+    private boolean hasSupportAt(final double x, final double y, final double z) {
+        final AABB feet = new AABB(x - SUPPORT_HALF_WIDTH, y - 0.5D, z - SUPPORT_HALF_WIDTH,
+                x + SUPPORT_HALF_WIDTH, y, z + SUPPORT_HALF_WIDTH);
+        return level().containsAnyLiquid(boxAt(x, y, z)) || !level().noCollision(this, feet);
+    }
+
+    private void tickHover() {
+        if (hoverTicks <= 0) {
+            if (isNoGravity()) setNoGravity(false);
+            return;
+        }
+
+        final LivingEntity target = getTarget();
+        hoverTicks--;
+        if (target == null || distanceTo(target) > HOVER_REACH || isInWater()) {
+            hoverTicks = 0;
+        }
+        if (hoverTicks == 0) {
+            setNoGravity(false);
+            return;
+        }
+
+        setDeltaMovement(Vec3.ZERO);
+        if (tickCount % 4 == 0 && level() instanceof ServerLevel serverLevel) {
+            serverLevel.sendParticles(ParticleTypes.END_ROD, getX(), getY() - 0.05D, getZ(), 3, 0.25, 0.0, 0.25, 0.0);
+        }
+    }
+
+    private void playBlinkEffects() {
+        level().playSound(null, getX(), getY(), getZ(), SoundEvents.ILLUSIONER_MIRROR_MOVE, getSoundSource(), 1.0F, 1.3F);
+
+        if (level() instanceof ServerLevel serverLevel) {
+            serverLevel.sendParticles(ParticleTypes.REVERSE_PORTAL, getX(), getY() + getBbHeight() * 0.5, getZ(), 20, 0.3, 0.6, 0.3, 0.05);
+        }
+    }
+
     private void playDodgeEffects() {
         level().playSound(null, getX(), getY(), getZ(), SoundEvents.PLAYER_ATTACK_NODAMAGE, getSoundSource(), 1.0F, 1.2F);
 
@@ -768,7 +914,7 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
         manaData.consumeMana(owner, cost);
 
         if (getHealth() < HeroStatsSystem.getMaxHealth(heroData)) {
-            heal(1.0F);
+            heal((float) HeroStatsSystem.getSummonedRegen(heroData));
         }
     }
 
@@ -782,7 +928,7 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
         }
     }
 
-    private void handleTeleport(Player owner) {
+    private void handleTeleport(LivingEntity owner) {
         double distance = distanceTo(owner);
 
         if (distance > 30) {
@@ -875,14 +1021,16 @@ public class HeroEntity extends PathfinderMob implements GeoEntity, OwnableEntit
                 double d1 = this.wantedY - this.heroEntity.getY();
                 double d2 = this.wantedZ - this.heroEntity.getZ();
                 double d3 = Math.sqrt(d0 * d0 + d1 * d1 + d2 * d2);
+                d0 /= d3;
                 d1 /= d3;
+                d2 /= d3;
                 float f = (float)(Mth.atan2(d2, d0) * 180.0F / (float)Math.PI) - 90.0F;
                 this.heroEntity.setYRot(this.rotlerp(this.heroEntity.getYRot(), f, 90.0F));
                 this.heroEntity.yBodyRot = this.heroEntity.getYRot();
                 float f1 = (float)(this.speedModifier * this.heroEntity.getAttributeValue(Attributes.MOVEMENT_SPEED));
                 float f2 = Mth.lerp(0.125F, this.heroEntity.getSpeed(), f1);
                 this.heroEntity.setSpeed(f2);
-                this.heroEntity.setDeltaMovement(this.heroEntity.getDeltaMovement().add((double)f2 * d0 * 0.005, (double)f2 * d1 * 0.1, (double)f2 * d2 * 0.005));
+                this.heroEntity.setDeltaMovement(this.heroEntity.getDeltaMovement().add((double)f2 * d0 * SWIM_ACCELERATION, (double)f2 * d1 * 0.1, (double)f2 * d2 * SWIM_ACCELERATION));
             } else {
                 if (!this.heroEntity.onGround()) {
                     this.heroEntity.setDeltaMovement(this.heroEntity.getDeltaMovement().add(0.0, -0.008, 0.0));

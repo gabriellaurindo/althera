@@ -18,12 +18,13 @@ public final class AltheraCreativeTabs {
             TABS.register("main",
                     () -> CreativeModeTab.builder()
                             .title(Component.literal("Althera"))
-                            .icon(() -> new ItemStack(AltheraItems.SUMMON_SEAL.get()))
+                            .icon(() -> new ItemStack(AltheraItems.EMBLEM.get()))
                             .displayItems((parameters, output) -> {
 
                                 // your items here
-                                output.accept(AltheraItems.SUMMON_SEAL.get());
                                 output.accept(AltheraItems.RITUAL_CORE.get());
+                                output.accept(AltheraItems.ENEMY_MAGE_SPAWN_EGG.get());
+                                output.accept(AltheraItems.NOBLE_SIGIL.get());
 
                             })
                             .build()

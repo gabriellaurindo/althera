@@ -22,7 +22,7 @@ public sealed interface UltimateTarget {
 
         @Override
         public List<LivingEntity> resolve(UltimateContext context) {
-            return List.of(context.hero());
+            return List.of(context.caster());
         }
     }
 
@@ -70,7 +70,7 @@ public sealed interface UltimateTarget {
         @Override
         public List<LivingEntity> resolve(UltimateContext context) {
 
-            Vec3 lift = new Vec3(0, context.hero().getBbHeight() / 2, 0);
+            Vec3 lift = new Vec3(0, context.caster().getBbHeight() / 2, 0);
             Vec3 start = context.origin().add(lift);
             Vec3 end = context.reach(length).add(lift);
 

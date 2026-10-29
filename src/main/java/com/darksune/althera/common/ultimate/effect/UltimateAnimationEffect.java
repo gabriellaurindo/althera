@@ -13,6 +13,6 @@ public record UltimateAnimationEffect() implements UltimateEffect {
 
     @Override
     public void apply(UltimateContext context) {
-        context.hero().triggerUltimateAnimation();
+        context.caster().triggerUltimateAnimation();
     }
 }

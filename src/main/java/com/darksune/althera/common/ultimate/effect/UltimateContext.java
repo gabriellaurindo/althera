@@ -1,6 +1,6 @@
 package com.darksune.althera.common.ultimate.effect;
 
-import com.darksune.althera.common.entity.HeroEntity;
+import com.darksune.althera.common.entity.CasterMob;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
@@ -13,18 +13,18 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
-public record UltimateContext(Player owner, HeroEntity hero, Vec3 origin, Vec3 direction,
+public record UltimateContext(LivingEntity owner, CasterMob caster, Vec3 origin, Vec3 direction,
                               @Nullable LivingEntity target, @Nullable Vec3 impact) {
 
     private static final double[] CLEARANCE_HEIGHTS = {0.25, 0.9};
 
     private static final double AIM_RANGE = 32.0;
 
-    public static UltimateContext of(Player owner, HeroEntity hero) {
+    public static UltimateContext of(LivingEntity owner, CasterMob hero) {
         return new UltimateContext(owner, hero, hero.position(), facing(owner, hero), null, null);
     }
 
-    public static UltimateContext attack(Player owner, HeroEntity hero, @Nullable LivingEntity target, @Nullable Vec3 impact) {
+    public static UltimateContext attack(LivingEntity owner, CasterMob hero, @Nullable LivingEntity target, @Nullable Vec3 impact) {
 
         Vec3 toTarget = target == null ? Vec3.ZERO : target.position().subtract(hero.position()).multiply(1, 0, 1);
 
@@ -36,18 +36,18 @@ public record UltimateContext(Player owner, HeroEntity hero, Vec3 origin, Vec3 d
     }
 
     public Vec3 position() {
-        return impact != null ? impact : hero.position();
+        return impact != null ? impact : caster.position();
     }
 
     public boolean canAffect(LivingEntity entity) {
-        return entity != hero
+        return entity != caster
                 && entity.isAlive()
-                && !hero.isAlliedTo(entity)
-                && !(entity instanceof Player player && !hero.canHarmPlayer(player));
+                && !caster.isAlliedTo(entity)
+                && !(entity instanceof Player player && !caster.canHarmPlayer(player));
     }
 
     public ServerLevel level() {
-        return (ServerLevel) hero.level();
+        return (ServerLevel) caster.level();
     }
 
     public Vec3 reach(double distance) {
@@ -56,25 +56,25 @@ public record UltimateContext(Player owner, HeroEntity hero, Vec3 origin, Vec3 d
 
         for (double clearance : CLEARANCE_HEIGHTS) {
 
-            Vec3 from = origin.add(0, hero.getBbHeight() * clearance, 0);
+            Vec3 from = origin.add(0, caster.getBbHeight() * clearance, 0);
 
             BlockHitResult hit = level().clip(new ClipContext(
                     from,
                     from.add(direction.scale(distance)),
                     ClipContext.Block.COLLIDER,
                     ClipContext.Fluid.NONE,
-                    hero
+                    caster
             ));
 
             if (hit.getType() != HitResult.Type.MISS) {
-                clearDistance = Math.min(clearDistance, hit.getLocation().distanceTo(from) - hero.getBbWidth());
+                clearDistance = Math.min(clearDistance, hit.getLocation().distanceTo(from) - caster.getBbWidth());
             }
         }
 
         return origin.add(direction.scale(Math.max(0, clearDistance)));
     }
 
-    private static Vec3 facing(Player owner, HeroEntity hero) {
+    private static Vec3 facing(LivingEntity owner, CasterMob hero) {
 
         if (owner.level() == hero.level()) {
             Vec3 toAim = aimPoint(owner, hero).subtract(hero.position()).multiply(1, 0, 1);
@@ -92,7 +92,7 @@ public record UltimateContext(Player owner, HeroEntity hero, Vec3 origin, Vec3 d
         return Vec3.directionFromRotation(0, hero.getYRot());
     }
 
-    private static Vec3 aimPoint(Player owner, HeroEntity hero) {
+    private static Vec3 aimPoint(LivingEntity owner, CasterMob hero) {
 
         Vec3 eye = owner.getEyePosition();
 

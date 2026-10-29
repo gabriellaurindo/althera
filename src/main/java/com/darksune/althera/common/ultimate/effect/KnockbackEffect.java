@@ -25,7 +25,7 @@ public record KnockbackEffect(UltimateTarget target, EntityFilter filter, double
     @Override
     public void apply(UltimateContext context) {
         for (LivingEntity entity : filter.resolve(target, context)) {
-            Vec3 away = new Vec3(entity.getX() - context.hero().getX(), 0, entity.getZ() - context.hero().getZ());
+            Vec3 away = new Vec3(entity.getX() - context.caster().getX(), 0, entity.getZ() - context.caster().getZ());
             if (!scaleWithDistance) {
                 away = away.lengthSqr() > 1.0E-4 ? away.normalize() : context.direction();
             }

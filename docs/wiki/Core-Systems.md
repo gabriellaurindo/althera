@@ -37,10 +37,10 @@ Each Hero belongs to a specific class and possesses an internal rank that influe
 | Class | Style | Knockback resistance | Dodge |
 |---|---|---|---|
 | Saber | Balanced offense and defense | 80% | 5% |
-| Caster | Very high attack, fragile | 50% | 0% |
+| Caster | Very high attack, fragile | 50% | 5% |
 | Lancer | Fast, high attack | 75% | 5% |
 | Shielder | Highest health and armor, slow | 100% | 0% |
-| Archer | High attack, lower durability | 60% | 5% |
+| Archer | High attack, lower durability | 60% | 10% |
 | Assassin | Fastest, high attack, fragile | 60% | 10% |
 
 Heroes move at their class speed: Assassins and Lancers are faster, Shielders slower. Knockback resistance keeps
@@ -97,6 +97,10 @@ Some Heroes may also feature:
 Heroes fight whichever enemy is attacking them within reach, keep fighting nearby enemies that attack them or you
 when their target dies, and help you against what you hit.
 
+A melee Hero that can't get any closer to its target for **5 seconds** (the target is in water, on a pillar, in a
+boat...) **blinks**: it vanishes and reappears next to the target. If there is no ground next to the target, the Hero
+hovers in the air beside it for up to 4 seconds, then falls. Enemy Heroes, like a Noble's, do the same.
+
 ### Signature attacks
 
 | Hero | Attack |
@@ -135,8 +139,11 @@ This system creates a balance between combat power and resource management.
 In **Creative** mode mana is infinite: summoning, keeping the Hero out, Command Seals and the Ultimate cost nothing,
 and the mana bar shows **∞**.
 
-Your mana is shown in the mana bar on screen. The mana bar and the Hero HUD are hidden together with the rest of the
-interface when you press **F1**.
+The **Hero HUD** in the top-left corner shows your hero's face and level, its health, your mana bar and the
+interventions left (green diamonds). The face is dimmed while the hero is not summoned and turns red when it is
+defeated. The Hero HUD is hidden with **F1**; its hero part can also be hidden in the hero screen settings.
+Its corner (top/bottom, left/right) and distance from it can be changed in the client config: **Mods > Althera >
+Config**, the **Open Config** key (unbound by default, set it in Controls) or `config/althera-client.toml`.
 
 ---
 
@@ -150,6 +157,18 @@ When dismissed, Heroes enter a spirit state instead of remaining physically acti
 - Health regeneration becomes significantly faster
 - The player gains:
   - **Resistance I**
+
+### Health regeneration
+
+Heroes recover health every 2 seconds, faster as they level up:
+
+| | Level 1 | Level 50 |
+|---|---|---|
+| Spirit form (or defeated) | 2 health | 6.9 health |
+| Summoned | 1 health | 3.45 health |
+
+Each level adds **0.1** health in spirit form and **0.05** while summoned. A defeated Hero recovers in spirit form
+until its health is full, then can be summoned again.
 
 Spirit form allows Heroes to recover safely before being summoned again.
 
@@ -194,8 +213,8 @@ Progression in Althera is continuous and centered around long-term Hero developm
 - Heroes grow stronger through combat
 - Experience is gained primarily through mob kills
 - Progression increases survivability and combat effectiveness
-- Heroes gain health, attack and **armor** as they level up (0.15 armor per level before the class, rank and nature
-  multipliers: at level 50 an EX Shielder has about 21 armor, an EX Saber about 14 and an EX Caster about 9)
+- Heroes gain health, attack and **armor** as they level up (1.65 health, 0.18 attack and 0.06 armor per level before the
+  class, rank and nature multipliers: at level 50 an EX Saber has about 213 health, 16 attack and 6 armor)
 - The maximum Hero level is **50** for now; the hero screen (**G**) then shows **MAX** instead of the XP needed
 - New systems become available as development progresses
 

@@ -16,11 +16,13 @@ import java.util.Map;
 public class CommandSealData extends SyncableAttachment {
 
     public static final int MAX_CHARGES = 3;
+    public static final int NO_TATTOO = -1;
 
     // =========================
     // DATA
     // =========================
 
+    private int tattoo = NO_TATTOO;
     private int color = 0xFFFFFF;
     private int commandSealCharges = MAX_CHARGES;
     private long lastChargeResetDay;
@@ -38,6 +40,9 @@ public class CommandSealData extends SyncableAttachment {
 
     public static final Codec<CommandSealData> CODEC = RecordCodecBuilder.create(instance ->
             instance.group(
+                    Codec.INT.optionalFieldOf("tattoo", NO_TATTOO)
+                            .forGetter(CommandSealData::getTattoo),
+
                     Codec.INT.optionalFieldOf("color", 0xFFFFFF)
                             .forGetter(data -> data.color),
 
@@ -53,10 +58,11 @@ public class CommandSealData extends SyncableAttachment {
                     SKILL_MAP_CODEC.optionalFieldOf("cooldownSkills", new HashMap<>())
                             .forGetter(CommandSealData::getCooldownSkills)
 
-            ).apply(instance, (color, commandSealCharges, lastChargeResetDay, activeSkills, cooldownSkills) -> {
+            ).apply(instance, (tattoo, color, commandSealCharges, lastChargeResetDay, activeSkills, cooldownSkills) -> {
 
                 CommandSealData data = new CommandSealData();
 
+                data.tattoo = tattoo;
                 data.color = color;
                 data.commandSealCharges = commandSealCharges;
                 data.lastChargeResetDay = lastChargeResetDay;
@@ -73,6 +79,8 @@ public class CommandSealData extends SyncableAttachment {
 
     public static final StreamCodec<FriendlyByteBuf, CommandSealData> STREAM_CODEC = StreamCodec.of(
             (buf, data) -> {
+
+                buf.writeInt(data.tattoo);
 
                 buf.writeInt(data.color);
 
@@ -100,6 +108,8 @@ public class CommandSealData extends SyncableAttachment {
             buf -> {
 
                 CommandSealData data = new CommandSealData();
+
+                data.tattoo = buf.readInt();
 
                 data.color = buf.readInt();
 
@@ -139,6 +149,20 @@ public class CommandSealData extends SyncableAttachment {
 
     public static CommandSealData get(Player player) {
         return player.getData(AltheraAttachments.COMMAND_SEAL.get());
+    }
+
+    public int getTattoo() {
+        return tattoo;
+    }
+
+    public boolean hasTattoo() {
+        return tattoo != NO_TATTOO;
+    }
+
+    public void setTattoo(int tattoo, int color) {
+        this.tattoo = tattoo;
+        this.color = color;
+        markDirty();
     }
 
     public int getColor() {

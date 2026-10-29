@@ -1,7 +1,8 @@
 package com.darksune.althera.common.ultimate.effect;
 
-import com.darksune.althera.common.entity.HeroEntity;
+import com.darksune.althera.common.entity.CasterMob;
 import com.darksune.althera.common.entity.HeroProjectileEntity;
+import com.darksune.althera.common.util.CodecUtil;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -13,7 +14,7 @@ import net.minecraft.world.phys.Vec3;
 
 import java.util.List;
 
-public record ProjectileEffect(int count, float spread, float speed, float amount, float attackRatio,
+public record ProjectileEffect(int count, float spread, float speed, float amount, float attackMultiplier,
                                ParticleOptions trail, List<UltimateEffect> onHit) implements UltimateEffect {
 
     public static final MapCodec<ProjectileEffect> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
@@ -21,7 +22,8 @@ public record ProjectileEffect(int count, float spread, float speed, float amoun
             Codec.FLOAT.optionalFieldOf("spread", 0.0F).forGetter(ProjectileEffect::spread),
             ExtraCodecs.POSITIVE_FLOAT.optionalFieldOf("speed", 1.2F).forGetter(ProjectileEffect::speed),
             Codec.FLOAT.optionalFieldOf("amount", 0.0F).forGetter(ProjectileEffect::amount),
-            Codec.FLOAT.optionalFieldOf("attack_ratio", 0.0F).forGetter(ProjectileEffect::attackRatio),
+            CodecUtil.optionalFloatWithLegacyName("attack_multiplier", "attack_ratio", 0.0F)
+                    .forGetter(ProjectileEffect::attackMultiplier),
             ParticleTypes.CODEC.optionalFieldOf("trail", ParticleTypes.FLAME).forGetter(ProjectileEffect::trail),
             Codec.lazyInitialized(() -> UltimateEffect.CODEC.listOf()).optionalFieldOf("on_hit", List.of())
                     .forGetter(ProjectileEffect::onHit)
@@ -34,12 +36,12 @@ public record ProjectileEffect(int count, float spread, float speed, float amoun
 
     @Override
     public void apply(UltimateContext context) {
-        HeroEntity hero = context.hero();
+        CasterMob hero = context.caster();
         Vec3 from = hero.getProjectileOrigin();
         Vec3 aim = context.target() != null
                 ? HeroProjectileEntity.aimAt(from, context.target())
                 : context.direction();
-        float damage = amount + attackRatio * (float) hero.getAttributeValue(Attributes.ATTACK_DAMAGE);
+        float damage = amount + attackMultiplier * (float) hero.getAttributeValue(Attributes.ATTACK_DAMAGE);
 
         for (int i = 0; i < count; i++) {
             float angle = count == 1 ? 0 : spread * ((float) i / (count - 1) - 0.5F);

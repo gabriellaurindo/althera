@@ -2,7 +2,7 @@ package com.darksune.althera.common.ai.goal;
 
 import com.darksune.althera.common.entity.HeroEntity;
 import net.minecraft.world.entity.ai.goal.Goal;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.LivingEntity;
 
 import java.util.EnumSet;
 
@@ -37,7 +37,7 @@ public class FollowOwnerGoal extends Goal {
     @Override
     public boolean canUse() {
 
-        Player owner = hero.getOwner();
+        LivingEntity owner = hero.getOwner();
 
         if (owner == null) {
             return false;
@@ -54,7 +54,7 @@ public class FollowOwnerGoal extends Goal {
     @Override
     public boolean canContinueToUse() {
 
-        Player owner = hero.getOwner();
+        LivingEntity owner = hero.getOwner();
 
         if (owner == null) {
             return false;
@@ -70,7 +70,7 @@ public class FollowOwnerGoal extends Goal {
     @Override
     public void tick() {
 
-        Player owner = hero.getOwner();
+        LivingEntity owner = hero.getOwner();
 
         if (owner == null) {
             return;

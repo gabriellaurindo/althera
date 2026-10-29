@@ -89,7 +89,7 @@ Every field is optional and they all have to match:
 | `exclude_target` | `false` | Skip the creature being attacked (attacks only), e.g. to hit only what stands behind it |
 
 ```json
-{ "type": "damage", "target": "target", "filter": { "entity_tag": "minecraft:undead" }, "attack_ratio": 0.5 }
+{ "type": "damage", "target": "target", "filter": { "entity_tag": "minecraft:undead" }, "attack_multiplier": 0.5 }
 ```
 
 ---
@@ -104,7 +104,7 @@ Positions (sounds, particles, explosions) are taken from the Hero's current posi
 | `target` | — | Who takes damage |
 | `filter` | none | See **Filter** above |
 | `amount` | `0` | Flat damage (2 = one heart) |
-| `attack_ratio` | `0` | Extra damage as a share of the Hero's attack damage (`0.5` = half of it), so it grows with the Hero level |
+| `attack_multiplier` | `0` | Extra damage as a multiple of the caster's attack damage (`1.8` = 180% of it), so it grows with the Hero level. Was `attack_ratio`, still accepted for now |
 
 In an attack's `on_hit`, damage to the attacked creature always lands on top of the hit itself (it ignores the
 short invulnerability after being hit).
@@ -176,7 +176,7 @@ Moves the Hero instantly in a straight line in front of it, stopping before wall
 | `target` | — | Who is healed, e.g. `"self"` or `"owner"` |
 | `filter` | none | |
 | `amount` | `0` | Flat healing (2 = one heart) |
-| `max_health_ratio` | `0` | Extra healing as a share of the target's max health (`0.25` = a quarter) |
+| `max_health_multiplier` | `0` | Extra healing as a multiple of the target's max health (`0.25` = a quarter). Was `max_health_ratio`, still accepted for now |
 
 ### `projectile`
 Shoots projectiles from the Hero (from its attack's `projectile_origin`) towards the attacked creature, or in the
@@ -189,14 +189,22 @@ Ultimate's direction. They fly straight, never hit the owner and run their own `
 | `spread` | `0` | Fan angle in degrees, split evenly between them |
 | `speed` | `1.2` | Blocks per tick |
 | `amount` | `0` | Flat damage of each projectile |
-| `attack_ratio` | `0` | Extra damage as a share of the Hero's attack damage |
+| `attack_multiplier` | `0` | Extra damage as a multiple of the caster's attack damage. Was `attack_ratio`, still accepted for now |
 | `trail` | `{ "type": "minecraft:flame" }` | Trail and impact particle |
 | `on_hit` | none | Effects applied where each projectile lands |
 
 ```json
-{ "type": "projectile", "count": 5, "spread": 40, "attack_ratio": 1.5,
+{ "type": "projectile", "count": 5, "spread": 40, "attack_multiplier": 1.5,
   "trail": { "type": "minecraft:soul_fire_flame" },
   "on_hit": [ { "type": "ignite", "target": "target", "ticks": 60 } ] }
+```
+
+### `lightning`
+Calls a lightning bolt down where the effect happens (the impact point, or the Hero). Only visual: no fire and no
+damage, so pair it with a `damage` effect. No fields.
+
+```json
+{ "type": "lightning" }
 ```
 
 ### `ultimate_animation`
@@ -221,7 +229,7 @@ Plays the `ultimate` animation of the Hero model (if it has one). No fields.
   "on_end": [
     { "type": "knockback", "target": { "area": 6 }, "horizontal": 0.35, "vertical": 0.6 },
     { "type": "ignite", "target": { "area": 6 }, "ticks": 60 },
-    { "type": "damage", "target": { "area": 6 }, "amount": 12 },
+    { "type": "damage", "target": { "area": 6 }, "attack_multiplier": 1.8 },
     { "type": "explosion" },
     { "type": "particles", "particle": { "type": "minecraft:explosion_emitter" }, "height": 1 },
     { "type": "particles", "particle": { "type": "minecraft:flame" }, "count": 80, "spread": [1.5, 1.0, 1.5], "speed": 0.05, "height": 1 },
@@ -254,7 +262,7 @@ Channels for 1.5 seconds over a crimson mist, then dashes 8 blocks through every
   ],
   "on_end": [
     { "type": "mob_effect", "target": { "line": 8, "width": 1.5 }, "effect": "minecraft:wither", "duration": 80, "amplifier": 1 },
-    { "type": "damage", "target": { "line": 8, "width": 1.5 }, "amount": 18 },
+    { "type": "damage", "target": { "line": 8, "width": 1.5 }, "attack_multiplier": 2.1 },
     { "type": "particles", "particle": { "type": "minecraft:dust", "color": [0.75, 0.05, 0.1], "scale": 1.5 }, "count": 4, "spread": [0.2, 0.4, 0.2], "height": 1, "line": 8 },
     { "type": "particles", "particle": { "type": "minecraft:crit" }, "count": 2, "spread": [0.3, 0.3, 0.3], "speed": 0.1, "height": 1, "line": 8 },
     { "type": "dash", "distance": 8 },
@@ -278,3 +286,4 @@ Channels for 1.5 seconds over a crimson mist, then dashes 8 blocks through every
 
 - [Creating Custom Heroes](Creating-Custom-Heroes)
 - [Command Seals & Ultimates](Command-Seals-and-Ultimates)
+- [Nobles](Nobles) (spells use the same effects)

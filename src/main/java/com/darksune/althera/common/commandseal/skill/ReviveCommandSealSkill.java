@@ -6,6 +6,7 @@ import com.darksune.althera.common.system.HeroStatsSystem;
 import com.darksune.althera.common.system.HeroSummonSystem;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
+import org.jetbrains.annotations.Nullable;
 
 public class ReviveCommandSealSkill extends AbstractCommandSealSkill {
 
@@ -27,6 +28,14 @@ public class ReviveCommandSealSkill extends AbstractCommandSealSkill {
         }
 
         return true;
+    }
+
+    @Override
+    @Nullable
+    public String unavailableReason(HeroData heroData) {
+        if (!heroData.isDefeated()) return "Hero not defeated";
+        if (!heroData.canResurrect()) return "Still recovering";
+        return null;
     }
 
     @Override

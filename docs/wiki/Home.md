@@ -8,12 +8,15 @@ This wiki contains detailed explanations of the mod’s systems, mechanics, and 
 
 ## 📚 Systems
 
+- [Heroes](Heroes)
 - [Core Systems](Core-Systems)
 - [Command Seals & Ultimates](Command-Seals-and-Ultimates)
 - [Commands](Commands)
 - [Ritual System](Ritual-System)
 - [Creating Custom Heroes](Creating-Custom-Heroes)
 - [Creating Custom Ultimates](Creating-Custom-Ultimates)
+- [Nobles](Nobles)
+- [Creating Custom Enemy Mages](Creating-Custom-Enemy-Mages)
 - More systems coming soon...
 
 ---
@@ -28,6 +31,12 @@ If you're new to Althera, it is recommended to start with:
 If you are interested in creating your own Heroes:
 
 3. [Creating Custom Heroes](Creating-Custom-Heroes)
+
+---
+
+## 📖 About
+
+- [Origin of the Name](Origin-of-the-Name)
 
 ---
 

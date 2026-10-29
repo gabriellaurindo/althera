@@ -1,11 +1,11 @@
 {
   "name": "Archer",
-  "health": 0.9,
-  "attack": 1.35,
-  "armor": 0.75,
+  "health": 0.95,
+  "attack": 1.3,
+  "armor": 0.8,
   "speed": 1.1,
   "knockback_resistance": 0.6,
-  "dodge_chance": 0.05,
+  "dodge_chance": 0.1,
   "strong_against": [
     "althera:assassin",
     "althera:saber"

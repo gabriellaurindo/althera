@@ -44,7 +44,7 @@ public class HeroProjectileEntity extends Projectile {
     }
 
     public static HeroProjectileEntity shoot(
-            final HeroEntity hero,
+            final CasterMob hero,
             final Vec3 from,
             final Vec3 direction,
             final float damage,
@@ -75,7 +75,7 @@ public class HeroProjectileEntity extends Projectile {
         super.tick();
 
         if (!level().isClientSide) {
-            if (tickCount > MAX_LIFE_TICKS || !(getOwner() instanceof HeroEntity)) {
+            if (tickCount > MAX_LIFE_TICKS || !(getOwner() instanceof CasterMob)) {
                 discard();
                 return;
             }
@@ -118,7 +118,7 @@ public class HeroProjectileEntity extends Projectile {
         if (!(target instanceof LivingEntity) || !super.canHitEntity(target)) {
             return false;
         }
-        if (!(getOwner() instanceof HeroEntity hero)) {
+        if (!(getOwner() instanceof CasterMob hero)) {
             return true;
         }
         return target != hero
@@ -132,7 +132,7 @@ public class HeroProjectileEntity extends Projectile {
         final Entity owner = getOwner();
         final LivingEntity attacker = owner instanceof LivingEntity living ? living : null;
         final boolean hurt = result.getEntity().hurt(damageSources().mobProjectile(this, attacker), damage);
-        if (hurt && owner instanceof HeroEntity hero && result.getEntity() instanceof LivingEntity target) {
+        if (hurt && owner instanceof CasterMob hero && result.getEntity() instanceof LivingEntity target) {
             hero.applyEffects(onHit, target, result.getLocation());
         }
     }
@@ -140,7 +140,7 @@ public class HeroProjectileEntity extends Projectile {
     @Override
     protected void onHitBlock(final BlockHitResult result) {
         super.onHitBlock(result);
-        if (getOwner() instanceof HeroEntity hero) {
+        if (getOwner() instanceof CasterMob hero) {
             hero.applyEffects(onHit, null, result.getLocation());
         }
     }
