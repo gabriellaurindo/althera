@@ -6,6 +6,8 @@ and generates the GitHub Release, CurseForge and Discord notes from it.
 
 ## [Unreleased]
 
+## [4.2.0] - 2026-10-31 - Hero Insight (feature + hotfix)
+
 ### Added
 - **Skill timers**: every Command Seal or Ultimate that is running shows a small see-through square under the
   Hero HUD, with its icon and the seconds left: **green** while active, **red** while on cooldown, with a fill that
