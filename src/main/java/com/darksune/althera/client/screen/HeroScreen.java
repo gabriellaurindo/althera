@@ -31,6 +31,7 @@ import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffectUtil;
 import net.minecraft.world.effect.MobEffects;
+import net.neoforged.fml.ModList;
 import net.neoforged.neoforge.common.ModConfigSpec;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.jetbrains.annotations.Nullable;
@@ -58,6 +59,7 @@ public class HeroScreen extends Screen {
     private static final int SETTING_NUMBER_WIDTH = 50;
     private static final int SETTING_STEP_SIZE = 10;
     private static final int SETTING_TOOLTIP_WIDTH = 180;
+    private static final int OTHER_OPTIONS_WIDTH = 80;
 
     private static final int BUTTON_HEIGHT = 16;
     private static final int CONTENT_X = 14;
@@ -731,13 +733,12 @@ public class HeroScreen extends Screen {
             }
         }
 
-        gui.drawCenteredString(
-                this.font,
-                "Click the gear to go back",
-                left() + GUI_WIDTH / 2,
-                top() + GUI_HEIGHT - 16,
-                0x777777
-        );
+        drawButton(gui, "Other options", otherOptionsX(), otherOptionsY(), OTHER_OPTIONS_WIDTH,
+                isOverOtherOptions(mouseX, mouseY));
+
+        final String hint = "Click the gear to go back";
+        gui.drawString(this.font, hint, left() + GUI_WIDTH - CONTENT_X - this.font.width(hint),
+                otherOptionsY() + (BUTTON_HEIGHT - 8) / 2, 0x777777);
     }
 
     private void renderSettingControl(GuiGraphics gui, HeroData heroData, SettingRow row, int right, int y) {
@@ -827,6 +828,11 @@ public class HeroScreen extends Screen {
         final int amount = hasShiftDown() ? 10 : 1;
         value.set(Mth.clamp(value.get() + direction * amount, 0, AltheraClientConfig.MAX_HUD_OFFSET));
         AltheraClientConfig.SPEC.save();
+    }
+
+    private void openOtherOptions() {
+        ModList.get().getModContainerById(Althera.MOD_ID)
+                .ifPresent(container -> minecraft.setScreen(AltheraClientConfig.createScreen(container, this)));
     }
 
     // =========================================================
@@ -976,6 +982,18 @@ public class HeroScreen extends Screen {
         return y;
     }
 
+    private int otherOptionsX() {
+        return left() + CONTENT_X;
+    }
+
+    private int otherOptionsY() {
+        return top() + GUI_HEIGHT - BUTTON_HEIGHT - 8;
+    }
+
+    private boolean isOverOtherOptions(double mouseX, double mouseY) {
+        return mouseX >= otherOptionsX() && mouseX < otherOptionsX() + OTHER_OPTIONS_WIDTH
+                && mouseY >= otherOptionsY() && mouseY < otherOptionsY() + BUTTON_HEIGHT;
+    }
 
     private boolean isOverGear(double mouseX, double mouseY) {
         return mouseX >= gearX() && mouseX <= gearX() + 16
@@ -1029,6 +1047,11 @@ public class HeroScreen extends Screen {
         }
 
         if (currentTab == Tab.SETTINGS) {
+            if (isOverOtherOptions(mouseX, mouseY)) {
+                openOtherOptions();
+                return true;
+            }
+
             if (clickSetting(mouseX, mouseY, button)) {
                 return true;
             }

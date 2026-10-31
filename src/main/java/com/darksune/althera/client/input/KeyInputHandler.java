@@ -31,9 +31,6 @@ public class KeyInputHandler {
             KeyActions.handleUltimateSkill();
         }
 
-        if (AltheraKeybinds.OPEN_CONFIG.consumeClick()) {
-            KeyActions.handleConfig();
-        }
     }
 
     private static void handleSummonKey() {

@@ -21,12 +21,13 @@ and generates the GitHub Release, CurseForge and Discord notes from it.
 - **Ultimate ready again**: when a new day restores a used Ultimate, a chime and a chat message let you know.
 - **HUD settings in the hero screen**: the gear tab (G) now has every option in one place: Disable interventions,
   Hide HUD, HUD corner, horizontal/vertical offset and skill timers position, with a description on hover. The
-  NeoForge config screen no longer repeats them.
+  NeoForge config screen (**Other options**) no longer repeats them.
 - **Custom hero sounds and hitbox**: hero JSONs accept `sounds` (`hurt`, `death`, `step`) and `hitbox` (`width`,
   `height`). A disguised hero keeps the default sounds and size.
 
 ### Changed
 - Command Seals are now cast only through the **Command Seal wheel** (hold **R**). The J/K/V shortcuts were removed.
+- The **Open Config** key was removed: the options live in the hero screen gear tab (G).
   The crosshair and the skill timers next to it are hidden while the wheel is open.
 - The skill slots next to the hotbar are gone. The Ultimate now shows as a **golden sword** beside your Hero's portrait
   in the Hero HUD, faded once used today; seal charges show in the Command Seal wheel.

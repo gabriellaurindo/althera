@@ -38,13 +38,6 @@ public class AltheraKeybinds {
             "key.categories.althera"
     );
 
-    public static final KeyMapping OPEN_CONFIG = new KeyMapping(
-            "key.althera.config",
-            InputConstants.Type.KEYSYM,
-            InputConstants.UNKNOWN.getValue(),
-            "key.categories.althera"
-    );
-
     public static void register(RegisterKeyMappingsEvent event) {
 
         for (Field field : AltheraKeybinds.class.getDeclaredFields()) {
