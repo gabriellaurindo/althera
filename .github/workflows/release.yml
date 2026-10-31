@@ -13,6 +13,8 @@ permissions:
 jobs:
   release:
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.meta.outputs.version }}
     env:
       CURSEFORGE_TOKEN: ${{ secrets.CURSEFORGE_TOKEN }}
       CURSEFORGE_PROJECT_ID: ${{ vars.CURSEFORGE_PROJECT_ID }}
@@ -115,3 +117,10 @@ jobs:
           # flags 4 = SUPPRESS_EMBEDS: no link preview cards under the announcement.
           jq -n --rawfile content "${{ steps.meta.outputs.notes }}/discord.md" '{content: $content, flags: 4}' \
             | curl -fsS -H "Content-Type: application/json" -d @- "$DISCORD_WEBHOOK"
+
+  modrinth-page:
+    needs: release
+    uses: ./.github/workflows/modrinth-page.yml
+    with:
+      version: ${{ needs.release.outputs.version }}
+    secrets: inherit
