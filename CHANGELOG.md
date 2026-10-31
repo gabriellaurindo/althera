@@ -6,6 +6,10 @@ and generates the GitHub Release, CurseForge and Discord notes from it.
 
 ## [Unreleased]
 
+### Changed
+- **Smaller download**: the mod's textures were recompressed without any visual change and the hero screen's gear
+  icon no longer ships at a needlessly huge resolution, cutting the jar roughly in half.
+
 ## [4.2.0] - 2026-10-31 - Hero Insight (feature + hotfix)
 
 ### Added
