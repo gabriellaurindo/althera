@@ -165,7 +165,8 @@ Click the gear in the hero screen (**G**) to change:
 - **HUD**: Hide HUD, HUD corner, horizontal and vertical offset from that corner (shift-click for steps of 10) and
   where the skill timers go (next to the crosshair or under the Hero HUD)
 
-Corner and timers cycle with a click (right-click goes back). Hover a setting to see what it does. The HUD options
+Corner and timers cycle with a click (right-click goes back). Hover a setting to see what it does. **Reset**, next
+to the HUD title, puts the corner, offsets and timers back to their defaults. The HUD options
 are saved in `config/althera-client.toml`. **Other options** is disabled for now; it is
 reserved for future options. The NeoForge config screen (**Mods > Althera > Config**) is empty for the same reason.
 

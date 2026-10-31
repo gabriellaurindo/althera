@@ -20,8 +20,8 @@ and generates the GitHub Release, CurseForge and Discord notes from it.
 - **Creative mode**: Command Seals and the Ultimate are unlimited (no charges, cooldowns or once-per-day limit).
 - **Ultimate ready again**: when a new day restores a used Ultimate, a chime and a chat message let you know.
 - **HUD settings in the hero screen**: the gear tab (G) now has every option in one place: Disable interventions,
-  Hide HUD, HUD corner, horizontal/vertical offset and skill timers position, with a description on hover. The
-  NeoForge config screen no longer repeats them.
+  Hide HUD, HUD corner, horizontal/vertical offset and skill timers position, with a description on hover and a
+  **Reset** link for the HUD position. The NeoForge config screen no longer repeats them.
 - **Custom hero sounds and hitbox**: hero JSONs accept `sounds` (`hurt`, `death`, `step`) and `hitbox` (`width`,
   `height`). A disguised hero keeps the default sounds and size.
 

@@ -59,6 +59,7 @@ public class HeroScreen extends Screen {
     private static final int SETTING_STEP_SIZE = 10;
     private static final int SETTING_TOOLTIP_WIDTH = 180;
     private static final int OTHER_OPTIONS_WIDTH = 80;
+    private static final String RESET_HUD_LABEL = "Reset";
 
     private static final int BUTTON_HEIGHT = 16;
     private static final int CONTENT_X = 14;
@@ -722,6 +723,10 @@ public class HeroScreen extends Screen {
             if (row.section != section) {
                 section = row.section;
                 gui.drawString(this.font, section.title, rowX, rowY - SETTING_HEADER_HEIGHT + 2, COLOR_ACCENT);
+
+                if (section == SettingSection.HUD) {
+                    renderResetHud(gui, mouseX, mouseY);
+                }
             }
 
             final boolean hovered = isOverSettingRow(row, mouseX, mouseY);
@@ -746,6 +751,39 @@ public class HeroScreen extends Screen {
         final String hint = "Click the gear to go back";
         gui.drawString(this.font, hint, left() + GUI_WIDTH - CONTENT_X - this.font.width(hint),
                 otherOptionsY() + (BUTTON_HEIGHT - 8) / 2, 0x777777);
+    }
+
+    private void renderResetHud(GuiGraphics gui, int mouseX, int mouseY) {
+        final boolean hovered = isOverResetHud(mouseX, mouseY);
+
+        gui.drawString(this.font, RESET_HUD_LABEL, resetHudX(), resetHudY(), hovered ? 0xFFFFFF : COLOR_LABEL);
+
+        if (hovered) {
+            setTooltipForNextRenderPass(this.font.split(
+                    Component.literal("Puts the HUD corner, offsets and skill timers back to their defaults."),
+                    SETTING_TOOLTIP_WIDTH));
+        }
+    }
+
+    private static void resetHud() {
+        AltheraClientConfig.HERO_HUD_CORNER.set(AltheraClientConfig.HERO_HUD_CORNER.getDefault());
+        AltheraClientConfig.HERO_HUD_OFFSET_X.set(AltheraClientConfig.HERO_HUD_OFFSET_X.getDefault());
+        AltheraClientConfig.HERO_HUD_OFFSET_Y.set(AltheraClientConfig.HERO_HUD_OFFSET_Y.getDefault());
+        AltheraClientConfig.SKILL_TIMERS_POSITION.set(AltheraClientConfig.SKILL_TIMERS_POSITION.getDefault());
+        AltheraClientConfig.SPEC.save();
+    }
+
+    private int resetHudX() {
+        return left() + CONTENT_X + CONTENT_WIDTH - 6 - this.font.width(RESET_HUD_LABEL);
+    }
+
+    private int resetHudY() {
+        return settingRowY(SettingRow.HIDE_HUD) - SETTING_HEADER_HEIGHT + 2;
+    }
+
+    private boolean isOverResetHud(double mouseX, double mouseY) {
+        return mouseX >= resetHudX() && mouseX < resetHudX() + this.font.width(RESET_HUD_LABEL)
+                && mouseY >= resetHudY() - 1 && mouseY < resetHudY() + 9;
     }
 
     private void renderSettingControl(GuiGraphics gui, HeroData heroData, SettingRow row, int right, int y) {
@@ -1056,6 +1094,11 @@ public class HeroScreen extends Screen {
         }
 
         if (currentTab == Tab.SETTINGS) {
+            if (isOverResetHud(mouseX, mouseY)) {
+                resetHud();
+                return true;
+            }
+
             if (clickSetting(mouseX, mouseY, button)) {
                 return true;
             }
