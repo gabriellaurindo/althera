@@ -214,7 +214,7 @@ While disguised, the Hero appears as a hooded figure with a shadowed face:
 
 - Loses **half of its base health, attack and armor**, but keeps everything it gained from levels: a high-level
   Hero stays strong while disguised (roughly, it still beats the same Hero 8 to 10 levels below it)
-- **50%** of its speed, knockback resistance and dodge chance
+- **75%** of its speed and **50%** of its knockback resistance and dodge chance
 - Costs only **¼ of the mana** to summon and keep summoned
 - Can't use its **Ultimate** (it can't be disguised while channeling one either)
 - Keeps its melee or ranged attack, but without its signature effects (ranged attacks leave a plain smoke trail)
