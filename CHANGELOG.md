@@ -26,8 +26,7 @@ and generates the GitHub Release, CurseForge and Discord notes from it.
   `height`). A disguised hero keeps the default sounds and size.
 
 ### Changed
-- A disguised Hero is stronger: it keeps **75%** of its base health, attack, armor, speed, knockback resistance and
-  dodge (was 50%), since it already can't use its Ultimate or signature attack effects.
+- A disguised Hero is faster: it keeps **75%** of its speed (was 50%).
 - Command Seals are now cast only through the **Command Seal wheel** (hold **R**). The J/K/V shortcuts were removed.
 - The **Open Config** key was removed: the options live in the hero screen gear tab (G).
   The crosshair and the skill timers next to it are hidden while the wheel is open.
