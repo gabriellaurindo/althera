@@ -5,23 +5,32 @@ import com.darksune.althera.client.input.AltheraKeybinds;
 import com.darksune.althera.common.attachment.HeroData;
 import com.darksune.althera.common.entity.AltheraEntities;
 import com.darksune.althera.common.entity.HeroEntity;
+import com.darksune.althera.common.hero.HeroClass;
+import com.darksune.althera.common.hero.HeroClassRegistry;
 import com.darksune.althera.common.hero.HeroDefinition;
 import com.darksune.althera.common.system.HeroProgressionSystem;
 import com.darksune.althera.common.system.HeroStatsSystem;
 import com.darksune.althera.common.ultimate.UltimateData;
 import com.darksune.althera.common.ultimate.UltimateDefinition;
 import com.darksune.althera.common.ultimate.UltimateRegistry;
+import com.darksune.althera.network.packet.HeroStatsPacket;
+import com.darksune.althera.network.packet.RequestHeroStatsPacket;
 import com.darksune.althera.network.packet.ToggleHeroSettingPacket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffectUtil;
+import net.minecraft.world.effect.MobEffects;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
@@ -59,6 +68,16 @@ public class HeroScreen extends Screen {
     private static final int COLOR_READY = 0xFF55FF55;
     private static final int COLOR_USED = 0xFFFF5555;
 
+    private static final int STATS_REQUEST_INTERVAL = 10;
+    private static final int EFFECT_ICON_SIZE = 12;
+    private static final double STAT_EPSILON = 0.05;
+    private static final double RESISTANCE_PER_LEVEL = 0.2;
+
+    private static final int DETAILS_WIDTH = 140;
+    private static final int DETAILS_GAP = 12;
+    private static final int DETAILS_TAB_WIDTH = 10;
+    private static final int DETAILS_TAB_HEIGHT = 28;
+
     private static final ResourceLocation GEAR_ICON =
             ResourceLocation.fromNamespaceAndPath(
                     Althera.MOD_ID,
@@ -69,6 +88,10 @@ public class HeroScreen extends Screen {
 
     private float tickAccumulator = 0;
 
+    private int screenTicks = 0;
+
+    private boolean detailsOpen = false;
+
     private Tab currentTab = Tab.STATUS;
 
     private enum Tab {
@@ -78,7 +101,7 @@ public class HeroScreen extends Screen {
     }
 
     private enum SettingRow {
-        HIDE_HUD("Hide HUD", "Hides the hero HUD and the skill slots.", 0xFF00FF88),
+        HIDE_HUD("Hide HUD", "Hides the hero HUD and the skill timers.", 0xFF00FF88),
         DISABLE_INTERVENTIONS(
                 "Disable interventions",
                 "Your hero will not step in to absorb the damage you take.",
@@ -119,6 +142,18 @@ public class HeroScreen extends Screen {
         }
 
         this.previewEntity = entity;
+    }
+
+    @Override
+    public void tick() {
+        super.tick();
+
+        final Minecraft mc = Minecraft.getInstance();
+
+        if (currentTab == Tab.STATUS && mc.player != null && HeroData.get(mc.player).isSummoned()
+                && screenTicks++ % STATS_REQUEST_INTERVAL == 0) {
+            PacketDistributor.sendToServer(new RequestHeroStatsPacket());
+        }
     }
 
     @Override
@@ -163,14 +198,21 @@ public class HeroScreen extends Screen {
             case ULTIMATE -> "ULTIMATE";
         };
 
-        gui.drawCenteredString(this.font, title, this.width / 2, y + 10, 0xFFFFFF);
-        gui.fill(this.width / 2 - 30, y + 21, this.width / 2 + 30, y + 22, COLOR_SEPARATOR);
+        final int centerX = x + GUI_WIDTH / 2;
+
+        gui.drawCenteredString(this.font, title, centerX, y + 10, 0xFFFFFF);
+        gui.fill(centerX - 30, y + 21, centerX + 30, y + 22, COLOR_SEPARATOR);
 
         renderGear(gui, mouseX, mouseY);
         renderClose(gui, mouseX, mouseY);
 
         if (currentTab == Tab.STATUS) {
             renderStatusTab(gui, heroData, mouseX, mouseY, partialTick);
+            renderDetailsTab(gui, mouseX, mouseY);
+        }
+
+        if (detailsVisible()) {
+            renderDetails(gui, heroData, heroData.isSummoned() ? HeroLiveStats.current() : null);
         }
 
         if (currentTab == Tab.SETTINGS) {
@@ -244,6 +286,12 @@ public class HeroScreen extends Screen {
                 entity
         );
 
+        final HeroStatsPacket live = heroData.isSummoned() ? HeroLiveStats.current() : null;
+
+        if (live != null) {
+            renderEffects(gui, live.effects(), previewLeft + 2, previewTop + 2, mouseX, mouseY);
+        }
+
         final int previewCenterX = previewLeft + PREVIEW_WIDTH / 2;
 
         gui.drawCenteredString(this.font, definition.getName(), previewCenterX, previewTop + PREVIEW_HEIGHT + 8, 0xFFFFFF);
@@ -271,67 +319,51 @@ public class HeroScreen extends Screen {
         drawStat(gui, "XP", maxLevel ? "MAX" : currentXp + " / " + requiredXp, infoX, infoY, INFO_WIDTH, 0xFFFFFFFF);
         infoY += 20;
 
-        final double maxHealth = HeroStatsSystem.getMaxHealth(heroData);
+        final double baseMaxHealth = HeroStatsSystem.getMaxHealth(heroData);
+        final double maxHealth = live != null ? live.maxHealth() : baseMaxHealth;
+        final double health = live != null ? live.health() : heroData.getHealth();
 
         drawStat(
                 gui,
                 "Health",
-                (int) heroData.getHealth() + " / " + (int) maxHealth,
+                (int) Math.ceil(health) + " / " + (int) maxHealth,
                 infoX,
                 infoY,
                 INFO_WIDTH,
-                0xFFFFFFFF
+                statColor(maxHealth, baseMaxHealth)
         );
         infoY += 12;
-        drawBar(gui, infoX, infoY, INFO_WIDTH, 6, maxHealth > 0 ? (float) (heroData.getHealth() / maxHealth) : 0, COLOR_HEALTH);
+        drawBar(gui, infoX, infoY, INFO_WIDTH, 6, maxHealth > 0 ? (float) (health / maxHealth) : 0, COLOR_HEALTH);
         infoY += 16;
 
         gui.fill(infoX, infoY, infoX + INFO_WIDTH, infoY + 1, COLOR_SEPARATOR);
         infoY += 8;
 
+        final double baseAttack = HeroStatsSystem.getAttack(heroData);
+        final double attack = live != null ? live.attack() : baseAttack;
+
         drawStat(
                 gui,
                 "Damage",
-                String.format(Locale.ROOT, "%.1f", HeroStatsSystem.getAttack(heroData)),
+                formatStat(attack, baseAttack),
                 infoX,
                 infoY,
                 INFO_WIDTH,
-                0xFFFFFFFF
+                statColor(attack, baseAttack)
         );
         infoY += 12;
+
+        final double baseArmor = HeroStatsSystem.getArmor(heroData);
+        final double armor = live != null ? live.armor() : baseArmor;
 
         drawStat(
                 gui,
                 "Armor",
-                String.format(Locale.ROOT, "%.1f", HeroStatsSystem.getArmor(heroData)),
+                formatStat(armor, baseArmor),
                 infoX,
                 infoY,
                 INFO_WIDTH,
-                0xFFFFFFFF
-        );
-        infoY += 12;
-
-        drawStat(
-                gui,
-                "Dodge",
-                String.format(Locale.ROOT, "%.0f%%", HeroStatsSystem.getDodgeChance(heroData) * 100),
-                infoX,
-                infoY,
-                INFO_WIDTH,
-                0xFFFFFFFF
-        );
-        infoY += 12;
-
-        final int interventionsLeft = HeroStatsSystem.getMaxInterventions() - heroData.getInterventions();
-
-        drawStat(
-                gui,
-                "Interventions",
-                interventionsLeft + " / " + HeroStatsSystem.getMaxInterventions(),
-                infoX,
-                infoY,
-                INFO_WIDTH,
-                0xFFFFFFFF
+                statColor(armor, baseArmor)
         );
 
         if (ultimate(heroData) != null) {
@@ -415,6 +447,185 @@ public class HeroScreen extends Screen {
         return String.format(Locale.ROOT, "%.0f + %.0f%% ATK (%.1f)", flat, attackPercent, damage);
     }
 
+    private void renderEffects(GuiGraphics gui, List<MobEffectInstance> effects, int x, int y, int mouseX, int mouseY) {
+
+        final Minecraft mc = Minecraft.getInstance();
+        final int perRow = (PREVIEW_WIDTH - 4) / (EFFECT_ICON_SIZE + 1);
+
+        for (int i = 0; i < effects.size(); i++) {
+            final MobEffectInstance effect = effects.get(i);
+            final int iconX = x + (i % perRow) * (EFFECT_ICON_SIZE + 1);
+            final int iconY = y + (i / perRow) * (EFFECT_ICON_SIZE + 1);
+            final TextureAtlasSprite sprite = mc.getMobEffectTextures().get(effect.getEffect());
+
+            gui.pose().pushPose();
+            gui.pose().translate(0, 0, 200);
+            gui.blit(iconX, iconY, 0, EFFECT_ICON_SIZE, EFFECT_ICON_SIZE, sprite);
+            gui.pose().popPose();
+
+            if (mouseX >= iconX && mouseX < iconX + EFFECT_ICON_SIZE
+                    && mouseY >= iconY && mouseY < iconY + EFFECT_ICON_SIZE) {
+                setTooltipForNextRenderPass(effectTooltip(mc, effect));
+            }
+        }
+    }
+
+    private void renderDetailsTab(GuiGraphics gui, int mouseX, int mouseY) {
+        final int tabX = detailsTabX();
+        final int tabY = detailsTabY();
+
+        gui.fill(tabX, tabY - 1, tabX + DETAILS_TAB_WIDTH + 1, tabY + DETAILS_TAB_HEIGHT + 1, COLOR_BORDER);
+        gui.fill(tabX, tabY, tabX + DETAILS_TAB_WIDTH, tabY + DETAILS_TAB_HEIGHT,
+                isOverDetailsTab(mouseX, mouseY) ? COLOR_BUTTON_HOVER : COLOR_PANEL);
+        gui.drawCenteredString(this.font, detailsOpen ? "‹" : "›", tabX + DETAILS_TAB_WIDTH / 2,
+                tabY + (DETAILS_TAB_HEIGHT - 8) / 2, COLOR_ACCENT);
+    }
+
+    private void renderDetails(GuiGraphics gui, HeroData heroData, @Nullable HeroStatsPacket live) {
+
+        final HeroDefinition definition = heroData.getHeroDefinition();
+
+        if (definition == null) {
+            return;
+        }
+
+        final int x = detailsX();
+        final int y = top();
+        final int innerX = x + 8;
+        final int innerWidth = DETAILS_WIDTH - 16;
+
+        gui.fill(x - 2, y - 2, x + DETAILS_WIDTH + 2, y + GUI_HEIGHT + 2, COLOR_BORDER);
+        gui.fill(x, y, x + DETAILS_WIDTH, y + GUI_HEIGHT, COLOR_PANEL);
+
+        gui.drawCenteredString(this.font, "DETAILS", x + DETAILS_WIDTH / 2, y + 10, 0xFFFFFF);
+        gui.fill(x + DETAILS_WIDTH / 2 - 24, y + 21, x + DETAILS_WIDTH / 2 + 24, y + 22, COLOR_SEPARATOR);
+
+        int rowY = y + 30;
+
+        final double baseSpeed = HeroStatsSystem.getSpeed(heroData);
+        final double speed = live != null ? live.speed() : baseSpeed;
+
+        final double speedRatio = baseSpeed > 0 ? speed / baseSpeed : 1;
+
+        drawStat(gui, "Speed", percent(speedRatio), innerX, rowY, innerWidth, statColor(speedRatio * 100, 100));
+        rowY += 12;
+
+        final double resistance = live != null ? damageResistance(live.effects()) : 0;
+
+        drawStat(gui, "Resistance", percent(resistance), innerX, rowY, innerWidth, statColor(resistance * 100, 0));
+        rowY += 12;
+
+        final double baseKnockback = HeroStatsSystem.getKnockbackResistance(heroData);
+        final double knockback = live != null ? live.knockbackResistance() : baseKnockback;
+
+        drawStat(gui, "Knockback res.", percent(knockback), innerX, rowY, innerWidth,
+                statColor(knockback * 100, baseKnockback * 100));
+        rowY += 12;
+
+        drawStat(gui, "Dodge", percent(HeroStatsSystem.getDodgeChance(heroData)), innerX, rowY, innerWidth,
+                0xFFFFFFFF);
+        rowY += 12;
+
+        final boolean spiritForm = heroData.isDefeated() || !heroData.isSummoned();
+        final double regen = spiritForm
+                ? HeroStatsSystem.getSpiritRegen(heroData)
+                : HeroStatsSystem.getSummonedRegen(heroData);
+
+        drawStat(gui, spiritForm ? "Spirit regen" : "Regen", String.format(Locale.ROOT, "%.2f HP/2s", regen),
+                innerX, rowY, innerWidth, 0xFFFFFFFF);
+        rowY += 14;
+
+        gui.fill(innerX, rowY, innerX + innerWidth, rowY + 1, COLOR_SEPARATOR);
+        rowY += 6;
+
+        final HeroClass heroClass = definition.getHeroClass();
+
+        gui.drawCenteredString(this.font, heroClass.getDisplayName() + " class", x + DETAILS_WIDTH / 2, rowY, COLOR_RANK);
+        rowY += 13;
+
+        final int columnX = innerX + innerWidth / 2 + 4;
+
+        drawMultiplier(gui, "HP", heroClass.getHealthMultiplier(), innerX, rowY);
+        drawMultiplier(gui, "ATK", heroClass.getAttackMultiplier(), columnX, rowY);
+        rowY += 10;
+        drawMultiplier(gui, "DEF", heroClass.getArmorMultiplier(), innerX, rowY);
+        drawMultiplier(gui, "SPD", heroClass.getSpeedMultiplier(), columnX, rowY);
+        rowY += 14;
+
+        final List<String> strong = heroClass.strongAgainst().stream()
+                .map(id -> HeroClassRegistry.get(id).getDisplayName())
+                .sorted()
+                .toList();
+        final List<String> weak = HeroClassRegistry.getAll().values().stream()
+                .filter(heroClass::isWeakAgainst)
+                .map(HeroClass::getDisplayName)
+                .sorted(Comparator.naturalOrder())
+                .toList();
+
+        rowY = drawMatchup(gui, "Strong vs (+25%)", strong, COLOR_READY, innerX, rowY, innerWidth);
+        drawMatchup(gui, "Weak vs (-25%)", weak, COLOR_USED, innerX, rowY + 4, innerWidth);
+    }
+
+    private void drawMultiplier(GuiGraphics gui, String label, float value, int x, int y) {
+        gui.drawString(this.font, label, x, y, COLOR_LABEL);
+        gui.drawString(this.font, String.format(Locale.ROOT, "x%.2f", value), x + 24, y, statColor(value, 1.0));
+    }
+
+    private int drawMatchup(GuiGraphics gui, String label, List<String> classes, int color, int x, int y, int width) {
+        gui.drawString(this.font, label, x, y, color);
+        y += 10;
+
+        final String names = classes.isEmpty() ? "None" : String.join(", ", classes);
+
+        for (FormattedCharSequence line : this.font.split(Component.literal(names), width)) {
+            gui.drawString(this.font, line, x, y, 0xFFFFFFFF);
+            y += 10;
+        }
+
+        return y;
+    }
+
+    private static double damageResistance(List<MobEffectInstance> effects) {
+        return effects.stream()
+                .filter(effect -> effect.getEffect().is(MobEffects.DAMAGE_RESISTANCE))
+                .mapToDouble(effect -> Math.min(1.0, (effect.getAmplifier() + 1) * RESISTANCE_PER_LEVEL))
+                .max()
+                .orElse(0);
+    }
+
+    private static String percent(double ratio) {
+        return String.format(Locale.ROOT, "%.0f%%", ratio * 100);
+    }
+
+    private static Component effectTooltip(Minecraft mc, MobEffectInstance effect) {
+
+        final Component name = Component.translatable(effect.getDescriptionId());
+        final Component level = effect.getAmplifier() > 0
+                ? Component.literal(" ").append(Component.translatable("enchantment.level." + (effect.getAmplifier() + 1)))
+                : Component.empty();
+        final float tickRate = mc.level == null ? 20.0F : mc.level.tickRateManager().tickrate();
+
+        return Component.empty().append(name).append(level)
+                .append(" (").append(MobEffectUtil.formatDuration(effect, 1.0F, tickRate)).append(")");
+    }
+
+    private static String formatStat(double value, double base) {
+        final double bonus = value - base;
+
+        if (Math.abs(bonus) < STAT_EPSILON) {
+            return String.format(Locale.ROOT, "%.1f", value);
+        }
+
+        return String.format(Locale.ROOT, "%.1f (%+.1f)", value, bonus);
+    }
+
+    private static int statColor(double value, double base) {
+        if (value > base + STAT_EPSILON) return COLOR_READY;
+        if (value < base - STAT_EPSILON) return COLOR_USED;
+
+        return 0xFFFFFFFF;
+    }
+
     private static String formatSeconds(int ticks) {
         return ticks % 20 == 0
                 ? ticks / 20 + " s"
@@ -461,7 +672,7 @@ public class HeroScreen extends Screen {
         gui.drawCenteredString(
                 this.font,
                 "Click the gear to go back",
-                this.width / 2,
+                left() + GUI_WIDTH / 2,
                 top() + GUI_HEIGHT - 16,
                 0x777777
         );
@@ -559,7 +770,28 @@ public class HeroScreen extends Screen {
     }
 
     private int left() {
-        return (this.width - GUI_WIDTH) / 2;
+        return (this.width - GUI_WIDTH - (detailsVisible() ? DETAILS_GAP + DETAILS_WIDTH : 0)) / 2;
+    }
+
+    private boolean detailsVisible() {
+        return detailsOpen && currentTab == Tab.STATUS;
+    }
+
+    private int detailsX() {
+        return left() + GUI_WIDTH + DETAILS_GAP;
+    }
+
+    private int detailsTabX() {
+        return left() + GUI_WIDTH + 1;
+    }
+
+    private int detailsTabY() {
+        return top() + (GUI_HEIGHT - DETAILS_TAB_HEIGHT) / 2;
+    }
+
+    private boolean isOverDetailsTab(double mouseX, double mouseY) {
+        return mouseX >= detailsTabX() && mouseX < detailsTabX() + DETAILS_TAB_WIDTH
+                && mouseY >= detailsTabY() && mouseY < detailsTabY() + DETAILS_TAB_HEIGHT;
     }
 
     private int top() {
@@ -613,6 +845,11 @@ public class HeroScreen extends Screen {
 
         if (isOverClose(mouseX, mouseY)) {
             this.onClose();
+            return true;
+        }
+
+        if (currentTab == Tab.STATUS && isOverDetailsTab(mouseX, mouseY)) {
+            detailsOpen = !detailsOpen;
             return true;
         }
 

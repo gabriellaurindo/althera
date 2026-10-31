@@ -5,15 +5,16 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 
 public record HeroHudLayout(int portraitX, int portraitY, int barX, int healthY, int manaY, int interventionsY,
-                            boolean mirrored) {
+                            int ultimateX, int ultimateY, boolean mirrored) {
 
     public static final int PORTRAIT_SIZE = 34;
     public static final int BAR_WIDTH = 90;
     public static final int HEALTH_HEIGHT = 8;
 
     private static final int GAP = 5;
+    private static final int ULTIMATE_GAP = 3;
     private static final int TEXT_WIDTH = 44;
-    private static final int WIDTH = PORTRAIT_SIZE + GAP + BAR_WIDTH + GAP + TEXT_WIDTH;
+    private static final int WIDTH = HudIcons.ITEM_SIZE + ULTIMATE_GAP + PORTRAIT_SIZE + GAP + BAR_WIDTH + GAP + TEXT_WIDTH;
     private static final int HEIGHT = PORTRAIT_SIZE + 6;
 
     public static HeroHudLayout current(final Minecraft mc) {
@@ -27,12 +28,15 @@ public record HeroHudLayout(int portraitX, int portraitY, int barX, int healthY,
         final int top = corner.isBottom() ? screenHeight - offsetY - HEIGHT : offsetY;
         final boolean mirrored = corner.isRight();
 
-        final int portraitX = mirrored ? left + WIDTH - PORTRAIT_SIZE : left;
-        final int barX = mirrored ? portraitX - GAP - BAR_WIDTH : left + PORTRAIT_SIZE + GAP;
+        final int ultimateColumn = HudIcons.ITEM_SIZE + ULTIMATE_GAP;
+        final int portraitX = mirrored ? left + WIDTH - ultimateColumn - PORTRAIT_SIZE : left + ultimateColumn;
+        final int ultimateX = mirrored ? portraitX + PORTRAIT_SIZE + ULTIMATE_GAP : left;
+        final int ultimateY = top + (PORTRAIT_SIZE - HudIcons.ITEM_SIZE) / 2;
+        final int barX = mirrored ? portraitX - GAP - BAR_WIDTH : portraitX + PORTRAIT_SIZE + GAP;
         final int healthY = top + 4;
         final int manaY = healthY + HEALTH_HEIGHT + 4;
 
-        return new HeroHudLayout(portraitX, top, barX, healthY, manaY, manaY + 11, mirrored);
+        return new HeroHudLayout(portraitX, top, barX, healthY, manaY, manaY + 11, ultimateX, ultimateY, mirrored);
     }
 
     public int labelX(final Font font, final String text) {

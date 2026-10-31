@@ -5,6 +5,7 @@ import com.darksune.althera.client.input.AltheraKeybinds;
 import com.darksune.althera.client.input.KeyActions;
 import com.darksune.althera.common.commandseal.CommandSealData;
 import com.darksune.althera.common.commandseal.skill.CommandSealSkillType;
+import com.darksune.althera.common.skill.SkillLimits;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.gui.Font;
@@ -119,7 +120,7 @@ public class SealWheelScreen extends Screen {
         }
 
         renderCentre(gui, centerX, centerY, hovered >= 0 ? entries.get(hovered) : null,
-                CommandSealData.get(player).getCommandSealCharges());
+                CommandSealData.get(player).getCommandSealCharges(), !SkillLimits.isUnlimited(player));
     }
 
     private void castHovered() {
@@ -260,7 +261,7 @@ public class SealWheelScreen extends Screen {
         return hovered ? COLOR_NAME_HOVERED : COLOR_NAME;
     }
 
-    private void renderCentre(GuiGraphics gui, int centerX, int centerY, Entry entry, int charges) {
+    private void renderCentre(GuiGraphics gui, int centerX, int centerY, Entry entry, int charges, boolean showCharges) {
 
         List<Component> lines = new ArrayList<>();
         List<Integer> colors = new ArrayList<>();
@@ -282,13 +283,15 @@ public class SealWheelScreen extends Screen {
             colors.add(stateColor(state));
         }
 
-        int top = centerY - (lines.size() + 1) * LINE_HEIGHT / 2;
+        int top = centerY - (lines.size() + (showCharges ? 1 : 0)) * LINE_HEIGHT / 2;
 
         for (int i = 0; i < lines.size(); i++) {
             gui.drawCenteredString(font, lines.get(i), centerX, top + i * LINE_HEIGHT, colors.get(i));
         }
 
-        renderCharges(gui, centerX, top + lines.size() * LINE_HEIGHT, charges);
+        if (showCharges) {
+            renderCharges(gui, centerX, top + lines.size() * LINE_HEIGHT, charges);
+        }
     }
 
     private void renderCharges(GuiGraphics gui, int centerX, int y, int charges) {

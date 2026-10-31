@@ -6,6 +6,29 @@ and generates the GitHub Release, CurseForge and Discord notes from it.
 
 ## [Unreleased]
 
+### Added
+- **Skill timers**: every Command Seal or Ultimate that is running shows a small see-through square next to the
+  crosshair, with its icon and the seconds left: **green** while active, **red** while on cooldown, with a fill that
+  drains as time runs out. The client config option **Skill Timers Position** moves them under the Hero HUD instead.
+- **Live hero stats**: while your Hero is summoned, the hero screen (G) shows its current health, damage and armor
+  with every buff and debuff applied (Overdrive, thrown potions...): green with the bonus when above normal, red when
+  below. Its active effects show as icons on its portrait, with name, level and time left on hover.
+- **Hero details panel**: the arrow on the right edge of the hero screen opens a side panel with speed, damage
+  resistance (from Resistance, e.g. Overdrive), knockback resistance, dodge and regeneration, plus the class
+  multipliers (HP, ATK, DEF, SPD) and which classes it is strong (+25%) and weak (-25%) against.
+- **Creative mode**: Command Seals and the Ultimate are unlimited (no charges, cooldowns or once-per-day limit).
+
+### Changed
+- Command Seals are now cast only through the **Command Seal wheel** (hold **R**). The J/K/V shortcuts were removed.
+  The crosshair is hidden while the wheel is open.
+- The skill slots next to the hotbar are gone. The Ultimate now shows as a **golden sword** beside your Hero's portrait
+  in the Hero HUD, faded once used today; seal charges show in the Command Seal wheel.
+
+### Fixed
+- Valka no longer inflicts Wither: she shared Clare's Crimson Requiem. Her new Ultimate, **Tempest Charge**, is the
+  same 8-block charge in teal, without the Wither, and throws enemies aside with a lancer's knockback.
+- The Ultimate key was listed as "Explosion" in the Controls menu; it is now "Ultimate".
+
 ## [4.1.0] - 2026-10-29 - The Nobles Rise (feature + hotfix)
 
 ### Added

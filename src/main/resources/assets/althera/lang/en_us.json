@@ -10,11 +10,7 @@
   "key.althera.hero.screen": "Hero Menu",
   "key.althera.seal": "Command Seal Wheel (hold)",
 
-  "key.althera.commandseal.skill.one": "Overdrive",
-  "key.althera.commandseal.skill.two": "Revive",
-  "key.althera.commandseal.skill.three": "Heal",
-
-  "key.althera.ultimate.skill": "Explosion",
+  "key.althera.ultimate.skill": "Ultimate",
   "key.althera.config": "Open Config",
 
   "althera.commandseal.overdrive": "Overdrive",
@@ -33,6 +29,8 @@
   "althera.configuration.heroHudOffsetX.tooltip": "Horizontal distance of the hero HUD from its corner, in GUI pixels",
   "althera.configuration.heroHudOffsetY": "Hero HUD Vertical Offset",
   "althera.configuration.heroHudOffsetY.tooltip": "Vertical distance of the hero HUD from its corner, in GUI pixels",
+  "althera.configuration.skillTimersPosition": "Skill Timers Position",
+  "althera.configuration.skillTimersPosition.tooltip": "Where active and cooldown timers of Command Seals and the Ultimate are shown: next to the crosshair or under the hero HUD",
 
   "advancements.althera.root.title": "Althera",
   "advancements.althera.root.description": "Every summoner begins somewhere",

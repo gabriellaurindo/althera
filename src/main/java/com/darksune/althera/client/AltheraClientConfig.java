@@ -19,6 +19,11 @@ public final class AltheraClientConfig {
         }
     }
 
+    public enum SkillTimersPosition {
+        CROSSHAIR,
+        HERO_HUD
+    }
+
     private static final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
 
     public static final ModConfigSpec.EnumValue<HudCorner> HERO_HUD_CORNER = BUILDER
@@ -32,6 +37,10 @@ public final class AltheraClientConfig {
     public static final ModConfigSpec.IntValue HERO_HUD_OFFSET_Y = BUILDER
             .comment("Vertical distance of the hero HUD from its corner, in GUI pixels")
             .defineInRange("heroHudOffsetY", 6, 0, 1000);
+
+    public static final ModConfigSpec.EnumValue<SkillTimersPosition> SKILL_TIMERS_POSITION = BUILDER
+            .comment("Where active and cooldown timers of Command Seals and the Ultimate are shown")
+            .defineEnum("skillTimersPosition", SkillTimersPosition.CROSSHAIR);
 
     public static final ModConfigSpec SPEC = BUILDER.build();
 

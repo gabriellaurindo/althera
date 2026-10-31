@@ -8,14 +8,20 @@ All keys can be changed in **Options → Controls**, under the **Althera** categ
 
 ## 🖥️ Skill HUD
 
-Next to the hotbar (right side) there is one slot per skill, labeled with its key (**J**, **K**, **V**, **U**):
+A **golden sword** next to your Hero's portrait in the Hero HUD shows the Ultimate: bright when it is still available
+today, faded once it has been used. Command Seal charges left today show in the Command Seal wheel (hold **R**).
 
-- **◆◆◆** above the seal slots: Command Seal charges left today
-- **Gold border + seconds**: the skill is active (e.g. Overdrive's remaining time)
-- **Light overlay + seconds**: the skill is on cooldown
-- **Grayed out**: the skill can't be used right now (not enough mana, no Command Seal charges left, Hero summoned or
-  not summoned when the skill needs the opposite)
-- **Red ✕** on an Ultimate: already used today
+### ⏱️ Skill timers
+
+Every Command Seal or Ultimate that is running shows up as a small see-through square with its icon and the seconds
+left, next to the crosshair:
+
+- **Green**: active (e.g. Overdrive's remaining time); the green fill drains as it runs out
+- **Red**: on cooldown; the red fill drains until the skill is ready again
+
+Icons: Overdrive 🔥 blaze powder, Revive 🗿 totem of undying, Heal 🍉 glistering melon, Ultimate ⭐ nether star.
+Active timers come first. Prefer them under the Hero HUD? Change **Skill Timers Position** in the Althera config
+(**Options → Mods → Althera → Config**).
 
 The HUD is hidden together with the Hero HUD (hero screen settings) and with **F1**.
 
@@ -49,7 +55,7 @@ to cast it. Releasing in the centre (or pressing **Esc**) cancels.
 Each seal shows its mana cost and its state: ready, active, on cooldown or blocked (no charges, not enough mana,
 Hero summoned or not, Hero not defeated for Revive). You can't walk while the wheel is open.
 
-**J**, **K** and **V** still cast the seals directly. The Ultimate stays on **U** and is not on the wheel.
+The wheel is the only way to cast a seal. The Ultimate stays on **U** and is not on the wheel.
 
 ---
 
@@ -122,7 +128,7 @@ Fully restores the summoned Hero's health.
 ## 💥 Ultimates
 
 Ultimates are the Hero's strongest abilities. Each Hero has its own Ultimate (**U**): Aria and Zaya use Explosion,
-Clare and Valka use Crimson Requiem. To see how your Hero's Ultimate works, open the hero screen (**G**) and click
+Clare uses Crimson Requiem and Valka uses Tempest Charge. To see how your Hero's Ultimate works, open the hero screen (**G**) and click
 **Ultimate**: it shows its name, key, mana cost, channel time, whether it is ready today and a short description.
 Datapacks can create new ones: see [Creating Custom Ultimates](Creating-Custom-Ultimates).
 
@@ -149,7 +155,7 @@ If the Hero is defeated or dismissed while channeling, the explosion is cancelle
 
 ---
 
-### 🗡 Crimson Requiem (Clare, Valka)
+### 🗡 Crimson Requiem (Clare)
 
 | Key | Mana | Requires summoned Hero |
 |---|---|---|
@@ -163,6 +169,22 @@ channels), stopping before walls:
 - Leaves a crimson trail behind her
 
 If Clare is defeated or dismissed while channeling, the attack is cancelled.
+
+---
+
+### 🌀 Tempest Charge (Valka)
+
+| Key | Mana | Requires summoned Hero |
+|---|---|---|
+| **U** | 200 | Yes |
+
+Valka braces her lance over a teal gale for about **1.5 seconds**, then charges **8 blocks** in a straight line
+towards where **you** are looking (aim while she charges up), stopping before walls:
+- Deals heavy damage to every creature in her path (except you)
+- Throws them aside with a strong knockback
+- Leaves a teal trail behind her
+
+If Valka is defeated or dismissed while channeling, the attack is cancelled.
 
 ---
 

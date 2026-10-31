@@ -1,0 +1,25 @@
+{
+  "name": "Tempest Charge",
+  "description": "Valka braces her lance over a teal gale for 1.5 seconds, then charges 8 blocks towards where you are looking, stopping before walls. Everything in her path takes heavy damage and is thrown aside. Aim while she charges up.",
+  "mana_cost": 200,
+  "channel_ticks": 30,
+  "cooldown_ticks": 20,
+  "on_start": [
+    { "type": "ultimate_animation" },
+    { "type": "mob_effect", "target": "self", "effect": "minecraft:slowness", "duration": 30, "amplifier": 4, "show_particles": false },
+    { "type": "sound", "sound": "minecraft:block.respawn_anchor.charge", "volume": 1.5, "pitch": 1.3 }
+  ],
+  "on_tick": [
+    { "type": "particles", "particle": { "type": "minecraft:dust", "color": [0.1, 0.7, 0.65], "scale": 1.2 }, "count": 3, "spread": [1.0, 0.05, 1.0], "height": 0.1 }
+  ],
+  "on_end": [
+    { "type": "damage", "target": { "line": 8, "width": 1.5 }, "attack_multiplier": 2.1 },
+    { "type": "knockback", "target": { "line": 8, "width": 1.5 }, "horizontal": 1.2, "vertical": 0.35, "scale_with_distance": false },
+    { "type": "particles", "particle": { "type": "minecraft:dust", "color": [0.1, 0.7, 0.65], "scale": 1.5 }, "count": 4, "spread": [0.2, 0.4, 0.2], "height": 1, "line": 8 },
+    { "type": "particles", "particle": { "type": "minecraft:crit" }, "count": 2, "spread": [0.3, 0.3, 0.3], "speed": 0.1, "height": 1, "line": 8 },
+    { "type": "dash", "distance": 8 },
+    { "type": "particles", "particle": { "type": "minecraft:sweep_attack" }, "count": 1, "height": 1 },
+    { "type": "sound", "sound": "minecraft:item.trident.riptide_1", "volume": 1.5, "pitch": 1.4 },
+    { "type": "sound", "sound": "minecraft:entity.player.attack.sweep", "volume": 2.0, "pitch": 0.7 }
+  ]
+}

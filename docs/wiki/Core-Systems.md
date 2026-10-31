@@ -48,6 +48,16 @@ crowds of mobs from pushing a Hero away from its target. Dodging avoids the whol
 dodged), and a dodge during an intervention still protects you. The hero screen (**G**) shows your Hero's dodge
 chance.
 
+While your Hero is summoned, the hero screen shows its stats as they are right now: current health, damage and armor
+including buffs and debuffs (Overdrive, potions thrown at it, Weakness...). A stat above its normal value is
+**green** with the bonus in brackets, one below it is **red**. The effects on your Hero appear as icons in the corner
+of its portrait; hover one to see its name, level and time left.
+
+Click the arrow on the right edge of the hero screen to open the **details panel**: speed (100% = normal), damage
+resistance (20% per Resistance level, e.g. from Overdrive), knockback resistance, dodge chance and health regained
+every 2 seconds (higher in spirit form, while not summoned or defeated), then the class multipliers (HP, ATK, DEF, SPD) and the classes your Hero is strong (+25% damage)
+and weak (-25%) against.
+
 Classes matter when Heroes fight each other: every class beats two classes and loses to two, dealing **+25%** damage
 to the classes it beats (with a burst of crits) and **−25%** to the ones that beat it:
 
@@ -137,7 +147,8 @@ Mana is the primary resource used to maintain your Hero while summoned.
 This system creates a balance between combat power and resource management.
 
 In **Creative** mode mana is infinite: summoning, keeping the Hero out, Command Seals and the Ultimate cost nothing,
-and the mana bar shows **∞**.
+and the mana bar shows **∞**. Command Seals and the Ultimate are unlimited too: no charges used, no cooldown and no
+once-per-day limit.
 
 The **Hero HUD** in the top-left corner shows your hero's face and level, its health, your mana bar and the
 interventions left (green diamonds). The face is dimmed while the hero is not summoned and turns red when it is

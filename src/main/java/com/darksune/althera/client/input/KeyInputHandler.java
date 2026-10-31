@@ -5,8 +5,6 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 
-import static com.darksune.althera.common.commandseal.skill.CommandSealSkillType.*;
-
 @EventBusSubscriber(value = Dist.CLIENT)
 public class KeyInputHandler {
 
@@ -27,18 +25,6 @@ public class KeyInputHandler {
 
         if (AltheraKeybinds.HERO_SCREEN.consumeClick()) {
             KeyActions.handleHero();
-        }
-
-        if (AltheraKeybinds.COMMAND_SEAL_SKILL_ONE.consumeClick()) {
-            KeyActions.handleCommandSealSkill(OVERDRIVE);
-        }
-
-        if (AltheraKeybinds.COMMAND_SEAL_SKILL_TWO.consumeClick()) {
-            KeyActions.handleCommandSealSkill(REVIVE);
-        }
-
-        if (AltheraKeybinds.COMMAND_SEAL_SKILL_THREE.consumeClick()) {
-            KeyActions.handleCommandSealSkill(HEAL);
         }
 
         if (AltheraKeybinds.ULTIMATE_SKILL.consumeClick()) {

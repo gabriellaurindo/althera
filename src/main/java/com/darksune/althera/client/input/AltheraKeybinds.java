@@ -31,27 +31,6 @@ public class AltheraKeybinds {
             "key.categories.althera"
     );
 
-    public static final KeyMapping COMMAND_SEAL_SKILL_ONE = new KeyMapping(
-            "key.althera.commandseal.skill.one",
-            InputConstants.Type.KEYSYM,
-            GLFW.GLFW_KEY_J,
-            "key.categories.althera"
-    );
-
-    public static final KeyMapping COMMAND_SEAL_SKILL_TWO = new KeyMapping(
-            "key.althera.commandseal.skill.two",
-            InputConstants.Type.KEYSYM,
-            GLFW.GLFW_KEY_K,
-            "key.categories.althera"
-    );
-
-    public static final KeyMapping COMMAND_SEAL_SKILL_THREE = new KeyMapping(
-            "key.althera.commandseal.skill.three",
-            InputConstants.Type.KEYSYM,
-            GLFW.GLFW_KEY_V,
-            "key.categories.althera"
-    );
-
     public static final KeyMapping ULTIMATE_SKILL = new KeyMapping(
             "key.althera.ultimate.skill",
             InputConstants.Type.KEYSYM,

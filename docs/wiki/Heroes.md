@@ -67,7 +67,7 @@ Classes follow a cycle: each one is strong against two others (+25% damage) and 
 
 **⚔️ Signature attack:** **Piercing Thrust**: each thrust also hits everything up to 4.5 blocks behind her target.
 
-**💥 Ultimate: Crimson Requiem**: Clare stands still over a crimson mist for 1.5 seconds, then dashes 8 blocks towards where you are looking, stopping before walls. Everything in her path takes heavy damage and Wither II. Aim while she channels.
+**💥 Ultimate: Tempest Charge**: Valka braces her lance over a teal gale for 1.5 seconds, then charges 8 blocks towards where you are looking, stopping before walls. Everything in her path takes heavy damage and is thrown aside. Aim while she charges up.
 
 ---
 
