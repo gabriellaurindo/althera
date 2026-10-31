@@ -31,7 +31,6 @@ import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffectUtil;
 import net.minecraft.world.effect.MobEffects;
-import net.neoforged.fml.ModList;
 import net.neoforged.neoforge.common.ModConfigSpec;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.jetbrains.annotations.Nullable;
@@ -733,8 +732,7 @@ public class HeroScreen extends Screen {
             }
         }
 
-        drawButton(gui, "Other options", otherOptionsX(), otherOptionsY(), OTHER_OPTIONS_WIDTH,
-                isOverOtherOptions(mouseX, mouseY));
+        drawDisabledButton(gui, "Other options", otherOptionsX(), otherOptionsY(), OTHER_OPTIONS_WIDTH);
 
         final String hint = "Click the gear to go back";
         gui.drawString(this.font, hint, left() + GUI_WIDTH - CONTENT_X - this.font.width(hint),
@@ -830,11 +828,6 @@ public class HeroScreen extends Screen {
         AltheraClientConfig.SPEC.save();
     }
 
-    private void openOtherOptions() {
-        ModList.get().getModContainerById(Althera.MOD_ID)
-                .ifPresent(container -> minecraft.setScreen(AltheraClientConfig.createScreen(container, this)));
-    }
-
     // =========================================================
     // HELPERS
     // =========================================================
@@ -878,6 +871,12 @@ public class HeroScreen extends Screen {
                 y + height,
                 color
         );
+    }
+
+    private void drawDisabledButton(GuiGraphics gui, String label, int x, int y, int width) {
+        gui.fill(x - 1, y - 1, x + width + 1, y + BUTTON_HEIGHT + 1, COLOR_SEPARATOR);
+        gui.fill(x, y, x + width, y + BUTTON_HEIGHT, COLOR_BUTTON);
+        gui.drawCenteredString(this.font, label, x + width / 2, y + (BUTTON_HEIGHT - 8) / 2, 0x666666);
     }
 
     private void drawButton(GuiGraphics gui, String label, int x, int y, int width, boolean hovered) {
@@ -990,10 +989,6 @@ public class HeroScreen extends Screen {
         return top() + GUI_HEIGHT - BUTTON_HEIGHT - 8;
     }
 
-    private boolean isOverOtherOptions(double mouseX, double mouseY) {
-        return mouseX >= otherOptionsX() && mouseX < otherOptionsX() + OTHER_OPTIONS_WIDTH
-                && mouseY >= otherOptionsY() && mouseY < otherOptionsY() + BUTTON_HEIGHT;
-    }
 
     private boolean isOverGear(double mouseX, double mouseY) {
         return mouseX >= gearX() && mouseX <= gearX() + 16
@@ -1047,11 +1042,6 @@ public class HeroScreen extends Screen {
         }
 
         if (currentTab == Tab.SETTINGS) {
-            if (isOverOtherOptions(mouseX, mouseY)) {
-                openOtherOptions();
-                return true;
-            }
-
             if (clickSetting(mouseX, mouseY, button)) {
                 return true;
             }
