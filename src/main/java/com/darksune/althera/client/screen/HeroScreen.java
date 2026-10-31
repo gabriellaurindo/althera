@@ -734,6 +734,10 @@ public class HeroScreen extends Screen {
 
         drawDisabledButton(gui, "Other options", otherOptionsX(), otherOptionsY(), OTHER_OPTIONS_WIDTH);
 
+        if (isOverOtherOptions(mouseX, mouseY)) {
+            setTooltipForNextRenderPass(Component.literal("Coming soon"));
+        }
+
         final String hint = "Click the gear to go back";
         gui.drawString(this.font, hint, left() + GUI_WIDTH - CONTENT_X - this.font.width(hint),
                 otherOptionsY() + (BUTTON_HEIGHT - 8) / 2, 0x777777);
@@ -979,6 +983,11 @@ public class HeroScreen extends Screen {
         }
 
         return y;
+    }
+
+    private boolean isOverOtherOptions(double mouseX, double mouseY) {
+        return mouseX >= otherOptionsX() && mouseX < otherOptionsX() + OTHER_OPTIONS_WIDTH
+                && mouseY >= otherOptionsY() && mouseY < otherOptionsY() + BUTTON_HEIGHT;
     }
 
     private int otherOptionsX() {
