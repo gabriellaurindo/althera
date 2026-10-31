@@ -26,10 +26,15 @@ public final class AltheraItems {
 
     public static final DeferredItem<Item> EMBLEM = register(AltheraItemId.EMBLEM, () -> new Item(new Item.Properties()));
 
+    public static final DeferredItem<HeroCatalystItem> HERO_CATALYST = register(AltheraItemId.HERO_CATALYST,
+            () -> new HeroCatalystItem(new Item.Properties()));
+
     // Block items
     public static final DeferredHolder<Item, Item> RITUAL_CORE = register(AltheraItemId.RITUAL_CORE, RitualCoreItem::create);
     public static final DeferredItem<BlockItem> NOBLE_SIGIL = register(AltheraItemId.NOBLE_SIGIL,
             () -> new BlockItem(AltheraBlocks.NOBLE_SIGIL.get(), new Item.Properties()));
+    public static final DeferredItem<BlockItem> RITUAL_PEDESTAL = register(AltheraItemId.RITUAL_PEDESTAL,
+            () -> new BlockItem(AltheraBlocks.RITUAL_PEDESTAL.get(), new Item.Properties()));
 
     private static <T extends Item> DeferredItem<T> register(ResourceLocation id, Supplier<T> supplier) {
         return ITEMS.register(id.getPath(), supplier);

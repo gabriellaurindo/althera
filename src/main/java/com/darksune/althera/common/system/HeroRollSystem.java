@@ -25,6 +25,19 @@ public class HeroRollSystem {
                 .toList());
     }
 
+    public static Optional<HeroDefinition> rollHeroOf(ResourceLocation classId, HeroRank rank,
+                                                      @Nullable ResourceLocation excludedId) {
+        List<HeroDefinition> pool = HeroRegistry.getRollable().stream()
+                .filter(hero -> hero.getRank() == rank)
+                .filter(hero -> hero.getHeroClassId().equals(classId))
+                .filter(hero -> !hero.getId().equals(excludedId))
+                .toList();
+        if (pool.isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of(pool.get(ThreadLocalRandom.current().nextInt(pool.size())));
+    }
+
     private static Optional<HeroDefinition> rollFrom(List<HeroDefinition> rollable) {
 
         if (rollable.isEmpty()) {

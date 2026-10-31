@@ -1,0 +1,398 @@
+{
+  "textures": {
+    "tex": "althera:block/ritual_core",
+    "particle": "althera:block/ritual_core"
+  },
+  "elements": [
+    {
+      "name": "crystal_body",
+      "from": [
+        6.5,
+        6.5,
+        6.5
+      ],
+      "to": [
+        9.5,
+        9.5,
+        9.5
+      ],
+      "faces": {
+        "north": {
+          "texture": "#tex",
+          "uv": [
+            0.75,
+            3.5,
+            1.5,
+            4.25
+          ]
+        },
+        "south": {
+          "texture": "#tex",
+          "uv": [
+            1.5,
+            3.5,
+            2.25,
+            4.25
+          ]
+        },
+        "east": {
+          "texture": "#tex",
+          "uv": [
+            2.25,
+            3.5,
+            3.0,
+            4.25
+          ]
+        },
+        "west": {
+          "texture": "#tex",
+          "uv": [
+            3.0,
+            3.5,
+            3.75,
+            4.25
+          ]
+        },
+        "up": {
+          "texture": "#tex",
+          "uv": [
+            3.75,
+            3.5,
+            4.5,
+            4.25
+          ]
+        },
+        "down": {
+          "texture": "#tex",
+          "uv": [
+            4.5,
+            3.5,
+            5.25,
+            4.25
+          ]
+        }
+      },
+      "rotation": {
+        "angle": 45,
+        "axis": "y",
+        "origin": [
+          8,
+          8,
+          8
+        ]
+      }
+    },
+    {
+      "name": "crystal_upper",
+      "from": [
+        7,
+        9.5,
+        7
+      ],
+      "to": [
+        9,
+        11.5,
+        9
+      ],
+      "faces": {
+        "north": {
+          "texture": "#tex",
+          "uv": [
+            1.0,
+            4.75,
+            1.5,
+            5.25
+          ]
+        },
+        "south": {
+          "texture": "#tex",
+          "uv": [
+            1.5,
+            4.75,
+            2.0,
+            5.25
+          ]
+        },
+        "east": {
+          "texture": "#tex",
+          "uv": [
+            2.0,
+            4.75,
+            2.5,
+            5.25
+          ]
+        },
+        "west": {
+          "texture": "#tex",
+          "uv": [
+            2.5,
+            4.75,
+            3.0,
+            5.25
+          ]
+        },
+        "up": {
+          "texture": "#tex",
+          "uv": [
+            3.0,
+            4.75,
+            3.5,
+            5.25
+          ]
+        },
+        "down": {
+          "texture": "#tex",
+          "uv": [
+            3.5,
+            4.75,
+            4.0,
+            5.25
+          ]
+        }
+      },
+      "rotation": {
+        "angle": 45,
+        "axis": "y",
+        "origin": [
+          8,
+          8,
+          8
+        ]
+      }
+    },
+    {
+      "name": "crystal_tip",
+      "from": [
+        7.5,
+        11.5,
+        7.5
+      ],
+      "to": [
+        8.5,
+        13,
+        8.5
+      ],
+      "faces": {
+        "north": {
+          "texture": "#tex",
+          "uv": [
+            7.0,
+            4.75,
+            7.25,
+            5.25
+          ]
+        },
+        "south": {
+          "texture": "#tex",
+          "uv": [
+            7.25,
+            4.75,
+            7.5,
+            5.25
+          ]
+        },
+        "east": {
+          "texture": "#tex",
+          "uv": [
+            7.5,
+            4.75,
+            7.75,
+            5.25
+          ]
+        },
+        "west": {
+          "texture": "#tex",
+          "uv": [
+            7.75,
+            4.75,
+            8.0,
+            5.25
+          ]
+        },
+        "up": {
+          "texture": "#tex",
+          "uv": [
+            9.0,
+            5.5,
+            9.25,
+            5.75
+          ]
+        },
+        "down": {
+          "texture": "#tex",
+          "uv": [
+            9.25,
+            5.5,
+            9.5,
+            5.75
+          ]
+        }
+      },
+      "rotation": {
+        "angle": 45,
+        "axis": "y",
+        "origin": [
+          8,
+          8,
+          8
+        ]
+      }
+    },
+    {
+      "name": "crystal_lower",
+      "from": [
+        7,
+        4.5,
+        7
+      ],
+      "to": [
+        9,
+        6.5,
+        9
+      ],
+      "faces": {
+        "north": {
+          "texture": "#tex",
+          "uv": [
+            4.0,
+            4.75,
+            4.5,
+            5.25
+          ]
+        },
+        "south": {
+          "texture": "#tex",
+          "uv": [
+            4.5,
+            4.75,
+            5.0,
+            5.25
+          ]
+        },
+        "east": {
+          "texture": "#tex",
+          "uv": [
+            5.0,
+            4.75,
+            5.5,
+            5.25
+          ]
+        },
+        "west": {
+          "texture": "#tex",
+          "uv": [
+            5.5,
+            4.75,
+            6.0,
+            5.25
+          ]
+        },
+        "up": {
+          "texture": "#tex",
+          "uv": [
+            6.0,
+            4.75,
+            6.5,
+            5.25
+          ]
+        },
+        "down": {
+          "texture": "#tex",
+          "uv": [
+            6.5,
+            4.75,
+            7.0,
+            5.25
+          ]
+        }
+      },
+      "rotation": {
+        "angle": 45,
+        "axis": "y",
+        "origin": [
+          8,
+          8,
+          8
+        ]
+      }
+    },
+    {
+      "name": "crystal_root",
+      "from": [
+        7.5,
+        3,
+        7.5
+      ],
+      "to": [
+        8.5,
+        4.5,
+        8.5
+      ],
+      "faces": {
+        "north": {
+          "texture": "#tex",
+          "uv": [
+            8.0,
+            4.75,
+            8.25,
+            5.25
+          ]
+        },
+        "south": {
+          "texture": "#tex",
+          "uv": [
+            8.25,
+            4.75,
+            8.5,
+            5.25
+          ]
+        },
+        "east": {
+          "texture": "#tex",
+          "uv": [
+            8.5,
+            4.75,
+            8.75,
+            5.25
+          ]
+        },
+        "west": {
+          "texture": "#tex",
+          "uv": [
+            8.75,
+            4.75,
+            9.0,
+            5.25
+          ]
+        },
+        "up": {
+          "texture": "#tex",
+          "uv": [
+            9.5,
+            5.5,
+            9.75,
+            5.75
+          ]
+        },
+        "down": {
+          "texture": "#tex",
+          "uv": [
+            9.75,
+            5.5,
+            10.0,
+            5.75
+          ]
+        }
+      },
+      "rotation": {
+        "angle": 45,
+        "axis": "y",
+        "origin": [
+          8,
+          8,
+          8
+        ]
+      }
+    }
+  ]
+}

@@ -10,9 +10,12 @@ public class AltheraItemId {
 
     public static final ResourceLocation EMBLEM = id("emblem");
 
+    public static final ResourceLocation HERO_CATALYST = id("hero_catalyst");
+
     //Block items
     public static final ResourceLocation RITUAL_CORE = id("ritual_core");
     public static final ResourceLocation NOBLE_SIGIL = id("noble_sigil");
+    public static final ResourceLocation RITUAL_PEDESTAL = id("ritual_pedestal");
 
     public static ResourceLocation id(final String name) {
         return ResourceLocation.fromNamespaceAndPath(MOD_ID, name);

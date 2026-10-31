@@ -1,0 +1,31 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "GAG",
+    " D ",
+    "DDD"
+  ],
+  "key": {
+    "G": {
+      "item": "minecraft:gold_ingot"
+    },
+    "A": {
+      "item": "minecraft:amethyst_shard"
+    },
+    "D": [
+      {
+        "item": "minecraft:polished_deepslate"
+      },
+      {
+        "item": "minecraft:deepslate_bricks"
+      },
+      {
+        "item": "minecraft:deepslate_tiles"
+      }
+    ]
+  },
+  "result": {
+    "id": "althera:ritual_pedestal",
+    "count": 1
+  }
+}

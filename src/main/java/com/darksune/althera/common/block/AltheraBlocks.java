@@ -28,6 +28,14 @@ public class AltheraBlocks {
                     .noLootTable()
             ));
 
+    public static final DeferredHolder<Block, Block> RITUAL_PEDESTAL = BLOCKS.register("ritual_pedestal",
+            () -> new RitualPedestalBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.STONE)
+                    .sound(SoundType.STONE)
+                    .strength(1.5f, 6.0f)
+                    .noOcclusion()
+            ));
+
     public static void register(final IEventBus bus) {
         BLOCKS.register(bus);
     }

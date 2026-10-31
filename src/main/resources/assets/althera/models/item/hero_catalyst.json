@@ -1,0 +1,44 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "althera:item/catalyst/generic"
+  },
+  "overrides": [
+    {
+      "predicate": {
+        "althera:catalyst_class": 1
+      },
+      "model": "althera:item/catalyst/saber"
+    },
+    {
+      "predicate": {
+        "althera:catalyst_class": 2
+      },
+      "model": "althera:item/catalyst/caster"
+    },
+    {
+      "predicate": {
+        "althera:catalyst_class": 3
+      },
+      "model": "althera:item/catalyst/lancer"
+    },
+    {
+      "predicate": {
+        "althera:catalyst_class": 4
+      },
+      "model": "althera:item/catalyst/shielder"
+    },
+    {
+      "predicate": {
+        "althera:catalyst_class": 5
+      },
+      "model": "althera:item/catalyst/archer"
+    },
+    {
+      "predicate": {
+        "althera:catalyst_class": 6
+      },
+      "model": "althera:item/catalyst/assassin"
+    }
+  ]
+}
