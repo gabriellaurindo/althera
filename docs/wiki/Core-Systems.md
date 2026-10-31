@@ -166,8 +166,8 @@ Click the gear in the hero screen (**G**) to change:
   where the skill timers go (next to the crosshair or under the Hero HUD)
 
 Corner and timers cycle with a click (right-click goes back). Hover a setting to see what it does. The HUD options
-are saved in `config/althera-client.toml`. **Other options** opens the NeoForge config screen (also reachable from
-**Mods > Althera > Config** or the **Open Config** key, unbound by default), reserved for future options.
+are saved in `config/althera-client.toml`. The NeoForge config screen (**Mods > Althera > Config** or the
+**Open Config** key, unbound by default) is reserved for future options.
 
 ---
 
