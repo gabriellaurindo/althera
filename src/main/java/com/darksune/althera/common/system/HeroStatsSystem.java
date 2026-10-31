@@ -15,8 +15,7 @@ import org.jetbrains.annotations.Nullable;
 public class HeroStatsSystem {
 
     private final static double BASE_KNOCKBACK_RESISTANCE = 0.8;
-    public static final double DISGUISE_STAT_MULTIPLIER = 0.5;
-    public static final double DISGUISE_SPEED_MULTIPLIER = 0.75;
+    public static final double DISGUISE_STAT_MULTIPLIER = 0.75;
     public static final String DISGUISED_NAME = "Hooded Figure";
     private static final double SPIRIT_REGEN_BASE = 2.0;
     private static final double SPIRIT_REGEN_PER_LEVEL = 0.1;
@@ -166,7 +165,7 @@ public class HeroStatsSystem {
     }
 
     public static double getSpeed(final HeroData data) {
-        return getSpeed(data.getHeroDefinition(), data.isDisguised() ? DISGUISE_SPEED_MULTIPLIER : 1.0);
+        return getSpeed(data.getHeroDefinition(), getDisguiseMultiplier(data));
     }
 
     public static double getSpeed(@Nullable final HeroDefinition def, final double disguise) {
