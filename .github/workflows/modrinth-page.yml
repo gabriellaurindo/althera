@@ -1,0 +1,49 @@
+name: Modrinth page
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        required: true
+        type: string
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Release notes folder to send (e.g. 4.2.0)
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  page:
+    runs-on: ubuntu-latest
+    env:
+      MODRINTH_PROJECT_TOKEN: ${{ secrets.MODRINTH_PROJECT_TOKEN }}
+      MODRINTH_PROJECT_ID: ${{ vars.MODRINTH_PROJECT_ID }}
+      NOTES: release-notes/${{ inputs.version }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Update Modrinth project page
+        if: env.MODRINTH_PROJECT_TOKEN != '' && env.MODRINTH_PROJECT_ID != ''
+        run: |
+          PAGE="$NOTES/modrinth-page.md"
+          SUMMARY="$NOTES/modrinth-summary.txt"
+          if [[ ! -f "$PAGE" ]]; then
+            echo "::warning::Missing $PAGE, Modrinth page not updated"
+            exit 0
+          fi
+          [[ -f "$SUMMARY" ]] || SUMMARY=/dev/null
+          jq -n --rawfile body "$PAGE" --rawfile summary "$SUMMARY" '
+            ($summary | gsub("\r"; "") | gsub("^\\s+|\\s+$"; "")) as $s
+            | {body: ($body | gsub("\r"; ""))}
+            + (if $s == "" then {} else {description: $s} end)' \
+            | curl -fsS -X PATCH \
+                -H "Authorization: $MODRINTH_PROJECT_TOKEN" \
+                -H "Content-Type: application/json" \
+                -H "User-Agent: gabriellaurindo/althera (release workflow)" \
+                -d @- "https://api.modrinth.com/v2/project/$MODRINTH_PROJECT_ID"
+          echo "Modrinth project page updated from $PAGE"
