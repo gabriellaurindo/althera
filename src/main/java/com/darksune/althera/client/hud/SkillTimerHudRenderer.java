@@ -2,6 +2,7 @@ package com.darksune.althera.client.hud;
 
 import com.darksune.althera.Althera;
 import com.darksune.althera.client.AltheraClientConfig;
+import com.darksune.althera.client.screen.SealWheelScreen;
 import com.darksune.althera.common.attachment.HeroData;
 import com.darksune.althera.common.commandseal.skill.CommandSealSkillType;
 import net.minecraft.client.Minecraft;
@@ -28,6 +29,7 @@ public final class SkillTimerHudRenderer {
     private static final int TEXT_HEIGHT = 9;
     private static final int CROSSHAIR_OFFSET = 14;
     private static final int HERO_HUD_GAP = 4;
+    private static final int LEVEL_BADGE_OVERHANG = 6;
     private static final int OVERLAY_Z = 200;
 
     private static final float ICON_ALPHA = 0.67F;
@@ -65,6 +67,8 @@ public final class SkillTimerHudRenderer {
         Font font = mc.font;
 
         if (AltheraClientConfig.SKILL_TIMERS_POSITION.get() == AltheraClientConfig.SkillTimersPosition.CROSSHAIR) {
+            if (mc.screen instanceof SealWheelScreen) return;
+
             int x = mc.getWindow().getGuiScaledWidth() / 2 + CROSSHAIR_OFFSET;
             int y = mc.getWindow().getGuiScaledHeight() / 2 - SIZE / 2;
             renderRow(gui, font, timers, x, y, 1);
@@ -74,7 +78,7 @@ public final class SkillTimerHudRenderer {
         HeroHudLayout layout = HeroHudLayout.current(mc);
         int y = AltheraClientConfig.HERO_HUD_CORNER.get().isBottom()
                 ? layout.portraitY() - HERO_HUD_GAP - SIZE - TEXT_HEIGHT
-                : layout.portraitY() + HeroHudLayout.PORTRAIT_SIZE + HERO_HUD_GAP;
+                : layout.portraitY() + HeroHudLayout.PORTRAIT_SIZE + LEVEL_BADGE_OVERHANG + HERO_HUD_GAP;
 
         if (layout.mirrored()) {
             renderRow(gui, font, timers, layout.portraitX() + HeroHudLayout.PORTRAIT_SIZE - SIZE, y, -1);

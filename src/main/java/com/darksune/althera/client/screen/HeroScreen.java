@@ -1,13 +1,16 @@
 package com.darksune.althera.client.screen;
 
 import com.darksune.althera.Althera;
+import com.darksune.althera.client.AltheraClientConfig;
 import com.darksune.althera.client.input.AltheraKeybinds;
 import com.darksune.althera.common.attachment.HeroData;
+import com.darksune.althera.common.commandseal.CommandSealData;
 import com.darksune.althera.common.entity.AltheraEntities;
 import com.darksune.althera.common.entity.HeroEntity;
 import com.darksune.althera.common.hero.HeroClass;
 import com.darksune.althera.common.hero.HeroClassRegistry;
 import com.darksune.althera.common.hero.HeroDefinition;
+import com.darksune.althera.common.skill.SkillLimits;
 import com.darksune.althera.common.system.HeroProgressionSystem;
 import com.darksune.althera.common.system.HeroStatsSystem;
 import com.darksune.althera.common.ultimate.UltimateData;
@@ -23,10 +26,13 @@ import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffectUtil;
 import net.minecraft.world.effect.MobEffects;
+import net.neoforged.fml.ModList;
+import net.neoforged.neoforge.common.ModConfigSpec;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.jetbrains.annotations.Nullable;
 
@@ -48,7 +54,12 @@ public class HeroScreen extends Screen {
     private static final int INFO_WIDTH = GUI_WIDTH - INFO_X - 12;
 
     private static final int CHECKBOX_SIZE = 10;
-    private static final int SETTING_ROW_HEIGHT = 44;
+    private static final int SETTING_ROW_HEIGHT = 16;
+    private static final int SETTING_HEADER_HEIGHT = 12;
+    private static final int SETTING_NUMBER_WIDTH = 50;
+    private static final int SETTING_STEP_SIZE = 10;
+    private static final int SETTING_TOOLTIP_WIDTH = 180;
+    private static final int OTHER_OPTIONS_WIDTH = 80;
 
     private static final int BUTTON_HEIGHT = 16;
     private static final int CONTENT_X = 14;
@@ -72,6 +83,10 @@ public class HeroScreen extends Screen {
     private static final int EFFECT_ICON_SIZE = 12;
     private static final double STAT_EPSILON = 0.05;
     private static final double RESISTANCE_PER_LEVEL = 0.2;
+
+    private static final String CHARGE_GLYPH = "◆";
+    private static final int COLOR_CHARGE = 0xFFE03050;
+    private static final int COLOR_CHARGE_EMPTY = 0xFF4A2A30;
 
     private static final int DETAILS_WIDTH = 140;
     private static final int DETAILS_GAP = 12;
@@ -100,19 +115,37 @@ public class HeroScreen extends Screen {
         ULTIMATE
     }
 
-    private enum SettingRow {
-        HIDE_HUD("Hide HUD", "Hides the hero HUD and the skill timers.", 0xFF00FF88),
-        DISABLE_INTERVENTIONS(
-                "Disable interventions",
-                "Your hero will not step in to absorb the damage you take.",
-                0xFFFF5555
-        );
+    private enum SettingSection {
+        HERO("HERO"),
+        HUD("HUD");
 
+        private final String title;
+
+        SettingSection(String title) {
+            this.title = title;
+        }
+    }
+
+    private enum SettingRow {
+        DISABLE_INTERVENTIONS(SettingSection.HERO, "Disable interventions",
+                "Your hero will not step in to absorb the damage you take.", 0xFFFF5555),
+        HIDE_HUD(SettingSection.HUD, "Hide HUD", "Hides the hero HUD and the skill timers.", 0xFF00FF88),
+        HUD_CORNER(SettingSection.HUD, "HUD corner",
+                "Screen corner of the hero HUD. Right-click to go back.", 0),
+        HUD_OFFSET_X(SettingSection.HUD, "Horizontal offset",
+                "Distance of the hero HUD from its corner, in GUI pixels. Shift-click: 10 at a time.", 0),
+        HUD_OFFSET_Y(SettingSection.HUD, "Vertical offset",
+                "Distance of the hero HUD from its corner, in GUI pixels. Shift-click: 10 at a time.", 0),
+        SKILL_TIMERS(SettingSection.HUD, "Skill timers",
+                "Where the timers of running Command Seals and the Ultimate are shown. Right-click to go back.", 0);
+
+        private final SettingSection section;
         private final String label;
         private final String description;
         private final int color;
 
-        SettingRow(String label, String description, int color) {
+        SettingRow(SettingSection section, String label, String description, int color) {
+            this.section = section;
             this.label = label;
             this.description = description;
             this.color = color;
@@ -365,6 +398,12 @@ public class HeroScreen extends Screen {
                 INFO_WIDTH,
                 statColor(armor, baseArmor)
         );
+        infoY += 12;
+
+        drawSpeed(gui, heroData, live, infoX, infoY, INFO_WIDTH);
+        infoY += 12;
+
+        drawResistance(gui, live, infoX, infoY, INFO_WIDTH);
 
         if (ultimate(heroData) != null) {
             drawButton(gui, "Ultimate  ›", ultimateButtonX(), ultimateButtonY(), INFO_WIDTH,
@@ -502,19 +541,6 @@ public class HeroScreen extends Screen {
 
         int rowY = y + 30;
 
-        final double baseSpeed = HeroStatsSystem.getSpeed(heroData);
-        final double speed = live != null ? live.speed() : baseSpeed;
-
-        final double speedRatio = baseSpeed > 0 ? speed / baseSpeed : 1;
-
-        drawStat(gui, "Speed", percent(speedRatio), innerX, rowY, innerWidth, statColor(speedRatio * 100, 100));
-        rowY += 12;
-
-        final double resistance = live != null ? damageResistance(live.effects()) : 0;
-
-        drawStat(gui, "Resistance", percent(resistance), innerX, rowY, innerWidth, statColor(resistance * 100, 0));
-        rowY += 12;
-
         final double baseKnockback = HeroStatsSystem.getKnockbackResistance(heroData);
         final double knockback = live != null ? live.knockbackResistance() : baseKnockback;
 
@@ -533,6 +559,12 @@ public class HeroScreen extends Screen {
 
         drawStat(gui, spiritForm ? "Spirit regen" : "Regen", String.format(Locale.ROOT, "%.2f HP/2s", regen),
                 innerX, rowY, innerWidth, 0xFFFFFFFF);
+        rowY += 12;
+
+        drawSealCharges(gui, innerX, rowY, innerWidth);
+        rowY += 12;
+
+        drawUltimateReady(gui, innerX, rowY, innerWidth);
         rowY += 14;
 
         gui.fill(innerX, rowY, innerX + innerWidth, rowY + 1, COLOR_SEPARATOR);
@@ -564,6 +596,45 @@ public class HeroScreen extends Screen {
 
         rowY = drawMatchup(gui, "Strong vs (+25%)", strong, COLOR_READY, innerX, rowY, innerWidth);
         drawMatchup(gui, "Weak vs (-25%)", weak, COLOR_USED, innerX, rowY + 4, innerWidth);
+    }
+
+    private void drawSpeed(GuiGraphics gui, HeroData heroData, @Nullable HeroStatsPacket live, int x, int y, int width) {
+        final double baseSpeed = HeroStatsSystem.getSpeed(heroData);
+        final double speed = live != null ? live.speed() : baseSpeed;
+        final double speedRatio = baseSpeed > 0 ? speed / baseSpeed : 1;
+
+        drawStat(gui, "Speed", percent(speedRatio), x, y, width, statColor(speedRatio * 100, 100));
+    }
+
+    private void drawResistance(GuiGraphics gui, @Nullable HeroStatsPacket live, int x, int y, int width) {
+        final double resistance = live != null ? damageResistance(live.effects()) : 0;
+
+        drawStat(gui, "Resistance", percent(resistance), x, y, width, statColor(resistance * 100, 0));
+    }
+
+    private void drawSealCharges(GuiGraphics gui, int x, int y, int width) {
+        gui.drawString(this.font, "Seals", x, y, COLOR_LABEL);
+
+        if (SkillLimits.isUnlimited(minecraft.player)) {
+            gui.drawString(this.font, "∞", x + width - this.font.width("∞"), y, COLOR_CHARGE);
+            return;
+        }
+
+        final int charges = CommandSealData.get(minecraft.player).getCommandSealCharges();
+        final int glyphWidth = this.font.width(CHARGE_GLYPH) + 1;
+        int glyphX = x + width - CommandSealData.MAX_CHARGES * glyphWidth + 1;
+
+        for (int i = 0; i < CommandSealData.MAX_CHARGES; i++) {
+            gui.drawString(this.font, CHARGE_GLYPH, glyphX, y, i < charges ? COLOR_CHARGE : COLOR_CHARGE_EMPTY);
+            glyphX += glyphWidth;
+        }
+    }
+
+    private void drawUltimateReady(GuiGraphics gui, int x, int y, int width) {
+        final boolean usedToday = UltimateData.get(minecraft.player).wasUsedToday()
+                && !SkillLimits.isUnlimited(minecraft.player);
+
+        drawStat(gui, "Ultimate", usedToday ? "Used today" : "Ready", x, y, width, usedToday ? COLOR_USED : COLOR_READY);
     }
 
     private void drawMultiplier(GuiGraphics gui, String label, float value, int x, int y) {
@@ -638,58 +709,130 @@ public class HeroScreen extends Screen {
 
     private void renderSettingsTab(GuiGraphics gui, HeroData heroData, int mouseX, int mouseY) {
 
-        final SettingRow[] rows = SettingRow.values();
+        final int rowX = left() + CONTENT_X;
+        SettingSection section = null;
 
-        for (int i = 0; i < rows.length; i++) {
-            final SettingRow row = rows[i];
-            final int rowX = left() + 14;
-            final int rowY = rowTop(i);
-            final int rowWidth = GUI_WIDTH - 28;
+        for (SettingRow row : SettingRow.values()) {
+            final int rowY = settingRowY(row);
 
-            final boolean hovered = isOverRow(i, mouseX, mouseY);
-
-            gui.fill(rowX, rowY, rowX + rowWidth, rowY + SETTING_ROW_HEIGHT - 4, hovered ? 0xFF353535 : COLOR_PREVIEW);
-
-            final int boxX = rowX + 8;
-            final int boxY = rowY + 6;
-
-            gui.fill(boxX - 1, boxY - 1, boxX + CHECKBOX_SIZE + 1, boxY + CHECKBOX_SIZE + 1, COLOR_SEPARATOR);
-            gui.fill(boxX, boxY, boxX + CHECKBOX_SIZE, boxY + CHECKBOX_SIZE, 0xFF111111);
-
-            if (isEnabled(heroData, row)) {
-                gui.fill(boxX + 2, boxY + 2, boxX + CHECKBOX_SIZE - 2, boxY + CHECKBOX_SIZE - 2, row.color);
+            if (row.section != section) {
+                section = row.section;
+                gui.drawString(this.font, section.title, rowX, rowY - SETTING_HEADER_HEIGHT + 2, COLOR_ACCENT);
             }
 
-            gui.drawString(this.font, row.label, boxX + CHECKBOX_SIZE + 8, boxY + 1, 0xFFFFFF);
+            final boolean hovered = isOverSettingRow(row, mouseX, mouseY);
 
-            final List<FormattedCharSequence> lines =
-                    this.font.split(Component.literal(row.description), rowWidth - CHECKBOX_SIZE - 32);
-            for (int line = 0; line < Math.min(lines.size(), 2); line++) {
-                gui.drawString(this.font, lines.get(line), boxX + CHECKBOX_SIZE + 8, boxY + 13 + line * 10, COLOR_LABEL);
+            gui.fill(rowX, rowY, rowX + CONTENT_WIDTH, rowY + SETTING_ROW_HEIGHT - 2,
+                    hovered ? COLOR_BUTTON_HOVER : COLOR_PREVIEW);
+            gui.drawString(this.font, row.label, rowX + 6, rowY + 3, 0xFFFFFF);
+
+            renderSettingControl(gui, heroData, row, rowX + CONTENT_WIDTH - 6, rowY + 2);
+
+            if (hovered) {
+                setTooltipForNextRenderPass(this.font.split(Component.literal(row.description), SETTING_TOOLTIP_WIDTH));
             }
         }
 
-        gui.drawCenteredString(
-                this.font,
-                "Click the gear to go back",
-                left() + GUI_WIDTH / 2,
-                top() + GUI_HEIGHT - 16,
-                0x777777
-        );
+        drawButton(gui, "Other options", otherOptionsX(), otherOptionsY(), OTHER_OPTIONS_WIDTH,
+                isOverOtherOptions(mouseX, mouseY));
+
+        final String hint = "Click the gear to go back";
+        gui.drawString(this.font, hint, left() + GUI_WIDTH - CONTENT_X - this.font.width(hint),
+                otherOptionsY() + (BUTTON_HEIGHT - 8) / 2, 0x777777);
     }
 
-    private boolean isEnabled(HeroData heroData, SettingRow row) {
-        return switch (row) {
-            case HIDE_HUD -> heroData.isHiddenHud();
-            case DISABLE_INTERVENTIONS -> heroData.isSaveDisabled();
-        };
+    private void renderSettingControl(GuiGraphics gui, HeroData heroData, SettingRow row, int right, int y) {
+        switch (row) {
+            case DISABLE_INTERVENTIONS -> drawCheckbox(gui, right, y, heroData.isSaveDisabled(), row.color);
+            case HIDE_HUD -> drawCheckbox(gui, right, y, heroData.isHiddenHud(), row.color);
+            case HUD_CORNER -> drawCycle(gui, right, y, AltheraClientConfig.HERO_HUD_CORNER.get().displayName());
+            case SKILL_TIMERS -> drawCycle(gui, right, y, AltheraClientConfig.SKILL_TIMERS_POSITION.get().displayName());
+            case HUD_OFFSET_X -> drawNumber(gui, right, y, AltheraClientConfig.HERO_HUD_OFFSET_X.get());
+            case HUD_OFFSET_Y -> drawNumber(gui, right, y, AltheraClientConfig.HERO_HUD_OFFSET_Y.get());
+        }
     }
 
-    private ToggleHeroSettingPacket.Setting packetSetting(SettingRow row) {
-        return switch (row) {
-            case HIDE_HUD -> ToggleHeroSettingPacket.Setting.HIDDEN_HUD;
-            case DISABLE_INTERVENTIONS -> ToggleHeroSettingPacket.Setting.SAVE_DISABLED;
-        };
+    private void drawCheckbox(GuiGraphics gui, int right, int y, boolean checked, int color) {
+        final int boxX = right - CHECKBOX_SIZE;
+
+        gui.fill(boxX - 1, y - 1, right + 1, y + CHECKBOX_SIZE + 1, COLOR_SEPARATOR);
+        gui.fill(boxX, y, right, y + CHECKBOX_SIZE, 0xFF111111);
+
+        if (checked) {
+            gui.fill(boxX + 2, y + 2, right - 2, y + CHECKBOX_SIZE - 2, color);
+        }
+    }
+
+    private void drawCycle(GuiGraphics gui, int right, int y, String value) {
+        final String text = "‹ " + value + " ›";
+        gui.drawString(this.font, text, right - this.font.width(text), y + 1, COLOR_ACCENT);
+    }
+
+    private void drawNumber(GuiGraphics gui, int right, int y, int value) {
+        final int left = right - SETTING_NUMBER_WIDTH;
+
+        drawStepButton(gui, left, y, "-");
+        drawStepButton(gui, right - SETTING_STEP_SIZE, y, "+");
+        gui.drawCenteredString(this.font, String.valueOf(value), left + SETTING_NUMBER_WIDTH / 2, y + 1, 0xFFFFFF);
+    }
+
+    private void drawStepButton(GuiGraphics gui, int x, int y, String label) {
+        gui.fill(x, y, x + SETTING_STEP_SIZE, y + SETTING_STEP_SIZE, COLOR_SEPARATOR);
+        gui.drawCenteredString(this.font, label, x + SETTING_STEP_SIZE / 2 + 1, y + 1, 0xFFFFFF);
+    }
+
+    private boolean clickSetting(double mouseX, double mouseY, int button) {
+        for (SettingRow row : SettingRow.values()) {
+            if (!isOverSettingRow(row, mouseX, mouseY)) {
+                continue;
+            }
+
+            final int step = button == 1 ? -1 : 1;
+
+            switch (row) {
+                case DISABLE_INTERVENTIONS -> PacketDistributor.sendToServer(
+                        new ToggleHeroSettingPacket(ToggleHeroSettingPacket.Setting.SAVE_DISABLED));
+                case HIDE_HUD -> PacketDistributor.sendToServer(
+                        new ToggleHeroSettingPacket(ToggleHeroSettingPacket.Setting.HIDDEN_HUD));
+                case HUD_CORNER -> cycle(AltheraClientConfig.HERO_HUD_CORNER, step);
+                case SKILL_TIMERS -> cycle(AltheraClientConfig.SKILL_TIMERS_POSITION, step);
+                case HUD_OFFSET_X -> adjustOffset(AltheraClientConfig.HERO_HUD_OFFSET_X, mouseX);
+                case HUD_OFFSET_Y -> adjustOffset(AltheraClientConfig.HERO_HUD_OFFSET_Y, mouseX);
+            }
+
+            return true;
+        }
+
+        return false;
+    }
+
+    private static <T extends Enum<T>> void cycle(ModConfigSpec.EnumValue<T> value, int step) {
+        final T[] values = value.get().getDeclaringClass().getEnumConstants();
+        value.set(values[Math.floorMod(value.get().ordinal() + step, values.length)]);
+        AltheraClientConfig.SPEC.save();
+    }
+
+    private void adjustOffset(ModConfigSpec.IntValue value, double mouseX) {
+        final int right = left() + CONTENT_X + CONTENT_WIDTH - 6;
+        final int left = right - SETTING_NUMBER_WIDTH;
+        final int direction;
+
+        if (mouseX >= right - SETTING_STEP_SIZE && mouseX < right) {
+            direction = 1;
+        } else if (mouseX >= left && mouseX < left + SETTING_STEP_SIZE) {
+            direction = -1;
+        } else {
+            return;
+        }
+
+        final int amount = hasShiftDown() ? 10 : 1;
+        value.set(Mth.clamp(value.get() + direction * amount, 0, AltheraClientConfig.MAX_HUD_OFFSET));
+        AltheraClientConfig.SPEC.save();
+    }
+
+    private void openOtherOptions() {
+        ModList.get().getModContainerById(Althera.MOD_ID)
+                .ifPresent(container -> minecraft.setScreen(AltheraClientConfig.createScreen(container, this)));
     }
 
     // =========================================================
@@ -819,8 +962,37 @@ public class HeroScreen extends Screen {
                 && mouseY >= closeY() && mouseY <= closeY() + 12;
     }
 
-    private int rowTop(int index) {
-        return top() + 34 + index * SETTING_ROW_HEIGHT;
+    private int settingRowY(SettingRow target) {
+        int y = top() + 30;
+        SettingSection section = null;
+
+        for (SettingRow row : SettingRow.values()) {
+            if (row.section != section) {
+                section = row.section;
+                y += SETTING_HEADER_HEIGHT;
+            }
+
+            if (row == target) {
+                return y;
+            }
+
+            y += SETTING_ROW_HEIGHT;
+        }
+
+        return y;
+    }
+
+    private int otherOptionsX() {
+        return left() + CONTENT_X;
+    }
+
+    private int otherOptionsY() {
+        return top() + GUI_HEIGHT - BUTTON_HEIGHT - 8;
+    }
+
+    private boolean isOverOtherOptions(double mouseX, double mouseY) {
+        return mouseX >= otherOptionsX() && mouseX < otherOptionsX() + OTHER_OPTIONS_WIDTH
+                && mouseY >= otherOptionsY() && mouseY < otherOptionsY() + BUTTON_HEIGHT;
     }
 
     private boolean isOverGear(double mouseX, double mouseY) {
@@ -828,12 +1000,12 @@ public class HeroScreen extends Screen {
                 && mouseY >= gearY() && mouseY <= gearY() + 16;
     }
 
-    private boolean isOverRow(int index, double mouseX, double mouseY) {
-        final int rowX = left() + 14;
-        final int rowY = rowTop(index);
+    private boolean isOverSettingRow(SettingRow row, double mouseX, double mouseY) {
+        final int rowX = left() + CONTENT_X;
+        final int rowY = settingRowY(row);
 
-        return mouseX >= rowX && mouseX <= rowX + GUI_WIDTH - 28
-                && mouseY >= rowY && mouseY <= rowY + SETTING_ROW_HEIGHT - 4;
+        return mouseX >= rowX && mouseX < rowX + CONTENT_WIDTH
+                && mouseY >= rowY && mouseY < rowY + SETTING_ROW_HEIGHT - 2;
     }
 
     // =========================================================
@@ -875,13 +1047,13 @@ public class HeroScreen extends Screen {
         }
 
         if (currentTab == Tab.SETTINGS) {
-            final SettingRow[] rows = SettingRow.values();
+            if (isOverOtherOptions(mouseX, mouseY)) {
+                openOtherOptions();
+                return true;
+            }
 
-            for (int i = 0; i < rows.length; i++) {
-                if (isOverRow(i, mouseX, mouseY)) {
-                    PacketDistributor.sendToServer(new ToggleHeroSettingPacket(packetSetting(rows[i])));
-                    return true;
-                }
+            if (clickSetting(mouseX, mouseY, button)) {
+                return true;
             }
         }
 

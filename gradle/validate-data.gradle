@@ -7,7 +7,9 @@ class DataValidator {
     static final Set<String> NAMED_TARGETS = ['self', 'owner', 'target'] as Set
 
     static final Set<String> HERO_KEYS = ['name', 'description', 'class', 'rank', 'nature', 'model', 'texture',
-            'animations', 'personality', 'scale', 'ultimate', 'attack', 'animation', 'stats'] as Set
+            'animations', 'personality', 'scale', 'ultimate', 'attack', 'animation', 'stats', 'sounds', 'hitbox'] as Set
+    static final Set<String> SOUNDS_KEYS = ['hurt', 'death', 'step'] as Set
+    static final Set<String> HITBOX_KEYS = ['width', 'height'] as Set
     static final Set<String> ATTACK_KEYS = ['type', 'range', 'cooldown_ticks', 'shoot_frame', 'projectile_speed',
             'projectile_origin', 'projectile_trail', 'on_attack', 'on_hit'] as Set
     static final Set<String> ANIMATION_KEYS = ['attack_speed', 'attack_length', 'walk_speed', 'death_length'] as Set
@@ -202,6 +204,15 @@ class DataValidator {
         if (json.animation != null) {
             checkKeys("${where} animation", json.animation, ANIMATION_KEYS)
             ANIMATION_KEYS.each { checkNumber("${where} animation", json.animation, it, false, 0) }
+        }
+
+        if (json.sounds != null) {
+            checkKeys("${where} sounds", json.sounds, SOUNDS_KEYS)
+        }
+
+        if (json.hitbox != null) {
+            checkKeys("${where} hitbox", json.hitbox, HITBOX_KEYS)
+            HITBOX_KEYS.each { checkNumber("${where} hitbox", json.hitbox, it, false, 0) }
         }
 
         if (json.stats != null) {

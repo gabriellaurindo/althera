@@ -183,8 +183,28 @@ public class HeroLoader extends SimpleJsonResourceReloadListener {
                 ResourceLocation.parse(GsonHelper.getAsString(json, "ultimate", DEFAULT_ULTIMATE)),
                 parseAttack(json, ops),
                 parseAnimation(json, ops),
-                parseStats(json, ops)
+                parseStats(json, ops),
+                parseSounds(json, ops),
+                parseHitbox(json, ops)
         );
+    }
+
+    private HeroSounds parseSounds(JsonObject json, RegistryOps<JsonElement> ops) {
+
+        if (!json.has("sounds")) {
+            return HeroSounds.DEFAULT;
+        }
+
+        return HeroSounds.CODEC.parse(ops, json.get("sounds")).getOrThrow();
+    }
+
+    private HeroHitbox parseHitbox(JsonObject json, RegistryOps<JsonElement> ops) {
+
+        if (!json.has("hitbox")) {
+            return HeroHitbox.DEFAULT;
+        }
+
+        return HeroHitbox.CODEC.parse(ops, json.get("hitbox")).getOrThrow();
     }
 
     private HeroStats parseStats(JsonObject json, RegistryOps<JsonElement> ops) {

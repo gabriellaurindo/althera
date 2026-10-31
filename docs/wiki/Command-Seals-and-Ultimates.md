@@ -9,19 +9,21 @@ All keys can be changed in **Options → Controls**, under the **Althera** categ
 ## 🖥️ Skill HUD
 
 A **golden sword** next to your Hero's portrait in the Hero HUD shows the Ultimate: bright when it is still available
-today, faded once it has been used. Command Seal charges left today show in the Command Seal wheel (hold **R**).
+today, faded once it has been used. When a new day restores a used Ultimate, a chime and a chat message let you
+know. Command Seal charges left today show in the Command Seal wheel (hold **R**) and in the hero screen's details
+panel (**G**).
 
 ### ⏱️ Skill timers
 
 Every Command Seal or Ultimate that is running shows up as a small see-through square with its icon and the seconds
-left, next to the crosshair:
+left, under the Hero HUD:
 
 - **Green**: active (e.g. Overdrive's remaining time); the green fill drains as it runs out
 - **Red**: on cooldown; the red fill drains until the skill is ready again
 
 Icons: Overdrive 🔥 blaze powder, Revive 🗿 totem of undying, Heal 🍉 glistering melon, Ultimate ⭐ nether star.
-Active timers come first. Prefer them under the Hero HUD? Change **Skill Timers Position** in the Althera config
-(**Options → Mods → Althera → Config**).
+Active timers come first. Prefer them next to the crosshair? Change **Skill timers** in the hero screen settings
+(gear in **G**); there they hide while the Command Seal wheel is open.
 
 The HUD is hidden together with the Hero HUD (hero screen settings) and with **F1**.
 

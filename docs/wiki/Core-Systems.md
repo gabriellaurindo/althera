@@ -53,10 +53,13 @@ including buffs and debuffs (Overdrive, potions thrown at it, Weakness...). A st
 **green** with the bonus in brackets, one below it is **red**. The effects on your Hero appear as icons in the corner
 of its portrait; hover one to see its name, level and time left.
 
-Click the arrow on the right edge of the hero screen to open the **details panel**: speed (100% = normal), damage
-resistance (20% per Resistance level, e.g. from Overdrive), knockback resistance, dodge chance and health regained
-every 2 seconds (higher in spirit form, while not summoned or defeated), then the class multipliers (HP, ATK, DEF, SPD) and the classes your Hero is strong (+25% damage)
-and weak (-25%) against.
+The status also shows its speed (100% = normal) and damage resistance (20% per Resistance level, e.g. from
+Overdrive).
+
+Click the arrow on the right edge of the hero screen to open the **details panel**: knockback resistance, dodge
+chance, health regained every 2 seconds (higher in spirit form, while not summoned or defeated), Command Seal charges
+left today and whether the Ultimate is ready, then the class multipliers (HP, ATK, DEF, SPD) and the classes your
+Hero is strong (+25% damage) and weak (-25%) against.
 
 Classes matter when Heroes fight each other: every class beats two classes and loses to two, dealing **+25%** damage
 to the classes it beats (with a burst of crits) and **−25%** to the ones that beat it:
@@ -152,9 +155,19 @@ once-per-day limit.
 
 The **Hero HUD** in the top-left corner shows your hero's face and level, its health, your mana bar and the
 interventions left (green diamonds). The face is dimmed while the hero is not summoned and turns red when it is
-defeated. The Hero HUD is hidden with **F1**; its hero part can also be hidden in the hero screen settings.
-Its corner (top/bottom, left/right) and distance from it can be changed in the client config: **Mods > Althera >
-Config**, the **Open Config** key (unbound by default, set it in Controls) or `config/althera-client.toml`.
+defeated. The Hero HUD is hidden with **F1**.
+
+### ⚙️ Settings
+
+Click the gear in the hero screen (**G**) to change:
+
+- **Hero**: Disable interventions (saved per world)
+- **HUD**: Hide HUD, HUD corner, horizontal and vertical offset from that corner (shift-click for steps of 10) and
+  where the skill timers go (next to the crosshair or under the Hero HUD)
+
+Corner and timers cycle with a click (right-click goes back). Hover a setting to see what it does. The HUD options
+are saved in `config/althera-client.toml`. **Other options** opens the NeoForge config screen (also reachable from
+**Mods > Althera > Config** or the **Open Config** key, unbound by default), reserved for future options.
 
 ---
 
