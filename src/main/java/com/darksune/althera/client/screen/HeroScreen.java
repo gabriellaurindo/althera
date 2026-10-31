@@ -351,14 +351,15 @@ public class HeroScreen extends Screen {
         drawStat(gui, "XP", maxLevel ? "MAX" : currentXp + " / " + requiredXp, infoX, infoY, INFO_WIDTH, 0xFFFFFFFF);
         infoY += 20;
 
-        final double baseMaxHealth = HeroStatsSystem.getMaxHealth(heroData);
-        final double maxHealth = live != null ? live.maxHealth() : baseMaxHealth;
+        final int level = heroData.getLevel();
+        final double baseMaxHealth = HeroStatsSystem.getMaxHealth(definition, level, 1.0);
+        final double maxHealth = live != null ? live.maxHealth() : HeroStatsSystem.getMaxHealth(heroData);
         final double health = live != null ? live.health() : heroData.getHealth();
 
         drawStat(
                 gui,
                 "Health",
-                (int) Math.ceil(health) + " / " + (int) maxHealth,
+                (int) Math.ceil(health) + " / " + (int) Math.ceil(maxHealth),
                 infoX,
                 infoY,
                 INFO_WIDTH,
@@ -371,8 +372,8 @@ public class HeroScreen extends Screen {
         gui.fill(infoX, infoY, infoX + INFO_WIDTH, infoY + 1, COLOR_SEPARATOR);
         infoY += 8;
 
-        final double baseAttack = HeroStatsSystem.getAttack(heroData);
-        final double attack = live != null ? live.attack() : baseAttack;
+        final double baseAttack = HeroStatsSystem.getAttack(definition, level, 1.0);
+        final double attack = live != null ? live.attack() : HeroStatsSystem.getAttack(heroData);
 
         drawStat(
                 gui,
@@ -385,8 +386,8 @@ public class HeroScreen extends Screen {
         );
         infoY += 12;
 
-        final double baseArmor = HeroStatsSystem.getArmor(heroData);
-        final double armor = live != null ? live.armor() : baseArmor;
+        final double baseArmor = HeroStatsSystem.getArmor(definition, level, 1.0);
+        final double armor = live != null ? live.armor() : HeroStatsSystem.getArmor(heroData);
 
         drawStat(
                 gui,
@@ -540,15 +541,19 @@ public class HeroScreen extends Screen {
 
         int rowY = y + 30;
 
-        final double baseKnockback = HeroStatsSystem.getKnockbackResistance(heroData);
-        final double knockback = live != null ? live.knockbackResistance() : baseKnockback;
+        final double baseKnockback = HeroStatsSystem.getKnockbackResistance(definition, 1.0);
+        final double knockback = live != null
+                ? live.knockbackResistance()
+                : HeroStatsSystem.getKnockbackResistance(heroData);
 
         drawStat(gui, "Knockback res.", percent(knockback), innerX, rowY, innerWidth,
                 statColor(knockback * 100, baseKnockback * 100));
         rowY += 12;
 
-        drawStat(gui, "Dodge", percent(HeroStatsSystem.getDodgeChance(heroData)), innerX, rowY, innerWidth,
-                0xFFFFFFFF);
+        final double dodge = HeroStatsSystem.getDodgeChance(heroData);
+
+        drawStat(gui, "Dodge", percent(dodge), innerX, rowY, innerWidth,
+                statColor(dodge * 100, definition.getHeroClass().getDodgeChance() * 100));
         rowY += 12;
 
         final boolean spiritForm = heroData.isDefeated() || !heroData.isSummoned();
@@ -598,8 +603,8 @@ public class HeroScreen extends Screen {
     }
 
     private void drawSpeed(GuiGraphics gui, HeroData heroData, @Nullable HeroStatsPacket live, int x, int y, int width) {
-        final double baseSpeed = HeroStatsSystem.getSpeed(heroData);
-        final double speed = live != null ? live.speed() : baseSpeed;
+        final double baseSpeed = HeroStatsSystem.getSpeed(heroData.getHeroDefinition(), 1.0);
+        final double speed = live != null ? live.speed() : HeroStatsSystem.getSpeed(heroData);
         final double speedRatio = baseSpeed > 0 ? speed / baseSpeed : 1;
 
         drawStat(gui, "Speed", percent(speedRatio), x, y, width, statColor(speedRatio * 100, 100));
