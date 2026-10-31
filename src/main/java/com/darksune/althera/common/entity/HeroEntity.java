@@ -14,6 +14,7 @@ import com.darksune.althera.common.hero.HeroAnimation;
 import com.darksune.althera.common.hero.HeroAttack;
 import com.darksune.althera.common.hero.HeroDefinition;
 import com.darksune.althera.common.hero.HeroRegistry;
+import com.darksune.althera.common.hero.HeroSounds;
 import com.darksune.althera.common.hero.HeroStats;
 import com.darksune.althera.common.system.HeroStatsSystem;
 import com.darksune.althera.common.system.HeroSummonSystem;
@@ -27,6 +28,7 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
@@ -46,6 +48,7 @@ import net.minecraft.world.entity.ai.navigation.WaterBoundPathNavigation;
 import net.minecraft.world.entity.ai.util.DefaultRandomPos;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.level.pathfinder.PathType;
 import net.minecraft.world.phys.AABB;
@@ -63,6 +66,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 import static com.darksune.althera.common.util.LightOrbUtil.habilitarEspirito;
@@ -222,6 +226,46 @@ public class HeroEntity extends CasterMob implements GeoEntity, OwnableEntity {
         return id != null
                 ? HeroRegistry.get(id)
                 : null;
+    }
+
+    @Override
+    public EntityDimensions getDefaultDimensions(final Pose pose) {
+        final HeroDefinition definition = getHeroDefinition();
+        return definition == null || isDisguised() ? super.getDefaultDimensions(pose) : definition.getHitbox().dimensions();
+    }
+
+    @Override
+    public void onSyncedDataUpdated(final EntityDataAccessor<?> key) {
+        super.onSyncedDataUpdated(key);
+        if (HERO_ID.equals(key) || DISGUISED.equals(key)) {
+            refreshDimensions();
+        }
+    }
+
+    @Override
+    protected SoundEvent getHurtSound(final DamageSource source) {
+        return heroSound(HeroSounds::hurt).orElseGet(() -> super.getHurtSound(source));
+    }
+
+    @Override
+    protected SoundEvent getDeathSound() {
+        return heroSound(HeroSounds::death).orElseGet(super::getDeathSound);
+    }
+
+    @Override
+    protected void playStepSound(final BlockPos pos, final BlockState state) {
+        final Optional<SoundEvent> step = heroSound(HeroSounds::step);
+        if (step.isPresent()) {
+            playSound(step.get(), 0.15F, 1.0F);
+        } else {
+            super.playStepSound(pos, state);
+        }
+    }
+
+    private Optional<SoundEvent> heroSound(final Function<HeroSounds, Optional<Holder<SoundEvent>>> sound) {
+        final HeroDefinition definition = getHeroDefinition();
+        if (definition == null || isDisguised()) return Optional.empty();
+        return sound.apply(definition.getSounds()).map(Holder::value);
     }
 
     public HeroAnimation getAnimation() {

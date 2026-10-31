@@ -331,11 +331,55 @@ Optional. How the model's animations are played. Lengths are in seconds, as show
 Optional. Multiplies the size of the hero model in the world (default `1.0`). The player is 1.8 blocks tall: lower the
 value if the hero looks taller than the player, raise it if shorter. The hero screens (Choose your Hero, hero status)
 ignore `scale` and show the model at its drawn size, a bit larger than the player. Only the rendering is scaled; the
-hero hitbox is fixed at 0.6 x 1.8 blocks, the same as the player.
+hitbox is set separately with `hitbox` (below).
 
 ```json
 "scale": 0.72
 ```
+
+---
+
+# 📦 Hitbox
+
+Optional. Size of the Hero's hitbox in blocks: what can be hit, how big a gap it fits through and where it collides.
+Defaults to the player's size. A disguised Hero always uses the default size.
+
+```json
+"hitbox": {
+  "width": 0.5,
+  "height": 1.4
+}
+```
+
+| Field | Default | Description |
+|---|---|---|
+| `width` | `0.6` | Width and depth of the hitbox |
+| `height` | `1.8` | Height of the hitbox |
+
+---
+
+# 🔊 Sounds
+
+Optional. Sounds the Hero makes when hurt, when defeated and when walking. Each one is a sound event id; leave one out
+to keep the default (the generic hurt/death sounds and the block's footstep sound). A disguised Hero always uses the
+defaults, so its voice doesn't give it away.
+
+```json
+"sounds": {
+  "hurt": "minecraft:entity.player.hurt",
+  "death": "minecraft:entity.evoker.death",
+  "step": "minecraft:block.chain.step"
+}
+```
+
+| Field | Description |
+|---|---|
+| `hurt` | Played when the Hero takes damage |
+| `death` | Played when the Hero is defeated |
+| `step` | Played on each footstep |
+
+Datapacks can't register new sound events. To use a sound from a resource pack, write it as
+`{ "sound_id": "mypack:hero.hurt" }` instead of a plain id.
 
 ---
 

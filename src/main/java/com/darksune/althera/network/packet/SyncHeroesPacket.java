@@ -4,9 +4,11 @@ import com.darksune.althera.Althera;
 import com.darksune.althera.common.hero.HeroAnimation;
 import com.darksune.althera.common.hero.HeroAttack;
 import com.darksune.althera.common.hero.HeroDefinition;
+import com.darksune.althera.common.hero.HeroHitbox;
 import com.darksune.althera.common.hero.HeroNature;
 import com.darksune.althera.common.hero.HeroRank;
 import com.darksune.althera.common.hero.HeroRegistry;
+import com.darksune.althera.common.hero.HeroSounds;
 import com.darksune.althera.common.hero.HeroStats;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -33,6 +35,12 @@ public record SyncHeroesPacket(List<HeroDefinition> heroes) implements CustomPac
 
     private static final StreamCodec<RegistryFriendlyByteBuf, HeroStats> STATS_CODEC =
             ByteBufCodecs.fromCodecWithRegistries(HeroStats.CODEC);
+
+    private static final StreamCodec<RegistryFriendlyByteBuf, HeroSounds> SOUNDS_CODEC =
+            ByteBufCodecs.fromCodecWithRegistries(HeroSounds.CODEC);
+
+    private static final StreamCodec<RegistryFriendlyByteBuf, HeroHitbox> HITBOX_CODEC =
+            ByteBufCodecs.fromCodecWithRegistries(HeroHitbox.CODEC);
 
     public static final StreamCodec<RegistryFriendlyByteBuf, SyncHeroesPacket> STREAM_CODEC =
             StreamCodec.of(
@@ -75,6 +83,8 @@ public record SyncHeroesPacket(List<HeroDefinition> heroes) implements CustomPac
         writeAttack(buf, hero.getAttack());
         ANIMATION_CODEC.encode(buf, hero.getAnimation());
         STATS_CODEC.encode(buf, hero.getStats());
+        SOUNDS_CODEC.encode(buf, hero.getSounds());
+        HITBOX_CODEC.encode(buf, hero.getHitbox());
     }
 
     private static void writeAttack(RegistryFriendlyByteBuf buf, HeroAttack attack) {
@@ -101,7 +111,9 @@ public record SyncHeroesPacket(List<HeroDefinition> heroes) implements CustomPac
                 buf.readResourceLocation(),
                 readAttack(buf),
                 ANIMATION_CODEC.decode(buf),
-                STATS_CODEC.decode(buf)
+                STATS_CODEC.decode(buf),
+                SOUNDS_CODEC.decode(buf),
+                HITBOX_CODEC.decode(buf)
         );
     }
 

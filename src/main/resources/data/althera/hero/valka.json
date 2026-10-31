@@ -9,7 +9,7 @@
   "animations": "althera:animations/entity/hero/valka.animation.json",
   "personality": "Bold and spirited",
   "scale": 0.75,
-  "ultimate": "althera:crimson_requiem",
+  "ultimate": "althera:tempest_charge",
   "attack": {
     "type": "melee",
     "on_hit": [

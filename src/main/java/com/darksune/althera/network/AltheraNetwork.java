@@ -1,8 +1,10 @@
 package com.darksune.althera.network;
 
 import com.darksune.althera.network.packet.DisguisePacket;
+import com.darksune.althera.network.packet.HeroStatsPacket;
 import com.darksune.althera.network.packet.MarkTargetPacket;
 import com.darksune.althera.network.packet.OpenHeroSelectionPacket;
+import com.darksune.althera.network.packet.RequestHeroStatsPacket;
 import com.darksune.althera.network.packet.SealTattooPacket;
 import com.darksune.althera.network.packet.SelectHeroPacket;
 import com.darksune.althera.network.packet.SummonPacket;
@@ -26,7 +28,7 @@ public final class AltheraNetwork {
 
     private static void registerPayloads(RegisterPayloadHandlersEvent event) {
 
-        var registrar = event.registrar("9");
+        var registrar = event.registrar("10");
 
         registrar.playToServer(
                 SummonPacket.TYPE,
@@ -70,6 +72,12 @@ public final class AltheraNetwork {
                 SelectHeroPacket::handle
         );
 
+        registrar.playToServer(
+                RequestHeroStatsPacket.TYPE,
+                RequestHeroStatsPacket.STREAM_CODEC,
+                RequestHeroStatsPacket::handle
+        );
+
         registrar.playToClient(
                 SyncHeroesPacket.TYPE,
                 SyncHeroesPacket.STREAM_CODEC,
@@ -104,6 +112,12 @@ public final class AltheraNetwork {
                 SealTattooPacket.TYPE,
                 SealTattooPacket.STREAM_CODEC,
                 SealTattooPacket::handle
+        );
+
+        registrar.playToClient(
+                HeroStatsPacket.TYPE,
+                HeroStatsPacket.STREAM_CODEC,
+                HeroStatsPacket::handle
         );
     }
 }

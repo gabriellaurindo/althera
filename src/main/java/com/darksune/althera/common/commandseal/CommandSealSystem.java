@@ -5,6 +5,7 @@ import com.darksune.althera.common.commandseal.skill.CommandSealSkillType;
 import com.darksune.althera.common.commandseal.skill.ICommandSealSkill;
 import com.darksune.althera.common.entity.HeroEntity;
 import com.darksune.althera.common.skill.SkillEndReason;
+import com.darksune.althera.common.skill.SkillLimits;
 import com.darksune.althera.common.skill.SkillTimers;
 import com.darksune.althera.common.system.HeroSummonSystem;
 import com.darksune.althera.common.system.SealTattooSystem;
@@ -26,7 +27,8 @@ public class CommandSealSystem {
             return;
         }
         final CommandSealData commandSealData = CommandSealData.get(player);
-        if (!commandSealData.hasCharges()) {
+        final boolean unlimited = SkillLimits.isUnlimited(player);
+        if (!unlimited && !commandSealData.hasCharges()) {
             player.sendSystemMessage(Component.literal("§cNo Command Seal charges left. They recharge at the start of a new day."));
             return;
         }
@@ -35,7 +37,7 @@ public class CommandSealSystem {
             player.sendSystemMessage(Component.literal("§cNot enough mana."));
             return;
         }
-        if (commandSealData.isSkillOnCooldown(commandSealSkillType)) {
+        if (!unlimited && commandSealData.isSkillOnCooldown(commandSealSkillType)) {
             player.sendSystemMessage(Component.literal("§eThis Command Seal is on cooldown."));
             return;
         }
@@ -50,11 +52,13 @@ public class CommandSealSystem {
         ICommandSealSkill commandSealSkill = commandSealSkillType.getSkill();
 
         manaData.consumeMana(player, commandSealSkill.getManaCost());
-        data.consumeCharge();
 
         data.activateSkill(commandSealSkillType, commandSealSkill.getDurationTicks());
 
-        data.startSkillCooldown(commandSealSkillType, commandSealSkill.getCooldownTicks());
+        if (!SkillLimits.isUnlimited(player)) {
+            data.consumeCharge();
+            data.startSkillCooldown(commandSealSkillType, commandSealSkill.getCooldownTicks());
+        }
 
         commandSealSkill.onCooldownStart(player);
 

@@ -1,27 +1,41 @@
 package com.darksune.althera.client.screen;
 
 import com.darksune.althera.Althera;
+import com.darksune.althera.client.AltheraClientConfig;
 import com.darksune.althera.client.input.AltheraKeybinds;
 import com.darksune.althera.common.attachment.HeroData;
+import com.darksune.althera.common.commandseal.CommandSealData;
 import com.darksune.althera.common.entity.AltheraEntities;
 import com.darksune.althera.common.entity.HeroEntity;
+import com.darksune.althera.common.hero.HeroClass;
+import com.darksune.althera.common.hero.HeroClassRegistry;
 import com.darksune.althera.common.hero.HeroDefinition;
+import com.darksune.althera.common.skill.SkillLimits;
 import com.darksune.althera.common.system.HeroProgressionSystem;
 import com.darksune.althera.common.system.HeroStatsSystem;
 import com.darksune.althera.common.ultimate.UltimateData;
 import com.darksune.althera.common.ultimate.UltimateDefinition;
 import com.darksune.althera.common.ultimate.UltimateRegistry;
+import com.darksune.althera.network.packet.HeroStatsPacket;
+import com.darksune.althera.network.packet.RequestHeroStatsPacket;
 import com.darksune.althera.network.packet.ToggleHeroSettingPacket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
 import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffectUtil;
+import net.minecraft.world.effect.MobEffects;
+import net.neoforged.neoforge.common.ModConfigSpec;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
@@ -39,7 +53,13 @@ public class HeroScreen extends Screen {
     private static final int INFO_WIDTH = GUI_WIDTH - INFO_X - 12;
 
     private static final int CHECKBOX_SIZE = 10;
-    private static final int SETTING_ROW_HEIGHT = 44;
+    private static final int SETTING_ROW_HEIGHT = 16;
+    private static final int SETTING_HEADER_HEIGHT = 12;
+    private static final int SETTING_NUMBER_WIDTH = 50;
+    private static final int SETTING_STEP_SIZE = 10;
+    private static final int SETTING_TOOLTIP_WIDTH = 180;
+    private static final int OTHER_OPTIONS_WIDTH = 80;
+    private static final String RESET_HUD_LABEL = "Reset";
 
     private static final int BUTTON_HEIGHT = 16;
     private static final int CONTENT_X = 14;
@@ -59,6 +79,20 @@ public class HeroScreen extends Screen {
     private static final int COLOR_READY = 0xFF55FF55;
     private static final int COLOR_USED = 0xFFFF5555;
 
+    private static final int STATS_REQUEST_INTERVAL = 10;
+    private static final int EFFECT_ICON_SIZE = 12;
+    private static final double STAT_EPSILON = 0.05;
+    private static final double RESISTANCE_PER_LEVEL = 0.2;
+
+    private static final String CHARGE_GLYPH = "◆";
+    private static final int COLOR_CHARGE = 0xFFE03050;
+    private static final int COLOR_CHARGE_EMPTY = 0xFF4A2A30;
+
+    private static final int DETAILS_WIDTH = 140;
+    private static final int DETAILS_GAP = 12;
+    private static final int DETAILS_TAB_WIDTH = 10;
+    private static final int DETAILS_TAB_HEIGHT = 28;
+
     private static final ResourceLocation GEAR_ICON =
             ResourceLocation.fromNamespaceAndPath(
                     Althera.MOD_ID,
@@ -69,6 +103,10 @@ public class HeroScreen extends Screen {
 
     private float tickAccumulator = 0;
 
+    private int screenTicks = 0;
+
+    private boolean detailsOpen = false;
+
     private Tab currentTab = Tab.STATUS;
 
     private enum Tab {
@@ -77,19 +115,37 @@ public class HeroScreen extends Screen {
         ULTIMATE
     }
 
-    private enum SettingRow {
-        HIDE_HUD("Hide HUD", "Hides the hero HUD and the skill slots.", 0xFF00FF88),
-        DISABLE_INTERVENTIONS(
-                "Disable interventions",
-                "Your hero will not step in to absorb the damage you take.",
-                0xFFFF5555
-        );
+    private enum SettingSection {
+        HERO("HERO"),
+        HUD("HUD");
 
+        private final String title;
+
+        SettingSection(String title) {
+            this.title = title;
+        }
+    }
+
+    private enum SettingRow {
+        DISABLE_INTERVENTIONS(SettingSection.HERO, "Disable interventions",
+                "Your hero will not step in to absorb the damage you take.", 0xFFFF5555),
+        HIDE_HUD(SettingSection.HUD, "Hide HUD", "Hides the hero HUD and the skill timers.", 0xFF00FF88),
+        HUD_CORNER(SettingSection.HUD, "HUD corner",
+                "Screen corner of the hero HUD. Right-click to go back.", 0),
+        HUD_OFFSET_X(SettingSection.HUD, "Horizontal offset",
+                "Distance of the hero HUD from its corner, in GUI pixels. Shift-click: 10 at a time.", 0),
+        HUD_OFFSET_Y(SettingSection.HUD, "Vertical offset",
+                "Distance of the hero HUD from its corner, in GUI pixels. Shift-click: 10 at a time.", 0),
+        SKILL_TIMERS(SettingSection.HUD, "Skill timers",
+                "Where the timers of running Command Seals and the Ultimate are shown. Right-click to go back.", 0);
+
+        private final SettingSection section;
         private final String label;
         private final String description;
         private final int color;
 
-        SettingRow(String label, String description, int color) {
+        SettingRow(SettingSection section, String label, String description, int color) {
+            this.section = section;
             this.label = label;
             this.description = description;
             this.color = color;
@@ -119,6 +175,18 @@ public class HeroScreen extends Screen {
         }
 
         this.previewEntity = entity;
+    }
+
+    @Override
+    public void tick() {
+        super.tick();
+
+        final Minecraft mc = Minecraft.getInstance();
+
+        if (currentTab == Tab.STATUS && mc.player != null && HeroData.get(mc.player).isSummoned()
+                && screenTicks++ % STATS_REQUEST_INTERVAL == 0) {
+            PacketDistributor.sendToServer(new RequestHeroStatsPacket());
+        }
     }
 
     @Override
@@ -163,14 +231,21 @@ public class HeroScreen extends Screen {
             case ULTIMATE -> "ULTIMATE";
         };
 
-        gui.drawCenteredString(this.font, title, this.width / 2, y + 10, 0xFFFFFF);
-        gui.fill(this.width / 2 - 30, y + 21, this.width / 2 + 30, y + 22, COLOR_SEPARATOR);
+        final int centerX = x + GUI_WIDTH / 2;
+
+        gui.drawCenteredString(this.font, title, centerX, y + 10, 0xFFFFFF);
+        gui.fill(centerX - 30, y + 21, centerX + 30, y + 22, COLOR_SEPARATOR);
 
         renderGear(gui, mouseX, mouseY);
         renderClose(gui, mouseX, mouseY);
 
         if (currentTab == Tab.STATUS) {
             renderStatusTab(gui, heroData, mouseX, mouseY, partialTick);
+            renderDetailsTab(gui, mouseX, mouseY);
+        }
+
+        if (detailsVisible()) {
+            renderDetails(gui, heroData, heroData.isSummoned() ? HeroLiveStats.current() : null);
         }
 
         if (currentTab == Tab.SETTINGS) {
@@ -244,6 +319,12 @@ public class HeroScreen extends Screen {
                 entity
         );
 
+        final HeroStatsPacket live = heroData.isSummoned() ? HeroLiveStats.current() : null;
+
+        if (live != null) {
+            renderEffects(gui, live.effects(), previewLeft + 2, previewTop + 2, mouseX, mouseY);
+        }
+
         final int previewCenterX = previewLeft + PREVIEW_WIDTH / 2;
 
         gui.drawCenteredString(this.font, definition.getName(), previewCenterX, previewTop + PREVIEW_HEIGHT + 8, 0xFFFFFF);
@@ -271,68 +352,59 @@ public class HeroScreen extends Screen {
         drawStat(gui, "XP", maxLevel ? "MAX" : currentXp + " / " + requiredXp, infoX, infoY, INFO_WIDTH, 0xFFFFFFFF);
         infoY += 20;
 
-        final double maxHealth = HeroStatsSystem.getMaxHealth(heroData);
+        final int level = heroData.getLevel();
+        final double baseMaxHealth = HeroStatsSystem.getMaxHealth(definition, level, 1.0);
+        final double maxHealth = live != null ? live.maxHealth() : HeroStatsSystem.getMaxHealth(heroData);
+        final double health = live != null ? live.health() : heroData.getHealth();
 
         drawStat(
                 gui,
                 "Health",
-                (int) heroData.getHealth() + " / " + (int) maxHealth,
+                (int) Math.ceil(health) + " / " + (int) Math.ceil(maxHealth),
                 infoX,
                 infoY,
                 INFO_WIDTH,
-                0xFFFFFFFF
+                statColor(maxHealth, baseMaxHealth)
         );
         infoY += 12;
-        drawBar(gui, infoX, infoY, INFO_WIDTH, 6, maxHealth > 0 ? (float) (heroData.getHealth() / maxHealth) : 0, COLOR_HEALTH);
+        drawBar(gui, infoX, infoY, INFO_WIDTH, 6, maxHealth > 0 ? (float) (health / maxHealth) : 0, COLOR_HEALTH);
         infoY += 16;
 
         gui.fill(infoX, infoY, infoX + INFO_WIDTH, infoY + 1, COLOR_SEPARATOR);
         infoY += 8;
 
+        final double baseAttack = HeroStatsSystem.getAttack(definition, level, 1.0);
+        final double attack = live != null ? live.attack() : HeroStatsSystem.getAttack(heroData);
+
         drawStat(
                 gui,
                 "Damage",
-                String.format(Locale.ROOT, "%.1f", HeroStatsSystem.getAttack(heroData)),
+                formatStat(attack, baseAttack),
                 infoX,
                 infoY,
                 INFO_WIDTH,
-                0xFFFFFFFF
+                statColor(attack, baseAttack)
         );
         infoY += 12;
+
+        final double baseArmor = HeroStatsSystem.getArmor(definition, level, 1.0);
+        final double armor = live != null ? live.armor() : HeroStatsSystem.getArmor(heroData);
 
         drawStat(
                 gui,
                 "Armor",
-                String.format(Locale.ROOT, "%.1f", HeroStatsSystem.getArmor(heroData)),
+                formatStat(armor, baseArmor),
                 infoX,
                 infoY,
                 INFO_WIDTH,
-                0xFFFFFFFF
+                statColor(armor, baseArmor)
         );
         infoY += 12;
 
-        drawStat(
-                gui,
-                "Dodge",
-                String.format(Locale.ROOT, "%.0f%%", HeroStatsSystem.getDodgeChance(heroData) * 100),
-                infoX,
-                infoY,
-                INFO_WIDTH,
-                0xFFFFFFFF
-        );
+        drawSpeed(gui, heroData, live, infoX, infoY, INFO_WIDTH);
         infoY += 12;
 
-        final int interventionsLeft = HeroStatsSystem.getMaxInterventions() - heroData.getInterventions();
-
-        drawStat(
-                gui,
-                "Interventions",
-                interventionsLeft + " / " + HeroStatsSystem.getMaxInterventions(),
-                infoX,
-                infoY,
-                INFO_WIDTH,
-                0xFFFFFFFF
-        );
+        drawResistance(gui, live, infoX, infoY, INFO_WIDTH);
 
         if (ultimate(heroData) != null) {
             drawButton(gui, "Ultimate  ›", ultimateButtonX(), ultimateButtonY(), INFO_WIDTH,
@@ -415,6 +487,221 @@ public class HeroScreen extends Screen {
         return String.format(Locale.ROOT, "%.0f + %.0f%% ATK (%.1f)", flat, attackPercent, damage);
     }
 
+    private void renderEffects(GuiGraphics gui, List<MobEffectInstance> effects, int x, int y, int mouseX, int mouseY) {
+
+        final Minecraft mc = Minecraft.getInstance();
+        final int perRow = (PREVIEW_WIDTH - 4) / (EFFECT_ICON_SIZE + 1);
+
+        for (int i = 0; i < effects.size(); i++) {
+            final MobEffectInstance effect = effects.get(i);
+            final int iconX = x + (i % perRow) * (EFFECT_ICON_SIZE + 1);
+            final int iconY = y + (i / perRow) * (EFFECT_ICON_SIZE + 1);
+            final TextureAtlasSprite sprite = mc.getMobEffectTextures().get(effect.getEffect());
+
+            gui.pose().pushPose();
+            gui.pose().translate(0, 0, 200);
+            gui.blit(iconX, iconY, 0, EFFECT_ICON_SIZE, EFFECT_ICON_SIZE, sprite);
+            gui.pose().popPose();
+
+            if (mouseX >= iconX && mouseX < iconX + EFFECT_ICON_SIZE
+                    && mouseY >= iconY && mouseY < iconY + EFFECT_ICON_SIZE) {
+                setTooltipForNextRenderPass(effectTooltip(mc, effect));
+            }
+        }
+    }
+
+    private void renderDetailsTab(GuiGraphics gui, int mouseX, int mouseY) {
+        final int tabX = detailsTabX();
+        final int tabY = detailsTabY();
+
+        gui.fill(tabX, tabY - 1, tabX + DETAILS_TAB_WIDTH + 1, tabY + DETAILS_TAB_HEIGHT + 1, COLOR_BORDER);
+        gui.fill(tabX, tabY, tabX + DETAILS_TAB_WIDTH, tabY + DETAILS_TAB_HEIGHT,
+                isOverDetailsTab(mouseX, mouseY) ? COLOR_BUTTON_HOVER : COLOR_PANEL);
+        gui.drawCenteredString(this.font, detailsOpen ? "‹" : "›", tabX + DETAILS_TAB_WIDTH / 2,
+                tabY + (DETAILS_TAB_HEIGHT - 8) / 2, COLOR_ACCENT);
+    }
+
+    private void renderDetails(GuiGraphics gui, HeroData heroData, @Nullable HeroStatsPacket live) {
+
+        final HeroDefinition definition = heroData.getHeroDefinition();
+
+        if (definition == null) {
+            return;
+        }
+
+        final int x = detailsX();
+        final int y = top();
+        final int innerX = x + 8;
+        final int innerWidth = DETAILS_WIDTH - 16;
+
+        gui.fill(x - 2, y - 2, x + DETAILS_WIDTH + 2, y + GUI_HEIGHT + 2, COLOR_BORDER);
+        gui.fill(x, y, x + DETAILS_WIDTH, y + GUI_HEIGHT, COLOR_PANEL);
+
+        gui.drawCenteredString(this.font, "DETAILS", x + DETAILS_WIDTH / 2, y + 10, 0xFFFFFF);
+        gui.fill(x + DETAILS_WIDTH / 2 - 24, y + 21, x + DETAILS_WIDTH / 2 + 24, y + 22, COLOR_SEPARATOR);
+
+        int rowY = y + 30;
+
+        final double baseKnockback = HeroStatsSystem.getKnockbackResistance(definition, 1.0);
+        final double knockback = live != null
+                ? live.knockbackResistance()
+                : HeroStatsSystem.getKnockbackResistance(heroData);
+
+        drawStat(gui, "Knockback res.", percent(knockback), innerX, rowY, innerWidth,
+                statColor(knockback * 100, baseKnockback * 100));
+        rowY += 12;
+
+        final double dodge = HeroStatsSystem.getDodgeChance(heroData);
+
+        drawStat(gui, "Dodge", percent(dodge), innerX, rowY, innerWidth,
+                statColor(dodge * 100, definition.getHeroClass().getDodgeChance() * 100));
+        rowY += 12;
+
+        final boolean spiritForm = heroData.isDefeated() || !heroData.isSummoned();
+        final double regen = spiritForm
+                ? HeroStatsSystem.getSpiritRegen(heroData)
+                : HeroStatsSystem.getSummonedRegen(heroData);
+
+        drawStat(gui, spiritForm ? "Spirit regen" : "Regen", String.format(Locale.ROOT, "%.2f HP/2s", regen),
+                innerX, rowY, innerWidth, 0xFFFFFFFF);
+        rowY += 12;
+
+        drawSealCharges(gui, innerX, rowY, innerWidth);
+        rowY += 12;
+
+        drawUltimateReady(gui, innerX, rowY, innerWidth);
+        rowY += 14;
+
+        gui.fill(innerX, rowY, innerX + innerWidth, rowY + 1, COLOR_SEPARATOR);
+        rowY += 6;
+
+        final HeroClass heroClass = definition.getHeroClass();
+
+        gui.drawCenteredString(this.font, heroClass.getDisplayName() + " class", x + DETAILS_WIDTH / 2, rowY, COLOR_RANK);
+        rowY += 13;
+
+        final int columnX = innerX + innerWidth / 2 + 4;
+
+        drawMultiplier(gui, "HP", heroClass.getHealthMultiplier(), innerX, rowY);
+        drawMultiplier(gui, "ATK", heroClass.getAttackMultiplier(), columnX, rowY);
+        rowY += 10;
+        drawMultiplier(gui, "DEF", heroClass.getArmorMultiplier(), innerX, rowY);
+        drawMultiplier(gui, "SPD", heroClass.getSpeedMultiplier(), columnX, rowY);
+        rowY += 14;
+
+        final List<String> strong = heroClass.strongAgainst().stream()
+                .map(id -> HeroClassRegistry.get(id).getDisplayName())
+                .sorted()
+                .toList();
+        final List<String> weak = HeroClassRegistry.getAll().values().stream()
+                .filter(heroClass::isWeakAgainst)
+                .map(HeroClass::getDisplayName)
+                .sorted(Comparator.naturalOrder())
+                .toList();
+
+        rowY = drawMatchup(gui, "Strong vs (+25%)", strong, COLOR_READY, innerX, rowY, innerWidth);
+        drawMatchup(gui, "Weak vs (-25%)", weak, COLOR_USED, innerX, rowY + 4, innerWidth);
+    }
+
+    private void drawSpeed(GuiGraphics gui, HeroData heroData, @Nullable HeroStatsPacket live, int x, int y, int width) {
+        final double baseSpeed = HeroStatsSystem.getSpeed(heroData.getHeroDefinition(), 1.0);
+        final double speed = live != null ? live.speed() : HeroStatsSystem.getSpeed(heroData);
+        final double speedRatio = baseSpeed > 0 ? speed / baseSpeed : 1;
+
+        drawStat(gui, "Speed", percent(speedRatio), x, y, width, statColor(speedRatio * 100, 100));
+    }
+
+    private void drawResistance(GuiGraphics gui, @Nullable HeroStatsPacket live, int x, int y, int width) {
+        final double resistance = live != null ? damageResistance(live.effects()) : 0;
+
+        drawStat(gui, "Resistance", percent(resistance), x, y, width, statColor(resistance * 100, 0));
+    }
+
+    private void drawSealCharges(GuiGraphics gui, int x, int y, int width) {
+        gui.drawString(this.font, "Seals", x, y, COLOR_LABEL);
+
+        if (SkillLimits.isUnlimited(minecraft.player)) {
+            gui.drawString(this.font, "∞", x + width - this.font.width("∞"), y, COLOR_CHARGE);
+            return;
+        }
+
+        final int charges = CommandSealData.get(minecraft.player).getCommandSealCharges();
+        final int glyphWidth = this.font.width(CHARGE_GLYPH) + 1;
+        int glyphX = x + width - CommandSealData.MAX_CHARGES * glyphWidth + 1;
+
+        for (int i = 0; i < CommandSealData.MAX_CHARGES; i++) {
+            gui.drawString(this.font, CHARGE_GLYPH, glyphX, y, i < charges ? COLOR_CHARGE : COLOR_CHARGE_EMPTY);
+            glyphX += glyphWidth;
+        }
+    }
+
+    private void drawUltimateReady(GuiGraphics gui, int x, int y, int width) {
+        final boolean usedToday = UltimateData.get(minecraft.player).wasUsedToday()
+                && !SkillLimits.isUnlimited(minecraft.player);
+
+        drawStat(gui, "Ultimate", usedToday ? "Used today" : "Ready", x, y, width, usedToday ? COLOR_USED : COLOR_READY);
+    }
+
+    private void drawMultiplier(GuiGraphics gui, String label, float value, int x, int y) {
+        gui.drawString(this.font, label, x, y, COLOR_LABEL);
+        gui.drawString(this.font, String.format(Locale.ROOT, "x%.2f", value), x + 24, y, statColor(value, 1.0));
+    }
+
+    private int drawMatchup(GuiGraphics gui, String label, List<String> classes, int color, int x, int y, int width) {
+        gui.drawString(this.font, label, x, y, color);
+        y += 10;
+
+        final String names = classes.isEmpty() ? "None" : String.join(", ", classes);
+
+        for (FormattedCharSequence line : this.font.split(Component.literal(names), width)) {
+            gui.drawString(this.font, line, x, y, 0xFFFFFFFF);
+            y += 10;
+        }
+
+        return y;
+    }
+
+    private static double damageResistance(List<MobEffectInstance> effects) {
+        return effects.stream()
+                .filter(effect -> effect.getEffect().is(MobEffects.DAMAGE_RESISTANCE))
+                .mapToDouble(effect -> Math.min(1.0, (effect.getAmplifier() + 1) * RESISTANCE_PER_LEVEL))
+                .max()
+                .orElse(0);
+    }
+
+    private static String percent(double ratio) {
+        return String.format(Locale.ROOT, "%.0f%%", ratio * 100);
+    }
+
+    private static Component effectTooltip(Minecraft mc, MobEffectInstance effect) {
+
+        final Component name = Component.translatable(effect.getDescriptionId());
+        final Component level = effect.getAmplifier() > 0
+                ? Component.literal(" ").append(Component.translatable("enchantment.level." + (effect.getAmplifier() + 1)))
+                : Component.empty();
+        final float tickRate = mc.level == null ? 20.0F : mc.level.tickRateManager().tickrate();
+
+        return Component.empty().append(name).append(level)
+                .append(" (").append(MobEffectUtil.formatDuration(effect, 1.0F, tickRate)).append(")");
+    }
+
+    private static String formatStat(double value, double base) {
+        final double bonus = value - base;
+
+        if (Math.abs(bonus) < STAT_EPSILON) {
+            return String.format(Locale.ROOT, "%.1f", value);
+        }
+
+        return String.format(Locale.ROOT, "%.1f (%+.1f)", value, bonus);
+    }
+
+    private static int statColor(double value, double base) {
+        if (value > base + STAT_EPSILON) return COLOR_READY;
+        if (value < base - STAT_EPSILON) return COLOR_USED;
+
+        return 0xFFFFFFFF;
+    }
+
     private static String formatSeconds(int ticks) {
         return ticks % 20 == 0
                 ? ticks / 20 + " s"
@@ -427,58 +714,165 @@ public class HeroScreen extends Screen {
 
     private void renderSettingsTab(GuiGraphics gui, HeroData heroData, int mouseX, int mouseY) {
 
-        final SettingRow[] rows = SettingRow.values();
+        final int rowX = left() + CONTENT_X;
+        SettingSection section = null;
 
-        for (int i = 0; i < rows.length; i++) {
-            final SettingRow row = rows[i];
-            final int rowX = left() + 14;
-            final int rowY = rowTop(i);
-            final int rowWidth = GUI_WIDTH - 28;
+        for (SettingRow row : SettingRow.values()) {
+            final int rowY = settingRowY(row);
 
-            final boolean hovered = isOverRow(i, mouseX, mouseY);
+            if (row.section != section) {
+                section = row.section;
+                gui.drawString(this.font, section.title, rowX, rowY - SETTING_HEADER_HEIGHT + 2, COLOR_ACCENT);
 
-            gui.fill(rowX, rowY, rowX + rowWidth, rowY + SETTING_ROW_HEIGHT - 4, hovered ? 0xFF353535 : COLOR_PREVIEW);
-
-            final int boxX = rowX + 8;
-            final int boxY = rowY + 6;
-
-            gui.fill(boxX - 1, boxY - 1, boxX + CHECKBOX_SIZE + 1, boxY + CHECKBOX_SIZE + 1, COLOR_SEPARATOR);
-            gui.fill(boxX, boxY, boxX + CHECKBOX_SIZE, boxY + CHECKBOX_SIZE, 0xFF111111);
-
-            if (isEnabled(heroData, row)) {
-                gui.fill(boxX + 2, boxY + 2, boxX + CHECKBOX_SIZE - 2, boxY + CHECKBOX_SIZE - 2, row.color);
+                if (section == SettingSection.HUD) {
+                    renderResetHud(gui, mouseX, mouseY);
+                }
             }
 
-            gui.drawString(this.font, row.label, boxX + CHECKBOX_SIZE + 8, boxY + 1, 0xFFFFFF);
+            final boolean hovered = isOverSettingRow(row, mouseX, mouseY);
 
-            final List<FormattedCharSequence> lines =
-                    this.font.split(Component.literal(row.description), rowWidth - CHECKBOX_SIZE - 32);
-            for (int line = 0; line < Math.min(lines.size(), 2); line++) {
-                gui.drawString(this.font, lines.get(line), boxX + CHECKBOX_SIZE + 8, boxY + 13 + line * 10, COLOR_LABEL);
+            gui.fill(rowX, rowY, rowX + CONTENT_WIDTH, rowY + SETTING_ROW_HEIGHT - 2,
+                    hovered ? COLOR_BUTTON_HOVER : COLOR_PREVIEW);
+            gui.drawString(this.font, row.label, rowX + 6, rowY + 3, 0xFFFFFF);
+
+            renderSettingControl(gui, heroData, row, rowX + CONTENT_WIDTH - 6, rowY + 2);
+
+            if (hovered) {
+                setTooltipForNextRenderPass(this.font.split(Component.literal(row.description), SETTING_TOOLTIP_WIDTH));
             }
         }
 
-        gui.drawCenteredString(
-                this.font,
-                "Click the gear to go back",
-                this.width / 2,
-                top() + GUI_HEIGHT - 16,
-                0x777777
-        );
+        drawDisabledButton(gui, "Other options", otherOptionsX(), otherOptionsY(), OTHER_OPTIONS_WIDTH);
+
+        if (isOverOtherOptions(mouseX, mouseY)) {
+            setTooltipForNextRenderPass(Component.literal("Coming soon"));
+        }
+
+        final String hint = "Click the gear to go back";
+        gui.drawString(this.font, hint, left() + GUI_WIDTH - CONTENT_X - this.font.width(hint),
+                otherOptionsY() + (BUTTON_HEIGHT - 8) / 2, 0x777777);
     }
 
-    private boolean isEnabled(HeroData heroData, SettingRow row) {
-        return switch (row) {
-            case HIDE_HUD -> heroData.isHiddenHud();
-            case DISABLE_INTERVENTIONS -> heroData.isSaveDisabled();
-        };
+    private void renderResetHud(GuiGraphics gui, int mouseX, int mouseY) {
+        final boolean hovered = isOverResetHud(mouseX, mouseY);
+
+        gui.drawString(this.font, RESET_HUD_LABEL, resetHudX(), resetHudY(), hovered ? 0xFFFFFF : COLOR_LABEL);
+
+        if (hovered) {
+            setTooltipForNextRenderPass(this.font.split(
+                    Component.literal("Puts the HUD corner, offsets and skill timers back to their defaults."),
+                    SETTING_TOOLTIP_WIDTH));
+        }
     }
 
-    private ToggleHeroSettingPacket.Setting packetSetting(SettingRow row) {
-        return switch (row) {
-            case HIDE_HUD -> ToggleHeroSettingPacket.Setting.HIDDEN_HUD;
-            case DISABLE_INTERVENTIONS -> ToggleHeroSettingPacket.Setting.SAVE_DISABLED;
-        };
+    private static void resetHud() {
+        AltheraClientConfig.HERO_HUD_CORNER.set(AltheraClientConfig.HERO_HUD_CORNER.getDefault());
+        AltheraClientConfig.HERO_HUD_OFFSET_X.set(AltheraClientConfig.HERO_HUD_OFFSET_X.getDefault());
+        AltheraClientConfig.HERO_HUD_OFFSET_Y.set(AltheraClientConfig.HERO_HUD_OFFSET_Y.getDefault());
+        AltheraClientConfig.SKILL_TIMERS_POSITION.set(AltheraClientConfig.SKILL_TIMERS_POSITION.getDefault());
+        AltheraClientConfig.SPEC.save();
+    }
+
+    private int resetHudX() {
+        return left() + CONTENT_X + CONTENT_WIDTH - 6 - this.font.width(RESET_HUD_LABEL);
+    }
+
+    private int resetHudY() {
+        return settingRowY(SettingRow.HIDE_HUD) - SETTING_HEADER_HEIGHT + 2;
+    }
+
+    private boolean isOverResetHud(double mouseX, double mouseY) {
+        return mouseX >= resetHudX() && mouseX < resetHudX() + this.font.width(RESET_HUD_LABEL)
+                && mouseY >= resetHudY() - 1 && mouseY < resetHudY() + 9;
+    }
+
+    private void renderSettingControl(GuiGraphics gui, HeroData heroData, SettingRow row, int right, int y) {
+        switch (row) {
+            case DISABLE_INTERVENTIONS -> drawCheckbox(gui, right, y, heroData.isSaveDisabled(), row.color);
+            case HIDE_HUD -> drawCheckbox(gui, right, y, heroData.isHiddenHud(), row.color);
+            case HUD_CORNER -> drawCycle(gui, right, y, AltheraClientConfig.HERO_HUD_CORNER.get().displayName());
+            case SKILL_TIMERS -> drawCycle(gui, right, y, AltheraClientConfig.SKILL_TIMERS_POSITION.get().displayName());
+            case HUD_OFFSET_X -> drawNumber(gui, right, y, AltheraClientConfig.HERO_HUD_OFFSET_X.get());
+            case HUD_OFFSET_Y -> drawNumber(gui, right, y, AltheraClientConfig.HERO_HUD_OFFSET_Y.get());
+        }
+    }
+
+    private void drawCheckbox(GuiGraphics gui, int right, int y, boolean checked, int color) {
+        final int boxX = right - CHECKBOX_SIZE;
+
+        gui.fill(boxX - 1, y - 1, right + 1, y + CHECKBOX_SIZE + 1, COLOR_SEPARATOR);
+        gui.fill(boxX, y, right, y + CHECKBOX_SIZE, 0xFF111111);
+
+        if (checked) {
+            gui.fill(boxX + 2, y + 2, right - 2, y + CHECKBOX_SIZE - 2, color);
+        }
+    }
+
+    private void drawCycle(GuiGraphics gui, int right, int y, String value) {
+        final String text = "‹ " + value + " ›";
+        gui.drawString(this.font, text, right - this.font.width(text), y + 1, COLOR_ACCENT);
+    }
+
+    private void drawNumber(GuiGraphics gui, int right, int y, int value) {
+        final int left = right - SETTING_NUMBER_WIDTH;
+
+        drawStepButton(gui, left, y, "-");
+        drawStepButton(gui, right - SETTING_STEP_SIZE, y, "+");
+        gui.drawCenteredString(this.font, String.valueOf(value), left + SETTING_NUMBER_WIDTH / 2, y + 1, 0xFFFFFF);
+    }
+
+    private void drawStepButton(GuiGraphics gui, int x, int y, String label) {
+        gui.fill(x, y, x + SETTING_STEP_SIZE, y + SETTING_STEP_SIZE, COLOR_SEPARATOR);
+        gui.drawCenteredString(this.font, label, x + SETTING_STEP_SIZE / 2 + 1, y + 1, 0xFFFFFF);
+    }
+
+    private boolean clickSetting(double mouseX, double mouseY, int button) {
+        for (SettingRow row : SettingRow.values()) {
+            if (!isOverSettingRow(row, mouseX, mouseY)) {
+                continue;
+            }
+
+            final int step = button == 1 ? -1 : 1;
+
+            switch (row) {
+                case DISABLE_INTERVENTIONS -> PacketDistributor.sendToServer(
+                        new ToggleHeroSettingPacket(ToggleHeroSettingPacket.Setting.SAVE_DISABLED));
+                case HIDE_HUD -> PacketDistributor.sendToServer(
+                        new ToggleHeroSettingPacket(ToggleHeroSettingPacket.Setting.HIDDEN_HUD));
+                case HUD_CORNER -> cycle(AltheraClientConfig.HERO_HUD_CORNER, step);
+                case SKILL_TIMERS -> cycle(AltheraClientConfig.SKILL_TIMERS_POSITION, step);
+                case HUD_OFFSET_X -> adjustOffset(AltheraClientConfig.HERO_HUD_OFFSET_X, mouseX);
+                case HUD_OFFSET_Y -> adjustOffset(AltheraClientConfig.HERO_HUD_OFFSET_Y, mouseX);
+            }
+
+            return true;
+        }
+
+        return false;
+    }
+
+    private static <T extends Enum<T>> void cycle(ModConfigSpec.EnumValue<T> value, int step) {
+        final T[] values = value.get().getDeclaringClass().getEnumConstants();
+        value.set(values[Math.floorMod(value.get().ordinal() + step, values.length)]);
+        AltheraClientConfig.SPEC.save();
+    }
+
+    private void adjustOffset(ModConfigSpec.IntValue value, double mouseX) {
+        final int right = left() + CONTENT_X + CONTENT_WIDTH - 6;
+        final int left = right - SETTING_NUMBER_WIDTH;
+        final int direction;
+
+        if (mouseX >= right - SETTING_STEP_SIZE && mouseX < right) {
+            direction = 1;
+        } else if (mouseX >= left && mouseX < left + SETTING_STEP_SIZE) {
+            direction = -1;
+        } else {
+            return;
+        }
+
+        final int amount = hasShiftDown() ? 10 : 1;
+        value.set(Mth.clamp(value.get() + direction * amount, 0, AltheraClientConfig.MAX_HUD_OFFSET));
+        AltheraClientConfig.SPEC.save();
     }
 
     // =========================================================
@@ -526,6 +920,12 @@ public class HeroScreen extends Screen {
         );
     }
 
+    private void drawDisabledButton(GuiGraphics gui, String label, int x, int y, int width) {
+        gui.fill(x - 1, y - 1, x + width + 1, y + BUTTON_HEIGHT + 1, COLOR_SEPARATOR);
+        gui.fill(x, y, x + width, y + BUTTON_HEIGHT, COLOR_BUTTON);
+        gui.drawCenteredString(this.font, label, x + width / 2, y + (BUTTON_HEIGHT - 8) / 2, 0x666666);
+    }
+
     private void drawButton(GuiGraphics gui, String label, int x, int y, int width, boolean hovered) {
         gui.fill(x - 1, y - 1, x + width + 1, y + BUTTON_HEIGHT + 1, COLOR_SEPARATOR);
         gui.fill(x, y, x + width, y + BUTTON_HEIGHT, hovered ? COLOR_BUTTON_HOVER : COLOR_BUTTON);
@@ -559,7 +959,28 @@ public class HeroScreen extends Screen {
     }
 
     private int left() {
-        return (this.width - GUI_WIDTH) / 2;
+        return (this.width - GUI_WIDTH - (detailsVisible() ? DETAILS_GAP + DETAILS_WIDTH : 0)) / 2;
+    }
+
+    private boolean detailsVisible() {
+        return detailsOpen && currentTab == Tab.STATUS;
+    }
+
+    private int detailsX() {
+        return left() + GUI_WIDTH + DETAILS_GAP;
+    }
+
+    private int detailsTabX() {
+        return left() + GUI_WIDTH + 1;
+    }
+
+    private int detailsTabY() {
+        return top() + (GUI_HEIGHT - DETAILS_TAB_HEIGHT) / 2;
+    }
+
+    private boolean isOverDetailsTab(double mouseX, double mouseY) {
+        return mouseX >= detailsTabX() && mouseX < detailsTabX() + DETAILS_TAB_WIDTH
+                && mouseY >= detailsTabY() && mouseY < detailsTabY() + DETAILS_TAB_HEIGHT;
     }
 
     private int top() {
@@ -587,21 +1008,51 @@ public class HeroScreen extends Screen {
                 && mouseY >= closeY() && mouseY <= closeY() + 12;
     }
 
-    private int rowTop(int index) {
-        return top() + 34 + index * SETTING_ROW_HEIGHT;
+    private int settingRowY(SettingRow target) {
+        int y = top() + 30;
+        SettingSection section = null;
+
+        for (SettingRow row : SettingRow.values()) {
+            if (row.section != section) {
+                section = row.section;
+                y += SETTING_HEADER_HEIGHT;
+            }
+
+            if (row == target) {
+                return y;
+            }
+
+            y += SETTING_ROW_HEIGHT;
+        }
+
+        return y;
     }
+
+    private boolean isOverOtherOptions(double mouseX, double mouseY) {
+        return mouseX >= otherOptionsX() && mouseX < otherOptionsX() + OTHER_OPTIONS_WIDTH
+                && mouseY >= otherOptionsY() && mouseY < otherOptionsY() + BUTTON_HEIGHT;
+    }
+
+    private int otherOptionsX() {
+        return left() + CONTENT_X;
+    }
+
+    private int otherOptionsY() {
+        return top() + GUI_HEIGHT - BUTTON_HEIGHT - 8;
+    }
+
 
     private boolean isOverGear(double mouseX, double mouseY) {
         return mouseX >= gearX() && mouseX <= gearX() + 16
                 && mouseY >= gearY() && mouseY <= gearY() + 16;
     }
 
-    private boolean isOverRow(int index, double mouseX, double mouseY) {
-        final int rowX = left() + 14;
-        final int rowY = rowTop(index);
+    private boolean isOverSettingRow(SettingRow row, double mouseX, double mouseY) {
+        final int rowX = left() + CONTENT_X;
+        final int rowY = settingRowY(row);
 
-        return mouseX >= rowX && mouseX <= rowX + GUI_WIDTH - 28
-                && mouseY >= rowY && mouseY <= rowY + SETTING_ROW_HEIGHT - 4;
+        return mouseX >= rowX && mouseX < rowX + CONTENT_WIDTH
+                && mouseY >= rowY && mouseY < rowY + SETTING_ROW_HEIGHT - 2;
     }
 
     // =========================================================
@@ -613,6 +1064,11 @@ public class HeroScreen extends Screen {
 
         if (isOverClose(mouseX, mouseY)) {
             this.onClose();
+            return true;
+        }
+
+        if (currentTab == Tab.STATUS && isOverDetailsTab(mouseX, mouseY)) {
+            detailsOpen = !detailsOpen;
             return true;
         }
 
@@ -638,13 +1094,13 @@ public class HeroScreen extends Screen {
         }
 
         if (currentTab == Tab.SETTINGS) {
-            final SettingRow[] rows = SettingRow.values();
+            if (isOverResetHud(mouseX, mouseY)) {
+                resetHud();
+                return true;
+            }
 
-            for (int i = 0; i < rows.length; i++) {
-                if (isOverRow(i, mouseX, mouseY)) {
-                    PacketDistributor.sendToServer(new ToggleHeroSettingPacket(packetSetting(rows[i])));
-                    return true;
-                }
+            if (clickSetting(mouseX, mouseY, button)) {
+                return true;
             }
         }
 

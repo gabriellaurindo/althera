@@ -1,6 +1,5 @@
 package com.darksune.althera.client.input;
 
-import com.darksune.althera.Althera;
 import com.darksune.althera.client.screen.HeroScreen;
 import com.darksune.althera.client.screen.HeroSelectionOpener;
 import com.darksune.althera.client.screen.SealWheelScreen;
@@ -21,8 +20,6 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.fml.ModList;
-import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 
 public class KeyActions {
 
@@ -44,14 +41,6 @@ public class KeyActions {
         } else {
             mc.setScreen(null);
         }
-    }
-
-    public static void handleConfig() {
-        Minecraft mc = Minecraft.getInstance();
-        if (mc.screen != null) return;
-
-        ModList.get().getModContainerById(Althera.MOD_ID)
-                .ifPresent(container -> mc.setScreen(new ConfigurationScreen(container, null)));
     }
 
     public static void handleSealWheel() {

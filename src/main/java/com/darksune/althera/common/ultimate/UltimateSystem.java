@@ -4,6 +4,7 @@ import com.darksune.althera.common.attachment.ManaData;
 import com.darksune.althera.common.entity.HeroEntity;
 import com.darksune.althera.common.hero.HeroDefinition;
 import com.darksune.althera.common.skill.SkillEndReason;
+import com.darksune.althera.common.skill.SkillLimits;
 import com.darksune.althera.common.skill.SkillTimers;
 import com.darksune.althera.common.system.HeroSummonSystem;
 import com.darksune.althera.common.system.SealTattooSystem;
@@ -51,12 +52,14 @@ public class UltimateSystem {
             return;
         }
 
-        if (ultimateData.wasUsedToday()) {
+        final boolean unlimited = SkillLimits.isUnlimited(player);
+
+        if (!unlimited && ultimateData.wasUsedToday()) {
             player.sendSystemMessage(Component.literal("§eUltimate already used today. It recharges at the start of a new day."));
             return;
         }
 
-        if (ultimateData.isSkillOnCooldown(ultimateId)) {
+        if (!unlimited && ultimateData.isSkillOnCooldown(ultimateId)) {
             player.sendSystemMessage(Component.literal("Ultimate on cooldown"));
             return;
         }
@@ -71,9 +74,10 @@ public class UltimateSystem {
 
         data.activateSkill(ultimateId, ultimate.channelTicks());
 
-        data.markUsedToday();
-
-        data.startSkillCooldown(ultimateId, ultimate.cooldownTicks());
+        if (!SkillLimits.isUnlimited(player)) {
+            data.markUsedToday();
+            data.startSkillCooldown(ultimateId, ultimate.cooldownTicks());
+        }
 
         ultimate.start(UltimateContext.of(player, heroEntity));
 

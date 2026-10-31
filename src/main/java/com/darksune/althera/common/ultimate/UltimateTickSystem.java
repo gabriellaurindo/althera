@@ -3,7 +3,10 @@ package com.darksune.althera.common.ultimate;
 import com.darksune.althera.Althera;
 import com.darksune.althera.common.entity.HeroEntity;
 import com.darksune.althera.common.system.HeroSummonSystem;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.level.Level;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -52,6 +55,11 @@ public class UltimateTickSystem {
         }
 
         data.setLastUltimateResetDay(currentDay);
+
+        if (data.wasUsedToday()) {
+            player.sendSystemMessage(Component.literal("§6Your hero's Ultimate is ready again."));
+            player.playNotifySound(SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.8F, 1.4F);
+        }
 
         data.resetDaily();
     }

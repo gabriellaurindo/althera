@@ -23,6 +23,8 @@ public class HeroDefinition {
     private final HeroAttack attack;
     private final HeroAnimation animation;
     private final HeroStats stats;
+    private final HeroSounds sounds;
+    private final HeroHitbox hitbox;
 
     public HeroDefinition(
             ResourceLocation id,
@@ -39,7 +41,9 @@ public class HeroDefinition {
             ResourceLocation ultimate,
             HeroAttack attack,
             HeroAnimation animation,
-            HeroStats stats
+            HeroStats stats,
+            HeroSounds sounds,
+            HeroHitbox hitbox
     ) {
         this.id = id;
         this.name = name;
@@ -56,6 +60,8 @@ public class HeroDefinition {
         this.attack = attack;
         this.animation = animation;
         this.stats = stats;
+        this.sounds = sounds;
+        this.hitbox = hitbox;
     }
 
     public ResourceLocation getId() {
@@ -120,6 +126,14 @@ public class HeroDefinition {
 
     public HeroStats getStats() {
         return stats;
+    }
+
+    public HeroSounds getSounds() {
+        return sounds;
+    }
+
+    public HeroHitbox getHitbox() {
+        return hitbox;
     }
 
     public boolean isRollable() {

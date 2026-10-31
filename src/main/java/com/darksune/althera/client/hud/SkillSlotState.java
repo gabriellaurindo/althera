@@ -6,6 +6,7 @@ import com.darksune.althera.common.commandseal.CommandSealData;
 import com.darksune.althera.common.commandseal.skill.CommandSealSkillType;
 import com.darksune.althera.common.commandseal.skill.ICommandSealSkill;
 import com.darksune.althera.common.hero.HeroDefinition;
+import com.darksune.althera.common.skill.SkillLimits;
 import com.darksune.althera.common.ultimate.UltimateData;
 import com.darksune.althera.common.ultimate.UltimateDefinition;
 import com.darksune.althera.common.ultimate.UltimateRegistry;
@@ -36,14 +37,14 @@ public record SkillSlotState(int timerTicks, int totalTicks, boolean active, @Nu
 
         return of(data.getActiveSkills().get(type), skill.getDurationTicks(),
                 data.getCooldownSkills().get(type), skill.getCooldownTicks(),
-                sealBlocker(type, skill, heroData, data, mana(player)), false);
+                sealBlocker(type, skill, heroData, data, mana(player), SkillLimits.isUnlimited(player)), false);
     }
 
     public static SkillSlotState ultimate(Player player) {
 
         HeroData heroData = HeroData.get(player);
         UltimateData data = UltimateData.get(player);
-        boolean usedToday = data.wasUsedToday();
+        boolean usedToday = data.wasUsedToday() && !SkillLimits.isUnlimited(player);
         UltimateDefinition ultimate = ultimateOf(player);
 
         if (ultimate == null) {
@@ -69,11 +70,11 @@ public record SkillSlotState(int timerTicks, int totalTicks, boolean active, @Nu
 
     @Nullable
     private static String sealBlocker(CommandSealSkillType type, ICommandSealSkill skill, HeroData heroData,
-                                      CommandSealData data, int mana) {
+                                      CommandSealData data, int mana, boolean unlimited) {
 
         if (type.requiresHeroEntity() && !heroData.isSummoned()) return "Summon your hero";
         if (!type.requiresHeroEntity() && heroData.isSummoned()) return "Hero must be away";
-        if (!data.hasCharges()) return "No charges";
+        if (!unlimited && !data.hasCharges()) return "No charges";
         if (mana < skill.getManaCost()) return "Not enough mana";
 
         return skill.unavailableReason(heroData);

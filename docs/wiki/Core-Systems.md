@@ -48,6 +48,19 @@ crowds of mobs from pushing a Hero away from its target. Dodging avoids the whol
 dodged), and a dodge during an intervention still protects you. The hero screen (**G**) shows your Hero's dodge
 chance.
 
+While your Hero is summoned, the hero screen shows its stats as they are right now: current health, damage and armor
+including buffs and debuffs (Overdrive, potions thrown at it, Weakness...). A stat above its normal value is
+**green** with the bonus in brackets, one below it is **red**. The effects on your Hero appear as icons in the corner
+of its portrait; hover one to see its name, level and time left.
+
+The status also shows its speed (100% = normal) and damage resistance (20% per Resistance level, e.g. from
+Overdrive).
+
+Click the arrow on the right edge of the hero screen to open the **details panel**: knockback resistance, dodge
+chance, health regained every 2 seconds (higher in spirit form, while not summoned or defeated), Command Seal charges
+left today and whether the Ultimate is ready, then the class multipliers (HP, ATK, DEF, SPD) and the classes your
+Hero is strong (+25% damage) and weak (-25%) against.
+
 Classes matter when Heroes fight each other: every class beats two classes and loses to two, dealing **+25%** damage
 to the classes it beats (with a burst of crits) and **−25%** to the ones that beat it:
 
@@ -137,13 +150,25 @@ Mana is the primary resource used to maintain your Hero while summoned.
 This system creates a balance between combat power and resource management.
 
 In **Creative** mode mana is infinite: summoning, keeping the Hero out, Command Seals and the Ultimate cost nothing,
-and the mana bar shows **∞**.
+and the mana bar shows **∞**. Command Seals and the Ultimate are unlimited too: no charges used, no cooldown and no
+once-per-day limit.
 
 The **Hero HUD** in the top-left corner shows your hero's face and level, its health, your mana bar and the
 interventions left (green diamonds). The face is dimmed while the hero is not summoned and turns red when it is
-defeated. The Hero HUD is hidden with **F1**; its hero part can also be hidden in the hero screen settings.
-Its corner (top/bottom, left/right) and distance from it can be changed in the client config: **Mods > Althera >
-Config**, the **Open Config** key (unbound by default, set it in Controls) or `config/althera-client.toml`.
+defeated. The Hero HUD is hidden with **F1**.
+
+### ⚙️ Settings
+
+Click the gear in the hero screen (**G**) to change:
+
+- **Hero**: Disable interventions (saved per world)
+- **HUD**: Hide HUD, HUD corner, horizontal and vertical offset from that corner (shift-click for steps of 10) and
+  where the skill timers go (next to the crosshair or under the Hero HUD)
+
+Corner and timers cycle with a click (right-click goes back). Hover a setting to see what it does. **Reset**, next
+to the HUD title, puts the corner, offsets and timers back to their defaults. The HUD options
+are saved in `config/althera-client.toml`. **Other options** is disabled for now; it is
+reserved for future options. The NeoForge config screen (**Mods > Althera > Config**) is empty for the same reason.
 
 ---
 
@@ -189,8 +214,8 @@ as usual.
 While disguised, the Hero appears as a hooded figure with a shadowed face:
 
 - Loses **half of its base health, attack and armor**, but keeps everything it gained from levels: a high-level
-  Hero stays strong while disguised (roughly, it still beats the same Hero 8 to 10 levels below it)
-- **50%** of its speed, knockback resistance and dodge chance
+  Hero stays strong while disguised (roughly, it still beats the same Hero 5 to 6 levels below it)
+- **75%** of its speed and **50%** of its knockback resistance and dodge chance
 - Costs only **¼ of the mana** to summon and keep summoned
 - Can't use its **Ultimate** (it can't be disguised while channeling one either)
 - Keeps its melee or ranged attack, but without its signature effects (ranged attacks leave a plain smoke trail)

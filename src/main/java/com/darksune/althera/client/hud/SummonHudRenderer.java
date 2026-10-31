@@ -4,12 +4,17 @@ import com.darksune.althera.Althera;
 import com.darksune.althera.common.attachment.HeroData;
 import com.darksune.althera.common.entity.AltheraEntities;
 import com.darksune.althera.common.entity.HeroEntity;
+import com.darksune.althera.common.skill.SkillLimits;
 import com.darksune.althera.common.system.HeroStatsSystem;
+import com.darksune.althera.common.ultimate.UltimateData;
+import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -43,6 +48,11 @@ public final class SummonHudRenderer {
     private static final int COLOR_DIM = 0x66000000;
     private static final int COLOR_DEFEATED = 0xAA3A0000;
 
+    private static final ItemStack ULTIMATE_ICON = new ItemStack(Items.GOLDEN_SWORD);
+    private static final float ULTIMATE_USED_BRIGHTNESS = 0.35F;
+    private static final float ULTIMATE_USED_ALPHA = 0.6F;
+    private static final float ULTIMATE_ROTATION = 135.0F;
+
     @Nullable
     private static HeroEntity portrait;
     @Nullable
@@ -64,6 +74,21 @@ public final class SummonHudRenderer {
         renderPortraitFrame(gui, mc, heroData, layout);
         renderHealth(gui, mc, heroData, layout);
         renderInterventions(gui, heroData, layout);
+        renderUltimate(gui, mc, layout);
+    }
+
+    private static void renderUltimate(final GuiGraphics gui, final Minecraft mc, final HeroHudLayout layout) {
+        final boolean usedToday = UltimateData.get(mc.player).wasUsedToday() && !SkillLimits.isUnlimited(mc.player);
+
+        final float half = HudIcons.ITEM_SIZE / 2.0F;
+
+        gui.pose().pushPose();
+        gui.pose().translate(layout.ultimateX() + half, layout.ultimateY() + half, 0);
+        gui.pose().mulPose(Axis.ZP.rotationDegrees(ULTIMATE_ROTATION));
+        gui.pose().translate(-half, -half, 0);
+        HudIcons.renderItem(gui, ULTIMATE_ICON, 0, 0,
+                usedToday ? ULTIMATE_USED_BRIGHTNESS : 1.0F, usedToday ? ULTIMATE_USED_ALPHA : 1.0F);
+        gui.pose().popPose();
     }
 
     private static void renderPortraitFrame(final GuiGraphics gui, final Minecraft mc, final HeroData heroData,
