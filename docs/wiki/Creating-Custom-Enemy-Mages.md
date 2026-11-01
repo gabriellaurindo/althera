@@ -103,7 +103,9 @@ If no Hero matches, the mage fights alone.
 
 One tier is picked at random when the mage appears. `level` is its Hero's level and `texture` is the mage's skin: a
 64 x 64 player skin (same layout as a Minecraft skin). The optional `loot_table` is what that tier drops, so tougher
-tiers can give better rewards; without it the mage's own `loot_table` is used.
+tiers can give better rewards; without it the mage's own `loot_table` is used. The optional `servant_ranks` (for
+example `["S"]`) replaces `servant.ranks` for that tier, so weaker tiers can serve lower-ranked Heroes; it is ignored
+when `servant.heroes` is set.
 
 A kill by a player's Hero counts as a kill by that player, so loot tables can use the vanilla
 `minecraft:killed_by_player` condition (the Noble's do) to stop iron golem or other mob farms.

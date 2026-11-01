@@ -32,9 +32,9 @@ public record EnemyMageDefinition(
     );
 
     public static final List<Tier> DEFAULT_TIERS = List.of(
-            new Tier(20, texture("noble_mage_green"), Optional.empty()),
-            new Tier(30, texture("noble_mage_yellow"), Optional.empty()),
-            new Tier(40, texture("noble_mage_red"), Optional.empty())
+            new Tier(20, texture("noble_mage_green"), Optional.empty(), Optional.empty()),
+            new Tier(30, texture("noble_mage_yellow"), Optional.empty(), Optional.empty()),
+            new Tier(40, texture("noble_mage_red"), Optional.empty(), Optional.empty())
     );
 
     public static final Codec<EnemyMageDefinition> CODEC = RecordCodecBuilder.create(instance -> instance.group(
@@ -114,12 +114,14 @@ public record EnemyMageDefinition(
         ).apply(instance, Servant::new));
     }
 
-    public record Tier(int level, ResourceLocation texture, Optional<ResourceLocation> lootTable) {
+    public record Tier(int level, ResourceLocation texture, Optional<ResourceLocation> lootTable,
+                       Optional<List<HeroRank>> servantRanks) {
 
         public static final Codec<Tier> CODEC = RecordCodecBuilder.create(instance -> instance.group(
                 ExtraCodecs.POSITIVE_INT.fieldOf("level").forGetter(Tier::level),
                 ResourceLocation.CODEC.fieldOf("texture").forGetter(Tier::texture),
-                ResourceLocation.CODEC.optionalFieldOf("loot_table").forGetter(Tier::lootTable)
+                ResourceLocation.CODEC.optionalFieldOf("loot_table").forGetter(Tier::lootTable),
+                HeroRank.CODEC.listOf().optionalFieldOf("servant_ranks").forGetter(Tier::servantRanks)
         ).apply(instance, Tier::new));
     }
 

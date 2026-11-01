@@ -6,6 +6,17 @@ and generates the GitHub Release, CurseForge and Discord notes from it.
 
 ## [Unreleased]
 
+### Added
+- **New Hero: Irisa** (rank S, Shielder): a stalwart shield maiden in silver armor with a violet tower shield. Her
+  shield bash knocks enemies back, and her Ultimate, **Aegis Dome**, raises a translucent blue dome around her while
+  her giant shield floats overhead: enemies within 5 blocks are pushed out, and she and you gain Resistance II and
+  Absorption II for 10 seconds. She can be picked on the Choose your Hero screen and rolled by the ritual.
+- **Hero Catalyst** drops from Nobles (yellow) too, on top of their diamonds.
+
+### Changed
+- **Nobles' Heroes**: green and yellow Nobles now serve an **S-rank** Hero (today Irisa); only red High Nobles keep an
+  EX Hero.
+
 ## [4.3.0] - 2026-11-03 - Ritual Rework (feature)
 
 ### Added
