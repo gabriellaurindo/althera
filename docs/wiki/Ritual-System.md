@@ -72,8 +72,8 @@ for future ingredients.
 
 ## 💠 Hero Catalyst
 
-Catalysts are dropped by **High Nobles** (red robe, see [Nobles](Nobles#-reward)): each one holds the **class and
-rank** of the Hero that served the Noble.
+Catalysts are dropped by yellow and red Nobles (see [Nobles](Nobles#-reward)): each one holds the **class and
+rank** of the Hero that served the Noble (S from a yellow Noble, EX from a red one).
 
 - Its name shows the class ("Saber Catalyst") in the rank's colour, and its tooltip the rank.
 - Each class has its own icon.

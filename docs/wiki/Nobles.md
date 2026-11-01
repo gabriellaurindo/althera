@@ -37,13 +37,13 @@ his shrine and casts at you from there while you are within his spell's range. A
 
 ## 👻 His Hero
 
-Every Noble is bound to a random **EX** Hero of **level 20, 30 or 40**. His robe shows which:
+Every Noble is bound to a random Hero. His robe shows its rank and level:
 
-| Robe | Hero level |
-|---|---|
-| 🟩 Green | 20 |
-| 🟨 Yellow | 30 |
-| 🟥 Red | 40 |
+| Robe | Hero rank | Hero level |
+|---|---|---|
+| 🟩 Green | S | 20 |
+| 🟨 Yellow | S | 30 |
+| 🟥 Red | EX | 40 |
 
 - While the Noble has no target, his Hero waits beside him in **spirit form** (a small light at his side) and slowly
   recovers health.
@@ -81,11 +81,12 @@ A Noble slain by a player or a player's Hero drops a reward that grows with his 
 | Robe | Drop |
 |---|---|
 | 🟩 Green | 1 diamond |
-| 🟨 Yellow | 3-4 diamonds |
+| 🟨 Yellow | 3-4 diamonds + 1 [Hero Catalyst](Ritual-System#-hero-catalyst) |
 | 🟥 Red | 1 diamond block + 1 [Hero Catalyst](Ritual-System#-hero-catalyst) |
 
-The **Hero Catalyst** holds the class and rank of the Hero that served the Noble. Offered to the
-[ritual](Ritual-System) next to a diamond block, it gives you a Hero of that class and rank.
+The **Hero Catalyst** holds the class and rank of the Hero that served the Noble (rank S from a yellow Noble, EX from
+a red one). Offered to the [ritual](Ritual-System) next to a diamond block, it gives you a Hero of that class and
+rank.
 
 Nobles killed by anything else (iron golems, other mobs, lava...) drop nothing.
 

@@ -7,8 +7,12 @@ and generates the GitHub Release, CurseForge and Discord notes from it.
 ## [Unreleased]
 
 ### Added
+- **New Hero: Irisa** (rank S, Shielder): a stalwart shield maiden in silver armor with a violet tower shield. Her
+  shield bash knocks enemies back, and her Ultimate, **Aegis Dome**, raises a translucent blue dome around her while
+  her giant shield floats overhead: enemies within 5 blocks are pushed out, and she and you gain Resistance II and
+  Absorption II for 10 seconds. She can be picked on the Choose your Hero screen and rolled by the ritual.
 - **Hero Catalyst**: High Nobles (red) now also drop a catalyst holding the **class and rank** of the Hero that
-  served them, on top of their diamond block. Its name shows the class ("Saber Catalyst") in the rank's colour and its
+  served them, on top of their diamond block, and Nobles (yellow) drop one too, on top of their diamonds. Its name shows the class ("Saber Catalyst") in the rank's colour and its
   tooltip the rank; each class has its own icon. A catalyst whose class no longer exists (removed datapack) turns into
   a **Faded Catalyst**. Offered to the ritual next to the diamond block, it guarantees a Hero of **that class and
   rank** (which Hero of them is still random).
@@ -19,6 +23,8 @@ and generates the GitHub Release, CurseForge and Discord notes from it.
   four deepslate blocks (polished, bricks or tiles), two gold ingots and an amethyst shard. It offers the ritual its ingredients.
 
 ### Changed
+- **Nobles' Heroes**: green and yellow Nobles now serve an **S-rank** Hero (today Irisa); only red High Nobles keep an
+  EX Hero.
 - **Ritual rework**: the Ritual Core now draws a glowing **summoning circle** on the ground around it. Place a
   **Ritual Pedestal** on each of its four points (two blocks away from the core, one on each side) and keep the rest
   of the circle clear: each point lights up once it holds a pedestal, and the whole circle glows and pulses when the

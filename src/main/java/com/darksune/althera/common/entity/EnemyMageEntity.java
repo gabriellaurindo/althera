@@ -6,6 +6,7 @@ import com.darksune.althera.common.commandseal.skill.OverdriveCommandSealSkill;
 import com.darksune.althera.common.enemy.EnemyMageDefinition;
 import com.darksune.althera.common.enemy.EnemyMageRegistry;
 import com.darksune.althera.common.hero.HeroDefinition;
+import com.darksune.althera.common.hero.HeroRank;
 import com.darksune.althera.common.hero.HeroRegistry;
 import com.darksune.althera.common.spell.SpellDefinition;
 import com.darksune.althera.common.spell.SpellRegistry;
@@ -197,29 +198,32 @@ public class EnemyMageEntity extends CasterMob implements Enemy, HeroSummoner {
                                         @Nullable SpawnGroupData spawnGroupData) {
         final EnemyMageDefinition definition = getDefinition();
         if (definition != null) {
-            final List<HeroDefinition> candidates = getServantCandidates(definition.servant());
+            final List<EnemyMageDefinition.Tier> tiers = definition.tiers();
+            final EnemyMageDefinition.Tier tier = tiers.get(random.nextInt(tiers.size()));
+            setServantLevel(tier.level());
+            final List<HeroDefinition> candidates = getServantCandidates(definition.servant(), tier);
             if (candidates.isEmpty()) {
                 servantFallen = true;
             } else {
                 servantHeroId = candidates.get(random.nextInt(candidates.size())).getId();
             }
-            final List<EnemyMageDefinition.Tier> tiers = definition.tiers();
-            setServantLevel(tiers.get(random.nextInt(tiers.size())).level());
             spellId = definition.spells().get(random.nextInt(definition.spells().size()));
             applyStats(definition);
         }
         return super.finalizeSpawn(level, difficulty, spawnType, spawnGroupData);
     }
 
-    private static List<HeroDefinition> getServantCandidates(final EnemyMageDefinition.Servant servant) {
+    private static List<HeroDefinition> getServantCandidates(final EnemyMageDefinition.Servant servant,
+                                                             final EnemyMageDefinition.Tier tier) {
         if (!servant.heroes().isEmpty()) {
             return servant.heroes().stream()
                     .map(HeroRegistry::get)
                     .filter(hero -> hero != null && hero.isRollable())
                     .toList();
         }
+        final List<HeroRank> ranks = tier.servantRanks().orElse(servant.ranks());
         return HeroRegistry.getRollable().stream()
-                .filter(hero -> servant.ranks().contains(hero.getRank()))
+                .filter(hero -> ranks.contains(hero.getRank()))
                 .toList();
     }
 
