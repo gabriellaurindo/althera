@@ -130,7 +130,7 @@ Fully restores the summoned Hero's health.
 ## 💥 Ultimates
 
 Ultimates are the Hero's strongest abilities. Each Hero has its own Ultimate (**U**): Aria and Zaya use Explosion,
-Clare uses Crimson Requiem and Valka uses Tempest Charge. To see how your Hero's Ultimate works, open the hero screen (**G**) and click
+Clare uses Crimson Requiem, Valka uses Tempest Charge and Irisa uses Aegis Dome. To see how your Hero's Ultimate works, open the hero screen (**G**) and click
 **Ultimate**: it shows its name, key, mana cost, channel time, whether it is ready today and a short description.
 Datapacks can create new ones: see [Creating Custom Ultimates](Creating-Custom-Ultimates).
 
@@ -187,6 +187,21 @@ towards where **you** are looking (aim while she charges up), stopping before wa
 - Leaves a teal trail behind her
 
 If Valka is defeated or dismissed while channeling, the attack is cancelled.
+
+---
+
+### 🛡 Aegis Dome (Irisa)
+
+| Key | Mana | Requires summoned Hero |
+|---|---|---|
+| **U** | 200 | Yes |
+
+Irisa hurls her shield into the air and channels for about **1 second**, then raises a translucent blue dome around
+her while her giant shield floats overhead:
+- Pushes every enemy within **5 blocks** out of the dome (no damage)
+- Gives Irisa and you **Resistance II** and **Absorption II** for 10 seconds
+
+If Irisa is defeated or dismissed while channeling, the dome is cancelled.
 
 ---
 

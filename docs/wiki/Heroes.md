@@ -1,6 +1,6 @@
 # Heroes
 
-Every hero you can summon in Althera (4 today). Pick your first one on the **Choose your Hero** screen; the [Ritual System](Ritual-System) swaps it for another later.
+Every hero you can summon in Althera (5 today). Pick your first one on the **Choose your Hero** screen; the [Ritual System](Ritual-System) swaps it for another later.
 
 Classes follow a cycle: each one is strong against two others (+25% damage) and weak against two (-25%). See [Core Systems](Core-Systems) and [Command Seals & Ultimates](Command-Seals-and-Ultimates).
 
@@ -47,6 +47,25 @@ Classes follow a cycle: each one is strong against two others (+25% damage) and 
 **⚔️ Signature attack:** **Wither**: every hit inflicts Wither I for 3 seconds.
 
 **💥 Ultimate: Crimson Requiem**: Clare stands still over a crimson mist for 1.5 seconds, then dashes 8 blocks towards where you are looking, stopping before walls. Everything in her path takes heavy damage and Wither II. Aim while she channels.
+
+---
+
+## Irisa
+
+*A stalwart shield maiden who plants her tower shield and lets nothing past.*
+
+| | |
+|---|---|
+| **Rarity** | S |
+| **Class** | Shielder |
+| **Strong against** | Archer, Assassin |
+| **Weak against** | Caster, Lancer |
+| **Combat style** | Melee |
+| **Personality** | Calm and unyielding |
+
+**⚔️ Signature attack:** **Shield Bash**: every bash knocks her target back.
+
+**💥 Ultimate: Aegis Dome**: Irisa hurls her shield into the air for about 1 second, then raises a blue dome around her: every enemy within 5 blocks is pushed out, and she and you gain Resistance II and Absorption II for 10 seconds.
 
 ---
 

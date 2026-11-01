@@ -1,0 +1,27 @@
+{
+  "name": "Aegis Dome",
+  "description": "Irisa hurls her shield into the air for about 1 second, then raises a blue dome around her: every enemy within 5 blocks is pushed out, and she and you gain Resistance II and Absorption II for 10 seconds.",
+  "mana_cost": 200,
+  "channel_ticks": 23,
+  "cooldown_ticks": 20,
+  "on_start": [
+    { "type": "ultimate_animation" },
+    { "type": "mob_effect", "target": "self", "effect": "minecraft:slowness", "duration": 52, "amplifier": 4, "show_particles": false },
+    { "type": "sound", "sound": "minecraft:item.trident.throw", "volume": 1.5, "pitch": 0.7 },
+    { "type": "sound", "sound": "minecraft:block.beacon.power_select", "volume": 1.5, "pitch": 1.2 }
+  ],
+  "on_tick": [
+    { "type": "particles", "particle": { "type": "minecraft:dust", "color": [0.35, 0.6, 1.0], "scale": 1.2 }, "count": 2, "spread": [1.0, 0.05, 1.0], "height": 0.1 }
+  ],
+  "on_end": [
+    { "type": "knockback", "target": { "area": 5 }, "horizontal": 1.0, "vertical": 0.4, "scale_with_distance": false },
+    { "type": "mob_effect", "target": "self", "effect": "minecraft:resistance", "duration": 200, "amplifier": 1 },
+    { "type": "mob_effect", "target": "self", "effect": "minecraft:absorption", "duration": 200, "amplifier": 1 },
+    { "type": "mob_effect", "target": "owner", "effect": "minecraft:resistance", "duration": 200, "amplifier": 1 },
+    { "type": "mob_effect", "target": "owner", "effect": "minecraft:absorption", "duration": 200, "amplifier": 1 },
+    { "type": "particles", "particle": { "type": "minecraft:dust", "color": [0.35, 0.6, 1.0], "scale": 1.8 }, "count": 60, "spread": [2.0, 1.2, 2.0], "height": 1.2 },
+    { "type": "particles", "particle": { "type": "minecraft:end_rod" }, "count": 30, "spread": [1.5, 1.0, 1.5], "speed": 0.05, "height": 1.2 },
+    { "type": "sound", "sound": "minecraft:block.beacon.activate", "volume": 2.0, "pitch": 1.3 },
+    { "type": "sound", "sound": "minecraft:item.shield.block", "volume": 2.0, "pitch": 0.6 }
+  ]
+}
