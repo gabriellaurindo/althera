@@ -1,0 +1,24 @@
+{
+  "name": "Irisa",
+  "description": "A stalwart shield maiden who plants her tower shield and lets nothing past.",
+  "class": "SHIELDER",
+  "rank": "S",
+  "nature": "COMMON",
+  "model": "althera:geo/entity/hero/irisa.geo.json",
+  "texture": "althera:textures/entity/hero/irisa.png",
+  "animations": "althera:animations/entity/hero/irisa.animation.json",
+  "personality": "Calm and unyielding",
+  "scale": 0.9375,
+  "ultimate": "althera:aegis_dome",
+  "animation": {
+    "attack_length": 0.8,
+    "death_length": 1.6
+  },
+  "attack": {
+    "type": "melee",
+    "on_hit": [
+      { "type": "knockback", "target": "target", "horizontal": 0.6, "vertical": 0.15, "scale_with_distance": false },
+      { "type": "particles", "particle": { "type": "minecraft:crit" }, "count": 4, "spread": [0.2, 0.3, 0.2], "speed": 0.05, "height": 1 }
+    ]
+  }
+}

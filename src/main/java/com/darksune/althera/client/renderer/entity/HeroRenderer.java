@@ -3,8 +3,11 @@ package com.darksune.althera.client.renderer.entity;
 import com.darksune.althera.client.model.entity.HeroModel;
 import com.darksune.althera.common.entity.HeroEntity;
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib.cache.GeckoLibCache;
 import software.bernie.geckolib.cache.object.BakedGeoModel;
 import software.bernie.geckolib.loading.object.BakedAnimations;
@@ -20,6 +23,14 @@ public class HeroRenderer extends GeoEntityRenderer<HeroEntity> {
     public void scaleModelForRender(float widthScale, float heightScale, PoseStack poseStack, HeroEntity animatable, BakedGeoModel model, boolean isReRender, float partialTick, int packedLight, int packedOverlay) {
         final float scale = animatable.getModelScale();
         super.scaleModelForRender(widthScale * scale, heightScale * scale, poseStack, animatable, model, isReRender, partialTick, packedLight, packedOverlay);
+    }
+
+    @Override
+    public RenderType getRenderType(HeroEntity animatable, ResourceLocation texture, @Nullable MultiBufferSource bufferSource, float partialTick) {
+        if (animatable.isPlayingUltimate() && !animatable.isInvisible()) {
+            return RenderType.entityTranslucent(texture);
+        }
+        return super.getRenderType(animatable, texture, bufferSource, partialTick);
     }
 
     @Override
