@@ -6,6 +6,8 @@ and generates the GitHub Release, CurseForge and Discord notes from it.
 
 ## [Unreleased]
 
+## [4.3.0] - 2026-11-03 - Ritual Rework (feature)
+
 ### Added
 - **Hero Catalyst**: High Nobles (red) now also drop a catalyst holding the **class and rank** of the Hero that
   served them, on top of their diamond block. Its name shows the class ("Saber Catalyst") in the rank's colour and its
