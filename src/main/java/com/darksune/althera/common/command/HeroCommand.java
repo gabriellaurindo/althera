@@ -4,9 +4,11 @@ import com.darksune.althera.Althera;
 import com.darksune.althera.common.attachment.HeroData;
 import com.darksune.althera.common.entity.AltheraEntities;
 import com.darksune.althera.common.entity.HeroEntity;
+import com.darksune.althera.common.hero.HeroClassRegistry;
 import com.darksune.althera.common.hero.HeroDefinition;
 import com.darksune.althera.common.hero.HeroRank;
 import com.darksune.althera.common.hero.HeroRegistry;
+import com.darksune.althera.common.item.HeroCatalystItem;
 import com.darksune.althera.common.system.HeroProgressionSystem;
 import com.darksune.althera.common.system.HeroRollSystem;
 import com.darksune.althera.common.system.HeroStatsSystem;
@@ -30,9 +32,11 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
@@ -86,6 +90,36 @@ public class HeroCommand {
                                                         EntityArgument.getPlayer(ctx, "target"),
                                                         IntegerArgumentType.getInteger(ctx, "level")
                                                 ))
+                                        )
+                                )
+                        )
+
+                        .then(Commands.literal("catalyst")
+                                .requires(AltheraCommands::hasCheats)
+                                .then(Commands.argument("class", ResourceLocationArgument.id())
+                                        .suggests((ctx, builder) -> SharedSuggestionProvider.suggestResource(
+                                                HeroClassRegistry.getAll().keySet(),
+                                                builder
+                                        ))
+                                        .then(Commands.argument("rank", StringArgumentType.word())
+                                                .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(
+                                                        Arrays.stream(HeroRank.values()).map(HeroRank::name),
+                                                        builder
+                                                ))
+                                                .executes(ctx -> giveCatalyst(
+                                                        ctx.getSource(),
+                                                        ctx.getSource().getPlayerOrException(),
+                                                        ResourceLocationArgument.getId(ctx, "class"),
+                                                        StringArgumentType.getString(ctx, "rank")
+                                                ))
+                                                .then(Commands.argument("target", EntityArgument.player())
+                                                        .executes(ctx -> giveCatalyst(
+                                                                ctx.getSource(),
+                                                                EntityArgument.getPlayer(ctx, "target"),
+                                                                ResourceLocationArgument.getId(ctx, "class"),
+                                                                StringArgumentType.getString(ctx, "rank")
+                                                        ))
+                                                )
                                         )
                                 )
                         )
@@ -329,6 +363,30 @@ public class HeroCommand {
     // =========================
     // BY RANK
     // =========================
+
+    private static int giveCatalyst(CommandSourceStack source, ServerPlayer target, ResourceLocation classId, String rankStr) {
+        if (!HeroClassRegistry.getAll().containsKey(classId)) {
+            source.sendFailure(Component.literal("§cUnknown hero class: " + classId));
+            return 0;
+        }
+
+        HeroRank rank;
+        try {
+            rank = HeroRank.valueOf(rankStr.toUpperCase());
+        } catch (Exception e) {
+            source.sendFailure(Component.literal("§cInvalid rank."));
+            return 0;
+        }
+
+        ItemStack catalyst = HeroCatalystItem.of(classId, rank);
+        if (!target.addItem(catalyst)) {
+            target.drop(catalyst, false);
+        }
+
+        source.sendSuccess(() -> Component.literal("§aGave a " + rank.getDisplayName() + " "
+                + HeroClassRegistry.get(classId).getDisplayName() + " Catalyst to " + target.getName().getString()), false);
+        return 1;
+    }
 
     private static int summonByRank(CommandSourceStack source, String rankStr) throws CommandSyntaxException {
         Player player = source.getPlayerOrException();

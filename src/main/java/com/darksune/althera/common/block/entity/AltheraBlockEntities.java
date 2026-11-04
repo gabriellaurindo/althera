@@ -19,6 +19,18 @@ public final class AltheraBlockEntities {
                             .of(NobleSigilBlockEntity::new, AltheraBlocks.NOBLE_SIGIL.get())
                             .build(null));
 
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<RitualPedestalBlockEntity>> RITUAL_PEDESTAL =
+            BLOCK_ENTITIES.register("ritual_pedestal",
+                    () -> BlockEntityType.Builder
+                            .of(RitualPedestalBlockEntity::new, AltheraBlocks.RITUAL_PEDESTAL.get())
+                            .build(null));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<RitualCoreBlockEntity>> RITUAL_CORE =
+            BLOCK_ENTITIES.register("ritual_core",
+                    () -> BlockEntityType.Builder
+                            .of(RitualCoreBlockEntity::new, AltheraBlocks.RITUAL_CORE.get())
+                            .build(null));
+
     public static void register(final IEventBus bus) {
         BLOCK_ENTITIES.register(bus);
     }

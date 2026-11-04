@@ -82,7 +82,10 @@ A Noble slain by a player or a player's Hero drops a reward that grows with his 
 |---|---|
 | 🟩 Green | 1 diamond |
 | 🟨 Yellow | 3-4 diamonds |
-| 🟥 Red | 1 diamond block |
+| 🟥 Red | 1 diamond block + 1 [Hero Catalyst](Ritual-System#-hero-catalyst) |
+
+The **Hero Catalyst** holds the class and rank of the Hero that served the Noble. Offered to the
+[ritual](Ritual-System) next to a diamond block, it gives you a Hero of that class and rank.
 
 Nobles killed by anything else (iron golems, other mobs, lava...) drop nothing.
 

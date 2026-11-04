@@ -4,12 +4,33 @@
     {
       "rolls": 1,
       "conditions": [
-        { "condition": "minecraft:killed_by_player" }
+        {
+          "condition": "minecraft:killed_by_player"
+        }
       ],
       "entries": [
         {
           "type": "minecraft:item",
           "name": "minecraft:diamond_block"
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "conditions": [
+        {
+          "condition": "minecraft:killed_by_player"
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "althera:hero_catalyst",
+          "functions": [
+            {
+              "function": "althera:servant_catalyst"
+            }
+          ]
         }
       ]
     }

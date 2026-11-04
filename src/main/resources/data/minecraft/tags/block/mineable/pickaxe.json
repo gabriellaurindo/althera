@@ -2,6 +2,7 @@
   "replace": false,
   "values": [
     "althera:ritual_core",
-    "althera:noble_sigil"
+    "althera:noble_sigil",
+    "althera:ritual_pedestal"
   ]
 }

@@ -17,6 +17,8 @@ Commands marked with **cheats** require cheats enabled (singleplayer) or operato
 | `/althera_hero divine` | Cheats | Assigns you a random Divine Hero |
 | `/althera_hero level <level>` | Cheats | Sets your Hero's level (1-50), resets its experience and heals it to full |
 | `/althera_hero level <level> <player>` | Cheats | Same, for another player |
+| `/althera_hero catalyst <class> <rank>` | Cheats | Gives you a [Hero Catalyst](Ritual-System#-hero-catalyst) of the given class (for example `althera:saber`) and rank |
+| `/althera_hero catalyst <class> <rank> <player>` | Cheats | Same, for another player |
 
 ### What `unstuck` does
 

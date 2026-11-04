@@ -27,6 +27,7 @@ logs/
 # =========================
 .DS_Store
 Thumbs.db
+__pycache__/
 
 # =========================
 # Environment / Secrets

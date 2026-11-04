@@ -87,8 +87,9 @@ Players without a Hero choose their first one on the **Choose your Hero** screen
 pressing the summon or hero key). Every Hero with its own model, texture and animations can be chosen; for now that
 is Aria (Saber), Clare (Assassin), Zaya (Caster) and Valka (Lancer), all EX.
 
-The ritual swaps your Hero: it rolls a new one, different from your current Hero, and your Hero level carries over
-(see [Ritual System](Ritual-System)). Rolls only consider Heroes with their own model, texture and animations, and only
+The ritual swaps your Hero: it rolls a new one, different from your current Hero, and your Hero level carries over.
+A Hero Catalyst dropped by High Nobles makes it roll a Hero of the catalyst's class and rank. Every ritual costs a
+diamond block and 300 mana (see [Ritual System](Ritual-System)). Rolls only consider Heroes with their own model, texture and animations, and only
 ranks that have at least one such Hero, so while every Hero is EX, every roll gives one of them.
 
 Higher-ranked Heroes generally possess:

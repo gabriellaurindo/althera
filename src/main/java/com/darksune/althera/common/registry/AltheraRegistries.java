@@ -6,18 +6,22 @@ import com.darksune.althera.common.block.entity.AltheraBlockEntities;
 import com.darksune.althera.common.creativetab.AltheraCreativeTabs;
 import com.darksune.althera.common.entity.AltheraEntities;
 import com.darksune.althera.common.item.AltheraItems;
+import com.darksune.althera.common.item.component.AltheraDataComponents;
+import com.darksune.althera.common.loot.AltheraLootFunctions;
 import com.darksune.althera.common.worldgen.AltheraFeatures;
 import net.neoforged.bus.api.IEventBus;
 
 public final class AltheraRegistries {
 
     public static void register(final IEventBus modEventBus) {
+        AltheraDataComponents.register(modEventBus);
         AltheraItems.register(modEventBus);
         AltheraEntities.register(modEventBus);
         AltheraAttachments.register(modEventBus);
         AltheraBlocks.register(modEventBus);
         AltheraBlockEntities.register(modEventBus);
         AltheraFeatures.register(modEventBus);
+        AltheraLootFunctions.register(modEventBus);
         AltheraCreativeTabs.register(modEventBus);
     }
 }

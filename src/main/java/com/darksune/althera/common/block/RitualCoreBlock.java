@@ -1,36 +1,67 @@
 package com.darksune.althera.common.block;
 
-import com.darksune.althera.common.attachment.HeroData;
-import com.darksune.althera.common.hero.HeroDefinition;
-import com.darksune.althera.common.multiblock.MultiblockValidator;
-import com.darksune.althera.common.system.HeroRollSystem;
-import com.darksune.althera.common.system.HeroStatsSystem;
-import com.darksune.althera.common.system.HeroSummonSystem;
+import com.darksune.althera.common.block.entity.AltheraBlockEntities;
+import com.darksune.althera.common.block.entity.RitualCoreBlockEntity;
+import com.darksune.althera.common.system.RitualSystem;
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.Optional;
+public class RitualCoreBlock extends BaseEntityBlock {
 
-public class RitualCoreBlock extends Block {
+    public static final MapCodec<RitualCoreBlock> CODEC = simpleCodec(RitualCoreBlock::new);
 
     private static final VoxelShape SHAPE = Shapes.or(
-            Block.box(2, 0, 2, 14, 2, 14),  // base
-            Block.box(3, 2, 3, 13, 4, 13),  // top
-            Block.box(7, 4, 7, 9, 6, 9)     // core
+            Block.box(1, 0, 1, 15, 2, 15),
+            Block.box(2, 2, 2, 14, 4.75, 14),
+            Block.box(1.25, 2, 1.25, 3.75, 4.5, 3.75),
+            Block.box(12.25, 2, 1.25, 14.75, 4.5, 3.75),
+            Block.box(1.25, 2, 12.25, 3.75, 4.5, 14.75),
+            Block.box(12.25, 2, 12.25, 14.75, 4.5, 14.75),
+            Block.box(3.5, 4.75, 3.5, 12.5, 6, 12.5)
     );
 
     public RitualCoreBlock(Properties properties) {
         super(properties);
+    }
+
+    @Override
+    protected MapCodec<? extends BaseEntityBlock> codec() {
+        return CODEC;
+    }
+
+    @Override
+    protected RenderShape getRenderShape(BlockState state) {
+        return RenderShape.MODEL;
+    }
+
+    @Nullable
+    @Override
+    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+        return new RitualCoreBlockEntity(pos, state);
+    }
+
+    @Nullable
+    @Override
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
+        return createTickerHelper(type, AltheraBlockEntities.RITUAL_CORE.get(), level.isClientSide
+                ? RitualCoreBlockEntity::clientTick
+                : RitualCoreBlockEntity::serverTick);
     }
 
     @Override
@@ -40,10 +71,8 @@ public class RitualCoreBlock extends Block {
             return InteractionResult.SUCCESS;
         }
 
-        if (MultiblockValidator.isValid(level, pos)) {
-            performRitual(player, level, pos);
-        } else {
-            player.sendSystemMessage(Component.literal("§cThe structure is incomplete and cannot sustain the ritual."));
+        if (level.getBlockEntity(pos) instanceof RitualCoreBlockEntity core) {
+            RitualSystem.tryStart(player, level, pos, core);
         }
 
         return InteractionResult.SUCCESS;
@@ -57,64 +86,5 @@ public class RitualCoreBlock extends Block {
     @Override
     public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         return SHAPE;
-    }
-
-    public void performRitual(final Player player, final Level level, final BlockPos pos) {
-        final HeroData heroData = HeroData.get(player);
-        final HeroDefinition current = heroData.getHeroDefinition();
-        final Optional<HeroDefinition> rolled = HeroRollSystem.rollHeroExcept(current != null ? current.getId() : null);
-        if (rolled.isEmpty()) {
-            player.sendSystemMessage(Component.literal(current != null
-                    ? "§cNo other hero answers the ritual."
-                    : "§cNo hero answers the ritual."));
-            return;
-        }
-        final HeroDefinition heroDefinition = rolled.get();
-
-        if (current != null) {
-            HeroSummonSystem.dismissSummon(player);
-            player.sendSystemMessage(Component.literal(
-                    "§7" + current.getName() + " leaves. Your hero level (" + heroData.getLevel() + ") carries over."
-            ));
-        }
-
-        player.sendSystemMessage(
-                Component.literal(
-                        "§aYou have formed a contract with §f"
-                                + heroDefinition.getName()
-                                + " §7["
-                                + heroDefinition.getHeroClass().getDisplayName()
-                                + "] §6("
-                                + heroDefinition.getRank().name()
-                                + ")"
-                )
-        );
-
-        level.playSound(null, pos,
-                net.minecraft.sounds.SoundEvents.ENCHANTMENT_TABLE_USE,
-                net.minecraft.sounds.SoundSource.BLOCKS,
-                1.0F, 1.0F
-        );
-
-        if (level instanceof net.minecraft.server.level.ServerLevel serverLevel) {
-            serverLevel.sendParticles(
-                    net.minecraft.core.particles.ParticleTypes.ENCHANT,
-                    pos.getX() + 0.5,
-                    pos.getY() + 1.0,
-                    pos.getZ() + 0.5,
-                    40,          // count
-                    0.5, 0.5, 0.5, // spread
-                    0.1           // speed
-            );
-        }
-
-        final BlockPos diamondPos = pos.below();
-        if (level.getBlockState(diamondPos).is(net.minecraft.world.level.block.Blocks.DIAMOND_BLOCK)) {
-            level.destroyBlock(diamondPos, false);
-        }
-
-        heroData.setHero(heroDefinition.getId());
-        heroData.setHealth(HeroStatsSystem.getMaxHealth(heroData));
-        heroData.sync(player);
     }
 }

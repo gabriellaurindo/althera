@@ -1,7 +1,13 @@
 {
   "item.althera.ritual_core": "Ritual core",
+  "item.althera.ritual_core.tooltip": "Place four Ritual Pedestals two blocks away, one on each side.",
   "item.althera.enemy_mage_spawn_egg": "Noble Spawn Egg",
   "item.althera.emblem": "Althera Emblem",
+  "item.althera.hero_catalyst": "Hero Catalyst",
+  "item.althera.hero_catalyst.named": "%s Catalyst",
+  "item.althera.hero_catalyst.faded": "Faded Catalyst",
+  "item.althera.hero_catalyst.faded.hint": "Its class no longer answers",
+  "item.althera.hero_catalyst.rank": "Rank %s",
 
   "entity.althera.enemy_mage": "Enemy Mage",
 
@@ -18,6 +24,7 @@
 
   "block.althera.ritual_core": "Ritual core",
   "block.althera.noble_sigil": "Noble Sigil",
+  "block.althera.ritual_pedestal": "Ritual Pedestal",
 
   "althera.configuration.title": "Althera Configuration",
   "althera.configuration.section.althera.client.toml": "Client Settings",
