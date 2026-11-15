@@ -43,6 +43,10 @@ public class KeyInputHandler {
             KeyActions.handleSpellWheel();
         }
 
+        if (AltheraKeybinds.SPELL_TREE.consumeClick()) {
+            KeyActions.handleSpellTree();
+        }
+
     }
 
     private static void handleSummonKey() {

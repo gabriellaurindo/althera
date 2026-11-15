@@ -1,6 +1,7 @@
 package com.darksune.althera.network;
 
 import com.darksune.althera.network.packet.DisguisePacket;
+import com.darksune.althera.network.packet.EquipSpellPacket;
 import com.darksune.althera.network.packet.HeroStatsPacket;
 import com.darksune.althera.network.packet.MarkTargetPacket;
 import com.darksune.althera.network.packet.OpenHeroSelectionPacket;
@@ -16,6 +17,7 @@ import com.darksune.althera.network.packet.SyncSpellNodesPacket;
 import com.darksune.althera.network.packet.SyncSpellsPacket;
 import com.darksune.althera.network.packet.SyncUltimatesPacket;
 import com.darksune.althera.network.packet.ToggleHeroSettingPacket;
+import com.darksune.althera.network.packet.TrainSpellNodePacket;
 import com.darksune.althera.network.packet.UseCommandSealSkillPacket;
 import com.darksune.althera.network.packet.UseUltimateSkillPacket;
 import net.neoforged.bus.api.IEventBus;
@@ -31,7 +33,7 @@ public final class AltheraNetwork {
 
     private static void registerPayloads(RegisterPayloadHandlersEvent event) {
 
-        var registrar = event.registrar("12");
+        var registrar = event.registrar("13");
 
         registrar.playToServer(
                 SummonPacket.TYPE,
@@ -85,6 +87,18 @@ public final class AltheraNetwork {
                 SelectSpellSlotPacket.TYPE,
                 SelectSpellSlotPacket.STREAM_CODEC,
                 SelectSpellSlotPacket::handle
+        );
+
+        registrar.playToServer(
+                TrainSpellNodePacket.TYPE,
+                TrainSpellNodePacket.STREAM_CODEC,
+                TrainSpellNodePacket::handle
+        );
+
+        registrar.playToServer(
+                EquipSpellPacket.TYPE,
+                EquipSpellPacket.STREAM_CODEC,
+                EquipSpellPacket::handle
         );
 
         registrar.playToClient(

@@ -4,6 +4,7 @@ import com.darksune.althera.client.hud.SpellSlots;
 import com.darksune.althera.client.screen.HeroScreen;
 import com.darksune.althera.client.screen.HeroSelectionOpener;
 import com.darksune.althera.client.screen.SealWheelScreen;
+import com.darksune.althera.client.screen.SpellTreeScreen;
 import com.darksune.althera.client.screen.SpellWheelScreen;
 import com.darksune.althera.common.attachment.HeroData;
 import com.darksune.althera.common.commandseal.skill.CommandSealSkillType;
@@ -94,6 +95,13 @@ public class KeyActions {
         Minecraft mc = Minecraft.getInstance();
         if (mc.screen == null && mc.player != null && !SpellBookItem.isCastingWith(mc.player)) {
             mc.setScreen(new SpellWheelScreen());
+        }
+    }
+
+    public static void handleSpellTree() {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.screen == null && mc.player != null && !SpellBookItem.isCastingWith(mc.player)) {
+            mc.setScreen(new SpellTreeScreen());
         }
     }
 

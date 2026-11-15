@@ -272,6 +272,13 @@ public class PlayerSpellData extends SyncableAttachment {
         markDirty();
     }
 
+    public boolean canEquip(ResourceLocation id) {
+
+        SpellNode node = SpellNodeRegistry.get(id);
+
+        return node != null && node.isTrainable() && (isLearned(id) || isTraining(id));
+    }
+
     public int slotOf(ResourceLocation node) {
 
         for (int i = 0; i < SLOT_COUNT; i++) {

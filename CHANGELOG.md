@@ -15,8 +15,15 @@ and generates the GitHub Release, CurseForge and Discord notes from it.
   - Once **learned**, a spell casts at its normal cost with its full effect. Player spells hit as hard as a strong
     weapon (Fire Bolt 7.2, Frost Shard 6, Lightning Strike 4.8 plus 3.6 around the target), never hurt your own Hero
     and follow the server's PvP and team rules.
-  - Training progress is kept on death. The spell tree screen comes next; until then training starts with
-    `/althera_spell train`.
+  - Training progress is kept on death.
+- **Spell Tree** screen (**K**): Knowledge in the centre, Damage up, Defense left and Utility down. Node borders show
+  each spell's state: green learned, blue training, yellow can be learned, red locked (learn the spell before it
+  first), orange learned but not usable yet; `?` nodes are spells still to come. Hover a node for its cost, cooldown,
+  tier, description and how many training casts are left at your current max mana.
+  - **Click** a yellow node to start training it, click a blue one to pause (progress is kept).
+  - The 9 book slots sit at the bottom: **drag** a spell onto a slot (or **right-click** it) to equip it, drag a slot's
+    spell elsewhere or right-click the slot to clear it, click a slot to select it. Drag the background to move
+    around, scroll to zoom.
 - **Spell Book**: crafted from a book, two amethyst shards and a lapis lazuli. It has **9 spell slots**: a spell joins
   the first free slot when you start training it or learn it. **Right-click** with the book casts the selected spell
   (at double mana while training). Holding the book shows the selected spell, its cost, training progress and

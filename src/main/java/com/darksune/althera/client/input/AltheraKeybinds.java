@@ -38,6 +38,13 @@ public class AltheraKeybinds {
             "key.categories.althera"
     );
 
+    public static final KeyMapping SPELL_TREE = new KeyMapping(
+            "key.althera.spell.tree",
+            InputConstants.Type.KEYSYM,
+            GLFW.GLFW_KEY_K,
+            "key.categories.althera"
+    );
+
     public static final KeyMapping SPELL_WHEEL = new KeyMapping(
             "key.althera.spell.wheel",
             InputConstants.Type.KEYSYM,
