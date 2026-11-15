@@ -44,7 +44,7 @@ public class HeroProjectileEntity extends Projectile {
     }
 
     public static HeroProjectileEntity shoot(
-            final CasterMob hero,
+            final SpellCaster caster,
             final Vec3 from,
             final Vec3 direction,
             final float damage,
@@ -52,6 +52,7 @@ public class HeroProjectileEntity extends Projectile {
             final ParticleOptions particle,
             final List<UltimateEffect> onHit
     ) {
+        final LivingEntity hero = caster.entity();
         final HeroProjectileEntity projectile = AltheraEntities.HERO_PROJECTILE.get().create(hero.level());
         if (projectile == null) return null;
 
@@ -75,7 +76,7 @@ public class HeroProjectileEntity extends Projectile {
         super.tick();
 
         if (!level().isClientSide) {
-            if (tickCount > MAX_LIFE_TICKS || !(getOwner() instanceof CasterMob)) {
+            if (tickCount > MAX_LIFE_TICKS || SpellCaster.of(getOwner()) == null) {
                 discard();
                 return;
             }
@@ -118,11 +119,12 @@ public class HeroProjectileEntity extends Projectile {
         if (!(target instanceof LivingEntity) || !super.canHitEntity(target)) {
             return false;
         }
-        if (!(getOwner() instanceof CasterMob hero)) {
+        final SpellCaster hero = SpellCaster.of(getOwner());
+        if (hero == null) {
             return true;
         }
-        return target != hero
-                && !hero.isAlliedTo(target)
+        return target != hero.entity()
+                && !hero.isAllyOf(target)
                 && (!(target instanceof Player player) || hero.canHarmPlayer(player));
     }
 
@@ -132,7 +134,8 @@ public class HeroProjectileEntity extends Projectile {
         final Entity owner = getOwner();
         final LivingEntity attacker = owner instanceof LivingEntity living ? living : null;
         final boolean hurt = result.getEntity().hurt(damageSources().mobProjectile(this, attacker), damage);
-        if (hurt && owner instanceof CasterMob hero && result.getEntity() instanceof LivingEntity target) {
+        final SpellCaster hero = SpellCaster.of(owner);
+        if (hurt && hero != null && result.getEntity() instanceof LivingEntity target) {
             hero.applyEffects(onHit, target, result.getLocation());
         }
     }
@@ -140,7 +143,8 @@ public class HeroProjectileEntity extends Projectile {
     @Override
     protected void onHitBlock(final BlockHitResult result) {
         super.onHitBlock(result);
-        if (getOwner() instanceof CasterMob hero) {
+        final SpellCaster hero = SpellCaster.of(getOwner());
+        if (hero != null) {
             hero.applyEffects(onHit, null, result.getLocation());
         }
     }

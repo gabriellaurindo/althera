@@ -2,6 +2,7 @@ package com.darksune.althera.common.spell;
 
 import com.darksune.althera.common.attachment.AltheraAttachments;
 import com.darksune.althera.common.attachment.SyncableAttachment;
+import com.darksune.althera.common.skill.SkillTimers;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.network.FriendlyByteBuf;
@@ -33,6 +34,8 @@ public class PlayerSpellData extends SyncableAttachment {
     private final ResourceLocation[] slots = new ResourceLocation[SLOT_COUNT];
 
     private int selectedSlot;
+
+    private final Map<ResourceLocation, Integer> cooldowns = new HashMap<>();
 
     private record Slot(int index, ResourceLocation node) {
 
@@ -80,6 +83,8 @@ public class PlayerSpellData extends SyncableAttachment {
                 }
 
                 buf.writeVarInt(data.selectedSlot);
+
+                buf.writeMap(data.cooldowns, FriendlyByteBuf::writeResourceLocation, FriendlyByteBuf::writeVarInt);
             },
 
             buf -> {
@@ -95,6 +100,8 @@ public class PlayerSpellData extends SyncableAttachment {
                 }
 
                 data.selectedSlot = buf.readVarInt();
+
+                data.cooldowns.putAll(buf.readMap(FriendlyByteBuf::readResourceLocation, FriendlyByteBuf::readVarInt));
 
                 return data;
             });
@@ -221,6 +228,27 @@ public class PlayerSpellData extends SyncableAttachment {
                 : SpellNodeState.LOCKED;
     }
 
+    public boolean isOnCooldown(ResourceLocation node) {
+        return cooldowns.containsKey(node);
+    }
+
+    public int getCooldown(ResourceLocation node) {
+        return cooldowns.getOrDefault(node, 0);
+    }
+
+    public void startCooldown(ResourceLocation node, int ticks) {
+        cooldowns.put(node, ticks);
+        markDirty();
+    }
+
+    public void tickCooldowns() {
+        SkillTimers.tick(
+                cooldowns,
+                (node, remaining) -> SkillTimers.markDirtyOnSyncTick(this, remaining),
+                node -> markDirty()
+        );
+    }
+
     @Nullable
     public ResourceLocation getSlot(int index) {
         return slots[index];
@@ -258,6 +286,7 @@ public class PlayerSpellData extends SyncableAttachment {
         training.clear();
         Arrays.fill(slots, null);
         selectedSlot = 0;
+        cooldowns.clear();
         markDirty();
     }
 

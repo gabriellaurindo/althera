@@ -1,6 +1,7 @@
 package com.darksune.althera.common.command;
 
 import com.darksune.althera.common.spell.PlayerSpellData;
+import com.darksune.althera.common.spell.SpellCastSystem;
 import com.darksune.althera.common.spell.SpellNode;
 import com.darksune.althera.common.spell.SpellNodeRegistry;
 import com.mojang.brigadier.CommandDispatcher;
@@ -54,6 +55,13 @@ public class SpellCommand {
                                 .then(withTarget(
                                         Commands.argument("node", ResourceLocationArgument.id()).suggests(NODES),
                                         SpellCommand::startTraining
+                                ))
+                        )
+
+                        .then(Commands.literal("cast")
+                                .then(withTarget(
+                                        Commands.argument("node", ResourceLocationArgument.id()).suggests(NODES),
+                                        SpellCommand::cast
                                 ))
                         )
 
@@ -160,6 +168,13 @@ public class SpellCommand {
         ctx.getSource().sendSuccess(() -> Component.literal("§bNow training " + id + "."), true);
 
         return 1;
+    }
+
+    private static int cast(CommandContext<CommandSourceStack> ctx, ServerPlayer player) {
+
+        ResourceLocation id = node(ctx);
+
+        return id != null && SpellCastSystem.cast(player, id) ? 1 : 0;
     }
 
     private static int stopTraining(CommandContext<CommandSourceStack> ctx, ServerPlayer player) {

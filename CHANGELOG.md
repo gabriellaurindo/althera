@@ -7,14 +7,20 @@ and generates the GitHub Release, CurseForge and Discord notes from it.
 ## [Unreleased]
 
 ### Added
-- **Player spells (groundwork)**: the spell tree now exists in data. Each player tracks training progress per spell,
-  which spells are in training and their spell book slots (kept on death). Fire Bolt, Lightning Strike and Frost Shard
-  are the first player spells; the other branches are `?` placeholders for now. Casting, the spell book and the tree
-  screen come next.
-- Datapacks: spells take an optional `player` block (`mana_cost`, `description`) and the tree is defined in
-  `data/<namespace>/spell_node/*.json` (`spell`, `parent`, `x`, `y`, `branch`, `element`, `tier`, `name`).
-- `/althera_spell info | reset | progress <node> <value> | train <node> | untrain <node> [player]` (cheats) to inspect
-  and set spell training.
+- **Player spells (work in progress)**: players can now learn and cast spells. Fire Bolt (20 mana), Lightning Strike
+  (25) and Frost Shard (20) are the first ones; the other branches of the spell tree are `?` placeholders for now.
+  - A spell in **training** casts at **double mana** and has no real effect, only a puff of magic; each training cast
+    fills part of its progress. More max mana means fewer casts: a 20 mana spell takes 10 casts at 200 max mana and
+    only 3 at 1000. Harder (higher tier) spells take longer.
+  - Once **learned**, a spell casts at its normal cost with its full effect. Player spells hit as hard as a strong
+    weapon (Fire Bolt 7.2, Frost Shard 6, Lightning Strike 4.8 plus 3.6 around the target), never hurt your own Hero
+    and follow the server's PvP and team rules.
+  - Training progress is kept on death. The spell book and the spell tree screen come next; until then spells are
+    cast with `/althera_spell cast`.
+- Datapacks: spells take an optional `player` block (`mana_cost`, `description`, `cast_mode`) and the tree is defined
+  in `data/<namespace>/spell_node/*.json` (`spell`, `parent`, `x`, `y`, `branch`, `element`, `tier`, `name`).
+- `/althera_spell info | reset | progress <node> <value> | train <node> | untrain <node> | cast <node> [player]`
+  (cheats) to inspect, set and test spell training.
 
 ## [4.3.0] - 2026-11-03 - Ritual Rework (feature)
 
