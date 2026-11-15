@@ -7,7 +7,6 @@ import com.darksune.althera.common.spell.PlayerSpellData;
 import com.darksune.althera.common.spell.SpellCastSystem;
 import com.darksune.althera.common.spell.SpellElement;
 import com.darksune.althera.common.spell.SpellNode;
-import com.darksune.althera.common.spell.SpellNodeRegistry;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
@@ -25,9 +24,7 @@ import net.minecraft.world.level.Level;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.Nullable;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 
 public class SpellTomeItem extends Item {
 
@@ -39,14 +36,6 @@ public class SpellTomeItem extends Item {
         ItemStack stack = new ItemStack(AltheraItems.SPELL_TOME.get());
         stack.set(AltheraDataComponents.SPELL_TOME.get(), new SpellTome(nodeId));
         return stack;
-    }
-
-    public static List<ResourceLocation> trainableNodes() {
-        return SpellNodeRegistry.getAll().entrySet().stream()
-                .filter(entry -> entry.getValue().isTrainable())
-                .map(Map.Entry::getKey)
-                .sorted(Comparator.comparing(ResourceLocation::toString))
-                .toList();
     }
 
     @Nullable

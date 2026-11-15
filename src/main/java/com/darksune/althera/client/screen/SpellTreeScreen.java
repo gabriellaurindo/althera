@@ -118,8 +118,21 @@ public class SpellTreeScreen extends Screen {
     private ResourceLocation carried;
     private int carriedFromSlot = -1;
 
+    @Nullable
+    private final Screen parent;
+
     public SpellTreeScreen() {
+        this(null);
+    }
+
+    public SpellTreeScreen(@Nullable Screen parent) {
         super(Component.literal("Spell Tree"));
+        this.parent = parent;
+    }
+
+    @Override
+    public void onClose() {
+        minecraft.setScreen(parent);
     }
 
     @Override
@@ -730,7 +743,9 @@ public class SpellTreeScreen extends Screen {
         }
 
         lines.add(mana.withStyle(ChatFormatting.AQUA));
-        lines.add(Component.literal("Cooldown: " + seconds(spell.cooldownTicks()) + "s").withStyle(ChatFormatting.AQUA));
+        lines.add(Component.literal(playerSpell.cooldownTicks() > 0
+                ? "Cooldown: " + seconds(playerSpell.cooldownTicks()) + "s"
+                : "No cooldown").withStyle(ChatFormatting.AQUA));
 
         if (state != SpellNodeState.LEARNED) {
             int required = SpellTraining.requiredCasts(playerSpell.manaCost(), node.tier(), maxMana);

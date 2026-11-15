@@ -222,8 +222,10 @@ public final class SpellCastSystem {
     }
 
     private static void startCooldown(final ServerPlayer player, final Cast cast) {
-        if (!SkillLimits.isUnlimited(player)) {
-            cast.data().startCooldown(cast.nodeId(), cast.spell().cooldownTicks());
+        final int cooldown = cast.playerSpell().cooldownTicks();
+
+        if (cooldown > 0 && !SkillLimits.isUnlimited(player)) {
+            cast.data().startCooldown(cast.nodeId(), cooldown);
         }
     }
 

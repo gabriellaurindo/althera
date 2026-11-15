@@ -3,7 +3,11 @@ package com.darksune.althera.client.screen;
 import com.darksune.althera.Althera;
 import com.darksune.althera.client.AltheraClientConfig;
 import com.darksune.althera.client.input.AltheraKeybinds;
+import com.darksune.althera.client.hud.SpellSlots;
 import com.darksune.althera.common.attachment.HeroData;
+import com.darksune.althera.common.attachment.ManaData;
+import com.darksune.althera.common.spell.PlayerSpellData;
+import com.darksune.althera.common.spell.SpellNodeRegistry;
 import com.darksune.althera.common.commandseal.CommandSealData;
 import com.darksune.althera.common.entity.AltheraEntities;
 import com.darksune.althera.common.entity.HeroEntity;
@@ -23,6 +27,9 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -93,6 +100,17 @@ public class HeroScreen extends Screen {
     private static final int DETAILS_TAB_WIDTH = 10;
     private static final int DETAILS_TAB_HEIGHT = 28;
 
+    private static final int PAGE_TAB_X = 10;
+    private static final int PAGE_TAB_WIDTH = 64;
+    private static final int PAGE_TAB_HEIGHT = 15;
+    private static final int PAGE_TAB_GAP = 3;
+    private static final int COLOR_PAGE_TAB_IDLE = 0xFF1A1A1A;
+
+    private static final int PLAYER_PREVIEW_SCALE = 42;
+    private static final float PLAYER_PREVIEW_OFFSET = 0.0625F;
+    private static final int COLOR_MANA = 0xFF3FA9FF;
+    private static final int COLOR_SECTION = 0xFFE0B040;
+
     private static final ResourceLocation GEAR_ICON =
             ResourceLocation.fromNamespaceAndPath(
                     Althera.MOD_ID,
@@ -108,6 +126,21 @@ public class HeroScreen extends Screen {
     private boolean detailsOpen = false;
 
     private Tab currentTab = Tab.STATUS;
+
+    private static Page lastPage = Page.HERO;
+
+    private Page page;
+
+    private enum Page {
+        PLAYER("PLAYER"),
+        HERO("HERO");
+
+        private final String label;
+
+        Page(String label) {
+            this.label = label;
+        }
+    }
 
     private enum Tab {
         STATUS,
@@ -154,6 +187,12 @@ public class HeroScreen extends Screen {
 
     public HeroScreen() {
         super(Component.literal("Status"));
+        this.page = hasHero() ? lastPage : Page.PLAYER;
+    }
+
+    private static boolean hasHero() {
+        final Minecraft mc = Minecraft.getInstance();
+        return mc.player != null && HeroData.get(mc.player).getHeroDefinition() != null;
     }
 
     @Override
@@ -183,7 +222,7 @@ public class HeroScreen extends Screen {
 
         final Minecraft mc = Minecraft.getInstance();
 
-        if (currentTab == Tab.STATUS && mc.player != null && HeroData.get(mc.player).isSummoned()
+        if (page == Page.HERO && currentTab == Tab.STATUS && mc.player != null && HeroData.get(mc.player).isSummoned()
                 && screenTicks++ % STATS_REQUEST_INTERVAL == 0) {
             PacketDistributor.sendToServer(new RequestHeroStatsPacket());
         }
@@ -225,6 +264,8 @@ public class HeroScreen extends Screen {
         gui.fill(x - 2, y - 2, x + GUI_WIDTH + 2, y + GUI_HEIGHT + 2, COLOR_BORDER);
         gui.fill(x, y, x + GUI_WIDTH, y + GUI_HEIGHT, COLOR_PANEL);
 
+        renderPageTabs(gui, mouseX, mouseY);
+
         final String title = switch (currentTab) {
             case STATUS -> "STATUS";
             case SETTINGS -> "SETTINGS";
@@ -239,6 +280,18 @@ public class HeroScreen extends Screen {
         renderGear(gui, mouseX, mouseY);
         renderClose(gui, mouseX, mouseY);
 
+        if (currentTab == Tab.SETTINGS) {
+            renderSettingsTab(gui, heroData, mouseX, mouseY);
+            super.render(gui, mouseX, mouseY, partialTick);
+            return;
+        }
+
+        if (page == Page.PLAYER) {
+            renderPlayerPage(gui, mc, mouseX, mouseY);
+            super.render(gui, mouseX, mouseY, partialTick);
+            return;
+        }
+
         if (currentTab == Tab.STATUS) {
             renderStatusTab(gui, heroData, mouseX, mouseY, partialTick);
             renderDetailsTab(gui, mouseX, mouseY);
@@ -246,10 +299,6 @@ public class HeroScreen extends Screen {
 
         if (detailsVisible()) {
             renderDetails(gui, heroData, heroData.isSummoned() ? HeroLiveStats.current() : null);
-        }
-
-        if (currentTab == Tab.SETTINGS) {
-            renderSettingsTab(gui, heroData, mouseX, mouseY);
         }
 
         if (currentTab == Tab.ULTIMATE) {
@@ -268,6 +317,148 @@ public class HeroScreen extends Screen {
         }
 
         gui.blit(GEAR_ICON, gearX, gearY, 0, 0, 16, 16, 16, 16);
+    }
+
+    private void renderPageTabs(GuiGraphics gui, int mouseX, int mouseY) {
+        final int y = pageTabY();
+
+        for (Page tab : Page.values()) {
+            final int x = pageTabX(tab);
+            final boolean active = tab == page;
+            final boolean hovered = isOverPageTab(tab, mouseX, mouseY);
+            final int bottom = y + PAGE_TAB_HEIGHT + (active ? 2 : 0);
+
+            gui.fill(x - 2, y - 2, x + PAGE_TAB_WIDTH + 2, bottom, COLOR_BORDER);
+            gui.fill(x, y, x + PAGE_TAB_WIDTH, bottom,
+                    active ? COLOR_PANEL : hovered ? COLOR_BUTTON_HOVER : COLOR_PAGE_TAB_IDLE);
+
+            if (active) {
+                gui.fill(x, y - 2, x + PAGE_TAB_WIDTH, y - 1, COLOR_ACCENT);
+            }
+
+            gui.drawCenteredString(this.font, tab.label, x + PAGE_TAB_WIDTH / 2, y + (PAGE_TAB_HEIGHT - 8) / 2 + 1,
+                    active ? COLOR_ACCENT : COLOR_LABEL);
+
+            if (hovered && tab == Page.HERO && !hasHero()) {
+                setTooltipForNextRenderPass(Component.literal("Choose your Hero"));
+            }
+        }
+    }
+
+    private void selectPage(Page target) {
+        if (target == Page.HERO && !hasHero()) {
+            HeroSelectionOpener.open();
+            return;
+        }
+
+        page = target;
+        lastPage = target;
+        currentTab = Tab.STATUS;
+        minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.BOOK_PAGE_TURN, 1.0F));
+    }
+
+    private int pageTabX(Page tab) {
+        return left() + PAGE_TAB_X + tab.ordinal() * (PAGE_TAB_WIDTH + PAGE_TAB_GAP);
+    }
+
+    private int pageTabY() {
+        return top() - 2 - PAGE_TAB_HEIGHT;
+    }
+
+    private boolean isOverPageTab(Page tab, double mouseX, double mouseY) {
+        return mouseX >= pageTabX(tab) && mouseX < pageTabX(tab) + PAGE_TAB_WIDTH
+                && mouseY >= pageTabY() && mouseY < pageTabY() + PAGE_TAB_HEIGHT;
+    }
+
+    // =========================================================
+    // PLAYER PAGE
+    // =========================================================
+
+    private void renderPlayerPage(GuiGraphics gui, Minecraft mc, int mouseX, int mouseY) {
+
+        final LocalPlayer player = mc.player;
+        final int x = left();
+        final int y = top();
+
+        final int previewLeft = x + PREVIEW_X;
+        final int previewTop = y + PREVIEW_Y;
+
+        gui.fill(previewLeft, previewTop, previewLeft + PREVIEW_WIDTH, previewTop + PREVIEW_HEIGHT, COLOR_PREVIEW);
+
+        InventoryScreen.renderEntityInInventoryFollowsMouse(
+                gui,
+                previewLeft,
+                previewTop,
+                previewLeft + PREVIEW_WIDTH,
+                previewTop + PREVIEW_HEIGHT,
+                PLAYER_PREVIEW_SCALE,
+                PLAYER_PREVIEW_OFFSET,
+                mouseX,
+                mouseY,
+                player
+        );
+
+        final int previewCenterX = previewLeft + PREVIEW_WIDTH / 2;
+        final HeroDefinition hero = HeroData.get(player).getHeroDefinition();
+
+        gui.drawCenteredString(this.font, player.getName(), previewCenterX, previewTop + PREVIEW_HEIGHT + 8, 0xFFFFFF);
+        gui.drawCenteredString(
+                this.font,
+                hero == null ? "No hero yet" : hero.getName() + " · " + hero.getRank().getDisplayName(),
+                previewCenterX,
+                previewTop + PREVIEW_HEIGHT + 20,
+                hero == null ? COLOR_LABEL : COLOR_RANK
+        );
+
+        final int infoX = x + INFO_X;
+        int infoY = y + 32;
+
+        final ManaData mana = ManaData.get(player);
+        final boolean infinite = ManaData.hasInfiniteMana(player);
+        final boolean exhausted = mana.isExhausted() && !infinite;
+
+        drawStat(gui, "Mana", infinite ? "∞" : mana.getMana() + " / " + mana.getMaxMana(),
+                infoX, infoY, INFO_WIDTH, exhausted ? COLOR_USED : 0xFFFFFFFF);
+        infoY += 12;
+        drawBar(gui, infoX, infoY, INFO_WIDTH, 6,
+                infinite ? 1 : mana.getMaxMana() > 0 ? (float) mana.getMana() / mana.getMaxMana() : 0,
+                exhausted ? COLOR_USED : COLOR_MANA);
+        infoY += 10;
+
+        if (exhausted) {
+            gui.drawString(this.font, "Exhausted", infoX, infoY, COLOR_USED);
+        }
+        infoY += 14;
+
+        final CommandSealData seals = CommandSealData.get(player);
+        final int sealColor = seals.hasTattoo() ? 0xFF000000 | seals.getColor() : COLOR_CHARGE;
+
+        drawSealCharges(gui, infoX, infoY, INFO_WIDTH, sealColor, sealColor & 0x00FFFFFF | 0x50000000);
+        infoY += 14;
+
+        gui.fill(infoX, infoY, infoX + INFO_WIDTH, infoY + 1, COLOR_SEPARATOR);
+        infoY += 8;
+
+        gui.drawString(this.font, "SPELLS", infoX, infoY, COLOR_SECTION);
+        infoY += 13;
+
+        final PlayerSpellData spells = PlayerSpellData.get(player);
+        final List<ResourceLocation> trainable = SpellNodeRegistry.getTrainableIds();
+        final long learned = trainable.stream().filter(spells::isLearned).count();
+
+        drawStat(gui, "Learned", learned + " / " + trainable.size(), infoX, infoY, INFO_WIDTH, COLOR_READY);
+        infoY += 12;
+        drawStat(gui, "Training", String.valueOf(spells.getTraining().size()), infoX, infoY, INFO_WIDTH, COLOR_MANA);
+        infoY += 12;
+
+        final String selectedLabel = "Selected";
+        final String selected = this.font.plainSubstrByWidth(
+                SpellSlots.name(spells, spells.getSelectedSlot()).getString(),
+                INFO_WIDTH - this.font.width(selectedLabel) - 6);
+
+        drawStat(gui, selectedLabel, selected, infoX, infoY, INFO_WIDTH, 0xFFFF77FF);
+
+        drawButton(gui, "Spell Tree  ›", infoButtonX(), infoButtonY(), INFO_WIDTH, isOverInfoButton(mouseX, mouseY));
     }
 
     private void renderClose(GuiGraphics gui, int mouseX, int mouseY) {
@@ -407,8 +598,8 @@ public class HeroScreen extends Screen {
         drawResistance(gui, live, infoX, infoY, INFO_WIDTH);
 
         if (ultimate(heroData) != null) {
-            drawButton(gui, "Ultimate  ›", ultimateButtonX(), ultimateButtonY(), INFO_WIDTH,
-                    isOverUltimateButton(mouseX, mouseY));
+            drawButton(gui, "Ultimate  ›", infoButtonX(), infoButtonY(), INFO_WIDTH,
+                    isOverInfoButton(mouseX, mouseY));
         }
     }
 
@@ -566,7 +757,7 @@ public class HeroScreen extends Screen {
                 innerX, rowY, innerWidth, 0xFFFFFFFF);
         rowY += 12;
 
-        drawSealCharges(gui, innerX, rowY, innerWidth);
+        drawSealCharges(gui, innerX, rowY, innerWidth, COLOR_CHARGE, COLOR_CHARGE_EMPTY);
         rowY += 12;
 
         drawUltimateReady(gui, innerX, rowY, innerWidth);
@@ -617,11 +808,11 @@ public class HeroScreen extends Screen {
         drawStat(gui, "Resistance", percent(resistance), x, y, width, statColor(resistance * 100, 0));
     }
 
-    private void drawSealCharges(GuiGraphics gui, int x, int y, int width) {
+    private void drawSealCharges(GuiGraphics gui, int x, int y, int width, int color, int emptyColor) {
         gui.drawString(this.font, "Seals", x, y, COLOR_LABEL);
 
         if (SkillLimits.isUnlimited(minecraft.player)) {
-            gui.drawString(this.font, "∞", x + width - this.font.width("∞"), y, COLOR_CHARGE);
+            gui.drawString(this.font, "∞", x + width - this.font.width("∞"), y, color);
             return;
         }
 
@@ -630,7 +821,7 @@ public class HeroScreen extends Screen {
         int glyphX = x + width - CommandSealData.MAX_CHARGES * glyphWidth + 1;
 
         for (int i = 0; i < CommandSealData.MAX_CHARGES; i++) {
-            gui.drawString(this.font, CHARGE_GLYPH, glyphX, y, i < charges ? COLOR_CHARGE : COLOR_CHARGE_EMPTY);
+            gui.drawString(this.font, CHARGE_GLYPH, glyphX, y, i < charges ? color : emptyColor);
             glyphX += glyphWidth;
         }
     }
@@ -932,11 +1123,11 @@ public class HeroScreen extends Screen {
         gui.drawCenteredString(this.font, label, x + width / 2, y + (BUTTON_HEIGHT - 8) / 2, 0xFFFFFF);
     }
 
-    private int ultimateButtonX() {
+    private int infoButtonX() {
         return left() + INFO_X;
     }
 
-    private int ultimateButtonY() {
+    private int infoButtonY() {
         return top() + GUI_HEIGHT - BUTTON_HEIGHT - 12;
     }
 
@@ -948,9 +1139,9 @@ public class HeroScreen extends Screen {
         return top() + GUI_HEIGHT - BUTTON_HEIGHT - 10;
     }
 
-    private boolean isOverUltimateButton(double mouseX, double mouseY) {
-        return mouseX >= ultimateButtonX() && mouseX <= ultimateButtonX() + INFO_WIDTH
-                && mouseY >= ultimateButtonY() && mouseY <= ultimateButtonY() + BUTTON_HEIGHT;
+    private boolean isOverInfoButton(double mouseX, double mouseY) {
+        return mouseX >= infoButtonX() && mouseX <= infoButtonX() + INFO_WIDTH
+                && mouseY >= infoButtonY() && mouseY <= infoButtonY() + BUTTON_HEIGHT;
     }
 
     private boolean isOverBackButton(double mouseX, double mouseY) {
@@ -963,7 +1154,7 @@ public class HeroScreen extends Screen {
     }
 
     private boolean detailsVisible() {
-        return detailsOpen && currentTab == Tab.STATUS;
+        return detailsOpen && page == Page.HERO && currentTab == Tab.STATUS;
     }
 
     private int detailsX() {
@@ -1067,9 +1258,11 @@ public class HeroScreen extends Screen {
             return true;
         }
 
-        if (currentTab == Tab.STATUS && isOverDetailsTab(mouseX, mouseY)) {
-            detailsOpen = !detailsOpen;
-            return true;
+        for (Page tab : Page.values()) {
+            if ((tab != page || currentTab != Tab.STATUS) && isOverPageTab(tab, mouseX, mouseY)) {
+                selectPage(tab);
+                return true;
+            }
         }
 
         if (isOverGear(mouseX, mouseY)) {
@@ -1080,10 +1273,24 @@ public class HeroScreen extends Screen {
             return true;
         }
 
+        if (page == Page.PLAYER && currentTab == Tab.STATUS) {
+            if (isOverInfoButton(mouseX, mouseY)) {
+                minecraft.setScreen(new SpellTreeScreen(this));
+                return true;
+            }
+
+            return super.mouseClicked(mouseX, mouseY, button);
+        }
+
+        if (page == Page.HERO && currentTab == Tab.STATUS && isOverDetailsTab(mouseX, mouseY)) {
+            detailsOpen = !detailsOpen;
+            return true;
+        }
+
         final Minecraft mc = Minecraft.getInstance();
 
         if (currentTab == Tab.STATUS && mc.player != null && ultimate(HeroData.get(mc.player)) != null
-                && isOverUltimateButton(mouseX, mouseY)) {
+                && isOverInfoButton(mouseX, mouseY)) {
             currentTab = Tab.ULTIMATE;
             return true;
         }

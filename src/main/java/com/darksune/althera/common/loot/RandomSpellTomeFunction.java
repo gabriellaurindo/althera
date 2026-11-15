@@ -1,6 +1,5 @@
 package com.darksune.althera.common.loot;
 
-import com.darksune.althera.common.item.SpellTomeItem;
 import com.darksune.althera.common.item.component.AltheraDataComponents;
 import com.darksune.althera.common.item.component.SpellTome;
 import com.darksune.althera.common.spell.SpellNodeRegistry;
@@ -38,7 +37,7 @@ public class RandomSpellTomeFunction extends LootItemConditionalFunction {
     @Override
     protected ItemStack run(ItemStack stack, LootContext context) {
 
-        List<ResourceLocation> candidates = SpellTomeItem.trainableNodes().stream()
+        List<ResourceLocation> candidates = SpellNodeRegistry.getTrainableIds().stream()
                 .filter(id -> SpellNodeRegistry.get(id).tier() == tier)
                 .toList();
 

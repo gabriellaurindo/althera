@@ -76,8 +76,10 @@ public record SkillSlotState(int timerTicks, int totalTicks, boolean active, @Nu
 
         Integer cooldown = SkillLimits.isUnlimited(player) || !data.isOnCooldown(nodeId) ? null : data.getCooldown(nodeId);
 
-        return of(null, 0, cooldown, spell.cooldownTicks(),
-                spellBlocker(data, nodeId, spell.player().orElseThrow(), mana(player)), false);
+        PlayerSpell playerSpell = spell.player().orElseThrow();
+
+        return of(null, 0, cooldown, playerSpell.cooldownTicks(),
+                spellBlocker(data, nodeId, playerSpell, mana(player)), false);
     }
 
     @Nullable

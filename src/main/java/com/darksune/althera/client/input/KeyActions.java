@@ -2,11 +2,9 @@ package com.darksune.althera.client.input;
 
 import com.darksune.althera.client.hud.SpellSlots;
 import com.darksune.althera.client.screen.HeroScreen;
-import com.darksune.althera.client.screen.HeroSelectionOpener;
 import com.darksune.althera.client.screen.SealWheelScreen;
 import com.darksune.althera.client.screen.SpellTreeScreen;
 import com.darksune.althera.client.screen.SpellWheelScreen;
-import com.darksune.althera.common.attachment.HeroData;
 import com.darksune.althera.common.commandseal.skill.CommandSealSkillType;
 import com.darksune.althera.common.item.SpellBookItem;
 import com.darksune.althera.common.spell.PlayerSpellData;
@@ -41,11 +39,8 @@ public class KeyActions {
 
     public static void handleHero() {
         Minecraft mc = Minecraft.getInstance();
-        HeroData heroData = HeroData.get(mc.player);
-        if (mc.screen == null && heroData.getHeroDefinition() != null) {
+        if (mc.screen == null && mc.player != null) {
             mc.setScreen(new HeroScreen());
-        } else if (mc.screen == null) {
-            HeroSelectionOpener.open();
         } else {
             mc.setScreen(null);
         }
@@ -110,6 +105,18 @@ public class KeyActions {
         if (mc.screen != null || mc.player == null) return;
 
         selectSpellSlot(PlayerSpellData.get(mc.player).nextFilledSlot(direction));
+    }
+
+    public static boolean handleSpellScroll(final double delta) {
+        Minecraft mc = Minecraft.getInstance();
+        LocalPlayer player = mc.player;
+        if (delta == 0.0D || mc.screen != null || player == null || !SpellBookItem.isHeldBy(player)
+                || !AltheraKeybinds.isHeld(AltheraKeybinds.SPELL_SCROLL)) {
+            return false;
+        }
+
+        cycleSpell(delta > 0.0D ? -1 : 1);
+        return true;
     }
 
     public static void selectSpellSlot(final int slot) {

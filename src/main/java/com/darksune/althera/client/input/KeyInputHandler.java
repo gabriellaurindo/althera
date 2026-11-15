@@ -4,6 +4,7 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.neoforge.client.event.InputEvent;
 
 @EventBusSubscriber(value = Dist.CLIENT)
 public class KeyInputHandler {
@@ -47,6 +48,13 @@ public class KeyInputHandler {
             KeyActions.handleSpellTree();
         }
 
+    }
+
+    @SubscribeEvent
+    public static void onMouseScroll(InputEvent.MouseScrollingEvent event) {
+        if (KeyActions.handleSpellScroll(event.getScrollDeltaY())) {
+            event.setCanceled(true);
+        }
     }
 
     private static void handleSummonKey() {
