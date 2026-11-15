@@ -1,0 +1,8 @@
+{
+  "parent": "althera:knowledge",
+  "x": -2,
+  "y": 1,
+  "branch": "defense",
+  "element": "fire",
+  "tier": 1
+}

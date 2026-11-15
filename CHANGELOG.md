@@ -6,6 +6,16 @@ and generates the GitHub Release, CurseForge and Discord notes from it.
 
 ## [Unreleased]
 
+### Added
+- **Player spells (groundwork)**: the spell tree now exists in data. Each player tracks training progress per spell,
+  which spells are in training and their spell book slots (kept on death). Fire Bolt, Lightning Strike and Frost Shard
+  are the first player spells; the other branches are `?` placeholders for now. Casting, the spell book and the tree
+  screen come next.
+- Datapacks: spells take an optional `player` block (`mana_cost`, `description`) and the tree is defined in
+  `data/<namespace>/spell_node/*.json` (`spell`, `parent`, `x`, `y`, `branch`, `element`, `tier`, `name`).
+- `/althera_spell info | reset | progress <node> <value> | train <node> | untrain <node> [player]` (cheats) to inspect
+  and set spell training.
+
 ## [4.3.0] - 2026-11-03 - Ritual Rework (feature)
 
 ### Added

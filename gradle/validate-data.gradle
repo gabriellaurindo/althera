@@ -18,7 +18,11 @@ class DataValidator {
             'dodge_chance', 'strong_against'] as Set
     static final Set<String> ULTIMATE_KEYS = ['name', 'description', 'mana_cost', 'channel_ticks', 'cooldown_ticks',
             'on_start', 'on_tick', 'on_end'] as Set
-    static final Set<String> SPELL_KEYS = ['name', 'range', 'cooldown_ticks', 'cast_ticks', 'on_cast'] as Set
+    static final Set<String> SPELL_KEYS = ['name', 'player', 'range', 'cooldown_ticks', 'cast_ticks', 'on_cast'] as Set
+    static final Set<String> PLAYER_SPELL_KEYS = ['mana_cost', 'description'] as Set
+    static final Set<String> SPELL_NODE_KEYS = ['name', 'spell', 'parent', 'x', 'y', 'branch', 'element', 'tier'] as Set
+    static final Set<String> SPELL_BRANCHES = ['none', 'damage', 'defense', 'utility'] as Set
+    static final Set<String> SPELL_ELEMENTS = ['none', 'fire', 'lightning', 'ice'] as Set
     static final Set<String> FILTER_KEYS = ['entity_tag', 'hostile', 'exclude_target'] as Set
     static final Set<String> ENEMY_MAGE_KEYS = ['name', 'faction', 'stats', 'spells', 'targets', 'servant', 'tiers',
             'command_seals', 'ultimate', 'home', 'loot_table'] as Set
@@ -266,10 +270,55 @@ class DataValidator {
         Map json = read(file)
         if (json == null) return
         checkKeys(where, json, SPELL_KEYS)
+        if (checkObject(where, json, 'player', PLAYER_SPELL_KEYS)) checkNumber("${where} player", json.player, 'mana_cost', true, 1)
         checkNumber(where, json, 'range', false, 0)
         checkNumber(where, json, 'cooldown_ticks', false, 1)
         checkNumber(where, json, 'cast_ticks', false, 0)
         checkEffects("${where} on_cast", json.on_cast)
+    }
+
+    void validateSpellNode(File file, Map<String, String> parents) {
+        String where = "spell_node/${file.name}"
+        Map json = read(file)
+        if (json == null) return
+        checkKeys(where, json, SPELL_NODE_KEYS)
+        checkNumber(where, json, 'x', true)
+        checkNumber(where, json, 'y', true)
+        checkNumber(where, json, 'tier', false, 1)
+        if (json.branch != null && !SPELL_BRANCHES.contains(json.branch)) error(where, "unknown branch '${json.branch}' (${SPELL_BRANCHES.join(', ')})")
+        if (json.element != null && !SPELL_ELEMENTS.contains(json.element)) error(where, "unknown element '${json.element}' (${SPELL_ELEMENTS.join(', ')})")
+
+        if (json.spell != null) {
+            String spell = toId(json.spell.toString(), false)
+            if (isOurs(spell)) {
+                File spellFile = dataFile(spell, 'spell')
+                if (!spellFile.exists()) error(where, "spell '${spell}' has no spell file")
+                else if (!(read(spellFile)?.player instanceof Map)) error(where, "spell '${spell}' has no 'player' block")
+            }
+        }
+
+        String id = "althera:${file.name - '.json'}".toString()
+        if (json.parent == null) {
+            parents[id] = null
+            return
+        }
+        String parent = toId(json.parent.toString(), false)
+        parents[id] = parent
+        if (isOurs(parent) && !dataFile(parent, 'spell_node').exists()) error(where, "parent '${parent}' has no spell_node file")
+    }
+
+    void checkSpellNodeCycles(Map<String, String> parents) {
+        parents.keySet().each { start ->
+            Set<String> seen = [] as Set
+            String current = start
+            while (current != null && parents.containsKey(current)) {
+                if (!seen.add(current)) {
+                    error("spell_node/${start - 'althera:'}.json", 'parent chain loops back on itself')
+                    return
+                }
+                current = parents[current]
+            }
+        }
     }
 
     boolean checkObject(String where, Map json, String key, Set<String> allowed) {
@@ -417,6 +466,9 @@ class DataValidator {
         new File(data, 'ultimate').listFiles({ it.name.endsWith('.json') } as FileFilter)?.sort()?.each { validateUltimate(it) }
         new File(data, 'hero').listFiles({ it.name.endsWith('.json') } as FileFilter)?.sort()?.each { validateHero(it) }
         new File(data, 'spell').listFiles({ it.name.endsWith('.json') } as FileFilter)?.sort()?.each { validateSpell(it) }
+        Map<String, String> spellParents = [:]
+        new File(data, 'spell_node').listFiles({ it.name.endsWith('.json') } as FileFilter)?.sort()?.each { validateSpellNode(it, spellParents) }
+        checkSpellNodeCycles(spellParents)
         new File(data, 'enemy_mage').listFiles({ it.name.endsWith('.json') } as FileFilter)?.sort()?.each { validateEnemyMage(it) }
         new File(data, 'worldgen/configured_feature').listFiles({ it.name.endsWith('.json') } as FileFilter)?.sort()?.each { validateShrine(it) }
         return errors
@@ -425,7 +477,7 @@ class DataValidator {
 
 tasks.register('validateData') {
     group = 'verification'
-    description = 'Checks the hero, hero class, ultimate, spell, enemy mage and shrine JSON files for typos and broken references.'
+    description = 'Checks the hero, hero class, ultimate, spell, spell node, enemy mage and shrine JSON files for typos and broken references.'
     def resources = file('src/main/resources')
     inputs.dir(resources)
     doLast {

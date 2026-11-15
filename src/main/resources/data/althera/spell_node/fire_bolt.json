@@ -1,0 +1,9 @@
+{
+  "spell": "althera:fire_bolt",
+  "parent": "althera:knowledge",
+  "x": -1,
+  "y": 2,
+  "branch": "damage",
+  "element": "fire",
+  "tier": 1
+}

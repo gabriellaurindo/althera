@@ -13,12 +13,17 @@ import com.darksune.althera.common.hero.HeroLoader;
 import com.darksune.althera.common.hero.HeroRegistry;
 import com.darksune.althera.common.registry.AltheraRegistries;
 import com.darksune.althera.common.spell.SpellLoader;
+import com.darksune.althera.common.spell.SpellNodeLoader;
+import com.darksune.althera.common.spell.SpellNodeRegistry;
+import com.darksune.althera.common.spell.SpellRegistry;
 import com.darksune.althera.common.ultimate.UltimateLoader;
 import com.darksune.althera.common.ultimate.UltimateRegistry;
 import com.darksune.althera.network.AltheraNetwork;
 import com.darksune.althera.network.packet.SyncEnemyMagesPacket;
 import com.darksune.althera.network.packet.SyncHeroClassesPacket;
 import com.darksune.althera.network.packet.SyncHeroesPacket;
+import com.darksune.althera.network.packet.SyncSpellNodesPacket;
+import com.darksune.althera.network.packet.SyncSpellsPacket;
 import com.darksune.althera.network.packet.SyncUltimatesPacket;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -49,6 +54,7 @@ public final class Althera {
         event.addListener(new HeroLoader(event.getRegistryAccess()));
         event.addListener(new UltimateLoader(event.getRegistryAccess()));
         event.addListener(new SpellLoader(event.getRegistryAccess()));
+        event.addListener(new SpellNodeLoader());
         event.addListener(new EnemyMageLoader(event.getRegistryAccess()));
     }
 
@@ -57,8 +63,10 @@ public final class Althera {
         SyncHeroClassesPacket classes = new SyncHeroClassesPacket(HeroClassRegistry.getAll());
         SyncHeroesPacket heroes = SyncHeroesPacket.of(HeroRegistry.getAll());
         SyncUltimatesPacket ultimates = new SyncUltimatesPacket(UltimateRegistry.getAll());
+        SyncSpellsPacket spells = new SyncSpellsPacket(SpellRegistry.getAll());
+        SyncSpellNodesPacket spellNodes = new SyncSpellNodesPacket(SpellNodeRegistry.getAll());
         SyncEnemyMagesPacket mages = new SyncEnemyMagesPacket(EnemyMageRegistry.getAll());
-        event.getRelevantPlayers().forEach(player -> PacketDistributor.sendToPlayer(player, classes, heroes, ultimates, mages));
+        event.getRelevantPlayers().forEach(player -> PacketDistributor.sendToPlayer(player, classes, heroes, ultimates, spells, spellNodes, mages));
     }
 
     @SubscribeEvent
