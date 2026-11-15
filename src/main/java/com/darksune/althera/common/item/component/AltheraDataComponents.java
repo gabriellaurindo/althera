@@ -18,6 +18,11 @@ public final class AltheraDataComponents {
                     .persistent(HeroCatalyst.CODEC)
                     .networkSynchronized(HeroCatalyst.STREAM_CODEC));
 
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<SpellTome>> SPELL_TOME =
+            COMPONENTS.registerComponentType("spell_tome", builder -> builder
+                    .persistent(SpellTome.CODEC)
+                    .networkSynchronized(SpellTome.STREAM_CODEC));
+
     private AltheraDataComponents() {
     }
 

@@ -10,6 +10,13 @@
   "item.althera.hero_catalyst.rank": "Rank %s",
   "item.althera.spell_book": "Spell Book",
   "item.althera.spell_book.tooltip": "Right-click to cast the selected spell",
+  "item.althera.spell_tome": "Spell Tome",
+  "item.althera.spell_tome.named": "Tome of %s",
+  "item.althera.spell_tome.faded": "Faded Tome",
+  "item.althera.spell_tome.faded.hint": "Its spell no longer answers",
+  "item.althera.spell_tome.details": "%s · Tier %s",
+  "item.althera.spell_tome.progress": "+%s%% training",
+  "item.althera.spell_tome.tooltip": "Right-click to study",
 
   "entity.althera.enemy_mage": "Enemy Mage",
 

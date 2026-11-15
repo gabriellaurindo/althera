@@ -33,6 +33,30 @@
           ]
         }
       ]
+    },
+    {
+      "rolls": 1,
+      "conditions": [
+        {
+          "condition": "minecraft:killed_by_player"
+        },
+        {
+          "condition": "minecraft:random_chance",
+          "chance": 0.05
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "althera:spell_tome",
+          "functions": [
+            {
+              "function": "althera:random_spell_tome",
+              "tier": 1
+            }
+          ]
+        }
+      ]
     }
   ]
 }

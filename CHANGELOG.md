@@ -32,6 +32,11 @@ and generates the GitHub Release, CurseForge and Discord notes from it.
     select the previous / next spell. All three can be changed in Controls.
   - Held spells are supported for datapacks: `charge` spells drain their mana while charging (`cast_ticks`) and fire
     on release, `continuous` spells drain their `mana_cost` per second while held. No built-in spell uses them yet.
+- **Spell Tome**: High Nobles (red) have a **5%** chance to drop a tome of a random basic spell. Right-click it to
+  study: it adds **+50%** of that spell's training at once, whatever the spell's state (not training yet, or even
+  locked behind a spell you don't know: the progress is kept and a spell finished this way stays unusable until the
+  spells before it are learned). Tomes of a spell you already know can't be used. The creative tab has one tome per
+  spell.
 - Datapacks: spells take an optional `player` block (`mana_cost`, `description`, `cast_mode`) and the tree is defined
   in `data/<namespace>/spell_node/*.json` (`spell`, `parent`, `x`, `y`, `branch`, `element`, `tier`, `name`).
 - `/althera_spell info | reset | progress <node> <value> | train <node> | untrain <node> | cast <node> [player]`

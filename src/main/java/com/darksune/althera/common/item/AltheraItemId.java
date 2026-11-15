@@ -14,6 +14,8 @@ public class AltheraItemId {
 
     public static final ResourceLocation SPELL_BOOK = id("spell_book");
 
+    public static final ResourceLocation SPELL_TOME = id("spell_tome");
+
     //Block items
     public static final ResourceLocation RITUAL_CORE = id("ritual_core");
     public static final ResourceLocation NOBLE_SIGIL = id("noble_sigil");
