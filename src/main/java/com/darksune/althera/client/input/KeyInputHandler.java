@@ -31,6 +31,18 @@ public class KeyInputHandler {
             KeyActions.handleUltimateSkill();
         }
 
+        while (AltheraKeybinds.SPELL_PREVIOUS.consumeClick()) {
+            KeyActions.cycleSpell(-1);
+        }
+
+        while (AltheraKeybinds.SPELL_NEXT.consumeClick()) {
+            KeyActions.cycleSpell(1);
+        }
+
+        if (AltheraKeybinds.SPELL_WHEEL.consumeClick()) {
+            KeyActions.handleSpellWheel();
+        }
+
     }
 
     private static void handleSummonKey() {

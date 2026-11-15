@@ -8,6 +8,8 @@
   "item.althera.hero_catalyst.faded": "Faded Catalyst",
   "item.althera.hero_catalyst.faded.hint": "Its class no longer answers",
   "item.althera.hero_catalyst.rank": "Rank %s",
+  "item.althera.spell_book": "Spell Book",
+  "item.althera.spell_book.tooltip": "Right-click to cast the selected spell",
 
   "entity.althera.enemy_mage": "Enemy Mage",
 
@@ -17,6 +19,9 @@
   "key.althera.seal": "Command Seal Wheel (hold)",
 
   "key.althera.ultimate.skill": "Ultimate",
+  "key.althera.spell.wheel": "Spell Wheel (hold)",
+  "key.althera.spell.previous": "Previous Spell",
+  "key.althera.spell.next": "Next Spell",
 
   "althera.commandseal.overdrive": "Overdrive",
   "althera.commandseal.revive": "Revive",

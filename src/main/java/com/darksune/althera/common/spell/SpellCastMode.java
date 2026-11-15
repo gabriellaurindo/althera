@@ -16,6 +16,10 @@ public enum SpellCastMode implements StringRepresentable {
         this.id = id;
     }
 
+    public boolean isHeld() {
+        return this != INSTANT;
+    }
+
     @Override
     public String getSerializedName() {
         return id;

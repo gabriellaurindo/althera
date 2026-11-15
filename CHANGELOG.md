@@ -15,12 +15,20 @@ and generates the GitHub Release, CurseForge and Discord notes from it.
   - Once **learned**, a spell casts at its normal cost with its full effect. Player spells hit as hard as a strong
     weapon (Fire Bolt 7.2, Frost Shard 6, Lightning Strike 4.8 plus 3.6 around the target), never hurt your own Hero
     and follow the server's PvP and team rules.
-  - Training progress is kept on death. The spell book and the spell tree screen come next; until then spells are
-    cast with `/althera_spell cast`.
+  - Training progress is kept on death. The spell tree screen comes next; until then training starts with
+    `/althera_spell train`.
+- **Spell Book**: crafted from a book, two amethyst shards and a lapis lazuli. It has **9 spell slots**: a spell joins
+  the first free slot when you start training it or learn it. **Right-click** with the book casts the selected spell
+  (at double mana while training). Holding the book shows the selected spell, its cost, training progress and
+  recharge next to the hotbar.
+  - **V** (hold) opens the **spell wheel** with the 9 slots: point at one and release to select it. **Z** / **B**
+    select the previous / next spell. All three can be changed in Controls.
+  - Held spells are supported for datapacks: `charge` spells drain their mana while charging (`cast_ticks`) and fire
+    on release, `continuous` spells drain their `mana_cost` per second while held. No built-in spell uses them yet.
 - Datapacks: spells take an optional `player` block (`mana_cost`, `description`, `cast_mode`) and the tree is defined
   in `data/<namespace>/spell_node/*.json` (`spell`, `parent`, `x`, `y`, `branch`, `element`, `tier`, `name`).
 - `/althera_spell info | reset | progress <node> <value> | train <node> | untrain <node> | cast <node> [player]`
-  (cheats) to inspect, set and test spell training.
+  and `/althera_spell equip <slot> <node>` / `unequip <slot>` (cheats) to inspect, set and test spells.
 
 ## [4.3.0] - 2026-11-03 - Ritual Rework (feature)
 

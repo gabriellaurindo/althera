@@ -140,7 +140,13 @@ public class PlayerSpellData extends SyncableAttachment {
 
         markDirty();
 
-        return !wasLearned && isLearned(node);
+        boolean learnedNow = !wasLearned && isLearned(node);
+
+        if (learnedNow) {
+            equip(node);
+        }
+
+        return learnedNow;
     }
 
     public boolean isTraining(ResourceLocation node) {
@@ -154,6 +160,7 @@ public class PlayerSpellData extends SyncableAttachment {
         }
 
         training.add(node);
+        equip(node);
         markDirty();
 
         return true;
@@ -162,6 +169,7 @@ public class PlayerSpellData extends SyncableAttachment {
     public void stopTraining(ResourceLocation node) {
 
         if (training.remove(node)) {
+            unequip(node);
             markDirty();
         }
     }
@@ -255,8 +263,56 @@ public class PlayerSpellData extends SyncableAttachment {
     }
 
     public void setSlot(int index, @Nullable ResourceLocation node) {
+
+        if (node != null) {
+            unequip(node);
+        }
+
         slots[index] = node;
         markDirty();
+    }
+
+    public int slotOf(ResourceLocation node) {
+
+        for (int i = 0; i < SLOT_COUNT; i++) {
+            if (node.equals(slots[i])) {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
+    public boolean equip(ResourceLocation node) {
+
+        if (slotOf(node) >= 0) {
+            return true;
+        }
+
+        for (int i = 0; i < SLOT_COUNT; i++) {
+            if (slots[i] == null) {
+                slots[i] = node;
+                markDirty();
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public void unequip(ResourceLocation node) {
+
+        int index = slotOf(node);
+
+        if (index >= 0) {
+            slots[index] = null;
+            markDirty();
+        }
+    }
+
+    @Nullable
+    public ResourceLocation getSelectedNode() {
+        return slots[selectedSlot];
     }
 
     public int getSelectedSlot() {
@@ -266,6 +322,20 @@ public class PlayerSpellData extends SyncableAttachment {
     public void setSelectedSlot(int index) {
         selectedSlot = Math.floorMod(index, SLOT_COUNT);
         markDirty();
+    }
+
+    public int nextFilledSlot(int direction) {
+
+        for (int step = 1; step <= SLOT_COUNT; step++) {
+
+            int index = Math.floorMod(selectedSlot + step * direction, SLOT_COUNT);
+
+            if (slots[index] != null) {
+                return index;
+            }
+        }
+
+        return selectedSlot;
     }
 
     private List<Slot> slotList() {

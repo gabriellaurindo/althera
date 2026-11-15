@@ -38,6 +38,27 @@ public class AltheraKeybinds {
             "key.categories.althera"
     );
 
+    public static final KeyMapping SPELL_WHEEL = new KeyMapping(
+            "key.althera.spell.wheel",
+            InputConstants.Type.KEYSYM,
+            GLFW.GLFW_KEY_V,
+            "key.categories.althera"
+    );
+
+    public static final KeyMapping SPELL_PREVIOUS = new KeyMapping(
+            "key.althera.spell.previous",
+            InputConstants.Type.KEYSYM,
+            GLFW.GLFW_KEY_Z,
+            "key.categories.althera"
+    );
+
+    public static final KeyMapping SPELL_NEXT = new KeyMapping(
+            "key.althera.spell.next",
+            InputConstants.Type.KEYSYM,
+            GLFW.GLFW_KEY_B,
+            "key.categories.althera"
+    );
+
     public static void register(RegisterKeyMappingsEvent event) {
 
         for (Field field : AltheraKeybinds.class.getDeclaredFields()) {

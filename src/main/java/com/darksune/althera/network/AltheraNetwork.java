@@ -7,6 +7,7 @@ import com.darksune.althera.network.packet.OpenHeroSelectionPacket;
 import com.darksune.althera.network.packet.RequestHeroStatsPacket;
 import com.darksune.althera.network.packet.SealTattooPacket;
 import com.darksune.althera.network.packet.SelectHeroPacket;
+import com.darksune.althera.network.packet.SelectSpellSlotPacket;
 import com.darksune.althera.network.packet.SummonPacket;
 import com.darksune.althera.network.packet.SyncEnemyMagesPacket;
 import com.darksune.althera.network.packet.SyncHeroClassesPacket;
@@ -30,7 +31,7 @@ public final class AltheraNetwork {
 
     private static void registerPayloads(RegisterPayloadHandlersEvent event) {
 
-        var registrar = event.registrar("11");
+        var registrar = event.registrar("12");
 
         registrar.playToServer(
                 SummonPacket.TYPE,
@@ -78,6 +79,12 @@ public final class AltheraNetwork {
                 RequestHeroStatsPacket.TYPE,
                 RequestHeroStatsPacket.STREAM_CODEC,
                 RequestHeroStatsPacket::handle
+        );
+
+        registrar.playToServer(
+                SelectSpellSlotPacket.TYPE,
+                SelectSpellSlotPacket.STREAM_CODEC,
+                SelectSpellSlotPacket::handle
         );
 
         registrar.playToClient(

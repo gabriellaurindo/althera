@@ -6,6 +6,7 @@ import com.darksune.althera.common.spell.SpellNode;
 import com.darksune.althera.common.spell.SpellNodeRegistry;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.FloatArgumentType;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -62,6 +63,22 @@ public class SpellCommand {
                                 .then(withTarget(
                                         Commands.argument("node", ResourceLocationArgument.id()).suggests(NODES),
                                         SpellCommand::cast
+                                ))
+                        )
+
+                        .then(Commands.literal("equip")
+                                .then(Commands.argument("slot", IntegerArgumentType.integer(1, PlayerSpellData.SLOT_COUNT))
+                                        .then(withTarget(
+                                                Commands.argument("node", ResourceLocationArgument.id()).suggests(NODES),
+                                                SpellCommand::equip
+                                        ))
+                                )
+                        )
+
+                        .then(Commands.literal("unequip")
+                                .then(withTarget(
+                                        Commands.argument("slot", IntegerArgumentType.integer(1, PlayerSpellData.SLOT_COUNT)),
+                                        SpellCommand::unequip
                                 ))
                         )
 
@@ -175,6 +192,34 @@ public class SpellCommand {
         ResourceLocation id = node(ctx);
 
         return id != null && SpellCastSystem.cast(player, id) ? 1 : 0;
+    }
+
+    private static int equip(CommandContext<CommandSourceStack> ctx, ServerPlayer player) {
+
+        ResourceLocation id = node(ctx);
+
+        if (id == null) {
+            return 0;
+        }
+
+        int slot = IntegerArgumentType.getInteger(ctx, "slot");
+
+        PlayerSpellData.get(player).setSlot(slot - 1, id);
+
+        ctx.getSource().sendSuccess(() -> Component.literal("§bEquipped " + id + " in slot " + slot + "."), true);
+
+        return 1;
+    }
+
+    private static int unequip(CommandContext<CommandSourceStack> ctx, ServerPlayer player) {
+
+        int slot = IntegerArgumentType.getInteger(ctx, "slot");
+
+        PlayerSpellData.get(player).setSlot(slot - 1, null);
+
+        ctx.getSource().sendSuccess(() -> Component.literal("§bCleared slot " + slot + "."), true);
+
+        return 1;
     }
 
     private static int stopTraining(CommandContext<CommandSourceStack> ctx, ServerPlayer player) {
