@@ -149,7 +149,9 @@ public final class SpellBookHudRenderer {
         } else if (note != null) {
             gui.drawString(font, note, x, y + font.lineHeight, COLOR_TRAINING);
         } else if (mana != null) {
-            gui.drawString(font, mana, x, y + font.lineHeight, COLOR_DETAIL);
+            Component level = SpellSlots.level(data, slot);
+            Component detail = level == null ? mana : level.copy().append(" · ").append(mana);
+            gui.drawString(font, detail, x, y + font.lineHeight, COLOR_DETAIL);
         }
     }
 }

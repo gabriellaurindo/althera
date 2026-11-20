@@ -279,6 +279,7 @@ The system is designed to support future expansion and potentially community-cre
 ## 🔗 Related Systems
 
 - [Command Seals & Ultimates](Command-Seals-and-Ultimates)
+- [Spells](Spells)
 - [Commands](Commands)
 - [Ritual System](Ritual-System)
 

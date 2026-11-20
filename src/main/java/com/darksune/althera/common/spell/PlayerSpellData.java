@@ -15,6 +15,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -37,6 +38,19 @@ public class PlayerSpellData extends SyncableAttachment {
 
     private final Map<ResourceLocation, Integer> cooldowns = new HashMap<>();
 
+    private final Map<ResourceLocation, Integer> spellXp = new HashMap<>();
+
+    private final Map<SpellElement, Integer> elementXp = new EnumMap<>(SpellElement.class);
+
+    public record LevelUps(int spellLevel, int elementLevel) {
+
+        public static final LevelUps NONE = new LevelUps(0, 0);
+
+        public boolean any() {
+            return spellLevel > 0 || elementLevel > 0;
+        }
+    }
+
     private record Slot(int index, ResourceLocation node) {
 
         private static final Codec<Slot> CODEC = RecordCodecBuilder.create(instance -> instance.group(
@@ -53,9 +67,13 @@ public class PlayerSpellData extends SyncableAttachment {
 
             Slot.CODEC.listOf().optionalFieldOf("slots", List.of()).forGetter(PlayerSpellData::slotList),
 
-            Codec.intRange(0, SLOT_COUNT - 1).optionalFieldOf("selectedSlot", 0).forGetter(PlayerSpellData::getSelectedSlot)
+            Codec.intRange(0, SLOT_COUNT - 1).optionalFieldOf("selectedSlot", 0).forGetter(PlayerSpellData::getSelectedSlot),
 
-    ).apply(instance, (progress, training, slots, selectedSlot) -> {
+            Codec.unboundedMap(ResourceLocation.CODEC, Codec.INT).optionalFieldOf("spellXp", Map.of()).forGetter(data -> data.spellXp),
+
+            Codec.unboundedMap(SpellElement.CODEC, Codec.INT).optionalFieldOf("elementXp", Map.of()).forGetter(data -> data.elementXp)
+
+    ).apply(instance, (progress, training, slots, selectedSlot, spellXp, elementXp) -> {
 
         PlayerSpellData data = new PlayerSpellData();
 
@@ -66,6 +84,10 @@ public class PlayerSpellData extends SyncableAttachment {
         slots.forEach(slot -> data.slots[slot.index()] = slot.node());
 
         data.selectedSlot = selectedSlot;
+
+        data.spellXp.putAll(spellXp);
+
+        data.elementXp.putAll(elementXp);
 
         return data;
     }));
@@ -85,6 +107,10 @@ public class PlayerSpellData extends SyncableAttachment {
                 buf.writeVarInt(data.selectedSlot);
 
                 buf.writeMap(data.cooldowns, FriendlyByteBuf::writeResourceLocation, FriendlyByteBuf::writeVarInt);
+
+                buf.writeMap(data.spellXp, FriendlyByteBuf::writeResourceLocation, FriendlyByteBuf::writeVarInt);
+
+                buf.writeMap(data.elementXp, FriendlyByteBuf::writeEnum, FriendlyByteBuf::writeVarInt);
             },
 
             buf -> {
@@ -102,6 +128,10 @@ public class PlayerSpellData extends SyncableAttachment {
                 data.selectedSlot = buf.readVarInt();
 
                 data.cooldowns.putAll(buf.readMap(FriendlyByteBuf::readResourceLocation, FriendlyByteBuf::readVarInt));
+
+                data.spellXp.putAll(buf.readMap(FriendlyByteBuf::readResourceLocation, FriendlyByteBuf::readVarInt));
+
+                data.elementXp.putAll(buf.readMap(b -> b.readEnum(SpellElement.class), FriendlyByteBuf::readVarInt));
 
                 return data;
             });
@@ -236,6 +266,81 @@ public class PlayerSpellData extends SyncableAttachment {
                 : SpellNodeState.LOCKED;
     }
 
+    public int getSpellXp(ResourceLocation node) {
+        return spellXp.getOrDefault(node, 0);
+    }
+
+    public int getSpellLevel(ResourceLocation node) {
+        return SpellProficiency.levelFor(getSpellXp(node), SpellProficiency.SPELL_BASE_XP);
+    }
+
+    public float getSpellLevelProgress(ResourceLocation node) {
+        return SpellProficiency.progressInLevel(getSpellXp(node), SpellProficiency.SPELL_BASE_XP);
+    }
+
+    public int getElementXp(SpellElement element) {
+        return elementXp.getOrDefault(element, 0);
+    }
+
+    public int getElementLevel(SpellElement element) {
+        return SpellProficiency.levelFor(getElementXp(element), SpellProficiency.ELEMENT_BASE_XP);
+    }
+
+    public float getElementLevelProgress(SpellElement element) {
+        return SpellProficiency.progressInLevel(getElementXp(element), SpellProficiency.ELEMENT_BASE_XP);
+    }
+
+    public LevelUps addXp(ResourceLocation node, SpellElement element, int amount) {
+
+        if (amount <= 0) {
+            return LevelUps.NONE;
+        }
+
+        int spellBefore = getSpellLevel(node);
+        setSpellXp(node, getSpellXp(node) + amount);
+        int spellAfter = getSpellLevel(node);
+
+        int elementAfter = 0;
+
+        if (element != SpellElement.NONE) {
+            int elementBefore = getElementLevel(element);
+            setElementXp(element, getElementXp(element) + amount);
+            elementAfter = getElementLevel(element) > elementBefore ? getElementLevel(element) : 0;
+        }
+
+        return new LevelUps(spellAfter > spellBefore ? spellAfter : 0, elementAfter);
+    }
+
+    public void setSpellXp(ResourceLocation node, int xp) {
+
+        int clamped = Mth.clamp(xp, 0, SpellProficiency.maxXp(SpellProficiency.SPELL_BASE_XP));
+
+        if (clamped == 0) {
+            spellXp.remove(node);
+        } else {
+            spellXp.put(node, clamped);
+        }
+
+        markDirty();
+    }
+
+    public void setElementXp(SpellElement element, int xp) {
+
+        if (element == SpellElement.NONE) {
+            return;
+        }
+
+        int clamped = Mth.clamp(xp, 0, SpellProficiency.maxXp(SpellProficiency.ELEMENT_BASE_XP));
+
+        if (clamped == 0) {
+            elementXp.remove(element);
+        } else {
+            elementXp.put(element, clamped);
+        }
+
+        markDirty();
+    }
+
     public boolean isOnCooldown(ResourceLocation node) {
         return cooldowns.containsKey(node);
     }
@@ -364,6 +469,8 @@ public class PlayerSpellData extends SyncableAttachment {
         Arrays.fill(slots, null);
         selectedSlot = 0;
         cooldowns.clear();
+        spellXp.clear();
+        elementXp.clear();
         markDirty();
     }
 

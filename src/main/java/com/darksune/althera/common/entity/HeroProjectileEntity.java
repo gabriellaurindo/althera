@@ -1,5 +1,6 @@
 package com.darksune.althera.common.entity;
 
+import com.darksune.althera.common.spell.SpellScale;
 import com.darksune.althera.common.ultimate.effect.UltimateEffect;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
@@ -29,10 +30,18 @@ public class HeroProjectileEntity extends Projectile {
                     HeroProjectileEntity.class,
                     EntityDataSerializers.PARTICLE
             );
+    private static final EntityDataAccessor<Float> VISUAL_SCALE =
+            SynchedEntityData.defineId(
+                    HeroProjectileEntity.class,
+                    EntityDataSerializers.FLOAT
+            );
     private static final int MAX_LIFE_TICKS = 40;
+    private static final int TRAIL_PARTICLES = 2;
+    private static final int BURST_PARTICLES = 8;
 
     private float damage;
     private List<UltimateEffect> onHit = List.of();
+    private SpellScale scale = SpellScale.NONE;
 
     public HeroProjectileEntity(EntityType<? extends Projectile> type, Level level) {
         super(type, level);
@@ -52,6 +61,19 @@ public class HeroProjectileEntity extends Projectile {
             final ParticleOptions particle,
             final List<UltimateEffect> onHit
     ) {
+        return shoot(caster, from, direction, damage, speed, particle, onHit, SpellScale.NONE);
+    }
+
+    public static HeroProjectileEntity shoot(
+            final SpellCaster caster,
+            final Vec3 from,
+            final Vec3 direction,
+            final float damage,
+            final float speed,
+            final ParticleOptions particle,
+            final List<UltimateEffect> onHit,
+            final SpellScale scale
+    ) {
         final LivingEntity hero = caster.entity();
         final HeroProjectileEntity projectile = AltheraEntities.HERO_PROJECTILE.get().create(hero.level());
         if (projectile == null) return null;
@@ -59,7 +81,9 @@ public class HeroProjectileEntity extends Projectile {
         projectile.setOwner(hero);
         projectile.damage = damage;
         projectile.onHit = onHit;
+        projectile.scale = scale;
         projectile.entityData.set(PARTICLE, particle);
+        projectile.entityData.set(VISUAL_SCALE, scale.visual());
         projectile.moveTo(from.x, from.y, from.z, hero.getYRot(), 0);
         projectile.shoot(direction.x, direction.y, direction.z, speed, 0.0f);
         hero.level().addFreshEntity(projectile);
@@ -69,6 +93,7 @@ public class HeroProjectileEntity extends Projectile {
     @Override
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
         builder.define(PARTICLE, ParticleTypes.FLAME);
+        builder.define(VISUAL_SCALE, 1.0F);
     }
 
     @Override
@@ -100,8 +125,9 @@ public class HeroProjectileEntity extends Projectile {
 
     private void spawnTrail(final Vec3 motion) {
         final ParticleOptions particle = entityData.get(PARTICLE);
-        for (int i = 0; i < 2; i++) {
-            final double back = i * 0.5;
+        final int count = visualCount(TRAIL_PARTICLES);
+        for (int i = 0; i < count; i++) {
+            final double back = (double) i / count;
             level().addParticle(
                     particle,
                     getX() - motion.x * back,
@@ -136,7 +162,7 @@ public class HeroProjectileEntity extends Projectile {
         final boolean hurt = result.getEntity().hurt(damageSources().mobProjectile(this, attacker), damage);
         final SpellCaster hero = SpellCaster.of(owner);
         if (hurt && hero != null && result.getEntity() instanceof LivingEntity target) {
-            hero.applyEffects(onHit, target, result.getLocation());
+            hero.applyEffects(onHit, target, result.getLocation(), scale);
         }
     }
 
@@ -145,7 +171,7 @@ public class HeroProjectileEntity extends Projectile {
         super.onHitBlock(result);
         final SpellCaster hero = SpellCaster.of(getOwner());
         if (hero != null) {
-            hero.applyEffects(onHit, null, result.getLocation());
+            hero.applyEffects(onHit, null, result.getLocation(), scale);
         }
     }
 
@@ -153,9 +179,15 @@ public class HeroProjectileEntity extends Projectile {
     protected void onHit(final HitResult result) {
         super.onHit(result);
         if (level() instanceof ServerLevel serverLevel) {
-            serverLevel.sendParticles(entityData.get(PARTICLE), getX(), getY(), getZ(), 8, 0.15, 0.15, 0.15, 0.02);
+            final double spread = scale.size(0.15);
+            serverLevel.sendParticles(entityData.get(PARTICLE), getX(), getY(), getZ(), visualCount(BURST_PARTICLES),
+                    spread, spread, spread, 0.02);
             discard();
         }
+    }
+
+    private int visualCount(final int base) {
+        return Math.max(1, Math.round(base * entityData.get(VISUAL_SCALE)));
     }
 
     @Override

@@ -2,11 +2,14 @@ package com.darksune.althera.common.command;
 
 import com.darksune.althera.common.spell.PlayerSpellData;
 import com.darksune.althera.common.spell.SpellCastSystem;
+import com.darksune.althera.common.spell.SpellElement;
 import com.darksune.althera.common.spell.SpellNode;
 import com.darksune.althera.common.spell.SpellNodeRegistry;
+import com.darksune.althera.common.spell.SpellProficiency;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.FloatArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -20,13 +23,18 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Map;
+import java.util.stream.Stream;
 
 public class SpellCommand {
 
     private static final SuggestionProvider<CommandSourceStack> NODES =
             (ctx, builder) -> SharedSuggestionProvider.suggestResource(SpellNodeRegistry.getAll().keySet(), builder);
+
+    private static final SuggestionProvider<CommandSourceStack> ELEMENTS =
+            (ctx, builder) -> SharedSuggestionProvider.suggest(elements().map(SpellElement::getSerializedName), builder);
 
     @FunctionalInterface
     private interface PlayerAction {
@@ -88,6 +96,26 @@ public class SpellCommand {
                                         SpellCommand::stopTraining
                                 ))
                         )
+
+                        .then(Commands.literal("level")
+                                .then(Commands.argument("node", ResourceLocationArgument.id())
+                                        .suggests(NODES)
+                                        .then(withTarget(
+                                                Commands.argument("level", IntegerArgumentType.integer(SpellProficiency.MIN_LEVEL, SpellProficiency.MAX_LEVEL)),
+                                                SpellCommand::setSpellLevel
+                                        ))
+                                )
+                        )
+
+                        .then(Commands.literal("element")
+                                .then(Commands.argument("element", StringArgumentType.word())
+                                        .suggests(ELEMENTS)
+                                        .then(withTarget(
+                                                Commands.argument("level", IntegerArgumentType.integer(SpellProficiency.MIN_LEVEL, SpellProficiency.MAX_LEVEL)),
+                                                SpellCommand::setElementLevel
+                                        ))
+                                )
+                        )
         );
     }
 
@@ -120,6 +148,14 @@ public class SpellCommand {
                 .sorted(Comparator.comparing(entry -> entry.getKey().toString()))
                 .forEach(entry -> ctx.getSource().sendSuccess(() -> Component.literal(describe(data, entry)), false));
 
+        elements().forEach(element -> ctx.getSource().sendSuccess(() -> Component.literal(String.format(
+                "§7%s mastery §6lv %d §7(%d xp, %.0f%%)",
+                element.displayName(),
+                data.getElementLevel(element),
+                data.getElementXp(element),
+                data.getElementLevelProgress(element) * 100.0F
+        )), false));
+
         return 1;
     }
 
@@ -133,8 +169,58 @@ public class SpellCommand {
                 entry.getValue().displayName(),
                 data.getState(id),
                 data.getProgress(id) * 100.0F,
-                data.isLearned(id) && !data.isUsable(id) ? " §c(unusable)" : ""
+                data.isLearned(id) && !data.isUsable(id) ? " §c(unusable)" : "",
+                entry.getValue().isTrainable() ? " §6lv " + data.getSpellLevel(id) + " §7(" + data.getSpellXp(id) + " xp)" : ""
         );
+    }
+
+    private static Stream<SpellElement> elements() {
+        return Arrays.stream(SpellElement.values()).filter(element -> element != SpellElement.NONE);
+    }
+
+    private static int setSpellLevel(CommandContext<CommandSourceStack> ctx, ServerPlayer player) {
+
+        ResourceLocation id = node(ctx);
+
+        if (id == null) {
+            return 0;
+        }
+
+        if (!SpellNodeRegistry.get(id).isTrainable()) {
+            ctx.getSource().sendFailure(Component.literal("§c" + id + " is not a spell."));
+            return 0;
+        }
+
+        int level = IntegerArgumentType.getInteger(ctx, "level");
+
+        PlayerSpellData.get(player).setSpellXp(id, SpellProficiency.totalXpFor(level, SpellProficiency.SPELL_BASE_XP));
+
+        ctx.getSource().sendSuccess(() -> Component.literal("§bSet " + id + " to level " + level + "."), true);
+
+        return 1;
+    }
+
+    private static int setElementLevel(CommandContext<CommandSourceStack> ctx, ServerPlayer player) {
+
+        String name = StringArgumentType.getString(ctx, "element");
+
+        SpellElement element = elements()
+                .filter(candidate -> candidate.getSerializedName().equals(name))
+                .findFirst()
+                .orElse(null);
+
+        if (element == null) {
+            ctx.getSource().sendFailure(Component.literal("§cUnknown element: " + name));
+            return 0;
+        }
+
+        int level = IntegerArgumentType.getInteger(ctx, "level");
+
+        PlayerSpellData.get(player).setElementXp(element, SpellProficiency.totalXpFor(level, SpellProficiency.ELEMENT_BASE_XP));
+
+        ctx.getSource().sendSuccess(() -> Component.literal("§bSet " + element.displayName() + " mastery to level " + level + "."), true);
+
+        return 1;
     }
 
     private static int reset(CommandContext<CommandSourceStack> ctx, ServerPlayer player) {

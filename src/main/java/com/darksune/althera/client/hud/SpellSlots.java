@@ -4,6 +4,7 @@ import com.darksune.althera.common.spell.PlayerSpell;
 import com.darksune.althera.common.spell.PlayerSpellData;
 import com.darksune.althera.common.spell.SpellCastMode;
 import com.darksune.althera.common.spell.SpellDefinition;
+import com.darksune.althera.common.spell.SpellElement;
 import com.darksune.althera.common.spell.SpellNode;
 import com.darksune.althera.common.spell.SpellNodeRegistry;
 import com.darksune.althera.common.spell.SpellTraining;
@@ -37,7 +38,12 @@ public final class SpellSlots {
             return ItemStack.EMPTY;
         }
 
-        return new ItemStack(switch (node.element()) {
+        return elementIcon(node.element());
+    }
+
+    public static ItemStack elementIcon(SpellElement element) {
+
+        return new ItemStack(switch (element) {
             case FIRE -> Items.FIRE_CHARGE;
             case LIGHTNING -> Items.LIGHTNING_ROD;
             case ICE -> Items.BLUE_ICE;
@@ -46,7 +52,9 @@ public final class SpellSlots {
     }
 
     public static int manaCost(PlayerSpellData data, ResourceLocation id, PlayerSpell spell) {
-        return data.isTraining(id) ? SpellTraining.trainingCost(spell.manaCost()) : spell.manaCost();
+        return data.isTraining(id)
+                ? SpellTraining.trainingCost(spell.manaCost())
+                : spell.proficiency().cost(spell.manaCost(), data.getSpellLevel(id));
     }
 
     @Nullable
@@ -76,5 +84,25 @@ public final class SpellSlots {
         }
 
         return Component.literal("Training " + (int) (data.getProgress(id) * 100.0F) + "%");
+    }
+
+    @Nullable
+    public static Component level(PlayerSpellData data, int slot) {
+
+        ResourceLocation id = data.getSlot(slot);
+
+        if (id == null || !data.isLearned(id)) {
+            return null;
+        }
+
+        return Component.literal("Level " + data.getSpellLevel(id));
+    }
+
+    @Nullable
+    public static Component noteOrLevel(PlayerSpellData data, int slot) {
+
+        Component note = note(data, slot);
+
+        return note != null ? note : level(data, slot);
     }
 }

@@ -19,7 +19,8 @@ class DataValidator {
     static final Set<String> ULTIMATE_KEYS = ['name', 'description', 'mana_cost', 'channel_ticks', 'cooldown_ticks',
             'on_start', 'on_tick', 'on_end'] as Set
     static final Set<String> SPELL_KEYS = ['name', 'player', 'range', 'cooldown_ticks', 'cast_ticks', 'on_cast'] as Set
-    static final Set<String> PLAYER_SPELL_KEYS = ['mana_cost', 'description', 'cast_mode', 'cooldown_ticks'] as Set
+    static final Set<String> PLAYER_SPELL_KEYS = ['mana_cost', 'description', 'cast_mode', 'cooldown_ticks', 'proficiency'] as Set
+    static final Set<String> PROFICIENCY_KEYS = ['damage_per_level', 'size_per_level', 'visual_per_level', 'cost_per_level'] as Set
     static final Set<String> CAST_MODES = ['instant', 'charge', 'continuous'] as Set
     static final Set<String> SPELL_NODE_KEYS = ['name', 'spell', 'parent', 'x', 'y', 'branch', 'element', 'tier'] as Set
     static final Set<String> SPELL_BRANCHES = ['none', 'damage', 'defense', 'utility'] as Set
@@ -276,6 +277,13 @@ class DataValidator {
             checkNumber("${where} player", json.player, 'cooldown_ticks', false, 0)
             if (json.player.cast_mode != null && !CAST_MODES.contains(json.player.cast_mode)) {
                 error("${where} player", "unknown cast_mode '${json.player.cast_mode}' (${CAST_MODES.join(', ')})")
+            }
+            if (checkObject("${where} player", json.player, 'proficiency', PROFICIENCY_KEYS)) {
+                String rates = "${where} player proficiency"
+                checkNumber(rates, json.player.proficiency, 'damage_per_level', false, 0, 10)
+                checkNumber(rates, json.player.proficiency, 'size_per_level', false, 0, 10)
+                checkNumber(rates, json.player.proficiency, 'visual_per_level', false, 0, 10)
+                checkNumber(rates, json.player.proficiency, 'cost_per_level', false, 0, 0.1)
             }
         }
         checkNumber(where, json, 'range', false, 0)

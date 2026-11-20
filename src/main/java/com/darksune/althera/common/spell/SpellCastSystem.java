@@ -31,11 +31,15 @@ public final class SpellCastSystem {
             SpellDefinition spell,
             PlayerSpell playerSpell,
             PlayerSpellData data,
-            boolean training
+            boolean training,
+            int level,
+            int elementLevel
     ) {
 
         public int manaCost() {
-            return training ? SpellTraining.trainingCost(playerSpell.manaCost()) : playerSpell.manaCost();
+            return training
+                    ? SpellTraining.trainingCost(playerSpell.manaCost())
+                    : playerSpell.proficiency().cost(playerSpell.manaCost(), level);
         }
 
         public SpellCastMode mode() {
@@ -48,6 +52,10 @@ public final class SpellCastSystem {
 
         public int pulseTicks() {
             return Math.max(1, spell.castTicks());
+        }
+
+        public SpellScale scale() {
+            return SpellScale.of(playerSpell, level, elementLevel);
         }
     }
 
@@ -86,7 +94,8 @@ public final class SpellCastSystem {
             return refuse(player, explain, name + " is recharging.");
         }
 
-        return new Cast(nodeId, node, spell, spell.player().orElseThrow(), data, state == SpellNodeState.TRAINING);
+        return new Cast(nodeId, node, spell, spell.player().orElseThrow(), data, state == SpellNodeState.TRAINING,
+                data.getSpellLevel(nodeId), data.getElementLevel(node.element()));
     }
 
     @Nullable
@@ -116,6 +125,7 @@ public final class SpellCastSystem {
         startCooldown(player, cast);
         player.swing(hand, true);
         fire(player, cast);
+        gainXp(player, cast, cast.manaCost());
 
         return true;
     }
@@ -153,6 +163,7 @@ public final class SpellCastSystem {
         startCooldown(player, cast);
         player.swing(player.getUsedItemHand(), true);
         fire(player, cast);
+        gainXp(player, cast, cast.manaCost());
     }
 
     public static void endHold(final ServerPlayer player) {
@@ -183,11 +194,15 @@ public final class SpellCastSystem {
 
     private static void tickContinuous(final ServerPlayer player, final Cast cast, final int heldTicks) {
 
-        if (!pay(player, share(cast.manaCost(), heldTicks, TICKS_PER_SECOND))) {
+        final int payment = share(cast.manaCost(), heldTicks, TICKS_PER_SECOND);
+
+        if (!pay(player, payment)) {
             notify(player, "Out of mana.");
             player.releaseUsingItem();
             return;
         }
+
+        gainXp(player, cast, payment);
 
         if (cast.training()) {
 
@@ -203,7 +218,7 @@ public final class SpellCastSystem {
         }
 
         if ((heldTicks - 1) % cast.pulseTicks() == 0) {
-            cast.spell().cast(UltimateContext.spell(new PlayerCaster(player)));
+            cast.spell().cast(UltimateContext.spell(new PlayerCaster(player), cast.scale()));
         }
     }
 
@@ -235,7 +250,7 @@ public final class SpellCastSystem {
             playTrainingEffects(player);
             train(player, cast);
         } else {
-            cast.spell().cast(UltimateContext.spell(new PlayerCaster(player)));
+            cast.spell().cast(UltimateContext.spell(new PlayerCaster(player), cast.scale()));
         }
     }
 
@@ -251,6 +266,29 @@ public final class SpellCastSystem {
 
         final int percent = (int) (cast.data().getProgress(cast.nodeId()) * 100.0F);
         player.displayClientMessage(Component.literal("§bTraining " + cast.node().displayName() + ": " + percent + "%"), true);
+    }
+
+    private static void gainXp(final ServerPlayer player, final Cast cast, final int mana) {
+
+        if (cast.training() || mana <= 0 || SkillLimits.isUnlimited(player)) {
+            return;
+        }
+
+        final SpellElement element = cast.node().element();
+        final PlayerSpellData.LevelUps levelUps = cast.data().addXp(cast.nodeId(), element, mana);
+
+        if (levelUps.spellLevel() > 0) {
+            onLevelUp(player, cast.node().displayName(), levelUps.spellLevel());
+        }
+
+        if (levelUps.elementLevel() > 0) {
+            onLevelUp(player, element.displayName() + " mastery", levelUps.elementLevel());
+        }
+    }
+
+    public static void onLevelUp(final ServerPlayer player, final String name, final int level) {
+        player.sendSystemMessage(Component.literal("§6" + name + " reached level " + level + "!"));
+        player.level().playSound(null, player.blockPosition(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.6F, 1.5F);
     }
 
     public static void onLearned(final ServerPlayer player, final SpellNode node) {

@@ -13,7 +13,7 @@ and generates the GitHub Release, CurseForge and Discord notes from it.
     fills part of its progress. More max mana means fewer casts: a 20 mana spell takes 10 casts at 200 max mana and
     only 3 at 1000. Harder (higher tier) spells take longer.
   - Once **learned**, a spell casts at its normal cost with its full effect. Player spells hit as hard as a strong
-    weapon (Fire Bolt 7.2, Frost Shard 6, Lightning Strike 4.8 plus 3.6 around the target), never hurt your own Hero
+    weapon (Fire Bolt 7.2, Frost Shard 6, Lightning Strike 9.6 plus 3.6 around the target), never hurt your own Hero
     and follow the server's PvP and team rules.
   - Training progress is kept on death.
 - **Spell Tree** screen (**K**): Knowledge in the centre, Damage up, Defense left and Utility down. Node borders show
@@ -43,11 +43,24 @@ and generates the GitHub Release, CurseForge and Discord notes from it.
   locked behind a spell you don't know: the progress is kept and a spell finished this way stays unusable until the
   spells before it are learned). Tomes of a spell you already know can't be used. The creative tab has one tome per
   spell.
+- **Spell proficiency**: every learned spell now has a **level** (1-10) and every element (Fire, Lightning, Ice) a
+  **mastery** level (1-10). Both grow with the mana you spend on real casts (training casts don't count; nothing in
+  Creative). Spell level 2 takes about 5 minutes of casting, mastery level 2 about 10, and each level after that
+  takes 1.5 times longer: level 10 is about 6 hours of use for a spell and 12 for an element.
+  - Each spell level adds +10% damage, +5% size (areas, reach, particle spread), denser particles and -3% mana cost.
+    Each mastery level adds +5% damage to every spell of that element. At level 10 with mastery 10, Fire Bolt deals
+    19.8 damage instead of 7.2 and costs 15 mana instead of 20.
+  - A message and a sound announce every level up. The spell tree tooltip shows the level, progress and bonuses, the
+    book and spell wheel show the level, and the Player tab of the character sheet shows the three masteries.
+  - Datapacks: the spell's `player` block takes an optional `proficiency` block (`damage_per_level`,
+    `size_per_level`, `visual_per_level`, `cost_per_level`).
+  - `/althera_spell level <node> <level>` and `/althera_spell element <element> <level>` (cheats).
 - Player spells have **no cooldown** unless their spell says so: Fire Bolt, Lightning Strike and Frost Shard can be cast
   as often as your mana allows (Nobles keep their own cooldown on the same spells).
 - Datapacks: spells take an optional `player` block (`mana_cost`, `description`, `cast_mode`, `cooldown_ticks`, default
   0 = no cooldown, separate from the spell's own `cooldown_ticks` used by mages) and the tree is defined
   in `data/<namespace>/spell_node/*.json` (`spell`, `parent`, `x`, `y`, `branch`, `element`, `tier`, `name`).
+  See the new wiki pages "Spells" and "Creating Custom Spells" (the spell fields moved there from "Nobles").
 - `/althera_spell info | reset | progress <node> <value> | train <node> | untrain <node> | cast <node> [player]`
   and `/althera_spell equip <slot> <node>` / `unequip <slot>` (cheats) to inspect, set and test spells.
 

@@ -5,7 +5,6 @@ import com.darksune.althera.common.item.component.SpellTome;
 import com.darksune.althera.common.spell.PlayerSpell;
 import com.darksune.althera.common.spell.PlayerSpellData;
 import com.darksune.althera.common.spell.SpellCastSystem;
-import com.darksune.althera.common.spell.SpellElement;
 import com.darksune.althera.common.spell.SpellNode;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.particles.ParticleTypes;
@@ -108,7 +107,7 @@ public class SpellTomeItem extends Item {
             return Component.translatable("item.althera.spell_tome.faded").withStyle(ChatFormatting.GRAY);
         }
 
-        return Component.translatable("item.althera.spell_tome.named", node.displayName()).withStyle(color(node.element()));
+        return Component.translatable("item.althera.spell_tome.named", node.displayName()).withStyle(node.element().color());
     }
 
     @Override
@@ -137,14 +136,5 @@ public class SpellTomeItem extends Item {
     @Override
     public boolean isFoil(ItemStack stack) {
         return nodeOf(stack) != null;
-    }
-
-    private static ChatFormatting color(SpellElement element) {
-        return switch (element) {
-            case FIRE -> ChatFormatting.GOLD;
-            case LIGHTNING -> ChatFormatting.YELLOW;
-            case ICE -> ChatFormatting.AQUA;
-            case NONE -> ChatFormatting.LIGHT_PURPLE;
-        };
     }
 }

@@ -36,7 +36,7 @@ public record ParticlesEffect(ParticleOptions particle, int count, Vec3 spread, 
         }
 
         Vec3 start = context.origin();
-        Vec3 end = context.reach(line);
+        Vec3 end = context.reach(context.scale().size(line));
         int steps = Math.max(1, (int) Math.ceil(start.distanceTo(end) / LINE_STEP));
 
         for (int step = 0; step <= steps; step++) {
@@ -50,10 +50,10 @@ public record ParticlesEffect(ParticleOptions particle, int count, Vec3 spread, 
                 position.x,
                 position.y + height,
                 position.z,
-                count,
-                spread.x,
-                spread.y,
-                spread.z,
+                context.scale().count(count),
+                context.scale().size(spread.x),
+                context.scale().size(spread.y),
+                context.scale().size(spread.z),
                 speed
         );
     }

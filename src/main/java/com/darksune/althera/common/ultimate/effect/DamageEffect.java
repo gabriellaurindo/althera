@@ -24,7 +24,7 @@ public record DamageEffect(UltimateTarget target, EntityFilter filter, float amo
 
     @Override
     public void apply(UltimateContext context) {
-        float damage = amount + attackMultiplier * context.caster().getSpellPower();
+        float damage = context.scale().damage(amount + attackMultiplier * context.caster().getSpellPower());
         for (LivingEntity entity : filter.resolve(target, context)) {
             if (entity == context.target()) {
                 entity.invulnerableTime = 0;

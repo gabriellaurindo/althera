@@ -1,5 +1,6 @@
 package com.darksune.althera.common.entity;
 
+import com.darksune.althera.common.spell.SpellScale;
 import com.darksune.althera.common.ultimate.effect.UltimateContext;
 import com.darksune.althera.common.ultimate.effect.UltimateEffect;
 import net.minecraft.world.damagesource.DamageSource;
@@ -40,10 +41,15 @@ public interface SpellCaster {
 
     default void applyEffects(final List<UltimateEffect> effects, @Nullable final LivingEntity target,
                               @Nullable final Vec3 impact) {
+        applyEffects(effects, target, impact, SpellScale.NONE);
+    }
+
+    default void applyEffects(final List<UltimateEffect> effects, @Nullable final LivingEntity target,
+                              @Nullable final Vec3 impact, final SpellScale scale) {
         final LivingEntity owner = getEffectOwner();
         if (owner == null || effects.isEmpty()) return;
 
-        final UltimateContext context = UltimateContext.attack(owner, this, target, impact);
+        final UltimateContext context = UltimateContext.attack(owner, this, target, impact, scale);
         effects.forEach(effect -> effect.apply(context));
     }
 

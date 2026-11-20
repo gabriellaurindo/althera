@@ -3,11 +3,14 @@ package com.darksune.althera.client.screen;
 import com.darksune.althera.Althera;
 import com.darksune.althera.client.AltheraClientConfig;
 import com.darksune.althera.client.input.AltheraKeybinds;
+import com.darksune.althera.client.hud.HudIcons;
 import com.darksune.althera.client.hud.SpellSlots;
 import com.darksune.althera.common.attachment.HeroData;
 import com.darksune.althera.common.attachment.ManaData;
 import com.darksune.althera.common.spell.PlayerSpellData;
+import com.darksune.althera.common.spell.SpellElement;
 import com.darksune.althera.common.spell.SpellNodeRegistry;
+import com.darksune.althera.common.spell.SpellProficiency;
 import com.darksune.althera.common.commandseal.CommandSealData;
 import com.darksune.althera.common.entity.AltheraEntities;
 import com.darksune.althera.common.entity.HeroEntity;
@@ -23,6 +26,7 @@ import com.darksune.althera.common.ultimate.UltimateRegistry;
 import com.darksune.althera.network.packet.HeroStatsPacket;
 import com.darksune.althera.network.packet.RequestHeroStatsPacket;
 import com.darksune.althera.network.packet.ToggleHeroSettingPacket;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
@@ -42,9 +46,11 @@ import net.neoforged.neoforge.common.ModConfigSpec;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 public class HeroScreen extends Screen {
 
@@ -108,6 +114,8 @@ public class HeroScreen extends Screen {
 
     private static final int PLAYER_PREVIEW_SCALE = 42;
     private static final float PLAYER_PREVIEW_OFFSET = 0.0625F;
+    private static final SpellElement[] ELEMENTS = {SpellElement.FIRE, SpellElement.LIGHTNING, SpellElement.ICE};
+    private static final float ELEMENT_ICON_SCALE = 0.75F;
     private static final int COLOR_MANA = 0xFF3FA9FF;
     private static final int COLOR_SECTION = 0xFFE0B040;
 
@@ -457,8 +465,60 @@ public class HeroScreen extends Screen {
                 INFO_WIDTH - this.font.width(selectedLabel) - 6);
 
         drawStat(gui, selectedLabel, selected, infoX, infoY, INFO_WIDTH, 0xFFFF77FF);
+        infoY += 13;
+
+        renderElements(gui, spells, infoX, infoY, mouseX, mouseY);
 
         drawButton(gui, "Spell Tree  ›", infoButtonX(), infoButtonY(), INFO_WIDTH, isOverInfoButton(mouseX, mouseY));
+    }
+
+    private void renderElements(GuiGraphics gui, PlayerSpellData spells, int x, int y, int mouseX, int mouseY) {
+
+        final int cellWidth = INFO_WIDTH / ELEMENTS.length;
+        final int iconSize = Math.round(HudIcons.ITEM_SIZE * ELEMENT_ICON_SCALE);
+
+        for (int i = 0; i < ELEMENTS.length; i++) {
+
+            final SpellElement element = ELEMENTS[i];
+            final int cellX = x + i * cellWidth;
+            final int level = spells.getElementLevel(element);
+            final int color = 0xFF000000 | Objects.requireNonNullElse(element.color().getColor(), 0xFFFFFF);
+
+            gui.pose().pushPose();
+            gui.pose().translate(cellX, y, 0.0F);
+            gui.pose().scale(ELEMENT_ICON_SCALE, ELEMENT_ICON_SCALE, 1.0F);
+            HudIcons.renderItem(gui, SpellSlots.elementIcon(element), 0, 0, 1.0F, 1.0F);
+            gui.pose().popPose();
+
+            gui.drawString(this.font, String.valueOf(level), cellX + iconSize + 2, y + (iconSize - 8) / 2, color);
+
+            final int barWidth = cellWidth - 6;
+            drawBar(gui, cellX, y + iconSize + 2, barWidth, 2, spells.getElementLevelProgress(element), color);
+
+            if (mouseX >= cellX && mouseX < cellX + barWidth && mouseY >= y && mouseY < y + iconSize + 4) {
+                setTooltipForNextRenderPass(elementTooltip(spells, element));
+            }
+        }
+    }
+
+    private List<FormattedCharSequence> elementTooltip(PlayerSpellData spells, SpellElement element) {
+
+        final int level = spells.getElementLevel(element);
+        final List<Component> lines = new ArrayList<>();
+
+        lines.add(Component.literal(element.displayName() + " mastery · Level " + level).withStyle(element.color()));
+        lines.add(Component.literal(level >= SpellProficiency.MAX_LEVEL
+                ? "Max level"
+                : Math.round(spells.getElementLevelProgress(element) * 100.0F) + "% to level " + (level + 1))
+                .withStyle(ChatFormatting.GRAY));
+        lines.add(Component.literal("+" + Math.round((SpellProficiency.elementDamageMultiplier(level) - 1.0F) * 100.0F)
+                + "% damage to " + element.displayName().toLowerCase(Locale.ROOT) + " spells")
+                .withStyle(ChatFormatting.GREEN));
+        lines.add(Component.literal("Grows with the mana you spend on them.").withStyle(ChatFormatting.DARK_GRAY));
+
+        final List<FormattedCharSequence> split = new ArrayList<>();
+        lines.forEach(line -> split.addAll(this.font.split(line, 200)));
+        return split;
     }
 
     private void renderClose(GuiGraphics gui, int mouseX, int mouseY) {

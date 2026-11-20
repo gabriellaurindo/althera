@@ -33,7 +33,7 @@ public final class AltheraNetwork {
 
     private static void registerPayloads(RegisterPayloadHandlersEvent event) {
 
-        var registrar = event.registrar("13");
+        var registrar = event.registrar("14");
 
         registrar.playToServer(
                 SummonPacket.TYPE,

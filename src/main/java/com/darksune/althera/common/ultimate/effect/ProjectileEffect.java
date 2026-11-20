@@ -40,11 +40,11 @@ public record ProjectileEffect(int count, float spread, float speed, float amoun
         Vec3 aim = context.target() != null
                 ? HeroProjectileEntity.aimAt(from, context.target())
                 : context.direction();
-        float damage = amount + attackMultiplier * hero.getSpellPower();
+        float damage = context.scale().damage(amount + attackMultiplier * hero.getSpellPower());
 
         for (int i = 0; i < count; i++) {
             float angle = count == 1 ? 0 : spread * ((float) i / (count - 1) - 0.5F);
-            HeroProjectileEntity.shoot(hero, from, aim.yRot(angle * ((float) Math.PI / 180F)), damage, speed, trail, onHit);
+            HeroProjectileEntity.shoot(hero, from, aim.yRot(angle * ((float) Math.PI / 180F)), damage, speed, trail, onHit, context.scale());
         }
     }
 }

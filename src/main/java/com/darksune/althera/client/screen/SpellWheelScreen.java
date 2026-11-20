@@ -35,7 +35,7 @@ public class SpellWheelScreen extends RadialWheelScreen {
                     SpellSlots.name(data, slot),
                     SpellSlots.icon(SpellSlots.node(data, slot)),
                     SpellSlots.mana(data, slot),
-                    SpellSlots.note(data, slot),
+                    SpellSlots.noteOrLevel(data, slot),
                     SkillSlotState.spell(player, slot),
                     slot == data.getSelectedSlot(),
                     () -> KeyActions.selectSpellSlot(index)));

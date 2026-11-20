@@ -65,7 +65,7 @@ Only `faction` and `spells` are required. Every other field falls back to the No
 |---|---|---|
 | `name` | `"Enemy Mage"` | Name shown above the mage |
 | `faction` | required | Faction id. Mages of the same faction (and their Heroes) never fight each other |
-| `spells` | required | Spell ids. Each mage picks **one** of them at random when it appears (see [Nobles](Nobles#-custom-spells-datapacks)) |
+| `spells` | required | Spell ids. Each mage picks **one** of them at random when it appears (see [Creating Custom Spells](Creating-Custom-Spells)) |
 | `targets` | Noble's list | Entity type ids or `#tags` the mage attacks. The nearest one is chosen. Heroes of the same faction are never targeted |
 | `loot_table` | none | Loot table dropped when the mage is slain, used by tiers without their own `loot_table` (a regular `minecraft:entity` loot table in `data/<namespace>/loot_table/`). Leave both out and the mage drops nothing |
 

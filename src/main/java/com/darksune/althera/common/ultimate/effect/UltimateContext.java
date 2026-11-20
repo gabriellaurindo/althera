@@ -1,6 +1,7 @@
 package com.darksune.althera.common.ultimate.effect;
 
 import com.darksune.althera.common.entity.SpellCaster;
+import com.darksune.althera.common.spell.SpellScale;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
@@ -14,17 +15,22 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 public record UltimateContext(LivingEntity owner, SpellCaster caster, Vec3 origin, Vec3 direction,
-                              @Nullable LivingEntity target, @Nullable Vec3 impact) {
+                              @Nullable LivingEntity target, @Nullable Vec3 impact, SpellScale scale) {
 
     private static final double[] CLEARANCE_HEIGHTS = {0.25, 0.9};
 
     private static final double AIM_RANGE = 32.0;
 
     public static UltimateContext of(LivingEntity owner, SpellCaster hero) {
-        return new UltimateContext(owner, hero, hero.entity().position(), facing(owner, hero.entity()), null, null);
+        return new UltimateContext(owner, hero, hero.entity().position(), facing(owner, hero.entity()), null, null, SpellScale.NONE);
     }
 
     public static UltimateContext attack(LivingEntity owner, SpellCaster hero, @Nullable LivingEntity target, @Nullable Vec3 impact) {
+        return attack(owner, hero, target, impact, SpellScale.NONE);
+    }
+
+    public static UltimateContext attack(LivingEntity owner, SpellCaster hero, @Nullable LivingEntity target,
+                                         @Nullable Vec3 impact, SpellScale scale) {
 
         LivingEntity entity = hero.entity();
 
@@ -34,12 +40,12 @@ public record UltimateContext(LivingEntity owner, SpellCaster caster, Vec3 origi
                 ? toTarget.normalize()
                 : Vec3.directionFromRotation(0, entity.getYRot());
 
-        return new UltimateContext(owner, hero, entity.position(), direction, target, impact);
+        return new UltimateContext(owner, hero, entity.position(), direction, target, impact, scale);
     }
 
-    public static UltimateContext spell(SpellCaster caster) {
+    public static UltimateContext spell(SpellCaster caster, SpellScale scale) {
         LivingEntity entity = caster.entity();
-        return new UltimateContext(entity, caster, entity.position(), entity.getLookAngle(), null, null);
+        return new UltimateContext(entity, caster, entity.position(), entity.getLookAngle(), null, null, scale);
     }
 
     public Vec3 position() {

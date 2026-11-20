@@ -12,6 +12,8 @@ import com.darksune.althera.common.spell.SpellDefinition;
 import com.darksune.althera.common.spell.SpellElement;
 import com.darksune.althera.common.spell.SpellNode;
 import com.darksune.althera.common.spell.SpellNodeRegistry;
+import com.darksune.althera.common.spell.SpellProficiency;
+import com.darksune.althera.common.spell.SpellScale;
 import com.darksune.althera.common.spell.SpellNodeState;
 import com.darksune.althera.common.spell.SpellTraining;
 import com.darksune.althera.network.packet.EquipSpellPacket;
@@ -736,16 +738,24 @@ public class SpellTreeScreen extends Screen {
         }
 
         String unit = playerSpell.castMode() == SpellCastMode.CONTINUOUS ? " mana/s" : " mana";
-        MutableComponent mana = Component.literal("Cost: " + playerSpell.manaCost() + unit);
+        int level = data.getSpellLevel(id);
+        int cost = playerSpell.proficiency().cost(playerSpell.manaCost(), level);
+        MutableComponent mana = Component.literal("Cost: " + cost + unit);
 
         if (state != SpellNodeState.LEARNED) {
             mana.append(" (training: " + SpellTraining.trainingCost(playerSpell.manaCost()) + ")");
+        } else if (cost != playerSpell.manaCost()) {
+            mana.append(" (base " + playerSpell.manaCost() + ")");
         }
 
         lines.add(mana.withStyle(ChatFormatting.AQUA));
         lines.add(Component.literal(playerSpell.cooldownTicks() > 0
                 ? "Cooldown: " + seconds(playerSpell.cooldownTicks()) + "s"
                 : "No cooldown").withStyle(ChatFormatting.AQUA));
+
+        if (state == SpellNodeState.LEARNED) {
+            lines.addAll(proficiencyLines(data, id, node, playerSpell));
+        }
 
         if (state != SpellNodeState.LEARNED) {
             int required = SpellTraining.requiredCasts(playerSpell.manaCost(), node.tier(), maxMana);
@@ -757,6 +767,53 @@ public class SpellTreeScreen extends Screen {
         lines.addAll(actions(data, id, state));
 
         return wrap(lines);
+    }
+
+    private static List<Component> proficiencyLines(PlayerSpellData data, ResourceLocation id, SpellNode node,
+                                                    PlayerSpell playerSpell) {
+
+        List<Component> lines = new ArrayList<>();
+        int level = data.getSpellLevel(id);
+        int elementLevel = data.getElementLevel(node.element());
+        SpellScale scale = SpellScale.of(playerSpell, level, elementLevel);
+
+        lines.add(Component.literal(levelText("Level", level, data.getSpellLevelProgress(id)))
+                .withStyle(ChatFormatting.GOLD));
+
+        if (node.element() != SpellElement.NONE) {
+            lines.add(Component.literal(levelText(node.element().displayName() + " mastery", elementLevel,
+                    data.getElementLevelProgress(node.element()))).withStyle(ChatFormatting.YELLOW));
+        }
+
+        List<String> bonuses = new ArrayList<>();
+        addBonus(bonuses, scale.damage(), "damage");
+        addBonus(bonuses, scale.size(), "size");
+
+        int cost = playerSpell.proficiency().cost(playerSpell.manaCost(), level);
+        if (cost < playerSpell.manaCost()) {
+            bonuses.add("-" + Math.round(100.0F * (playerSpell.manaCost() - cost) / playerSpell.manaCost()) + "% cost");
+        }
+
+        if (!bonuses.isEmpty()) {
+            lines.add(Component.literal(String.join(" · ", bonuses)).withStyle(ChatFormatting.GREEN));
+        }
+
+        return lines;
+    }
+
+    private static String levelText(String label, int level, float progress) {
+        return level >= SpellProficiency.MAX_LEVEL
+                ? label + " " + level + " · Max"
+                : label + " " + level + " · " + percent(progress) + " to level " + (level + 1);
+    }
+
+    private static void addBonus(List<String> bonuses, float multiplier, String label) {
+
+        int percent = Math.round((multiplier - 1.0F) * 100.0F);
+
+        if (percent > 0) {
+            bonuses.add("+" + percent + "% " + label);
+        }
     }
 
     private static Component stateLine(PlayerSpellData data, ResourceLocation id, SpellNode node, SpellNodeState state) {
