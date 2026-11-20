@@ -1,0 +1,8 @@
+{
+  "parent": "althera:defense_lightning_1",
+  "x": -3,
+  "y": 0,
+  "branch": "defense",
+  "element": "lightning",
+  "tier": 2
+}

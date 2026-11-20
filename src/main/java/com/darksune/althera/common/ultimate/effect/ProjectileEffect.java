@@ -1,6 +1,6 @@
 package com.darksune.althera.common.ultimate.effect;
 
-import com.darksune.althera.common.entity.CasterMob;
+import com.darksune.althera.common.entity.SpellCaster;
 import com.darksune.althera.common.entity.HeroProjectileEntity;
 import com.darksune.althera.common.util.CodecUtil;
 import com.mojang.serialization.Codec;
@@ -9,7 +9,6 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.util.ExtraCodecs;
-import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.List;
@@ -36,16 +35,16 @@ public record ProjectileEffect(int count, float spread, float speed, float amoun
 
     @Override
     public void apply(UltimateContext context) {
-        CasterMob hero = context.caster();
+        SpellCaster hero = context.caster();
         Vec3 from = hero.getProjectileOrigin();
         Vec3 aim = context.target() != null
                 ? HeroProjectileEntity.aimAt(from, context.target())
                 : context.direction();
-        float damage = amount + attackMultiplier * (float) hero.getAttributeValue(Attributes.ATTACK_DAMAGE);
+        float damage = context.scale().damage(amount + attackMultiplier * hero.getSpellPower());
 
         for (int i = 0; i < count; i++) {
             float angle = count == 1 ? 0 : spread * ((float) i / (count - 1) - 0.5F);
-            HeroProjectileEntity.shoot(hero, from, aim.yRot(angle * ((float) Math.PI / 180F)), damage, speed, trail, onHit);
+            HeroProjectileEntity.shoot(hero, from, aim.yRot(angle * ((float) Math.PI / 180F)), damage, speed, trail, onHit, context.scale());
         }
     }
 }

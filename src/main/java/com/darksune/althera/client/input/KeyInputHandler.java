@@ -4,6 +4,7 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.neoforge.client.event.InputEvent;
 
 @EventBusSubscriber(value = Dist.CLIENT)
 public class KeyInputHandler {
@@ -31,6 +32,29 @@ public class KeyInputHandler {
             KeyActions.handleUltimateSkill();
         }
 
+        while (AltheraKeybinds.SPELL_PREVIOUS.consumeClick()) {
+            KeyActions.cycleSpell(-1);
+        }
+
+        while (AltheraKeybinds.SPELL_NEXT.consumeClick()) {
+            KeyActions.cycleSpell(1);
+        }
+
+        if (AltheraKeybinds.SPELL_WHEEL.consumeClick()) {
+            KeyActions.handleSpellWheel();
+        }
+
+        if (AltheraKeybinds.SPELL_TREE.consumeClick()) {
+            KeyActions.handleSpellTree();
+        }
+
+    }
+
+    @SubscribeEvent
+    public static void onMouseScroll(InputEvent.MouseScrollingEvent event) {
+        if (KeyActions.handleSpellScroll(event.getScrollDeltaY())) {
+            event.setCanceled(true);
+        }
     }
 
     private static void handleSummonKey() {

@@ -22,7 +22,7 @@ public sealed interface UltimateTarget {
 
         @Override
         public List<LivingEntity> resolve(UltimateContext context) {
-            return List.of(context.caster());
+            return List.of(context.caster().entity());
         }
     }
 
@@ -51,11 +51,12 @@ public sealed interface UltimateTarget {
 
         @Override
         public List<LivingEntity> resolve(UltimateContext context) {
+            double scaled = context.scale().size(radius);
             return context.level().getEntitiesOfClass(
                     LivingEntity.class,
-                    AABB.ofSize(context.position(), 0, 0, 0).inflate(radius + 1),
+                    AABB.ofSize(context.position(), 0, 0, 0).inflate(scaled + 1),
                     entity -> context.canAffect(entity)
-                            && entity.distanceToSqr(context.position()) <= radius * radius
+                            && entity.distanceToSqr(context.position()) <= scaled * scaled
             );
         }
     }
@@ -70,16 +71,17 @@ public sealed interface UltimateTarget {
         @Override
         public List<LivingEntity> resolve(UltimateContext context) {
 
-            Vec3 lift = new Vec3(0, context.caster().getBbHeight() / 2, 0);
+            Vec3 lift = new Vec3(0, context.caster().entity().getBbHeight() / 2, 0);
             Vec3 start = context.origin().add(lift);
-            Vec3 end = context.reach(length).add(lift);
+            Vec3 end = context.reach(context.scale().size(length)).add(lift);
+            double scaledWidth = context.scale().size(width);
 
             return context.level().getEntitiesOfClass(
                     LivingEntity.class,
-                    new AABB(start, end).inflate(width + 1),
+                    new AABB(start, end).inflate(scaledWidth + 1),
                     entity -> context.canAffect(entity)
                             && distanceToSegment(entity.getBoundingBox().getCenter(), start, end)
-                            <= width + entity.getBbWidth() / 2
+                            <= scaledWidth + entity.getBbWidth() / 2
             );
         }
 

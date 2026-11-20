@@ -1,5 +1,6 @@
 package com.darksune.althera.common.entity;
 
+import com.darksune.althera.common.spell.SpellScale;
 import com.darksune.althera.common.ultimate.effect.UltimateEffect;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
@@ -29,10 +30,23 @@ public class HeroProjectileEntity extends Projectile {
                     HeroProjectileEntity.class,
                     EntityDataSerializers.PARTICLE
             );
+    private static final EntityDataAccessor<Float> VISUAL_SCALE =
+            SynchedEntityData.defineId(
+                    HeroProjectileEntity.class,
+                    EntityDataSerializers.FLOAT
+            );
+    private static final EntityDataAccessor<Boolean> MASTERED =
+            SynchedEntityData.defineId(
+                    HeroProjectileEntity.class,
+                    EntityDataSerializers.BOOLEAN
+            );
     private static final int MAX_LIFE_TICKS = 40;
+    private static final int TRAIL_PARTICLES = 2;
+    private static final int BURST_PARTICLES = 8;
 
     private float damage;
     private List<UltimateEffect> onHit = List.of();
+    private SpellScale scale = SpellScale.NONE;
 
     public HeroProjectileEntity(EntityType<? extends Projectile> type, Level level) {
         super(type, level);
@@ -44,7 +58,7 @@ public class HeroProjectileEntity extends Projectile {
     }
 
     public static HeroProjectileEntity shoot(
-            final CasterMob hero,
+            final SpellCaster caster,
             final Vec3 from,
             final Vec3 direction,
             final float damage,
@@ -52,13 +66,30 @@ public class HeroProjectileEntity extends Projectile {
             final ParticleOptions particle,
             final List<UltimateEffect> onHit
     ) {
+        return shoot(caster, from, direction, damage, speed, particle, onHit, SpellScale.NONE);
+    }
+
+    public static HeroProjectileEntity shoot(
+            final SpellCaster caster,
+            final Vec3 from,
+            final Vec3 direction,
+            final float damage,
+            final float speed,
+            final ParticleOptions particle,
+            final List<UltimateEffect> onHit,
+            final SpellScale scale
+    ) {
+        final LivingEntity hero = caster.entity();
         final HeroProjectileEntity projectile = AltheraEntities.HERO_PROJECTILE.get().create(hero.level());
         if (projectile == null) return null;
 
         projectile.setOwner(hero);
         projectile.damage = damage;
         projectile.onHit = onHit;
+        projectile.scale = scale;
         projectile.entityData.set(PARTICLE, particle);
+        projectile.entityData.set(VISUAL_SCALE, scale.visual());
+        projectile.entityData.set(MASTERED, scale.mastered());
         projectile.moveTo(from.x, from.y, from.z, hero.getYRot(), 0);
         projectile.shoot(direction.x, direction.y, direction.z, speed, 0.0f);
         hero.level().addFreshEntity(projectile);
@@ -68,6 +99,8 @@ public class HeroProjectileEntity extends Projectile {
     @Override
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
         builder.define(PARTICLE, ParticleTypes.FLAME);
+        builder.define(VISUAL_SCALE, 1.0F);
+        builder.define(MASTERED, false);
     }
 
     @Override
@@ -75,7 +108,7 @@ public class HeroProjectileEntity extends Projectile {
         super.tick();
 
         if (!level().isClientSide) {
-            if (tickCount > MAX_LIFE_TICKS || !(getOwner() instanceof CasterMob)) {
+            if (tickCount > MAX_LIFE_TICKS || SpellCaster.of(getOwner()) == null) {
                 discard();
                 return;
             }
@@ -99,8 +132,14 @@ public class HeroProjectileEntity extends Projectile {
 
     private void spawnTrail(final Vec3 motion) {
         final ParticleOptions particle = entityData.get(PARTICLE);
-        for (int i = 0; i < 2; i++) {
-            final double back = i * 0.5;
+        if (entityData.get(MASTERED) && tickCount % 2 == 0) {
+            level().addParticle(ParticleTypes.END_ROD, getX(), getY(), getZ(),
+                    (random.nextDouble() - 0.5) * 0.04, (random.nextDouble() - 0.5) * 0.04,
+                    (random.nextDouble() - 0.5) * 0.04);
+        }
+        final int count = visualCount(TRAIL_PARTICLES);
+        for (int i = 0; i < count; i++) {
+            final double back = (double) i / count;
             level().addParticle(
                     particle,
                     getX() - motion.x * back,
@@ -118,11 +157,12 @@ public class HeroProjectileEntity extends Projectile {
         if (!(target instanceof LivingEntity) || !super.canHitEntity(target)) {
             return false;
         }
-        if (!(getOwner() instanceof CasterMob hero)) {
+        final SpellCaster hero = SpellCaster.of(getOwner());
+        if (hero == null) {
             return true;
         }
-        return target != hero
-                && !hero.isAlliedTo(target)
+        return target != hero.entity()
+                && !hero.isAllyOf(target)
                 && (!(target instanceof Player player) || hero.canHarmPlayer(player));
     }
 
@@ -132,16 +172,18 @@ public class HeroProjectileEntity extends Projectile {
         final Entity owner = getOwner();
         final LivingEntity attacker = owner instanceof LivingEntity living ? living : null;
         final boolean hurt = result.getEntity().hurt(damageSources().mobProjectile(this, attacker), damage);
-        if (hurt && owner instanceof CasterMob hero && result.getEntity() instanceof LivingEntity target) {
-            hero.applyEffects(onHit, target, result.getLocation());
+        final SpellCaster hero = SpellCaster.of(owner);
+        if (hurt && hero != null && result.getEntity() instanceof LivingEntity target) {
+            hero.applyEffects(onHit, target, result.getLocation(), scale);
         }
     }
 
     @Override
     protected void onHitBlock(final BlockHitResult result) {
         super.onHitBlock(result);
-        if (getOwner() instanceof CasterMob hero) {
-            hero.applyEffects(onHit, null, result.getLocation());
+        final SpellCaster hero = SpellCaster.of(getOwner());
+        if (hero != null) {
+            hero.applyEffects(onHit, null, result.getLocation(), scale);
         }
     }
 
@@ -149,9 +191,15 @@ public class HeroProjectileEntity extends Projectile {
     protected void onHit(final HitResult result) {
         super.onHit(result);
         if (level() instanceof ServerLevel serverLevel) {
-            serverLevel.sendParticles(entityData.get(PARTICLE), getX(), getY(), getZ(), 8, 0.15, 0.15, 0.15, 0.02);
+            final double spread = scale.size(0.15);
+            serverLevel.sendParticles(entityData.get(PARTICLE), getX(), getY(), getZ(), visualCount(BURST_PARTICLES),
+                    spread, spread, spread, 0.02);
             discard();
         }
+    }
+
+    private int visualCount(final int base) {
+        return Math.max(1, Math.round(base * entityData.get(VISUAL_SCALE)));
     }
 
     @Override

@@ -6,6 +6,79 @@ and generates the GitHub Release, CurseForge and Discord notes from it.
 
 ## [Unreleased]
 
+### Added
+- **Player spells (work in progress)**: players can now learn and cast spells. Fire Bolt (20 mana), Lightning Strike
+  (25) and Frost Shard (20) are the first ones; the other branches of the spell tree are `?` placeholders for now.
+  - A spell in **training** casts at **double mana** and has no real effect, only a puff of magic; each training cast
+    fills part of its progress. More max mana means fewer casts: a 20 mana spell takes 10 casts at 200 max mana and
+    only 3 at 1000. Harder (higher tier) spells take longer.
+  - Once **learned**, a spell casts at its normal cost with its full effect. Player spells hit as hard as a strong
+    weapon (Fire Bolt 7.2, Frost Shard 6, Lightning Strike 9.6 plus 3.6 around the target), never hurt your own Hero
+    and follow the server's PvP and team rules.
+  - Training progress is kept on death.
+- **Spell Tree** screen (**K**): Knowledge in the centre, Damage up, Defense left and Utility down. Node borders show
+  each spell's state: green learned, blue training, yellow can be learned, red locked (learn the spell before it
+  first), orange learned but not usable yet; `?` nodes are spells still to come. Hover a node for its cost, cooldown,
+  tier, description and how many training casts are left at your current max mana.
+  - **Click** a yellow node to start training it, click a blue one to pause (progress is kept).
+  - The 9 book slots sit at the bottom: **drag** a spell onto a slot (or **right-click** it) to equip it, drag a slot's
+    spell elsewhere or right-click the slot to clear it, click a slot to select it. Drag the background to move
+    around, scroll to zoom.
+- **Spell Book**: crafted from a book, two amethyst shards and a lapis lazuli. It has **9 spell slots**: a spell joins
+  the first free slot when you start training it or learn it. **Right-click** with the book casts the selected spell
+  (at double mana while training). Holding the book shows the selected spell, its cost, training progress and
+  recharge next to the hotbar.
+  - **V** (hold) opens the **spell wheel** with the 9 slots: point at one and release to select it. **Z** / **B**
+    select the previous / next spell. With a book in hand, hold **Left Shift** and use the **mouse wheel** to scroll
+    through the spells instead of the hotbar. All four can be changed in Controls.
+  - Held spells are supported for datapacks: `charge` spells drain their mana while charging (`cast_ticks`) and fire
+    on release, `continuous` spells drain their `mana_cost` per second while held (Flame Jet is the first).
+- **Character sheet** (**G**): the hero screen now has two tabs on top, **Player** and **Hero**. The Player tab shows
+  you, your mana, your Command Seal charges in your seal's colour, your spells (learned, training, selected) and a
+  **Spell Tree** button (closing the tree brings you back to the sheet). The settings gear is on both tabs. The sheet
+  reopens on the last tab you used.
+  Without a Hero, **G** now opens the sheet on the Player tab, and the Hero tab opens Choose your Hero.
+- **Spell Tome**: High Nobles (red) have a **5%** chance to drop a tome of a random basic spell. Right-click it to
+  study: it adds **+50%** of that spell's training at once, whatever the spell's state (not training yet, or even
+  locked behind a spell you don't know: the progress is kept and a spell finished this way stays unusable until the
+  spells before it are learned). Tomes of a spell you already know can't be used. The creative tab has one tome per
+  spell.
+- **Spell proficiency**: every learned spell now has a **level** (1-10) and every element (Fire, Lightning, Ice) a
+  **mastery** level (1-10). Both grow with the mana you spend on real casts (training casts don't count; nothing in
+  Creative). Spell level 2 takes about 5 minutes of casting, mastery level 2 about 10, and each level after that
+  takes 1.5 times longer: level 10 is about 6 hours of use for a spell and 12 for an element.
+  - Each spell level adds +10% damage, +5% size (areas, reach, particle spread), denser particles and -3% mana cost.
+    Each mastery level adds +5% damage to every spell of that element. At level 10 with mastery 10, Fire Bolt deals
+    19.8 damage instead of 7.2 and costs 15 mana instead of 20.
+  - A message and a sound announce every level up. The spell tree tooltip shows the level, progress and bonuses, the
+    book and spell wheel show the level, and the Player tab of the character sheet shows the three masteries.
+  - Datapacks: the spell's `player` block takes an optional `proficiency` block (`damage_per_level`,
+    `size_per_level`, `visual_per_level`, `cost_per_level`).
+  - `/althera_spell level <node> <level>` and `/althera_spell element <element> <level>` (cheats).
+- Spells and elements have their own **icons** (Fire Bolt, Lightning Strike, Frost Shard; Fire, Lightning, Ice and
+  an arcane rune for the Knowledge root) in the spell tree, the book HUD, the spell wheel and the character sheet.
+  Resource packs can add an icon for any spell at `textures/gui/spell/<spell>.png`; spells without one show their
+  element's icon.
+- New spells: **Frost Ward** (Defense, ice, 25 mana): Absorption II for 10 seconds and pushes back and slows the
+  enemies around you, 10 second cooldown. **Flame Jet** (tier 2 fire, after Fire Bolt, 24 mana per second): hold
+  right-click to pour a 5 block stream of fire that burns everything in it.
+- The Spell Book and the Spell Tome have new textures.
+- **Casting pose**: your character raises the book with both hands while casting (seen by everyone), the book lifts in
+  first person while you hold a spell, and every cast puffs in the spell's element colour.
+- **Mastered spells** (level 10) get a gold border in the spell tree, sparkle when cast and leave a trail of light.
+- Advancements: **First Words** (learn a spell), **Adept** (a spell at level 5) and the challenge **Archmage** (Fire,
+  Lightning and Ice mastery at 10).
+- A Spell Tome of a spell you already know now gives **1,500 proficiency** (a whole level 2) instead of being
+  refused; only tomes of a spell at level 10 are refused.
+- Player spells have **no cooldown** unless their spell says so: Fire Bolt, Lightning Strike and Frost Shard can be cast
+  as often as your mana allows (Nobles keep their own cooldown on the same spells).
+- Datapacks: spells take an optional `player` block (`mana_cost`, `description`, `cast_mode`, `cooldown_ticks`, default
+  0 = no cooldown, separate from the spell's own `cooldown_ticks` used by mages) and the tree is defined
+  in `data/<namespace>/spell_node/*.json` (`spell`, `parent`, `x`, `y`, `branch`, `element`, `tier`, `name`).
+  See the new wiki pages "Spells" and "Creating Custom Spells" (the spell fields moved there from "Nobles").
+- `/althera_spell info | reset | progress <node> <value> | train <node> | untrain <node> | cast <node> [player]`
+  and `/althera_spell equip <slot> <node>` / `unequip <slot>` (cheats) to inspect, set and test spells.
+
 ## [4.3.0] - 2026-11-03 - Ritual Rework (feature)
 
 ### Added

@@ -8,6 +8,16 @@
   "item.althera.hero_catalyst.faded": "Faded Catalyst",
   "item.althera.hero_catalyst.faded.hint": "Its class no longer answers",
   "item.althera.hero_catalyst.rank": "Rank %s",
+  "item.althera.spell_book": "Spell Book",
+  "item.althera.spell_book.tooltip": "Right-click to cast the selected spell",
+  "item.althera.spell_tome": "Spell Tome",
+  "item.althera.spell_tome.named": "Tome of %s",
+  "item.althera.spell_tome.faded": "Faded Tome",
+  "item.althera.spell_tome.faded.hint": "Its spell no longer answers",
+  "item.althera.spell_tome.details": "%s · Tier %s",
+  "item.althera.spell_tome.progress": "+%s%% training",
+  "item.althera.spell_tome.proficiency": "+%s proficiency once learned",
+  "item.althera.spell_tome.tooltip": "Right-click to study",
 
   "entity.althera.enemy_mage": "Enemy Mage",
 
@@ -17,6 +27,11 @@
   "key.althera.seal": "Command Seal Wheel (hold)",
 
   "key.althera.ultimate.skill": "Ultimate",
+  "key.althera.spell.tree": "Spell Tree",
+  "key.althera.spell.wheel": "Spell Wheel (hold)",
+  "key.althera.spell.previous": "Previous Spell",
+  "key.althera.spell.next": "Next Spell",
+  "key.althera.spell.scroll": "Scroll Spells (hold + mouse wheel)",
 
   "althera.commandseal.overdrive": "Overdrive",
   "althera.commandseal.revive": "Revive",
@@ -43,5 +58,11 @@
   "advancements.althera.slay_noble.title": "Noble Hunter",
   "advancements.althera.slay_noble.description": "Defeat a Noble",
   "advancements.althera.slay_red_noble.title": "High Noble Hunter",
-  "advancements.althera.slay_red_noble.description": "Defeat a High Noble"
+  "advancements.althera.slay_red_noble.description": "Defeat a High Noble",
+  "advancements.althera.first_spell.title": "First Words",
+  "advancements.althera.first_spell.description": "Learn your first spell",
+  "advancements.althera.adept.title": "Adept",
+  "advancements.althera.adept.description": "Raise a spell to level 5",
+  "advancements.althera.archmage.title": "Archmage",
+  "advancements.althera.archmage.description": "Master Fire, Lightning and Ice to level 10"
 }

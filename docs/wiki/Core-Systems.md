@@ -48,6 +48,12 @@ crowds of mobs from pushing a Hero away from its target. Dodging avoids the whol
 dodged), and a dodge during an intervention still protects you. The hero screen (**G**) shows your Hero's dodge
 chance.
 
+**G** opens your character sheet, with two tabs on top: **Player** and **Hero**. The Player tab shows you, your mana
+(red while exhausted), your Command Seal charges in your seal's colour, how many spells you learned and are training,
+the selected spell, and a **Spell Tree** button. The Hero tab is the hero screen described below. The settings gear
+works from both tabs. The sheet reopens on
+the last tab you used; without a Hero it opens on Player, and the Hero tab opens Choose your Hero.
+
 While your Hero is summoned, the hero screen shows its stats as they are right now: current health, damage and armor
 including buffs and debuffs (Overdrive, potions thrown at it, Weakness...). A stat above its normal value is
 **green** with the bonus in brackets, one below it is **red**. The effects on your Hero appear as icons in the corner
@@ -273,6 +279,7 @@ The system is designed to support future expansion and potentially community-cre
 ## 🔗 Related Systems
 
 - [Command Seals & Ultimates](Command-Seals-and-Ultimates)
+- [Spells](Spells)
 - [Commands](Commands)
 - [Ritual System](Ritual-System)
 

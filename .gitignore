@@ -54,6 +54,8 @@ docs/TODO.md
 docs/plans/
 scripts/compress-cover.py
 scripts/duel-sim.py
+scripts/spell-sim.py
+scripts/spell-icons.py
 scripts/store-description.py
 
 # Private repo (gabriellaurindo/althera-private) for the local-only files above

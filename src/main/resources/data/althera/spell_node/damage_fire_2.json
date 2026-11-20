@@ -1,0 +1,9 @@
+{
+  "spell": "althera:flame_jet",
+  "parent": "althera:fire_bolt",
+  "x": -1,
+  "y": 3,
+  "branch": "damage",
+  "element": "fire",
+  "tier": 2
+}

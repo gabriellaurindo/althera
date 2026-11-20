@@ -1,5 +1,6 @@
 {
   "name": "Frost Shard",
+  "player": { "mana_cost": 20, "description": "Fires a shard of ice that slows the target." },
   "range": 16,
   "cooldown_ticks": 40,
   "cast_ticks": 10,

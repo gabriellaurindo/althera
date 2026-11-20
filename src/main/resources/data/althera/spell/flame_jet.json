@@ -1,0 +1,17 @@
+{
+  "name": "Flame Jet",
+  "player": {
+    "mana_cost": 24,
+    "description": "Hold to pour a stream of fire that burns everything in front of you.",
+    "cast_mode": "continuous",
+    "cooldown_ticks": 20
+  },
+  "cast_ticks": 10,
+  "on_cast": [
+    { "type": "sound", "sound": "minecraft:item.firecharge.use", "volume": 0.5, "pitch": 1.3 },
+    { "type": "damage", "target": { "line": 5, "width": 1.0 }, "attack_multiplier": 0.9 },
+    { "type": "ignite", "target": { "line": 5, "width": 1.0 }, "ticks": 60 },
+    { "type": "particles", "particle": { "type": "minecraft:flame" }, "count": 3, "spread": [0.2, 0.2, 0.2], "speed": 0.02, "height": 1.3, "line": 5 },
+    { "type": "particles", "particle": { "type": "minecraft:smoke" }, "count": 1, "spread": [0.3, 0.3, 0.3], "speed": 0.02, "height": 1.4, "line": 5 }
+  ]
+}

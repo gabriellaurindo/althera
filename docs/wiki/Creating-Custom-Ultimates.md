@@ -286,4 +286,4 @@ Channels for 1.5 seconds over a crimson mist, then dashes 8 blocks through every
 
 - [Creating Custom Heroes](Creating-Custom-Heroes)
 - [Command Seals & Ultimates](Command-Seals-and-Ultimates)
-- [Nobles](Nobles) (spells use the same effects)
+- [Creating Custom Spells](Creating-Custom-Spells) (spells use the same effects)

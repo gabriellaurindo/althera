@@ -1,5 +1,6 @@
 {
   "name": "Lightning Strike",
+  "player": { "mana_cost": 25, "description": "Calls lightning down on the target and everything around it." },
   "range": 18,
   "cooldown_ticks": 60,
   "cast_ticks": 15,

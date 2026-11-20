@@ -1,5 +1,6 @@
 {
   "name": "Fire Bolt",
+  "player": { "mana_cost": 20, "description": "Hurls a bolt of fire that sets the target ablaze." },
   "range": 16,
   "cooldown_ticks": 40,
   "cast_ticks": 10,

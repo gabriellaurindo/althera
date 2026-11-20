@@ -2,6 +2,7 @@ package com.darksune.althera.common.attachment;
 
 import com.darksune.althera.Althera;
 import com.darksune.althera.common.commandseal.CommandSealData;
+import com.darksune.althera.common.spell.PlayerSpellData;
 import com.darksune.althera.common.ultimate.UltimateData;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.attachment.AttachmentType;
@@ -43,6 +44,14 @@ public class AltheraAttachments {
                             .serialize(UltimateData.CODEC)
                             .copyOnDeath()
                             .sync(UltimateData.STREAM_CODEC)
+                            .build());
+
+    public static final DeferredHolder<AttachmentType<?>, AttachmentType<PlayerSpellData>> SPELLS =
+            ATTACHMENTS.register("spells", () ->
+                    AttachmentType.builder(PlayerSpellData::new)
+                            .serialize(PlayerSpellData.CODEC)
+                            .copyOnDeath()
+                            .sync(PlayerSpellData.STREAM_CODEC)
                             .build());
 
     public static void register(final IEventBus bus) {

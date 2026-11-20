@@ -1,11 +1,10 @@
 package com.darksune.althera.common.entity;
 
-import com.darksune.althera.common.ultimate.effect.UltimateContext;
-import com.darksune.althera.common.ultimate.effect.UltimateEffect;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
@@ -14,9 +13,7 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
-
-public abstract class CasterMob extends PathfinderMob {
+public abstract class CasterMob extends PathfinderMob implements SpellCaster {
 
     protected CasterMob(EntityType<? extends PathfinderMob> type, Level level) {
         super(type, level);
@@ -29,6 +26,17 @@ public abstract class CasterMob extends PathfinderMob {
     @Nullable
     public abstract LivingEntity getEffectOwner();
 
+    @Override
+    public LivingEntity entity() {
+        return this;
+    }
+
+    @Override
+    public float getSpellPower() {
+        return (float) getAttributeValue(Attributes.ATTACK_DAMAGE);
+    }
+
+    @Override
     public void triggerUltimateAnimation() {
     }
 
@@ -48,14 +56,5 @@ public abstract class CasterMob extends PathfinderMob {
         return wall.getType() == HitResult.Type.MISS
                 ? point
                 : wall.getLocation().subtract(point.subtract(center).normalize().scale(0.2D));
-    }
-
-    public void applyEffects(final List<UltimateEffect> effects, @Nullable final LivingEntity target,
-                             @Nullable final Vec3 impact) {
-        final LivingEntity owner = getEffectOwner();
-        if (owner == null || effects.isEmpty()) return;
-
-        final UltimateContext context = UltimateContext.attack(owner, this, target, impact);
-        effects.forEach(effect -> effect.apply(context));
     }
 }

@@ -19,6 +19,10 @@ public class SpellRegistry {
         return SPELLS.get(id);
     }
 
+    public static Map<ResourceLocation, SpellDefinition> getAll() {
+        return Map.copyOf(SPELLS);
+    }
+
     public static void clear() {
         SPELLS.clear();
     }

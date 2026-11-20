@@ -19,6 +19,7 @@ public final class AltheraCommands {
         ManaCommand.register(dispatcher);
         MageCommand.register(dispatcher);
         SealCommand.register(dispatcher);
+        SpellCommand.register(dispatcher);
     }
 
     static String root(String feature) {
