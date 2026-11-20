@@ -17,6 +17,9 @@ data/<your_namespace>/spell_node/   spell tree nodes
 The file name is the id. Example: `data/althera/spell/fire_bolt.json` is the spell `althera:fire_bolt`, and
 `data/althera/spell_node/fire_bolt.json` is the node `althera:fire_bolt`.
 
+A spell's icon is a 16x16 texture from a resource pack: `assets/<namespace>/textures/gui/spell/<name>.png`, where
+`<namespace>:<name>` is the node id (or the spell id). Without one, the spell shows its element's icon.
+
 Both reload with `/reload`. Training progress is stored per **node** id: renaming a node file loses the progress
 players made on it.
 

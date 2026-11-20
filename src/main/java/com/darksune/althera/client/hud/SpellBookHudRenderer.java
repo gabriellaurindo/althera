@@ -67,7 +67,7 @@ public final class SpellBookHudRenderer {
         int x = mc.getWindow().getGuiScaledWidth() / 2 + HOTBAR_HALF_WIDTH + GAP + rightSideOffset(mc, player);
         int y = mc.getWindow().getGuiScaledHeight() - BOTTOM_OFFSET;
 
-        renderBox(gui, player, node, state, x, y);
+        renderBox(gui, player, node, SpellSlots.icon(data.getSlot(slot)), state, x, y);
         renderText(gui, mc.font, data, slot, state, x + SIZE + TEXT_GAP, y);
     }
 
@@ -86,7 +86,7 @@ public final class SpellBookHudRenderer {
         return 0;
     }
 
-    private static void renderBox(GuiGraphics gui, Player player, @Nullable SpellNode node, SkillSlotState state,
+    private static void renderBox(GuiGraphics gui, Player player, @Nullable SpellNode node, HudIcon icon, SkillSlotState state,
                                   int x, int y) {
 
         int inner = SIZE - 2;
@@ -95,7 +95,7 @@ public final class SpellBookHudRenderer {
         gui.fill(x + 1, y + 1, x + 1 + inner, y + 1 + inner, COLOR_BACKGROUND);
 
         if (node != null) {
-            HudIcons.renderItem(gui, SpellSlots.icon(node), x + 1, y + 1, 1.0F, state.ready() ? 1.0F : 0.4F);
+            icon.renderFlat(gui, x + 1, y + 1, 1.0F, state.ready() ? 1.0F : 0.4F);
         }
 
         float fill = 0F;

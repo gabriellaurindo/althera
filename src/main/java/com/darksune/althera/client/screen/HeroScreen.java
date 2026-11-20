@@ -487,7 +487,7 @@ public class HeroScreen extends Screen {
             gui.pose().pushPose();
             gui.pose().translate(cellX, y, 0.0F);
             gui.pose().scale(ELEMENT_ICON_SCALE, ELEMENT_ICON_SCALE, 1.0F);
-            HudIcons.renderItem(gui, SpellSlots.elementIcon(element), 0, 0, 1.0F, 1.0F);
+            SpellSlots.elementIcon(element).renderFlat(gui, 0, 0, 1.0F, 1.0F);
             gui.pose().popPose();
 
             gui.drawString(this.font, String.valueOf(level), cellX + iconSize + 2, y + (iconSize - 8) / 2, color);

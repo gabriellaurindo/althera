@@ -33,7 +33,7 @@ public class SpellWheelScreen extends RadialWheelScreen {
             int index = slot;
             entries.add(new Entry(
                     SpellSlots.name(data, slot),
-                    SpellSlots.icon(SpellSlots.node(data, slot)),
+                    SpellSlots.icon(data.getSlot(slot)),
                     SpellSlots.mana(data, slot),
                     SpellSlots.noteOrLevel(data, slot),
                     SkillSlotState.spell(player, slot),

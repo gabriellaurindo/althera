@@ -1,5 +1,6 @@
 package com.darksune.althera.client.hud;
 
+import com.darksune.althera.Althera;
 import com.darksune.althera.common.spell.PlayerSpell;
 import com.darksune.althera.common.spell.PlayerSpellData;
 import com.darksune.althera.common.spell.SpellCastMode;
@@ -8,15 +9,21 @@ import com.darksune.althera.common.spell.SpellElement;
 import com.darksune.althera.common.spell.SpellNode;
 import com.darksune.althera.common.spell.SpellNodeRegistry;
 import com.darksune.althera.common.spell.SpellTraining;
+import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public final class SpellSlots {
 
     public static final String EMPTY_NAME = "Empty";
+
+    private static final String ICON_FOLDER = "textures/gui/spell/";
+
+    private static final Map<ResourceLocation, Boolean> TEXTURE_EXISTS = new HashMap<>();
 
     private SpellSlots() {
     }
@@ -32,24 +39,39 @@ public final class SpellSlots {
         return Component.literal(node == null ? EMPTY_NAME : node.displayName());
     }
 
-    public static ItemStack icon(@Nullable SpellNode node) {
+    public static HudIcon icon(@Nullable ResourceLocation id) {
+
+        SpellNode node = id == null ? null : SpellNodeRegistry.get(id);
 
         if (node == null) {
-            return ItemStack.EMPTY;
+            return HudIcon.EMPTY;
         }
 
-        return elementIcon(node.element());
+        ResourceLocation texture = existingTexture(iconTexture(id));
+
+        if (texture == null) {
+            texture = node.spell().map(spell -> existingTexture(iconTexture(spell))).orElse(null);
+        }
+
+        return texture != null ? HudIcon.of(texture) : elementIcon(node.element());
     }
 
-    public static ItemStack elementIcon(SpellElement element) {
-
-        return new ItemStack(switch (element) {
-            case FIRE -> Items.FIRE_CHARGE;
-            case LIGHTNING -> Items.LIGHTNING_ROD;
-            case ICE -> Items.BLUE_ICE;
-            case NONE -> Items.ENCHANTED_BOOK;
-        });
+    public static HudIcon elementIcon(SpellElement element) {
+        return HudIcon.of(ResourceLocation.fromNamespaceAndPath(Althera.MOD_ID,
+                ICON_FOLDER + "element/" + element.getSerializedName() + ".png"));
     }
+
+    private static ResourceLocation iconTexture(ResourceLocation id) {
+        return id.withPath(ICON_FOLDER + id.getPath() + ".png");
+    }
+
+    @Nullable
+    private static ResourceLocation existingTexture(ResourceLocation texture) {
+        boolean exists = TEXTURE_EXISTS.computeIfAbsent(texture,
+                key -> Minecraft.getInstance().getResourceManager().getResource(key).isPresent());
+        return exists ? texture : null;
+    }
+
 
     public static int manaCost(PlayerSpellData data, ResourceLocation id, PlayerSpell spell) {
         return data.isTraining(id)

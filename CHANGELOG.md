@@ -55,6 +55,10 @@ and generates the GitHub Release, CurseForge and Discord notes from it.
   - Datapacks: the spell's `player` block takes an optional `proficiency` block (`damage_per_level`,
     `size_per_level`, `visual_per_level`, `cost_per_level`).
   - `/althera_spell level <node> <level>` and `/althera_spell element <element> <level>` (cheats).
+- Spells and elements have their own **icons** (Fire Bolt, Lightning Strike, Frost Shard; Fire, Lightning, Ice and
+  an arcane rune for the Knowledge root) in the spell tree, the book HUD, the spell wheel and the character sheet.
+  Resource packs can add an icon for any spell at `textures/gui/spell/<spell>.png`; spells without one show their
+  element's icon.
 - Player spells have **no cooldown** unless their spell says so: Fire Bolt, Lightning Strike and Frost Shard can be cast
   as often as your mana allows (Nobles keep their own cooldown on the same spells).
 - Datapacks: spells take an optional `player` block (`mana_cost`, `description`, `cast_mode`, `cooldown_ticks`, default

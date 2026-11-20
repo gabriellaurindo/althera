@@ -1,5 +1,6 @@
 package com.darksune.althera.client.screen;
 
+import com.darksune.althera.client.hud.HudIcon;
 import com.darksune.althera.client.hud.SkillSlotState;
 import com.darksune.althera.client.input.AltheraKeybinds;
 import com.darksune.althera.client.input.KeyActions;
@@ -41,7 +42,7 @@ public class SealWheelScreen extends RadialWheelScreen {
             int manaCost = type.getSkill().getManaCost();
             entries.add(new Entry(
                     Component.translatable("althera.commandseal." + type.getId()),
-                    sealIcon(type),
+                    HudIcon.of(sealIcon(type)),
                     manaCost > 0 ? Component.literal(manaCost + " mana") : null,
                     null,
                     SkillSlotState.seal(player, type),

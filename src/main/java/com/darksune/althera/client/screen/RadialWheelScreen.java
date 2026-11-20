@@ -1,5 +1,6 @@
 package com.darksune.althera.client.screen;
 
+import com.darksune.althera.client.hud.HudIcon;
 import com.darksune.althera.client.hud.SkillSlotState;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -11,7 +12,6 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 
@@ -47,7 +47,7 @@ public abstract class RadialWheelScreen extends Screen {
     private static final int COLOR_BLOCKED = 0xFFFF5555;
     private static final int COLOR_CANCEL = 0xFFAAAAAA;
 
-    protected record Entry(Component name, ItemStack icon, @Nullable Component mana, @Nullable Component note,
+    protected record Entry(Component name, HudIcon icon, @Nullable Component mana, @Nullable Component note,
                            SkillSlotState state, boolean current, Runnable pick) {
     }
 
@@ -226,7 +226,7 @@ public abstract class RadialWheelScreen extends Screen {
         int iconY = Math.round(centerY + dirY * middle) - 8;
 
         if (!entry.icon().isEmpty()) {
-            gui.renderItem(entry.icon(), iconX, iconY);
+            entry.icon().render(gui, iconX, iconY);
 
             if (!entry.state().ready()) {
                 gui.pose().pushPose();

@@ -32,7 +32,6 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
@@ -499,7 +498,7 @@ public class SpellTreeScreen extends Screen {
         if (carried != null) {
             gui.pose().pushPose();
             gui.pose().translate(0.0F, 0.0F, Z_CARRIED);
-            gui.renderItem(SpellSlots.icon(SpellNodeRegistry.get(carried)), mouseX - 8, mouseY - 8);
+            SpellSlots.icon(carried).render(gui, mouseX - 8, mouseY - 8);
             gui.pose().popPose();
             return;
         }
@@ -629,8 +628,7 @@ public class SpellTreeScreen extends Screen {
             return;
         }
 
-        ItemStack icon = SpellSlots.icon(node);
-        gui.renderItem(icon, x + NODE_HALF - 8, y + NODE_HALF - 8);
+        SpellSlots.icon(id).render(gui, x + NODE_HALF - 8, y + NODE_HALF - 8);
 
         gui.pose().pushPose();
         gui.pose().translate(0.0F, 0.0F, Z_OVERLAY);
@@ -686,7 +684,7 @@ public class SpellTreeScreen extends Screen {
             gui.fill(x + 1, y + 1, x + SLOT_SIZE - 1, y + SLOT_SIZE - 1, COLOR_SLOT);
 
             if (id != null) {
-                gui.renderItem(SpellSlots.icon(SpellNodeRegistry.get(id)), x + 2, y + 2);
+                SpellSlots.icon(id).render(gui, x + 2, y + 2);
             }
 
             gui.pose().pushPose();
