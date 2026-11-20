@@ -32,7 +32,7 @@ and generates the GitHub Release, CurseForge and Discord notes from it.
     select the previous / next spell. With a book in hand, hold **Left Shift** and use the **mouse wheel** to scroll
     through the spells instead of the hotbar. All four can be changed in Controls.
   - Held spells are supported for datapacks: `charge` spells drain their mana while charging (`cast_ticks`) and fire
-    on release, `continuous` spells drain their `mana_cost` per second while held. No built-in spell uses them yet.
+    on release, `continuous` spells drain their `mana_cost` per second while held (Flame Jet is the first).
 - **Character sheet** (**G**): the hero screen now has two tabs on top, **Player** and **Hero**. The Player tab shows
   you, your mana, your Command Seal charges in your seal's colour, your spells (learned, training, selected) and a
   **Spell Tree** button (closing the tree brings you back to the sheet). The settings gear is on both tabs. The sheet
@@ -59,6 +59,17 @@ and generates the GitHub Release, CurseForge and Discord notes from it.
   an arcane rune for the Knowledge root) in the spell tree, the book HUD, the spell wheel and the character sheet.
   Resource packs can add an icon for any spell at `textures/gui/spell/<spell>.png`; spells without one show their
   element's icon.
+- New spells: **Frost Ward** (Defense, ice, 25 mana): Absorption II for 10 seconds and pushes back and slows the
+  enemies around you, 10 second cooldown. **Flame Jet** (tier 2 fire, after Fire Bolt, 24 mana per second): hold
+  right-click to pour a 5 block stream of fire that burns everything in it.
+- The Spell Book and the Spell Tome have new textures.
+- **Casting pose**: your character raises the book with both hands while casting (seen by everyone), the book lifts in
+  first person while you hold a spell, and every cast puffs in the spell's element colour.
+- **Mastered spells** (level 10) get a gold border in the spell tree, sparkle when cast and leave a trail of light.
+- Advancements: **First Words** (learn a spell), **Adept** (a spell at level 5) and the challenge **Archmage** (Fire,
+  Lightning and Ice mastery at 10).
+- A Spell Tome of a spell you already know now gives **1,500 proficiency** (a whole level 2) instead of being
+  refused; only tomes of a spell at level 10 are refused.
 - Player spells have **no cooldown** unless their spell says so: Fire Bolt, Lightning Strike and Frost Shard can be cast
   as often as your mana allows (Nobles keep their own cooldown on the same spells).
 - Datapacks: spells take an optional `player` block (`mana_cost`, `description`, `cast_mode`, `cooldown_ticks`, default

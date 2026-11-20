@@ -3,6 +3,8 @@ package com.darksune.althera.common.item;
 import com.darksune.althera.common.item.component.AltheraDataComponents;
 import com.darksune.althera.common.item.component.SpellTome;
 import com.darksune.althera.common.spell.PlayerSpell;
+import com.darksune.althera.common.spell.SpellAdvancements;
+import com.darksune.althera.common.spell.SpellProficiency;
 import com.darksune.althera.common.spell.PlayerSpellData;
 import com.darksune.althera.common.spell.SpellCastSystem;
 import com.darksune.althera.common.spell.SpellNode;
@@ -62,8 +64,8 @@ public class SpellTomeItem extends Item {
 
         PlayerSpellData data = PlayerSpellData.get(player);
 
-        if (data.isLearned(tome.nodeId())) {
-            notify(player, "You already know " + node.displayName() + ".");
+        if (data.isLearned(tome.nodeId()) && data.getSpellLevel(tome.nodeId()) >= SpellProficiency.MAX_LEVEL) {
+            notify(player, "You have mastered " + node.displayName() + ".");
             return InteractionResultHolder.fail(stack);
         }
 
@@ -82,6 +84,22 @@ public class SpellTomeItem extends Item {
                 30, 0.5D, 0.6D, 0.5D, 0.8D);
         player.level().playSound(null, player.blockPosition(), SoundEvents.BOOK_PAGE_TURN, SoundSource.PLAYERS, 1.0F, 1.0F);
         player.level().playSound(null, player.blockPosition(), SoundEvents.ENCHANTMENT_TABLE_USE, SoundSource.PLAYERS, 0.6F, 1.2F);
+
+        if (data.isLearned(nodeId)) {
+            int before = data.getSpellLevel(nodeId);
+            data.setSpellXp(nodeId, data.getSpellXp(nodeId) + SpellTome.PROFICIENCY_XP);
+            int after = data.getSpellLevel(nodeId);
+
+            if (after > before) {
+                SpellCastSystem.onLevelUp(player, node.displayName(), after);
+            } else {
+                player.displayClientMessage(Component.literal("§6Studied " + node.displayName() + ": +"
+                        + SpellTome.PROFICIENCY_XP + " proficiency"), true);
+            }
+
+            SpellAdvancements.check(player);
+            return;
+        }
 
         if (data.addProgress(nodeId, SpellTome.progressFor(node))) {
             SpellCastSystem.onLearned(player, node);
@@ -130,6 +148,8 @@ public class SpellTomeItem extends Item {
 
         tooltip.add(Component.translatable("item.althera.spell_tome.progress",
                 Math.round(SpellTome.progressFor(node) * 100.0F)).withStyle(ChatFormatting.AQUA));
+        tooltip.add(Component.translatable("item.althera.spell_tome.proficiency", SpellTome.PROFICIENCY_XP)
+                .withStyle(ChatFormatting.GOLD));
         tooltip.add(Component.translatable("item.althera.spell_tome.tooltip").withStyle(ChatFormatting.DARK_GRAY));
     }
 

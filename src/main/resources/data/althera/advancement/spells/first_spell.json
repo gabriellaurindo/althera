@@ -1,0 +1,19 @@
+{
+  "parent": "althera:root",
+  "display": {
+    "icon": {
+      "id": "althera:spell_book"
+    },
+    "title": {
+      "translate": "advancements.althera.first_spell.title"
+    },
+    "description": {
+      "translate": "advancements.althera.first_spell.description"
+    }
+  },
+  "criteria": {
+    "unlock": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

@@ -88,7 +88,8 @@ The **Hero Catalyst** holds the class and rank of the Hero that served the Noble
 [ritual](Ritual-System) next to a diamond block, it gives you a Hero of that class and rank.
 
 The **Spell Tome** holds a random basic spell. Right-click it to study: it adds half of that spell's training at
-once, even if you are not training the spell yet (see [Spells](Spells#-spell-tome)).
+once, even if you are not training the spell yet, or proficiency if you already know it (see
+[Spells](Spells#-spell-tome)).
 
 Nobles killed by anything else (iron golems, other mobs, lava...) drop nothing.
 

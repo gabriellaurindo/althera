@@ -4,6 +4,7 @@ import com.darksune.althera.common.attachment.ManaData;
 import com.darksune.althera.common.entity.PlayerCaster;
 import com.darksune.althera.common.skill.SkillLimits;
 import com.darksune.althera.common.ultimate.effect.UltimateContext;
+import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -15,6 +16,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Vector3f;
 
 public final class SpellCastSystem {
 
@@ -218,7 +220,7 @@ public final class SpellCastSystem {
         }
 
         if ((heldTicks - 1) % cast.pulseTicks() == 0) {
-            cast.spell().cast(UltimateContext.spell(new PlayerCaster(player), cast.scale()));
+            castSpell(player, cast);
         }
     }
 
@@ -250,8 +252,30 @@ public final class SpellCastSystem {
             playTrainingEffects(player);
             train(player, cast);
         } else {
-            cast.spell().cast(UltimateContext.spell(new PlayerCaster(player), cast.scale()));
+            castSpell(player, cast);
         }
+    }
+
+    private static void castSpell(final ServerPlayer player, final Cast cast) {
+        final SpellScale scale = cast.scale();
+        playCastEffects(player, cast.node().element(), scale.mastered());
+        cast.spell().cast(UltimateContext.spell(new PlayerCaster(player), scale));
+    }
+
+    private static void playCastEffects(final ServerPlayer player, final SpellElement element, final boolean mastered) {
+        final ServerLevel level = player.serverLevel();
+        final Vec3 hand = handPosition(player);
+        final int rgb = element.color().getColor() == null ? 0xFFFFFF : element.color().getColor();
+        final Vector3f color = new Vector3f((rgb >> 16 & 0xFF) / 255.0F, (rgb >> 8 & 0xFF) / 255.0F, (rgb & 0xFF) / 255.0F);
+        level.sendParticles(new DustParticleOptions(color, 0.8F), hand.x, hand.y, hand.z, 8, 0.15D, 0.15D, 0.15D, 0.0D);
+
+        if (mastered) {
+            level.sendParticles(ParticleTypes.END_ROD, hand.x, hand.y, hand.z, 6, 0.2D, 0.2D, 0.2D, 0.04D);
+        }
+    }
+
+    private static Vec3 handPosition(final Player player) {
+        return player.getEyePosition().add(player.getLookAngle().scale(0.8D)).subtract(0, 0.3D, 0);
     }
 
     private static void train(final ServerPlayer player, final Cast cast) {
@@ -284,6 +308,10 @@ public final class SpellCastSystem {
         if (levelUps.elementLevel() > 0) {
             onLevelUp(player, element.displayName() + " mastery", levelUps.elementLevel());
         }
+
+        if (levelUps.any()) {
+            SpellAdvancements.check(player);
+        }
     }
 
     public static void onLevelUp(final ServerPlayer player, final String name, final int level) {
@@ -294,11 +322,12 @@ public final class SpellCastSystem {
     public static void onLearned(final ServerPlayer player, final SpellNode node) {
         player.sendSystemMessage(Component.literal("§aYou learned " + node.displayName() + "!"));
         player.level().playSound(null, player.blockPosition(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.8F, 1.2F);
+        SpellAdvancements.check(player);
     }
 
     private static void playTrainingEffects(final ServerPlayer player) {
         final ServerLevel level = player.serverLevel();
-        final Vec3 hand = player.getEyePosition().add(player.getLookAngle().scale(0.8D)).subtract(0, 0.3D, 0);
+        final Vec3 hand = handPosition(player);
         level.sendParticles(ParticleTypes.POOF, hand.x, hand.y, hand.z, 6, 0.1D, 0.1D, 0.1D, 0.02D);
         level.sendParticles(ParticleTypes.ENCHANT, hand.x, hand.y, hand.z, 12, 0.3D, 0.3D, 0.3D, 0.5D);
         level.playSound(null, player.blockPosition(), SoundEvents.FIRE_EXTINGUISH, SoundSource.PLAYERS, 0.4F, 1.6F);

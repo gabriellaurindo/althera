@@ -4,8 +4,8 @@ Players can learn spells and cast them with a **Spell Book**. Spells are learned
 spell you are still learning costs more and does nothing, but every cast brings you closer to mastering it.
 
 > [!NOTE]
-> Player spells are a work in progress. Fire Bolt, Lightning Strike and Frost Shard are the first spells; the
-> Defense and Utility branches are `?` placeholders for spells still to come.
+> Player spells are a work in progress. Fire Bolt, Lightning Strike, Frost Shard, Frost Ward and Flame Jet are the
+> first spells; the other nodes are `?` placeholders for spells still to come.
 
 ---
 
@@ -23,6 +23,7 @@ Node borders show each spell's state:
 | Border | State |
 |---|---|
 | 🟩 Green | Learned |
+| 🟨 Gold | Learned and mastered (level 10, see [Proficiency](#-proficiency)) |
 | 🟦 Blue | In training |
 | 🟨 Yellow | Can be trained (the spell before it is learned) |
 | 🟥 Red | Locked: learn the spell before it first |
@@ -104,9 +105,15 @@ In **Creative** mode spells cost no mana and have no cooldown, but they still ne
 | **Fire Bolt** | Fire | 20 | A bolt of fire (7.2 damage) that sets the target ablaze for 4 seconds |
 | **Lightning Strike** | Lightning | 25 | A spark that calls lightning down on what it hits (9.6 damage) and hurts everything around it (3.6), even when it hits a wall |
 | **Frost Shard** | Ice | 20 | A shard of ice (6 damage) that gives Slowness II for 3 seconds |
+| **Frost Ward** (Defense) | Ice | 25 | Wraps you in ice: Absorption II for 10 seconds, and enemies within 3 blocks are pushed back and get Slowness II for 3 seconds. 10 second cooldown |
+| **Flame Jet** (tier 2, after Fire Bolt) | Fire | 24 / s | **Hold** right-click to pour a stream of fire 5 blocks ahead: 3.6 damage twice a second to everything in it and sets it ablaze. 1 second cooldown after you stop |
 
-Spells fly where you look. They have **no cooldown**: you can cast them as often as your mana allows. Mana is shared
-with your Hero, so casting while your Hero is summoned drains the same pool that keeps it in the world.
+Spells fly where you look. Except for Frost Ward and Flame Jet, they have **no cooldown**: you can cast them as often
+as your mana allows. Mana is shared with your Hero, so casting while your Hero is summoned drains the same pool that
+keeps it in the world.
+
+While casting, your character raises the book with both hands, and a puff in the spell's element colour shows at
+your hand.
 
 Spells never hurt your own Hero and follow the server's PvP and team rules: with PvP off, or between teammates without
 friendly fire, they don't hurt other players.
@@ -139,6 +146,9 @@ element (**Fire**, **Lightning**, **Ice**) has its own **mastery** level from 1 
 
 At spell level 10 and mastery 10, Fire Bolt deals **19.8** damage instead of 7.2 and costs 15 mana instead of 20.
 
+A spell at level 10 is **mastered**: its node gets a gold border, its casts sparkle and its projectiles leave a
+trail of light.
+
 You get a message when a spell or a mastery goes up a level. The spell tree tooltip shows a learned spell's level,
 its progress to the next one and its current bonuses; the book shows the level next to the cost; the Player tab of the
 character sheet (**G**) shows the three masteries (hover one for details).
@@ -157,7 +167,19 @@ just accumulates.
 A spell finished with tomes before the spells leading to it are learned counts as learned, but stays **unusable**
 (orange in the tree, faded in the book and wheel) until the spells before it are learned.
 
-Tomes of a spell you already know can't be used. A tome whose spell no longer exists becomes a **Faded Tome**.
+A tome of a spell you already know gives **1,500 proficiency** instead (a whole level 2), see
+[Proficiency](#-proficiency). Only a tome of a spell at level 10 can't be used. A tome whose spell no longer exists
+becomes a **Faded Tome**.
+
+---
+
+## 🏆 Advancements
+
+| Advancement | How |
+|---|---|
+| **First Words** | Learn your first spell |
+| **Adept** | Raise a spell to level 5 |
+| **Archmage** (challenge) | Master Fire, Lightning and Ice to level 10 |
 
 ---
 

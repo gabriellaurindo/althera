@@ -73,6 +73,7 @@ public class SpellTreeScreen extends Screen {
     private static final int COLOR_BACKGROUND = 0xE0101018;
     private static final int COLOR_NODE = 0xFF1A1A24;
     private static final int COLOR_LEARNED = 0xFF55FF55;
+    private static final int COLOR_MASTERED = 0xFFFFD43B;
     private static final int COLOR_TRAINING = 0xFF5599FF;
     private static final int COLOR_AVAILABLE = 0xFFFFDD55;
     private static final int COLOR_LOCKED = 0xFFCC4444;
@@ -659,7 +660,8 @@ public class SpellTreeScreen extends Screen {
 
     private static int stateColor(PlayerSpellData data, ResourceLocation id, SpellNodeState state) {
         return switch (state) {
-            case LEARNED -> data.isUsable(id) ? COLOR_LEARNED : COLOR_UNUSABLE;
+            case LEARNED -> !data.isUsable(id) ? COLOR_UNUSABLE
+                    : data.getSpellLevel(id) >= SpellProficiency.MAX_LEVEL ? COLOR_MASTERED : COLOR_LEARNED;
             case TRAINING -> COLOR_TRAINING;
             case AVAILABLE -> COLOR_AVAILABLE;
             case LOCKED -> COLOR_LOCKED;

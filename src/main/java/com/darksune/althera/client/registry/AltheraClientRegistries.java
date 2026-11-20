@@ -2,6 +2,7 @@ package com.darksune.althera.client.registry;
 
 import com.darksune.althera.client.input.AltheraKeybinds;
 import com.darksune.althera.client.item.CatalystClassProperty;
+import com.darksune.althera.client.item.SpellBookClientExtensions;
 import com.darksune.althera.client.layer.SealLayer;
 import com.darksune.althera.client.renderer.block.RitualCircleRenderer;
 import com.darksune.althera.client.renderer.block.RitualPedestalRenderer;
@@ -21,6 +22,7 @@ import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.ModelEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
+import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
 
 public final class AltheraClientRegistries {
 
@@ -32,6 +34,7 @@ public final class AltheraClientRegistries {
         modEventBus.addListener(AltheraClientRegistries::registerLayers);
         modEventBus.addListener(AltheraClientRegistries::registerItemProperties);
         modEventBus.addListener(AltheraClientRegistries::registerAdditionalModels);
+        modEventBus.addListener(AltheraClientRegistries::registerItemExtensions);
     }
 
     private static void registerItemProperties(FMLClientSetupEvent event) {
@@ -40,6 +43,10 @@ public final class AltheraClientRegistries {
                 CatalystClassProperty.ID,
                 CatalystClassProperty::get
         ));
+    }
+
+    private static void registerItemExtensions(RegisterClientExtensionsEvent event) {
+        event.registerItem(new SpellBookClientExtensions(), AltheraItems.SPELL_BOOK.get());
     }
 
     private static void registerAdditionalModels(ModelEvent.RegisterAdditional event) {

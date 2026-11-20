@@ -1,6 +1,7 @@
 package com.darksune.althera.common.command;
 
 import com.darksune.althera.common.spell.PlayerSpellData;
+import com.darksune.althera.common.spell.SpellAdvancements;
 import com.darksune.althera.common.spell.SpellCastSystem;
 import com.darksune.althera.common.spell.SpellElement;
 import com.darksune.althera.common.spell.SpellNode;
@@ -194,6 +195,7 @@ public class SpellCommand {
         int level = IntegerArgumentType.getInteger(ctx, "level");
 
         PlayerSpellData.get(player).setSpellXp(id, SpellProficiency.totalXpFor(level, SpellProficiency.SPELL_BASE_XP));
+        SpellAdvancements.check(player);
 
         ctx.getSource().sendSuccess(() -> Component.literal("§bSet " + id + " to level " + level + "."), true);
 
@@ -217,6 +219,7 @@ public class SpellCommand {
         int level = IntegerArgumentType.getInteger(ctx, "level");
 
         PlayerSpellData.get(player).setElementXp(element, SpellProficiency.totalXpFor(level, SpellProficiency.ELEMENT_BASE_XP));
+        SpellAdvancements.check(player);
 
         ctx.getSource().sendSuccess(() -> Component.literal("§bSet " + element.displayName() + " mastery to level " + level + "."), true);
 
@@ -245,6 +248,7 @@ public class SpellCommand {
         PlayerSpellData data = PlayerSpellData.get(player);
 
         data.setProgress(id, value);
+        SpellAdvancements.check(player);
 
         ctx.getSource().sendSuccess(() -> Component.literal(
                 "§bSet " + id + " to " + Math.round(data.getProgress(id) * 100.0F) + "% (" + data.getState(id) + ")."

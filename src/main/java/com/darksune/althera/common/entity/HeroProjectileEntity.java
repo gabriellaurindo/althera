@@ -35,6 +35,11 @@ public class HeroProjectileEntity extends Projectile {
                     HeroProjectileEntity.class,
                     EntityDataSerializers.FLOAT
             );
+    private static final EntityDataAccessor<Boolean> MASTERED =
+            SynchedEntityData.defineId(
+                    HeroProjectileEntity.class,
+                    EntityDataSerializers.BOOLEAN
+            );
     private static final int MAX_LIFE_TICKS = 40;
     private static final int TRAIL_PARTICLES = 2;
     private static final int BURST_PARTICLES = 8;
@@ -84,6 +89,7 @@ public class HeroProjectileEntity extends Projectile {
         projectile.scale = scale;
         projectile.entityData.set(PARTICLE, particle);
         projectile.entityData.set(VISUAL_SCALE, scale.visual());
+        projectile.entityData.set(MASTERED, scale.mastered());
         projectile.moveTo(from.x, from.y, from.z, hero.getYRot(), 0);
         projectile.shoot(direction.x, direction.y, direction.z, speed, 0.0f);
         hero.level().addFreshEntity(projectile);
@@ -94,6 +100,7 @@ public class HeroProjectileEntity extends Projectile {
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
         builder.define(PARTICLE, ParticleTypes.FLAME);
         builder.define(VISUAL_SCALE, 1.0F);
+        builder.define(MASTERED, false);
     }
 
     @Override
@@ -125,6 +132,11 @@ public class HeroProjectileEntity extends Projectile {
 
     private void spawnTrail(final Vec3 motion) {
         final ParticleOptions particle = entityData.get(PARTICLE);
+        if (entityData.get(MASTERED) && tickCount % 2 == 0) {
+            level().addParticle(ParticleTypes.END_ROD, getX(), getY(), getZ(),
+                    (random.nextDouble() - 0.5) * 0.04, (random.nextDouble() - 0.5) * 0.04,
+                    (random.nextDouble() - 0.5) * 0.04);
+        }
         final int count = visualCount(TRAIL_PARTICLES);
         for (int i = 0; i < count; i++) {
             final double back = (double) i / count;

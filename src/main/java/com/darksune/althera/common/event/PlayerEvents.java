@@ -4,6 +4,7 @@ import com.darksune.althera.Althera;
 import com.darksune.althera.common.attachment.HeroData;
 import com.darksune.althera.common.attachment.ManaData;
 import com.darksune.althera.common.system.HeroSelectionSystem;
+import com.darksune.althera.common.spell.SpellAdvancements;
 import com.darksune.althera.common.system.HeroStatsSystem;
 import com.darksune.althera.common.system.HeroSummonSystem;
 import com.darksune.althera.common.system.SealTattooSystem;
@@ -89,6 +90,7 @@ public final class PlayerEvents {
         HeroSummonSystem.restorePresence(player);
         HeroSelectionSystem.requestSelection(player);
         SealTattooSystem.announce(player);
+        SpellAdvancements.check(player);
     }
 
     @SubscribeEvent
