@@ -48,6 +48,10 @@ public class KeyInputHandler {
             KeyActions.handleSpellTree();
         }
 
+        if (AltheraKeybinds.JOURNAL.consumeClick()) {
+            KeyActions.handleJournal();
+        }
+
     }
 
     @SubscribeEvent

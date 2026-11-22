@@ -1,5 +1,8 @@
 package com.darksune.althera.common.item;
 
+import com.darksune.althera.common.academy.AcademyTravel;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.item.context.UseOnContext;
 import com.darksune.althera.common.spell.SpellCastSystem;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -31,6 +34,11 @@ public class SpellBookItem extends Item {
 
     public static boolean isCastingWith(LivingEntity entity) {
         return entity.isUsingItem() && entity.getUseItem().getItem() instanceof SpellBookItem;
+    }
+
+    @Override
+    public InteractionResult useOn(UseOnContext context) {
+        return AcademyTravel.tryLight(context);
     }
 
     @Override

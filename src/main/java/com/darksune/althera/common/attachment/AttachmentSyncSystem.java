@@ -22,7 +22,9 @@ public class AttachmentSyncSystem {
 //                player.getData(AltheraAttachments.HERO.get()),
                 player.getData(AltheraAttachments.COMMAND_SEAL.get()),
                 player.getData(AltheraAttachments.ULTIMATE.get()),
-                player.getData(AltheraAttachments.SPELLS.get())
+                player.getData(AltheraAttachments.SPELLS.get()),
+                player.getData(AltheraAttachments.ACADEMY.get()),
+                player.getData(AltheraAttachments.QUESTS.get())
         );
 
         for (ISyncableAttachment attachment : attachments) {

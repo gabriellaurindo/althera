@@ -34,6 +34,11 @@ import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.event.OnDatapackSyncEvent;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.fml.config.ModConfig;
+import com.darksune.althera.common.AltheraServerConfig;
+import com.darksune.althera.common.quest.QuestLoader;
+import com.darksune.althera.common.quest.QuestRegistry;
+import com.darksune.althera.network.packet.SyncQuestsPacket;
 import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 
@@ -45,6 +50,7 @@ public final class Althera {
 
     public Althera(final IEventBus modEventBus, final ModContainer modContainer) {
         AltheraRegistries.register(modEventBus);
+        modContainer.registerConfig(ModConfig.Type.SERVER, AltheraServerConfig.SPEC);
         AltheraNetwork.register(modEventBus);
         NeoForge.EVENT_BUS.addListener(this::onReloadListeners);
     }
@@ -56,6 +62,7 @@ public final class Althera {
         event.addListener(new SpellLoader(event.getRegistryAccess()));
         event.addListener(new SpellNodeLoader());
         event.addListener(new EnemyMageLoader(event.getRegistryAccess()));
+        event.addListener(new QuestLoader(event.getRegistryAccess()));
     }
 
     @SubscribeEvent
@@ -66,7 +73,8 @@ public final class Althera {
         SyncSpellsPacket spells = new SyncSpellsPacket(SpellRegistry.getAll());
         SyncSpellNodesPacket spellNodes = new SyncSpellNodesPacket(SpellNodeRegistry.getAll());
         SyncEnemyMagesPacket mages = new SyncEnemyMagesPacket(EnemyMageRegistry.getAll());
-        event.getRelevantPlayers().forEach(player -> PacketDistributor.sendToPlayer(player, classes, heroes, ultimates, spells, spellNodes, mages));
+        SyncQuestsPacket quests = new SyncQuestsPacket(QuestRegistry.getAll());
+        event.getRelevantPlayers().forEach(player -> PacketDistributor.sendToPlayer(player, classes, heroes, ultimates, spells, spellNodes, mages, quests));
     }
 
     @SubscribeEvent

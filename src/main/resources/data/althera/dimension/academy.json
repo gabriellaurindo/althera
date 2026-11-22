@@ -1,0 +1,13 @@
+{
+  "type": "althera:academy",
+  "generator": {
+    "type": "minecraft:flat",
+    "settings": {
+      "biome": "althera:academy",
+      "layers": [],
+      "lakes": false,
+      "features": false,
+      "structure_overrides": []
+    }
+  }
+}

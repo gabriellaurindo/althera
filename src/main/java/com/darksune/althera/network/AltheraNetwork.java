@@ -18,6 +18,8 @@ import com.darksune.althera.network.packet.SyncSpellsPacket;
 import com.darksune.althera.network.packet.SyncUltimatesPacket;
 import com.darksune.althera.network.packet.ToggleHeroSettingPacket;
 import com.darksune.althera.network.packet.SeenSpellNodesPacket;
+import com.darksune.althera.network.packet.ClaimQuestPacket;
+import com.darksune.althera.network.packet.SyncQuestsPacket;
 import com.darksune.althera.network.packet.TrainSpellNodePacket;
 import com.darksune.althera.network.packet.UseCommandSealSkillPacket;
 import com.darksune.althera.network.packet.UseUltimateSkillPacket;
@@ -34,7 +36,7 @@ public final class AltheraNetwork {
 
     private static void registerPayloads(RegisterPayloadHandlersEvent event) {
 
-        var registrar = event.registrar("16");
+        var registrar = event.registrar("17");
 
         registrar.playToServer(
                 SummonPacket.TYPE,
@@ -100,6 +102,18 @@ public final class AltheraNetwork {
                 SeenSpellNodesPacket.TYPE,
                 SeenSpellNodesPacket.STREAM_CODEC,
                 SeenSpellNodesPacket::handle
+        );
+
+        registrar.playToServer(
+                ClaimQuestPacket.TYPE,
+                ClaimQuestPacket.STREAM_CODEC,
+                ClaimQuestPacket::handle
+        );
+
+        registrar.playToClient(
+                SyncQuestsPacket.TYPE,
+                SyncQuestsPacket.STREAM_CODEC,
+                SyncQuestsPacket::handle
         );
 
         registrar.playToServer(

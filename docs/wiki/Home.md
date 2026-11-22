@@ -12,6 +12,7 @@ This wiki contains detailed explanations of the mod’s systems, mechanics, and 
 - [Core Systems](Core-Systems)
 - [Command Seals & Ultimates](Command-Seals-and-Ultimates)
 - [Spells](Spells)
+- [Noble Magic Academy](Noble-Magic-Academy)
 - [Commands](Commands)
 - [Ritual System](Ritual-System)
 - [Creating Custom Heroes](Creating-Custom-Heroes)

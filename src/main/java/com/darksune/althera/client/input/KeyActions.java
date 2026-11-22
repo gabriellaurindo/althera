@@ -3,6 +3,7 @@ package com.darksune.althera.client.input;
 import com.darksune.althera.client.hud.SpellSlots;
 import com.darksune.althera.client.screen.HeroScreen;
 import com.darksune.althera.client.screen.SealWheelScreen;
+import com.darksune.althera.client.screen.JournalScreen;
 import com.darksune.althera.client.screen.SpellTreeScreen;
 import com.darksune.althera.client.screen.SpellWheelScreen;
 import com.darksune.althera.common.commandseal.skill.CommandSealSkillType;
@@ -97,6 +98,13 @@ public class KeyActions {
         Minecraft mc = Minecraft.getInstance();
         if (mc.screen == null && mc.player != null && !SpellBookItem.isCastingWith(mc.player)) {
             mc.setScreen(new SpellTreeScreen());
+        }
+    }
+
+    public static void handleJournal() {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.screen == null && mc.player != null) {
+            mc.setScreen(new JournalScreen(null));
         }
     }
 

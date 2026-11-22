@@ -90,6 +90,20 @@ and generates the GitHub Release, CurseForge and Discord notes from it.
 - `/althera_spell info | reset | progress <node> <value> | train <node> | untrain <node> | cast <node> [player]`
   and `/althera_spell equip <slot> <node>` / `unequip <slot>` (cheats) to inspect, set and test spells.
 
+- **Noble Magic Academy** (work in progress): a new dimension, a floating island in the sky with the school of magic
+  (a hall, a library, Fire, Lightning and Ice classrooms and a training yard). It is a safe place: no monsters, no
+  PvP, no breaking or placing blocks, no sleeping; a magic ward around the island keeps you from leaving or falling.
+  - **Academy Portal**: build a frame of **amethyst blocks** like a Nether portal (at least 2 wide and 3 tall
+    inside) and right-click it with a **Spell Book** to open it (**100 mana**). Stand in it for 2 seconds to travel.
+    Only players **invited** to the academy get through. The portal in the academy's hall takes you back where you
+    came from.
+  - **Journal** (**J**, or the new Journal button on the Player tab of the character sheet): your quests from the
+    academy. The first one, **An Invitation**, is ready from the start: click Accept to get the invitation. The next
+    ones send you to the academy, to learn and level spells and to defeat a Noble, and reward you with new spells.
+    Quests are data-driven (`data/<namespace>/academy_quest/`, see the wiki page "Noble Magic Academy").
+  - New players start in the academy the first time they join (server config `academy.spawnInAcademy`, on by
+    default; turn it off for modpacks with their own starting map).
+
 ### Changed
 - Your Hero now joins the fight when you hit a creature with a spell (or any ranged damage), as it does for melee hits.
 - **Noble drops**: Nobles no longer drop diamonds. They drop Spell Tomes instead: green **25%** a tier 1 tome; yellow

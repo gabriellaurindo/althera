@@ -80,6 +80,29 @@ Spell Tomes have no command: take them from the creative tab, or use
 
 ---
 
+## 🏫 Academy — `/althera_academy`
+
+See [Noble Magic Academy](Noble-Magic-Academy).
+
+| Command | Permission | Description |
+|---|---|---|
+| `/althera_academy tp [player]` | Cheats | Sends a player to the academy's arrival point |
+| `/althera_academy return [player]` | Cheats | Sends a player back to the world spawn |
+| `/althera_academy invite [player]` | Cheats | Gives a player the invitation (lets them through the portal) |
+| `/althera_academy uninvite [player]` | Cheats | Takes the invitation back |
+| `/althera_academy rebuild` | Cheats | Builds the academy island again (overwrites its blocks) |
+
+---
+
+## 📜 Quests — `/althera_quest`
+
+| Command | Permission | Description |
+|---|---|---|
+| `/althera_quest complete <quest> [player]` | Cheats | Finishes a quest and gives its rewards, whatever its tasks |
+| `/althera_quest reset [player]` | Cheats | Forgets every quest (rewards already given are kept) |
+
+---
+
 ## 🔗 Related Pages
 
 - [Core Systems](Core-Systems)

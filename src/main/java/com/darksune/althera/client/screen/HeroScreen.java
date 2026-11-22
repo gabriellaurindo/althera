@@ -75,6 +75,7 @@ public class HeroScreen extends Screen {
     private static final String RESET_HUD_LABEL = "Reset";
 
     private static final int BUTTON_HEIGHT = 16;
+    private static final int HALF_BUTTON_GAP = 4;
     private static final int CONTENT_X = 14;
     private static final int CONTENT_WIDTH = GUI_WIDTH - CONTENT_X * 2;
 
@@ -469,7 +470,8 @@ public class HeroScreen extends Screen {
 
         renderElements(gui, spells, infoX, infoY, mouseX, mouseY);
 
-        drawButton(gui, "Spell Tree  ›", infoButtonX(), infoButtonY(), INFO_WIDTH, isOverInfoButton(mouseX, mouseY));
+        drawButton(gui, "Spell Tree", infoButtonX(), infoButtonY(), halfInfoWidth(), isOverSpellTreeButton(mouseX, mouseY));
+        drawButton(gui, "Journal", journalButtonX(), infoButtonY(), halfInfoWidth(), isOverJournalButton(mouseX, mouseY));
     }
 
     private void renderElements(GuiGraphics gui, PlayerSpellData spells, int x, int y, int mouseX, int mouseY) {
@@ -1199,6 +1201,24 @@ public class HeroScreen extends Screen {
         return top() + GUI_HEIGHT - BUTTON_HEIGHT - 10;
     }
 
+    private int halfInfoWidth() {
+        return (INFO_WIDTH - HALF_BUTTON_GAP) / 2;
+    }
+
+    private int journalButtonX() {
+        return infoButtonX() + INFO_WIDTH - halfInfoWidth();
+    }
+
+    private boolean isOverSpellTreeButton(double mouseX, double mouseY) {
+        return mouseX >= infoButtonX() && mouseX <= infoButtonX() + halfInfoWidth()
+                && mouseY >= infoButtonY() && mouseY <= infoButtonY() + BUTTON_HEIGHT;
+    }
+
+    private boolean isOverJournalButton(double mouseX, double mouseY) {
+        return mouseX >= journalButtonX() && mouseX <= journalButtonX() + halfInfoWidth()
+                && mouseY >= infoButtonY() && mouseY <= infoButtonY() + BUTTON_HEIGHT;
+    }
+
     private boolean isOverInfoButton(double mouseX, double mouseY) {
         return mouseX >= infoButtonX() && mouseX <= infoButtonX() + INFO_WIDTH
                 && mouseY >= infoButtonY() && mouseY <= infoButtonY() + BUTTON_HEIGHT;
@@ -1334,8 +1354,13 @@ public class HeroScreen extends Screen {
         }
 
         if (page == Page.PLAYER && currentTab == Tab.STATUS) {
-            if (isOverInfoButton(mouseX, mouseY)) {
+            if (isOverSpellTreeButton(mouseX, mouseY)) {
                 minecraft.setScreen(new SpellTreeScreen(this));
+                return true;
+            }
+
+            if (isOverJournalButton(mouseX, mouseY)) {
+                minecraft.setScreen(new JournalScreen(this));
                 return true;
             }
 

@@ -1,0 +1,11 @@
+{
+  "title": "An Invitation",
+  "giver": "Headmaster of the Noble Magic Academy",
+  "order": 0,
+  "description": "To the young summoner: your talent has not gone unnoticed. The Noble Magic Academy opens its doors to you. Build a gate of amethyst blocks, touch it with a Spell Book and step through. This letter is your invitation: keep it close.",
+  "rewards": [
+    {
+      "type": "invitation"
+    }
+  ]
+}

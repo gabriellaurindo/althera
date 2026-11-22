@@ -1,5 +1,7 @@
 package com.darksune.althera.common.attachment;
 
+import com.darksune.althera.common.academy.AcademyData;
+import com.darksune.althera.common.quest.QuestData;
 import com.darksune.althera.Althera;
 import com.darksune.althera.common.commandseal.CommandSealData;
 import com.darksune.althera.common.spell.PlayerSpellData;
@@ -52,6 +54,22 @@ public class AltheraAttachments {
                             .serialize(PlayerSpellData.CODEC)
                             .copyOnDeath()
                             .sync(PlayerSpellData.STREAM_CODEC)
+                            .build());
+
+    public static final DeferredHolder<AttachmentType<?>, AttachmentType<AcademyData>> ACADEMY =
+            ATTACHMENTS.register("academy", () ->
+                    AttachmentType.builder(AcademyData::new)
+                            .serialize(AcademyData.CODEC)
+                            .copyOnDeath()
+                            .sync(AcademyData.STREAM_CODEC)
+                            .build());
+
+    public static final DeferredHolder<AttachmentType<?>, AttachmentType<QuestData>> QUESTS =
+            ATTACHMENTS.register("quests", () ->
+                    AttachmentType.builder(QuestData::new)
+                            .serialize(QuestData.CODEC)
+                            .copyOnDeath()
+                            .sync(QuestData.STREAM_CODEC)
                             .build());
 
     public static void register(final IEventBus bus) {

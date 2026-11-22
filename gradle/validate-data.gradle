@@ -23,6 +23,20 @@ class DataValidator {
     static final Set<String> PROFICIENCY_KEYS = ['damage_per_level', 'size_per_level', 'visual_per_level', 'cost_per_level'] as Set
     static final Set<String> CAST_MODES = ['instant', 'charge', 'continuous'] as Set
     static final Set<String> SPELL_NODE_KEYS = ['name', 'spell', 'parent', 'x', 'y', 'branch', 'element', 'tier'] as Set
+    static final Set<String> QUEST_KEYS = ['title', 'giver', 'description', 'order', 'requires', 'tasks', 'rewards'] as Set
+    static final Map<String, Set<String>> QUEST_TASKS = [
+            discover_spell: ['node'] as Set,
+            learn_spell   : ['node'] as Set,
+            spell_level   : ['node', 'level'] as Set,
+            kill          : ['entity', 'count', 'name'] as Set,
+            item          : ['item', 'count', 'consume'] as Set,
+            visit_academy : [] as Set,
+    ]
+    static final Map<String, Set<String>> QUEST_REWARDS = [
+            invitation    : [] as Set,
+            discover_spell: ['node', 'tier'] as Set,
+            item          : ['item', 'count'] as Set,
+    ]
     static final Set<String> SPELL_BRANCHES = ['none', 'damage', 'defense', 'utility'] as Set
     static final Set<String> SPELL_ELEMENTS = ['none', 'fire', 'lightning', 'ice'] as Set
     static final Set<String> FILTER_KEYS = ['entity_tag', 'hostile', 'exclude_target'] as Set
@@ -481,6 +495,42 @@ class DataValidator {
         }
     }
 
+    void validateQuest(File file) {
+        String where = "academy_quest/${file.name}"
+        Map json = read(file)
+        if (json == null) return
+        checkKeys(where, json, QUEST_KEYS)
+        if (!(json.title instanceof String)) error(where, "missing 'title'")
+        (json.requires ?: []).each { required ->
+            String id = toId(required.toString(), false)
+            if (isOurs(id) && !dataFile(id, 'academy_quest').exists()) error(where, "requires '${id}', which has no academy_quest file")
+        }
+        checkTyped("${where} task", json.tasks, QUEST_TASKS)
+        checkTyped("${where} reward", json.rewards, QUEST_REWARDS)
+        (json.tasks ?: []).findAll { it instanceof Map && it.type == 'spell_level' && !(it.level instanceof Number) }
+                .each { error(where, "spell_level task needs a 'level'") }
+        ((json.tasks ?: []) + (json.rewards ?: [])).findAll { it instanceof Map && it.node != null }.each { entry ->
+            String node = toId(entry.node.toString(), false)
+            if (isOurs(node) && !dataFile(node, 'spell_node').exists()) error(where, "node '${node}' has no spell_node file")
+        }
+    }
+
+    void checkTyped(String where, Object list, Map<String, Set<String>> types) {
+        if (list == null) return
+        if (!(list instanceof List)) {
+            error(where, 'must be a list')
+            return
+        }
+        list.each { entry ->
+            if (!(entry instanceof Map) || !types.containsKey(entry.type)) {
+                error(where, "unknown type '${entry instanceof Map ? entry.type : entry}' (${types.keySet().join(', ')})")
+                return
+            }
+            Set<String> allowed = (types[entry.type] + ['type']) as Set
+            entry.keySet().findAll { !allowed.contains(it) }.each { error(where, "'${entry.type}' has an unknown field '${it}'") }
+        }
+    }
+
     List<String> run() {
         File data = new File(resources, 'data/althera')
         new File(data, 'hero_class').listFiles({ it.name.endsWith('.json') } as FileFilter)?.sort()?.each { validateClass(it) }
@@ -491,6 +541,7 @@ class DataValidator {
         new File(data, 'spell_node').listFiles({ it.name.endsWith('.json') } as FileFilter)?.sort()?.each { validateSpellNode(it, spellParents) }
         checkSpellNodeCycles(spellParents)
         new File(data, 'enemy_mage').listFiles({ it.name.endsWith('.json') } as FileFilter)?.sort()?.each { validateEnemyMage(it) }
+        new File(data, 'academy_quest').listFiles({ it.name.endsWith('.json') } as FileFilter)?.sort()?.each { validateQuest(it) }
         new File(data, 'worldgen/configured_feature').listFiles({ it.name.endsWith('.json') } as FileFilter)?.sort()?.each { validateShrine(it) }
         return errors
     }

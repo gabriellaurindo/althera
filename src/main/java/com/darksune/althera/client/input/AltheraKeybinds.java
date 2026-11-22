@@ -46,6 +46,13 @@ public class AltheraKeybinds {
             "key.categories.althera"
     );
 
+    public static final KeyMapping JOURNAL = new KeyMapping(
+            "key.althera.journal",
+            InputConstants.Type.KEYSYM,
+            GLFW.GLFW_KEY_J,
+            "key.categories.althera"
+    );
+
     public static final KeyMapping SPELL_WHEEL = new KeyMapping(
             "key.althera.spell.wheel",
             InputConstants.Type.KEYSYM,

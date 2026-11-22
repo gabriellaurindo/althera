@@ -194,7 +194,7 @@ A tome whose spell no longer exists becomes a **Faded Tome**.
 
 | Advancement | How |
 |---|---|
-| **Hidden Knowledge** | Discover a spell with a Spell Tome |
+| **Hidden Knowledge** | Discover a spell |
 | **First Words** | Learn your first spell |
 | **Adept** | Raise a spell to level 5 |
 | **Archmage** (challenge) | Master Fire, Lightning and Ice to level 10 |

@@ -1,0 +1,20 @@
+{
+  "title": "First Words",
+  "giver": "Headmaster of the Noble Magic Academy",
+  "order": 20,
+  "requires": [
+    "althera:through_the_gate"
+  ],
+  "description": "Knowing a spell is not casting it. Open your spell tree, train the spell you discovered until it answers you.",
+  "tasks": [
+    {
+      "type": "learn_spell"
+    }
+  ],
+  "rewards": [
+    {
+      "type": "discover_spell",
+      "tier": 1
+    }
+  ]
+}

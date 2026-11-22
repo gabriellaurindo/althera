@@ -15,9 +15,11 @@ public final class AltheraCommands {
     }
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
+        AcademyCommand.register(dispatcher);
         HeroCommand.register(dispatcher);
         ManaCommand.register(dispatcher);
         MageCommand.register(dispatcher);
+        QuestCommand.register(dispatcher);
         SealCommand.register(dispatcher);
         SpellCommand.register(dispatcher);
     }
