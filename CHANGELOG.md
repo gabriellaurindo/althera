@@ -64,7 +64,8 @@ and generates the GitHub Release, CurseForge and Discord notes from it.
   - Datapacks: new particles `althera:glow`, `ember`, `frost`, `spark`, `ring` and `rune` (colour, scale and lifetime
     of your choice, glowing); projectiles can have a `visual` (a texture that faces the camera or stretches along the
     flight); `particles` gets `direction_speed` and `circle`; new `aura` effect (particles circling a creature for a
-    while); spells get `on_charge` effects while being cast or charged.
+    while, `on_break` effects when it ends early); spells get `on_charge` effects while being cast, charged or held;
+    `mob_effect` gets `stack` and `max_amplifier`.
   - `/althera_spell level <node> <level>` and `/althera_spell element <element> <level>` (cheats).
 - Spells and elements have their own **icons** (Fire Bolt, Lightning Strike, Frost Shard; Fire, Lightning, Ice and
   an arcane rune for the Knowledge root) in the spell tree, the book HUD, the spell wheel and the character sheet.
@@ -85,6 +86,13 @@ and generates the GitHub Release, CurseForge and Discord notes from it.
 - **Mastered spells** (level 10) get a gold star in the spell tree, sparkle when cast and leave a trail of light.
 - Advancements: **Hidden Knowledge** (discover a spell), **First Words** (learn a spell), **Adept** (a spell at level 5) and the challenge **Archmage** (Fire,
   Lightning and Ice mastery at 10).
+- **Spells look the part**: a rune circle at your feet when you cast, visible projectiles (a ball of fire, a
+  crackling spark, shards and spikes of ice that point where they fly), bursts, flashes and rings of light on impact,
+  ice gathering around you while Glacial Spike charges, a real stream of embers for Flame Jet, a shell of ice around
+  you during Frost Ward and healing lights during Mend. Nobles' spells get the same looks.
+- **Fire Bolt** also sets everything within 1.5 blocks of its target ablaze (2 seconds). **Frost Shard** slows more:
+  hitting an already slowed target gives Slowness III. **Frost Ward** shatters when its shell is broken early,
+  slowing the enemies around you again.
 - Player spells have **no cooldown** unless their spell says so: Fire Bolt, Lightning Strike and Frost Shard can be cast
   as often as your mana allows (Nobles keep their own cooldown on the same spells).
 - Datapacks: spells take an optional `player` block (`mana_cost`, `description`, `cast_mode`, `cooldown_ticks`, default
@@ -115,6 +123,8 @@ and generates the GitHub Release, CurseForge and Discord notes from it.
 
 ### Changed
 - Your Hero now joins the fight when you hit a creature with a spell (or any ranged damage), as it does for melee hits.
+- Creatures your Hero defeats, and creatures that burn to death from your spells' fire, count as yours: they count
+  for quests and drop what a player kill drops (experience, player-only loot), like a tamed wolf's kills.
 - **Noble drops**: Nobles no longer drop diamonds. They drop Spell Tomes instead: green **25%** a tier 1 tome; yellow
   **25%** a tier 1 tome and **25%** a tier 2 tome; red its Hero Catalyst, **25%** a tier 2 tome and **10%** a tier 3
   tome (no tier 3 spell exists yet).

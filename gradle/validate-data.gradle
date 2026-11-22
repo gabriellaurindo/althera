@@ -57,7 +57,7 @@ class DataValidator {
             damage            : [target: true, filter: false, amount: false, attack_multiplier: false],
             knockback         : [target: true, filter: false, horizontal: false, vertical: false, scale_with_distance: false],
             ignite            : [target: true, filter: false, ticks: true],
-            mob_effect        : [target: true, filter: false, effect: true, duration: true, amplifier: false, show_particles: false],
+            mob_effect        : [target: true, filter: false, effect: true, duration: true, amplifier: false, show_particles: false, stack: false, max_amplifier: false],
             explosion         : [power: false],
             particles         : [particle: true, count: false, spread: false, speed: false, height: false, line: false, direction_speed: false, circle: false],
             sound             : [sound: true, volume: false, pitch: false],
@@ -66,7 +66,7 @@ class DataValidator {
             projectile        : [count: false, spread: false, speed: false, amount: false, attack_multiplier: false, trail: false, on_hit: false, visual: false],
             lightning         : [:],
             chain             : [jumps: false, range: false, particle: false, on_jump: false],
-            aura              : [target: false, filter: false, particle: true, duration: true, count: false, radius: false, height: false, bob: false, interval: false, turn: false, while_effect: false],
+            aura              : [target: false, filter: false, particle: true, duration: true, count: false, radius: false, height: false, bob: false, interval: false, turn: false, while_effect: false, on_break: false],
             ultimate_animation: [:]
     ]
 
@@ -198,6 +198,7 @@ class DataValidator {
             if (effect.containsKey('visual')) checkVisual("${at} visual", effect.visual)
         }
         if (effect.type == 'aura') {
+            checkEffects("${at} on_break", effect.on_break)
             checkNumber(at, effect, 'duration', false, 1)
             checkNumber(at, effect, 'count', false, 1)
             checkNumber(at, effect, 'interval', false, 1)

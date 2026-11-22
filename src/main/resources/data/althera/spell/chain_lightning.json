@@ -13,25 +13,52 @@
       "pitch": 1.6
     },
     {
+      "type": "particles",
+      "particle": {
+        "type": "althera:rune",
+        "color": "#D8F0FF",
+        "scale": 0.8,
+        "lifetime": 16
+      },
+      "height": 0.05
+    },
+    {
       "type": "projectile",
       "speed": 2.4,
       "attack_multiplier": 1.5,
       "trail": {
-        "type": "minecraft:electric_spark"
+        "type": "althera:spark",
+        "color": "#D8F0FF"
+      },
+      "visual": {
+        "texture": "althera:textures/entity/projectile/orb.png",
+        "size": 0.35,
+        "color": "#D8F0FF",
+        "spin": 40
       },
       "on_hit": [
         {
           "type": "particles",
           "particle": {
-            "type": "minecraft:electric_spark"
+            "type": "althera:spark",
+            "color": "#D8F0FF"
           },
-          "count": 12,
+          "count": 16,
           "spread": [
             0.3,
             0.3,
             0.3
           ],
-          "speed": 0.1
+          "speed": 0.12
+        },
+        {
+          "type": "particles",
+          "particle": {
+            "type": "althera:glow",
+            "color": "#D8F0FF",
+            "scale": 4,
+            "lifetime": 5
+          }
         },
         {
           "type": "sound",
@@ -44,7 +71,9 @@
           "jumps": 3,
           "range": 5,
           "particle": {
-            "type": "minecraft:electric_spark"
+            "type": "althera:spark",
+            "color": "#D8F0FF",
+            "scale": 1.2
           },
           "on_jump": [
             {
@@ -57,6 +86,31 @@
               "sound": "minecraft:entity.lightning_bolt.impact",
               "volume": 0.4,
               "pitch": 1.9
+            },
+            {
+              "type": "particles",
+              "particle": {
+                "type": "althera:glow",
+                "color": "#D8F0FF",
+                "scale": 3,
+                "lifetime": 5
+              },
+              "height": 1.0
+            },
+            {
+              "type": "particles",
+              "particle": {
+                "type": "althera:spark",
+                "color": "#D8F0FF"
+              },
+              "count": 8,
+              "spread": [
+                0.3,
+                0.3,
+                0.3
+              ],
+              "speed": 0.1,
+              "height": 1.0
             }
           ]
         }

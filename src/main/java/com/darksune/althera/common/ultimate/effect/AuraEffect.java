@@ -11,11 +11,12 @@ import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.LivingEntity;
 
+import java.util.List;
 import java.util.Optional;
 
 public record AuraEffect(UltimateTarget target, EntityFilter filter, ParticleOptions particle, int duration, int count,
                          double radius, double height, double bob, int interval, double turn,
-                         Optional<Holder<MobEffect>> whileEffect) implements UltimateEffect {
+                         Optional<Holder<MobEffect>> whileEffect, List<UltimateEffect> onBreak) implements UltimateEffect {
 
     public static final MapCodec<AuraEffect> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
             UltimateTarget.CODEC.optionalFieldOf("target", new UltimateTarget.Self()).forGetter(AuraEffect::target),
@@ -28,7 +29,9 @@ public record AuraEffect(UltimateTarget target, EntityFilter filter, ParticleOpt
             Codec.DOUBLE.optionalFieldOf("bob", 0.3).forGetter(AuraEffect::bob),
             ExtraCodecs.POSITIVE_INT.optionalFieldOf("interval", 2).forGetter(AuraEffect::interval),
             Codec.DOUBLE.optionalFieldOf("turn", 0.15).forGetter(AuraEffect::turn),
-            BuiltInRegistries.MOB_EFFECT.holderByNameCodec().optionalFieldOf("while_effect").forGetter(AuraEffect::whileEffect)
+            BuiltInRegistries.MOB_EFFECT.holderByNameCodec().optionalFieldOf("while_effect").forGetter(AuraEffect::whileEffect),
+            Codec.lazyInitialized(() -> UltimateEffect.CODEC.listOf()).optionalFieldOf("on_break", List.of())
+                    .forGetter(AuraEffect::onBreak)
     ).apply(instance, AuraEffect::new));
 
     @Override
@@ -39,7 +42,7 @@ public record AuraEffect(UltimateTarget target, EntityFilter filter, ParticleOpt
     @Override
     public void apply(UltimateContext context) {
         for (LivingEntity entity : filter.resolve(target, context)) {
-            AuraSystem.start(entity, this, context.scale().size(radius), context.scale().count(count));
+            AuraSystem.start(entity, this, context.scale().size(radius), context.scale().count(count), context);
         }
     }
 }

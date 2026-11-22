@@ -38,7 +38,7 @@ public class FlatParticle extends TextureSheetParticle {
         this.xd = 0.0D;
         this.yd = 0.0D;
         this.zd = 0.0D;
-        this.roll = expanding ? 0.0F : random.nextFloat() * Mth.TWO_PI;
+        this.roll = expanding ? 0.0F : (level.getGameTime() * RUNE_SPIN) % Mth.TWO_PI;
         this.oRoll = roll;
         pickSprite(sprites);
     }

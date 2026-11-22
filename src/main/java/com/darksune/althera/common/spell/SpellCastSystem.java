@@ -223,6 +223,8 @@ public final class SpellCastSystem {
             return;
         }
 
+        cast.spell().charge(UltimateContext.spell(new PlayerCaster(player), cast.scale()), heldTicks);
+
         if ((heldTicks - 1) % cast.pulseTicks() == 0) {
             castSpell(player, cast);
         }

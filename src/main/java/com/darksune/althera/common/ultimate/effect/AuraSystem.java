@@ -18,6 +18,8 @@ public final class AuraSystem {
 
     private static final int MAX_AURAS = 512;
 
+    private static final int BREAK_MARGIN_TICKS = 5;
+
     private static final List<Aura> AURAS = new ArrayList<>();
 
     private AuraSystem() {
@@ -33,30 +35,43 @@ public final class AuraSystem {
 
         private final int count;
 
+        private final UltimateContext context;
+
         private int age;
 
-        private Aura(LivingEntity entity, AuraEffect effect, double radius, int count) {
+        private Aura(LivingEntity entity, AuraEffect effect, double radius, int count, UltimateContext context) {
             this.entity = entity;
             this.effect = effect;
             this.radius = radius;
             this.count = count;
+            this.context = context;
         }
 
         private boolean expired() {
-            return age >= effect.duration() || entity.isRemoved() || !entity.isAlive()
-                    || effect.whileEffect().filter(mobEffect -> !entity.hasEffect(mobEffect)).isPresent();
+            return age >= effect.duration() || entity.isRemoved() || !entity.isAlive() || broken();
+        }
+
+        private boolean broken() {
+            return effect.whileEffect().filter(mobEffect -> !entity.hasEffect(mobEffect)).isPresent();
+        }
+
+        private void breakAura() {
+            UltimateContext at = new UltimateContext(context.owner(), context.caster(), context.origin(),
+                    context.direction(), entity, entity.position(), context.scale());
+            effect.onBreak().forEach(onBreak -> onBreak.apply(at));
         }
     }
 
-    public static void start(LivingEntity entity, AuraEffect effect, double radius, int count) {
+    public static void start(LivingEntity entity, AuraEffect effect, double radius, int count, UltimateContext context) {
         if (entity.level() instanceof ServerLevel && AURAS.size() < MAX_AURAS) {
-            AURAS.add(new Aura(entity, effect, radius, count));
+            AURAS.add(new Aura(entity, effect, radius, count, context));
         }
     }
 
     @SubscribeEvent
     public static void onServerTick(ServerTickEvent.Post event) {
 
+        List<Aura> broken = new ArrayList<>();
         Iterator<Aura> iterator = AURAS.iterator();
 
         while (iterator.hasNext()) {
@@ -65,6 +80,12 @@ public final class AuraSystem {
 
             if (aura.expired()) {
                 iterator.remove();
+
+                if (aura.age < aura.effect.duration() - BREAK_MARGIN_TICKS && aura.entity.isAlive()
+                        && !aura.entity.isRemoved() && aura.broken()) {
+                    broken.add(aura);
+                }
+
                 continue;
             }
 
@@ -74,6 +95,8 @@ public final class AuraSystem {
 
             aura.age++;
         }
+
+        broken.forEach(Aura::breakAura);
     }
 
     private static void spawn(ServerLevel level, Aura aura) {

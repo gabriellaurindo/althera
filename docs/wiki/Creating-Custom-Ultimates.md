@@ -136,6 +136,8 @@ Pushes targets away from the Hero, stronger the farther they are.
 | `duration` | — | Ticks |
 | `amplifier` | `0` | `0` = level I |
 | `show_particles` | `true` | |
+| `stack` | `false` | If the creature already has the effect, the new one is one level higher (at least `amplifier`) |
+| `max_amplifier` | `255` | Highest level `stack` can reach (`0` = level I) |
 
 ### `explosion`
 A visual/sound explosion at the Hero. It never breaks blocks.
@@ -273,6 +275,7 @@ Particles circling a creature for a while, following it (an ice shell, healing m
 | `interval` | `2` | Ticks between pulses |
 | `turn` | `0.15` | Rotation per tick (radians) |
 | `while_effect` | none | A mob effect id: the aura also ends when the creature no longer has it |
+| `on_break` | none | Effects run when the aura ends early because `while_effect` is gone (e.g. an absorption shell used up). `"target"` is the creature, positions are its feet |
 
 ```json
 { "type": "aura", "particle": { "type": "althera:frost" }, "duration": 200, "count": 4, "radius": 1.0,

@@ -112,14 +112,19 @@ In **Creative** mode spells cost no mana and have no cooldown, but they still ne
 
 | Spell | Element | Cost | Effect |
 |---|---|---|---|
-| **Fire Bolt** | Fire | 20 | A bolt of fire (7.2 damage) that sets the target ablaze for 4 seconds |
+| **Fire Bolt** | Fire | 20 | A ball of fire (7.2 damage) that sets the target ablaze for 4 seconds and everything within 1.5 blocks of it for 2 seconds |
 | **Lightning Strike** | Lightning | 25 | A spark that calls lightning down on what it hits (9.6 damage) and hurts everything around it (3.6), even when it hits a wall |
-| **Frost Shard** | Ice | 20 | A shard of ice (6 damage) that gives Slowness II for 3 seconds |
-| **Frost Ward** (Defense) | Ice | 25 | Wraps you in ice: Absorption II for 10 seconds, and enemies within 3 blocks are pushed back and get Slowness II for 3 seconds. 10 second cooldown |
+| **Frost Shard** | Ice | 20 | A shard of ice (6 damage) that gives Slowness II for 3 seconds. Hitting a target that is already slowed makes it Slowness III |
+| **Frost Ward** (Defense) | Ice | 25 | Wraps you in a shell of ice: Absorption II for 10 seconds, and enemies within 3 blocks are pushed back and get Slowness II for 3 seconds. If the shell breaks before it melts (the absorption is used up), it shatters: Slowness II again to the enemies around you. 10 second cooldown |
 | **Chain Lightning** (tier 2, after Lightning Strike) | Lightning | 35 | A bolt (6 damage) that leaps from its target to up to 3 enemies within 5 blocks of each other (4 damage each). 1 second cooldown |
 | **Glacial Spike** (tier 2, after Frost Shard) | Ice | 40 | **Hold** right-click for 1 second to charge, release to fire a spike of ice (10.4 damage) that gives Slowness IV for 4 seconds and chills everything next to it (3.2 damage, Slowness II). Releasing early wastes the charge. 2 second cooldown |
 | **Mend** (Utility) | None | 30 | Heals 3 hearts and gives Regeneration I for 5 seconds. 5 second cooldown |
 | **Flame Jet** (tier 2, after Fire Bolt) | Fire | 24 / s | **Hold** right-click to pour a stream of fire 5 blocks ahead: 3.6 damage twice a second to everything in it and sets it ablaze. 1 second cooldown after you stop |
+
+Every spell has its own look: a rune circle at your feet when you cast, a visible projectile (a ball of fire, a
+crackling spark, a shard of ice), and a burst and a ring of light where it lands. Glacial Spike gathers ice around
+you while it charges, Flame Jet pours a real stream of embers, Frost Ward and Mend leave an aura around you while they
+last.
 
 Spells fly where you look. The basic attack spells have **no cooldown**: you can cast them as often as your mana
 allows. Mana is shared with your Hero, so casting while your Hero is summoned drains the same pool that

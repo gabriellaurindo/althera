@@ -30,6 +30,11 @@ public class CombatEvents {
         if (event.getSource().getEntity() instanceof Player player && event.getEntity() != player) {
             player.setLastHurtMob(event.getEntity());
         }
+
+        if (event.getSource().getEntity() instanceof HeroEntity hero && hero.getOwner() instanceof Player owner
+                && event.getEntity() != owner) {
+            event.getEntity().setLastHurtByPlayer(owner);
+        }
     }
 
     @SubscribeEvent

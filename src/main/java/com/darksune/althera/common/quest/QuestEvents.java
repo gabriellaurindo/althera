@@ -1,15 +1,16 @@
 package com.darksune.althera.common.quest;
 
 import com.darksune.althera.Althera;
-import com.darksune.althera.common.entity.HeroEntity;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.OwnableEntity;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import org.jetbrains.annotations.Nullable;
 
 @EventBusSubscriber(modid = Althera.MOD_ID)
 public final class QuestEvents {
@@ -22,15 +23,29 @@ public final class QuestEvents {
     @SubscribeEvent
     public static void onDeath(LivingDeathEvent event) {
 
-        Entity killer = event.getSource().getEntity();
+        ServerPlayer player = creditedPlayer(event.getSource().getEntity());
 
-        if (killer instanceof HeroEntity hero) {
-            killer = hero.getOwner();
+        if (player == null) {
+            player = creditedPlayer(event.getEntity().getKillCredit());
         }
 
-        if (killer instanceof ServerPlayer player) {
+        if (player != null) {
             QuestSystem.onKill(player, event.getEntity());
         }
+    }
+
+    @Nullable
+    private static ServerPlayer creditedPlayer(@Nullable Entity entity) {
+
+        if (entity instanceof ServerPlayer player) {
+            return player;
+        }
+
+        if (entity instanceof OwnableEntity ownable && ownable.getOwner() instanceof ServerPlayer owner) {
+            return owner;
+        }
+
+        return null;
     }
 
     @SubscribeEvent

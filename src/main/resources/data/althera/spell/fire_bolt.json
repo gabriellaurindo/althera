@@ -1,20 +1,100 @@
 {
   "name": "Fire Bolt",
-  "player": { "mana_cost": 20, "description": "Hurls a bolt of fire that sets the target ablaze." },
+  "player": {
+    "mana_cost": 20,
+    "description": "Hurls a bolt of fire that sets the target ablaze."
+  },
   "range": 16,
   "cooldown_ticks": 40,
   "cast_ticks": 10,
   "on_cast": [
-    { "type": "sound", "sound": "minecraft:entity.blaze.shoot", "volume": 1.0, "pitch": 0.9 },
+    {
+      "type": "sound",
+      "sound": "minecraft:entity.blaze.shoot",
+      "volume": 1.0,
+      "pitch": 0.9
+    },
+    {
+      "type": "particles",
+      "particle": {
+        "type": "althera:rune",
+        "color": "#FF7A1F",
+        "scale": 0.9,
+        "lifetime": 16
+      },
+      "height": 0.05
+    },
     {
       "type": "projectile",
       "speed": 1.3,
       "attack_multiplier": 1.8,
-      "trail": { "type": "minecraft:flame" },
+      "trail": {
+        "type": "althera:ember",
+        "scale": 1.2
+      },
+      "visual": {
+        "texture": "althera:textures/entity/projectile/orb.png",
+        "size": 0.55,
+        "color": "#FF7A1F",
+        "spin": 18
+      },
       "on_hit": [
-        { "type": "ignite", "target": "target", "ticks": 80 },
-        { "type": "particles", "particle": { "type": "minecraft:lava" }, "count": 4, "spread": [0.2, 0.2, 0.2] },
-        { "type": "sound", "sound": "minecraft:entity.generic.burn", "volume": 0.6, "pitch": 1.2 }
+        {
+          "type": "ignite",
+          "target": "target",
+          "ticks": 80
+        },
+        {
+          "type": "ignite",
+          "target": {
+            "area": 1.5
+          },
+          "ticks": 40
+        },
+        {
+          "type": "particles",
+          "particle": {
+            "type": "althera:ember",
+            "scale": 1.4
+          },
+          "count": 16,
+          "spread": [
+            0.25,
+            0.25,
+            0.25
+          ],
+          "speed": 0.08
+        },
+        {
+          "type": "particles",
+          "particle": {
+            "type": "althera:glow",
+            "color": "#FFB25C",
+            "scale": 5,
+            "lifetime": 6
+          }
+        },
+        {
+          "type": "particles",
+          "particle": {
+            "type": "althera:ring",
+            "color": "#FF7A1F",
+            "scale": 1.5,
+            "lifetime": 10
+          }
+        },
+        {
+          "type": "sound",
+          "sound": "minecraft:entity.generic.burn",
+          "volume": 0.6,
+          "pitch": 1.2
+        },
+        {
+          "type": "sound",
+          "sound": "minecraft:entity.generic.explode",
+          "volume": 0.35,
+          "pitch": 1.7
+        }
       ]
     }
   ]

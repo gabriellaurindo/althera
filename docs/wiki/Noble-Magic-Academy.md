@@ -104,7 +104,7 @@ Quests are data-driven: `data/<namespace>/academy_quest/<name>.json`. The file n
 | `discover_spell` | `node` (optional) | The spell (or any spell) is discovered |
 | `learn_spell` | `node` (optional) | The spell (or any spell) is learned |
 | `spell_level` | `node` (optional), `level` (2-10) | The spell (or any spell) reaches that level |
-| `kill` | `entity` (id or `#tag`), `count` (default 1), `name` (optional label) | You or your Hero defeat that many, after the quest shows up |
+| `kill` | `entity` (id or `#tag`), `count` (default 1), `name` (optional label) | You or your Hero defeat that many, after the quest shows up (also creatures that die soon after you or your Hero hurt them or set them on fire with a spell) |
 | `item` | `item`, `count` (default 1), `consume` (default `true`) | You carry them; they are taken on claim unless `consume` is `false` |
 | `visit_academy` | | You are in the academy |
 
