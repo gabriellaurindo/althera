@@ -18,7 +18,10 @@ class DataValidator {
             'dodge_chance', 'strong_against'] as Set
     static final Set<String> ULTIMATE_KEYS = ['name', 'description', 'mana_cost', 'channel_ticks', 'cooldown_ticks',
             'on_start', 'on_tick', 'on_end'] as Set
-    static final Set<String> SPELL_KEYS = ['name', 'player', 'range', 'cooldown_ticks', 'cast_ticks', 'on_cast'] as Set
+    static final Set<String> SPELL_KEYS = ['name', 'player', 'range', 'cooldown_ticks', 'cast_ticks', 'on_cast', 'on_charge'] as Set
+    static final Set<String> VISUAL_KEYS = ['texture', 'size', 'stretch', 'spin', 'glow', 'color'] as Set
+    static final Set<String> TINTED_PARTICLES = ['althera:glow', 'althera:ember', 'althera:frost', 'althera:spark', 'althera:ring', 'althera:rune'] as Set
+    static final Set<String> TINTED_PARTICLE_KEYS = ['type', 'color', 'scale', 'lifetime'] as Set
     static final Set<String> PLAYER_SPELL_KEYS = ['mana_cost', 'description', 'cast_mode', 'cooldown_ticks', 'proficiency'] as Set
     static final Set<String> PROFICIENCY_KEYS = ['damage_per_level', 'size_per_level', 'visual_per_level', 'cost_per_level'] as Set
     static final Set<String> CAST_MODES = ['instant', 'charge', 'continuous'] as Set
@@ -56,13 +59,14 @@ class DataValidator {
             ignite            : [target: true, filter: false, ticks: true],
             mob_effect        : [target: true, filter: false, effect: true, duration: true, amplifier: false, show_particles: false],
             explosion         : [power: false],
-            particles         : [particle: true, count: false, spread: false, speed: false, height: false, line: false],
+            particles         : [particle: true, count: false, spread: false, speed: false, height: false, line: false, direction_speed: false, circle: false],
             sound             : [sound: true, volume: false, pitch: false],
             dash              : [distance: true],
             heal              : [target: true, filter: false, amount: false, max_health_multiplier: false],
-            projectile        : [count: false, spread: false, speed: false, amount: false, attack_multiplier: false, trail: false, on_hit: false],
+            projectile        : [count: false, spread: false, speed: false, amount: false, attack_multiplier: false, trail: false, on_hit: false, visual: false],
             lightning         : [:],
             chain             : [jumps: false, range: false, particle: false, on_jump: false],
+            aura              : [target: false, filter: false, particle: true, duration: true, count: false, radius: false, height: false, bob: false, interval: false, turn: false, while_effect: false],
             ultimate_animation: [:]
     ]
 
@@ -125,6 +129,15 @@ class DataValidator {
     void checkParticle(String where, def particle) {
         if (!(particle instanceof Map) || !(particle.type instanceof String)) {
             error(where, 'particle must be an object with a "type", e.g. { "type": "minecraft:flame" }')
+            return
+        }
+        String type = toId(particle.type.toString(), false)
+        if (TINTED_PARTICLES.contains(type)) {
+            checkKeys("${where} particle", particle, TINTED_PARTICLE_KEYS)
+            checkNumber("${where} particle", particle, 'scale', false, 0.01, 64)
+            checkNumber("${where} particle", particle, 'lifetime', false, 1, 1200)
+        } else if (isOurs(type)) {
+            error(where, "unknown particle '${type}' (${TINTED_PARTICLES.join(', ')})")
         }
     }
 
@@ -182,12 +195,34 @@ class DataValidator {
         if (effect.type == 'projectile') {
             checkNumber(at, effect, 'count', false, 1)
             checkEffects("${at} on_hit", effect.on_hit)
+            if (effect.containsKey('visual')) checkVisual("${at} visual", effect.visual)
+        }
+        if (effect.type == 'aura') {
+            checkNumber(at, effect, 'duration', false, 1)
+            checkNumber(at, effect, 'count', false, 1)
+            checkNumber(at, effect, 'interval', false, 1)
         }
         if (effect.type == 'chain') {
             checkNumber(at, effect, 'jumps', false, 1)
             checkNumber(at, effect, 'range', false, 0)
             checkEffects("${at} on_jump", effect.on_jump)
         }
+    }
+
+    void checkVisual(String where, def visual) {
+        if (!(visual instanceof Map)) {
+            error(where, 'must be an object')
+            return
+        }
+        checkKeys(where, visual, VISUAL_KEYS)
+        if (!(visual.texture instanceof String)) {
+            error(where, "missing 'texture'")
+            return
+        }
+        String texture = toId(visual.texture, false)
+        if (isOurs(texture) && !assetFile(texture).exists()) error(where, "texture '${texture}' does not exist")
+        checkNumber(where, visual, 'size', false, 0.05, 16)
+        checkNumber(where, visual, 'stretch', false, 1, 16)
     }
 
     Map read(File file) {
@@ -311,6 +346,7 @@ class DataValidator {
         checkNumber(where, json, 'cooldown_ticks', false, 1)
         checkNumber(where, json, 'cast_ticks', false, 0)
         checkEffects("${where} on_cast", json.on_cast)
+        checkEffects("${where} on_charge", json.on_charge)
     }
 
     void validateSpellNode(File file, Map<String, String> parents) {

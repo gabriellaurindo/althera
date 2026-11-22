@@ -10,12 +10,12 @@ import com.darksune.althera.client.renderer.entity.HeroRenderer;
 import com.darksune.althera.client.renderer.entity.LightOrbRenderer;
 import com.darksune.althera.client.renderer.entity.EnemyMageRenderer;
 import com.darksune.althera.client.renderer.entity.TeacherRenderer;
+import com.darksune.althera.client.renderer.entity.HeroProjectileRenderer;
 import com.darksune.althera.client.renderer.entity.SummonedRenderer;
 import com.darksune.althera.common.block.entity.AltheraBlockEntities;
 import com.darksune.althera.common.entity.AltheraEntities;
 import com.darksune.althera.common.item.AltheraItems;
 import net.minecraft.client.renderer.item.ItemProperties;
-import net.minecraft.client.renderer.entity.NoopRenderer;
 import net.minecraft.client.renderer.entity.player.PlayerRenderer;
 import net.minecraft.client.resources.PlayerSkin;
 import net.neoforged.bus.api.IEventBus;
@@ -23,6 +23,10 @@ import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.ModelEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
+import net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent;
+import com.darksune.althera.client.particle.FlatParticle;
+import com.darksune.althera.client.particle.TintedParticle;
+import com.darksune.althera.common.particle.AltheraParticles;
 import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
 
 public final class AltheraClientRegistries {
@@ -36,6 +40,16 @@ public final class AltheraClientRegistries {
         modEventBus.addListener(AltheraClientRegistries::registerItemProperties);
         modEventBus.addListener(AltheraClientRegistries::registerAdditionalModels);
         modEventBus.addListener(AltheraClientRegistries::registerItemExtensions);
+        modEventBus.addListener(AltheraClientRegistries::registerParticles);
+    }
+
+    private static void registerParticles(RegisterParticleProvidersEvent event) {
+        event.registerSpriteSet(AltheraParticles.GLOW.get(), sprites -> new TintedParticle.Provider(sprites, TintedParticle.Motion.GLOW));
+        event.registerSpriteSet(AltheraParticles.EMBER.get(), sprites -> new TintedParticle.Provider(sprites, TintedParticle.Motion.EMBER));
+        event.registerSpriteSet(AltheraParticles.FROST.get(), sprites -> new TintedParticle.Provider(sprites, TintedParticle.Motion.FROST));
+        event.registerSpriteSet(AltheraParticles.SPARK.get(), sprites -> new TintedParticle.Provider(sprites, TintedParticle.Motion.SPARK));
+        event.registerSpriteSet(AltheraParticles.RING.get(), sprites -> new FlatParticle.Provider(sprites, true));
+        event.registerSpriteSet(AltheraParticles.RUNE.get(), sprites -> new FlatParticle.Provider(sprites, false));
     }
 
     private static void registerItemProperties(FMLClientSetupEvent event) {
@@ -95,7 +109,7 @@ public final class AltheraClientRegistries {
 
         event.registerEntityRenderer(
                 AltheraEntities.HERO_PROJECTILE.get(),
-                NoopRenderer::new
+                HeroProjectileRenderer::new
         );
 
         event.registerBlockEntityRenderer(

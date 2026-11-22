@@ -189,6 +189,10 @@ public final class SpellCastSystem {
             return;
         }
 
+        if (!cast.training()) {
+            cast.spell().charge(UltimateContext.spell(new PlayerCaster(player), cast.scale()), heldTicks);
+        }
+
         if (heldTicks == cast.chargeTicks()) {
             player.level().playSound(null, player.blockPosition(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 1.0F, 1.4F);
         }

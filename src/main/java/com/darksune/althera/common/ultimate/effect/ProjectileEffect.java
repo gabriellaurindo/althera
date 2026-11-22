@@ -12,9 +12,11 @@ import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.List;
+import java.util.Optional;
 
 public record ProjectileEffect(int count, float spread, float speed, float amount, float attackMultiplier,
-                               ParticleOptions trail, List<UltimateEffect> onHit) implements UltimateEffect {
+                               ParticleOptions trail, List<UltimateEffect> onHit,
+                               Optional<ProjectileVisual> visual) implements UltimateEffect {
 
     public static final MapCodec<ProjectileEffect> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
             ExtraCodecs.POSITIVE_INT.optionalFieldOf("count", 1).forGetter(ProjectileEffect::count),
@@ -25,7 +27,8 @@ public record ProjectileEffect(int count, float spread, float speed, float amoun
                     .forGetter(ProjectileEffect::attackMultiplier),
             ParticleTypes.CODEC.optionalFieldOf("trail", ParticleTypes.FLAME).forGetter(ProjectileEffect::trail),
             Codec.lazyInitialized(() -> UltimateEffect.CODEC.listOf()).optionalFieldOf("on_hit", List.of())
-                    .forGetter(ProjectileEffect::onHit)
+                    .forGetter(ProjectileEffect::onHit),
+            ProjectileVisual.CODEC.optionalFieldOf("visual").forGetter(ProjectileEffect::visual)
     ).apply(instance, ProjectileEffect::new));
 
     @Override
@@ -44,7 +47,8 @@ public record ProjectileEffect(int count, float spread, float speed, float amoun
 
         for (int i = 0; i < count; i++) {
             float angle = count == 1 ? 0 : spread * ((float) i / (count - 1) - 0.5F);
-            HeroProjectileEntity.shoot(hero, from, aim.yRot(angle * ((float) Math.PI / 180F)), damage, speed, trail, onHit, context.scale());
+            HeroProjectileEntity.shoot(hero, from, aim.yRot(angle * ((float) Math.PI / 180F)), damage, speed, trail, onHit,
+                    context.scale(), visual.orElse(null));
         }
     }
 }

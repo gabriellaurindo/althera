@@ -1,7 +1,11 @@
 package com.darksune.althera.common.entity;
 
 import com.darksune.althera.common.spell.SpellScale;
+import com.darksune.althera.common.ultimate.effect.ProjectileVisual;
 import com.darksune.althera.common.ultimate.effect.UltimateEffect;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
+import org.jetbrains.annotations.Nullable;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -40,6 +44,12 @@ public class HeroProjectileEntity extends Projectile {
                     HeroProjectileEntity.class,
                     EntityDataSerializers.BOOLEAN
             );
+    private static final EntityDataAccessor<CompoundTag> VISUAL =
+            SynchedEntityData.defineId(
+                    HeroProjectileEntity.class,
+                    EntityDataSerializers.COMPOUND_TAG
+            );
+    private static final String VISUAL_KEY = "visual";
     private static final int MAX_LIFE_TICKS = 40;
     private static final int TRAIL_PARTICLES = 2;
     private static final int BURST_PARTICLES = 8;
@@ -47,6 +57,8 @@ public class HeroProjectileEntity extends Projectile {
     private float damage;
     private List<UltimateEffect> onHit = List.of();
     private SpellScale scale = SpellScale.NONE;
+    @Nullable
+    private ProjectileVisual visual;
 
     public HeroProjectileEntity(EntityType<? extends Projectile> type, Level level) {
         super(type, level);
@@ -79,6 +91,20 @@ public class HeroProjectileEntity extends Projectile {
             final List<UltimateEffect> onHit,
             final SpellScale scale
     ) {
+        return shoot(caster, from, direction, damage, speed, particle, onHit, scale, null);
+    }
+
+    public static HeroProjectileEntity shoot(
+            final SpellCaster caster,
+            final Vec3 from,
+            final Vec3 direction,
+            final float damage,
+            final float speed,
+            final ParticleOptions particle,
+            final List<UltimateEffect> onHit,
+            final SpellScale scale,
+            @Nullable final ProjectileVisual visual
+    ) {
         final LivingEntity hero = caster.entity();
         final HeroProjectileEntity projectile = AltheraEntities.HERO_PROJECTILE.get().create(hero.level());
         if (projectile == null) return null;
@@ -90,6 +116,13 @@ public class HeroProjectileEntity extends Projectile {
         projectile.entityData.set(PARTICLE, particle);
         projectile.entityData.set(VISUAL_SCALE, scale.visual());
         projectile.entityData.set(MASTERED, scale.mastered());
+        if (visual != null) {
+            ProjectileVisual.CODEC.encodeStart(NbtOps.INSTANCE, visual).result().ifPresent(tag -> {
+                final CompoundTag wrapper = new CompoundTag();
+                wrapper.put(VISUAL_KEY, tag);
+                projectile.entityData.set(VISUAL, wrapper);
+            });
+        }
         projectile.moveTo(from.x, from.y, from.z, hero.getYRot(), 0);
         projectile.shoot(direction.x, direction.y, direction.z, speed, 0.0f);
         hero.level().addFreshEntity(projectile);
@@ -101,6 +134,27 @@ public class HeroProjectileEntity extends Projectile {
         builder.define(PARTICLE, ParticleTypes.FLAME);
         builder.define(VISUAL_SCALE, 1.0F);
         builder.define(MASTERED, false);
+        builder.define(VISUAL, new CompoundTag());
+    }
+
+    @Override
+    public void onSyncedDataUpdated(final EntityDataAccessor<?> key) {
+        super.onSyncedDataUpdated(key);
+        if (VISUAL.equals(key)) {
+            final CompoundTag wrapper = entityData.get(VISUAL);
+            visual = wrapper.contains(VISUAL_KEY)
+                    ? ProjectileVisual.CODEC.parse(NbtOps.INSTANCE, wrapper.get(VISUAL_KEY)).result().orElse(null)
+                    : null;
+        }
+    }
+
+    @Nullable
+    public ProjectileVisual getVisual() {
+        return visual;
+    }
+
+    public float getVisualScale() {
+        return entityData.get(VISUAL_SCALE);
     }
 
     @Override

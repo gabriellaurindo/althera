@@ -86,8 +86,12 @@ public class SpellAttackGoal extends Goal {
             repathDelay = 0;
         }
 
-        if (pendingCastTicks > 0 && --pendingCastTicks == 0) {
-            cast(target, spell);
+        if (pendingCastTicks > 0) {
+            spell.charge(UltimateContext.attack(mage, mage, target, null), spell.castTicks() - pendingCastTicks);
+
+            if (--pendingCastTicks == 0) {
+                cast(target, spell);
+            }
         }
 
         if (cooldown > 0) {

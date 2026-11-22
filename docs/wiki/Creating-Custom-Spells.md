@@ -58,6 +58,7 @@ players made on it.
 | `cooldown_ticks` | `40` | Mages: ticks between casts. Players use the `player` block's own `cooldown_ticks` |
 | `cast_ticks` | `0` | Mages: ticks spent casting before the spell goes off. Players: charge time of `charge` spells, time between pulses of `continuous` spells |
 | `on_cast` | `[]` | Effects applied when the spell goes off |
+| `on_charge` | `[]` | Effects applied every 4 ticks while the spell is being cast: during a mage's `cast_ticks`, and while a player charges a `charge` spell (not while training it). Good for build-up visuals |
 | `player` | none | Makes the spell usable by players (see below). Without it, the spell is for mages only |
 
 `on_cast` uses the same effects and targets as Ultimates (see

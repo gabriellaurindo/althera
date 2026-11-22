@@ -61,6 +61,10 @@ and generates the GitHub Release, CurseForge and Discord notes from it.
     `size_per_level`, `visual_per_level`, `cost_per_level`).
   - Datapacks and Ultimates: new `chain` effect (leaps from the hit creature to the nearest enemies, running its
     `on_jump` effects on each).
+  - Datapacks: new particles `althera:glow`, `ember`, `frost`, `spark`, `ring` and `rune` (colour, scale and lifetime
+    of your choice, glowing); projectiles can have a `visual` (a texture that faces the camera or stretches along the
+    flight); `particles` gets `direction_speed` and `circle`; new `aura` effect (particles circling a creature for a
+    while); spells get `on_charge` effects while being cast or charged.
   - `/althera_spell level <node> <level>` and `/althera_spell element <element> <level>` (cheats).
 - Spells and elements have their own **icons** (Fire Bolt, Lightning Strike, Frost Shard; Fire, Lightning, Ice and
   an arcane rune for the Knowledge root) in the spell tree, the book HUD, the spell wheel and the character sheet.
