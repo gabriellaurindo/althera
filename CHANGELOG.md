@@ -90,6 +90,11 @@ and generates the GitHub Release, CurseForge and Discord notes from it.
   crackling spark, shards and spikes of ice that point where they fly), bursts, flashes and rings of light on impact,
   ice gathering around you while Glacial Spike charges, a real stream of embers for Flame Jet, a shell of ice around
   you during Frost Ward and healing lights during Mend. Nobles' spells get the same looks.
+- **Spell damage balanced**: every spell of a tier now deals the same damage per second to a single target, and tier
+  2 spells deal 15% more than tier 1. Lightning Strike 7.2 (was 9.6, its area damage is unchanged), Frost Shard 7.2
+  (was 6), Flame Jet 8.3 twice a second (was 3.6), Chain Lightning 16.6 on its first target (was 6), Glacial Spike
+  33.1 (was 10.4) with a 1 second cooldown (was 2). Nobles casting Lightning Strike and Frost Shard change the same
+  way.
 - **Fire Bolt** also sets everything within 1.5 blocks of its target ablaze (2 seconds). **Frost Shard** slows more:
   hitting an already slowed target gives Slowness III. **Frost Ward** shatters when its shell is broken early,
   slowing the enemies around you again.
@@ -115,6 +120,9 @@ and generates the GitHub Release, CurseForge and Discord notes from it.
     academy. The first one, **An Invitation**, is ready from the start: click Accept to get the invitation. The next
     ones send you to the academy, to learn and level spells and to defeat a Noble, and reward you with new spells.
     Quests are data-driven (`data/<namespace>/academy_quest/`, see the wiki page "Noble Magic Academy").
+  - **Training Dummies** in the academy's training yard, and craftable (armor stand + hay bale) to place anywhere:
+    they never die and show the last hit, the total and the damage per second, to try spells and Heroes on. Sneak
+    and punch one with an empty hand to pick it up.
   - **Teachers**: the Headmaster in the hall, a master in each classroom (Fire, Lightning, Ice) and the librarian.
     Right-click one to talk and see their quests. The masters teach their element's basic spell, the librarian a
     random one for a few books. Teachers are data-driven too (`data/<namespace>/academy_teacher/`).

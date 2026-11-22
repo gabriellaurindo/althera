@@ -27,7 +27,7 @@
     {
       "type": "projectile",
       "speed": 1.6,
-      "attack_multiplier": 1.5,
+      "attack_multiplier": 1.8,
       "trail": {
         "type": "althera:frost",
         "scale": 0.8

@@ -16,6 +16,7 @@ summoners go to learn spells: its quests teach you new spells and send you to tr
 - Days and nights pass, but you **can't sleep** or set your respawn point there
 - A **magic ward**, a faint violet dome over the island, follows its edge: walk up to it and it glows and pushes you
   back. Fall off and the ward brings you back to the hall
+- The training yard has three **Training Dummies** (see [Spells](Spells#-training-dummy))
 - Classrooms have desks for the students, the island has cherry, birch and oak trees, flowers and lamps along the
   paths, and its own music
 

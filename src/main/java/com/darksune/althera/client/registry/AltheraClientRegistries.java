@@ -10,6 +10,7 @@ import com.darksune.althera.client.renderer.entity.HeroRenderer;
 import com.darksune.althera.client.renderer.entity.LightOrbRenderer;
 import com.darksune.althera.client.renderer.entity.EnemyMageRenderer;
 import com.darksune.althera.client.renderer.entity.TeacherRenderer;
+import com.darksune.althera.client.renderer.entity.TrainingDummyRenderer;
 import com.darksune.althera.client.renderer.entity.HeroProjectileRenderer;
 import com.darksune.althera.client.renderer.entity.SummonedRenderer;
 import com.darksune.althera.common.block.entity.AltheraBlockEntities;
@@ -105,6 +106,11 @@ public final class AltheraClientRegistries {
         event.registerEntityRenderer(
                 AltheraEntities.TEACHER.get(),
                 TeacherRenderer::new
+        );
+
+        event.registerEntityRenderer(
+                AltheraEntities.TRAINING_DUMMY.get(),
+                TrainingDummyRenderer::new
         );
 
         event.registerEntityRenderer(

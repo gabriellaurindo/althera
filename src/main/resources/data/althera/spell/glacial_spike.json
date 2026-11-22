@@ -4,7 +4,7 @@
     "mana_cost": 40,
     "description": "Charge a spike of ice that hits hard and all but freezes the target.",
     "cast_mode": "charge",
-    "cooldown_ticks": 40
+    "cooldown_ticks": 20
   },
   "cast_ticks": 20,
   "on_cast": [
@@ -17,7 +17,7 @@
     {
       "type": "projectile",
       "speed": 2.4,
-      "attack_multiplier": 2.6,
+      "attack_multiplier": 8.28,
       "trail": {
         "type": "althera:frost",
         "scale": 1.2

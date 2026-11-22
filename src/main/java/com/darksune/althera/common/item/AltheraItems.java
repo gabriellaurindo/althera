@@ -35,6 +35,9 @@ public final class AltheraItems {
     public static final DeferredItem<SpellTomeItem> SPELL_TOME = register(AltheraItemId.SPELL_TOME,
             () -> new SpellTomeItem(new Item.Properties()));
 
+    public static final DeferredItem<TrainingDummyItem> TRAINING_DUMMY = register(AltheraItemId.TRAINING_DUMMY,
+            () -> new TrainingDummyItem(new Item.Properties()));
+
     // Block items
     public static final DeferredHolder<Item, Item> RITUAL_CORE = register(AltheraItemId.RITUAL_CORE, RitualCoreItem::create);
     public static final DeferredItem<BlockItem> NOBLE_SIGIL = register(AltheraItemId.NOBLE_SIGIL,

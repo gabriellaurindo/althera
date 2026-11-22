@@ -62,6 +62,14 @@ public final class AltheraEntities {
                             .clientTrackingRange(10)
                             .build("teacher"));
 
+    public static final DeferredHolder<EntityType<?>, EntityType<TrainingDummyEntity>> TRAINING_DUMMY =
+            ENTITIES.register("training_dummy",
+                    () -> EntityType.Builder
+                            .of(TrainingDummyEntity::new, MobCategory.MISC)
+                            .sized(0.6f, 1.9f)
+                            .clientTrackingRange(10)
+                            .build("training_dummy"));
+
     public static void register(final IEventBus bus) {
         ENTITIES.register(bus);
     }

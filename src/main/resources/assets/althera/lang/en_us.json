@@ -13,6 +13,8 @@
   "biome.althera.academy": "Noble Magic Academy",
   "block.althera.academy_portal": "Academy Portal",
   "entity.althera.teacher": "Teacher",
+  "entity.althera.training_dummy": "Training Dummy",
+  "item.althera.training_dummy": "Training Dummy",
   "item.althera.spell_tome": "Spell Tome",
   "item.althera.spell_tome.named": "Tome of %s",
   "item.althera.spell_tome.faded": "Faded Tome",

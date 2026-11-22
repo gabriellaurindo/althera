@@ -25,7 +25,7 @@
     {
       "type": "projectile",
       "speed": 2.4,
-      "attack_multiplier": 1.5,
+      "attack_multiplier": 4.14,
       "trail": {
         "type": "althera:spark",
         "color": "#D8F0FF"

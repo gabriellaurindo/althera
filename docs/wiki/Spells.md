@@ -113,18 +113,22 @@ In **Creative** mode spells cost no mana and have no cooldown, but they still ne
 | Spell | Element | Cost | Effect |
 |---|---|---|---|
 | **Fire Bolt** | Fire | 20 | A ball of fire (7.2 damage) that sets the target ablaze for 4 seconds and everything within 1.5 blocks of it for 2 seconds |
-| **Lightning Strike** | Lightning | 25 | A spark that calls lightning down on what it hits (9.6 damage) and hurts everything around it (3.6), even when it hits a wall |
-| **Frost Shard** | Ice | 20 | A shard of ice (6 damage) that gives Slowness II for 3 seconds. Hitting a target that is already slowed makes it Slowness III |
+| **Lightning Strike** | Lightning | 25 | A spark that calls lightning down on what it hits (7.2 damage) and hurts everything around it (3.6), even when it hits a wall |
+| **Frost Shard** | Ice | 20 | A shard of ice (7.2 damage) that gives Slowness II for 3 seconds. Hitting a target that is already slowed makes it Slowness III |
 | **Frost Ward** (Defense) | Ice | 25 | Wraps you in a shell of ice: Absorption II for 10 seconds, and enemies within 3 blocks are pushed back and get Slowness II for 3 seconds. If the shell breaks before it melts (the absorption is used up), it shatters: Slowness II again to the enemies around you. 10 second cooldown |
-| **Chain Lightning** (tier 2, after Lightning Strike) | Lightning | 35 | A bolt (6 damage) that leaps from its target to up to 3 enemies within 5 blocks of each other (4 damage each). 1 second cooldown |
-| **Glacial Spike** (tier 2, after Frost Shard) | Ice | 40 | **Hold** right-click for 1 second to charge, release to fire a spike of ice (10.4 damage) that gives Slowness IV for 4 seconds and chills everything next to it (3.2 damage, Slowness II). Releasing early wastes the charge. 2 second cooldown |
+| **Chain Lightning** (tier 2, after Lightning Strike) | Lightning | 35 | A bolt (16.6 damage) that leaps from its target to up to 3 enemies within 5 blocks of each other (4 damage each). 1 second cooldown |
+| **Glacial Spike** (tier 2, after Frost Shard) | Ice | 40 | **Hold** right-click for 1 second to charge, release to fire a spike of ice (33.1 damage) that gives Slowness IV for 4 seconds and chills everything next to it (3.2 damage, Slowness II). Releasing early wastes the charge. 1 second cooldown |
 | **Mend** (Utility) | None | 30 | Heals 3 hearts and gives Regeneration I for 5 seconds. 5 second cooldown |
-| **Flame Jet** (tier 2, after Fire Bolt) | Fire | 24 / s | **Hold** right-click to pour a stream of fire 5 blocks ahead: 3.6 damage twice a second to everything in it and sets it ablaze. 1 second cooldown after you stop |
+| **Flame Jet** (tier 2, after Fire Bolt) | Fire | 24 / s | **Hold** right-click to pour a stream of fire 5 blocks ahead: 8.3 damage twice a second to everything in it and sets it ablaze. 1 second cooldown after you stop |
 
 Every spell has its own look: a rune circle at your feet when you cast, a visible projectile (a ball of fire, a
 crackling spark, a shard of ice), and a burst and a ring of light where it lands. Glacial Spike gathers ice around
 you while it charges, Flame Jet pours a real stream of embers, Frost Ward and Mend leave an aura around you while they
 last.
+
+**Balance:** every spell of a tier deals the same damage per second to a single target (tier 1: 14.4, tier 2: 15%
+more, 16.6, at level 1); what sets them apart is how they deal it (fire, areas, leaps, slowness, a big charged hit or
+a stream) and their mana cost.
 
 Spells fly where you look. The basic attack spells have **no cooldown**: you can cast them as often as your mana
 allows. Mana is shared with your Hero, so casting while your Hero is summoned drains the same pool that
@@ -172,6 +176,19 @@ trail of light.
 You get a message when a spell or a mastery goes up a level. The spell tree tooltip shows a learned spell's level,
 its progress to the next one and its current bonuses; the book shows the level next to the cost; the Player tab of the
 character sheet (**G**) shows the three masteries (hover one for details).
+
+---
+
+## 🎯 Training Dummy
+
+A straw dummy to try your spells (and your Hero) on. It never dies, doesn't move and takes fire and slowness like
+any creature. Its name shows the **last hit**, the **total** and the **damage per second** of the current round (measured from the
+second hit on: the damage after the first hit divided by the time between the first and the last hit), and
+the same line appears above your hotbar when you or your Hero hit it. It resets after 3 seconds without being hit.
+
+- The academy's training yard has three
+- Craft one anywhere: **armor stand + hay bale** (shapeless). Right-click a block to place it; **sneak and punch it
+  with an empty hand** to pick it back up
 
 ---
 

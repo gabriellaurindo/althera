@@ -2,6 +2,7 @@ package com.darksune.althera.common.event;
 
 import com.darksune.althera.common.attachment.HeroData;
 import com.darksune.althera.common.entity.HeroEntity;
+import com.darksune.althera.common.entity.TrainingDummyEntity;
 import com.darksune.althera.common.hero.HeroDefinition;
 import com.darksune.althera.common.system.HeroProgressionSystem;
 import com.darksune.althera.common.system.HeroStatsSystem;
@@ -34,6 +35,10 @@ public class CombatEvents {
         if (event.getSource().getEntity() instanceof HeroEntity hero && hero.getOwner() instanceof Player owner
                 && event.getEntity() != owner) {
             event.getEntity().setLastHurtByPlayer(owner);
+        }
+
+        if (event.getEntity() instanceof TrainingDummyEntity dummy) {
+            dummy.record(event.getSource(), event.getNewDamage());
         }
     }
 

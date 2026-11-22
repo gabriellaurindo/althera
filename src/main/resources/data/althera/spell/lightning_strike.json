@@ -27,7 +27,7 @@
     {
       "type": "projectile",
       "speed": 2.2,
-      "attack_multiplier": 1.2,
+      "attack_multiplier": 0.9,
       "trail": {
         "type": "althera:spark",
         "color": "#FFF6B8"
@@ -55,7 +55,7 @@
         {
           "type": "damage",
           "target": "target",
-          "attack_multiplier": 1.2
+          "attack_multiplier": 0.9
         },
         {
           "type": "particles",

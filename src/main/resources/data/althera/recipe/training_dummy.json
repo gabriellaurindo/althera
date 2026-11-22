@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "minecraft:armor_stand"
+    },
+    {
+      "item": "minecraft:hay_block"
+    }
+  ],
+  "result": {
+    "id": "althera:training_dummy",
+    "count": 1
+  }
+}

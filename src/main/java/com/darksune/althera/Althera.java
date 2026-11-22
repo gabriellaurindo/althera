@@ -43,6 +43,7 @@ import com.darksune.althera.network.packet.SyncTeachersPacket;
 import com.darksune.althera.common.academy.teacher.TeacherLoader;
 import com.darksune.althera.common.academy.teacher.TeacherRegistry;
 import com.darksune.althera.common.entity.TeacherEntity;
+import com.darksune.althera.common.entity.TrainingDummyEntity;
 import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 
@@ -105,6 +106,10 @@ public final class Althera {
         event.put(
                 AltheraEntities.TEACHER.get(),
                 TeacherEntity.createAttributes().build()
+        );
+        event.put(
+                AltheraEntities.TRAINING_DUMMY.get(),
+                TrainingDummyEntity.createAttributes().build()
         );
     }
 }
