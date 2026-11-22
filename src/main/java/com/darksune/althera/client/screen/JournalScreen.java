@@ -1,6 +1,8 @@
 package com.darksune.althera.client.screen;
 
 import com.darksune.althera.client.input.AltheraKeybinds;
+import com.darksune.althera.common.academy.teacher.TeacherDefinition;
+import com.darksune.althera.common.academy.teacher.TeacherRegistry;
 import com.darksune.althera.common.quest.Quest;
 import com.darksune.althera.common.quest.QuestData;
 import com.darksune.althera.common.quest.QuestRegistry;
@@ -48,20 +50,48 @@ public class JournalScreen extends Screen {
     private final Screen parent;
 
     @Nullable
+    private final ResourceLocation teacher;
+
+    @Nullable
     private ResourceLocation selected;
 
     private Button claimButton;
 
     public JournalScreen(@Nullable Screen parent) {
-        super(Component.literal("Journal"));
+        this(parent, null);
+    }
+
+    public JournalScreen(@Nullable Screen parent, @Nullable ResourceLocation teacher) {
+        super(Component.literal(teacherTitle(teacher)));
         this.parent = parent;
+        this.teacher = teacher;
+    }
+
+    private static String teacherTitle(@Nullable ResourceLocation teacher) {
+        TeacherDefinition definition = TeacherRegistry.get(teacher);
+        return definition == null ? "Journal" : definition.displayName();
+    }
+
+    private List<ResourceLocation> visible(Player player) {
+
+        List<ResourceLocation> visible = QuestSystem.visible(player);
+
+        if (teacher == null) {
+            return visible;
+        }
+
+        String giver = teacher.toString();
+
+        return visible.stream()
+                .filter(id -> QuestRegistry.get(id).giver().filter(giver::equals).isPresent())
+                .toList();
     }
 
     @Override
     protected void init() {
 
         if (selected == null && minecraft.player != null) {
-            selected = initialSelection(minecraft.player);
+            selected = initialSelection(minecraft.player, visible(minecraft.player), teacher != null);
         }
 
         claimButton = addRenderableWidget(Button.builder(Component.literal("Accept"), button -> claim())
@@ -71,12 +101,15 @@ public class JournalScreen extends Screen {
     }
 
     @Nullable
-    private static ResourceLocation initialSelection(Player player) {
+    private static ResourceLocation initialSelection(Player player, List<ResourceLocation> visible, boolean greetFirst) {
 
-        List<ResourceLocation> visible = QuestSystem.visible(player);
+        ResourceLocation claimable = visible.stream().filter(id -> QuestSystem.isClaimable(player, id)).findFirst().orElse(null);
 
-        return visible.stream().filter(id -> QuestSystem.isClaimable(player, id)).findFirst()
-                .or(() -> visible.stream().filter(id -> QuestSystem.isAvailable(player, id)).findFirst())
+        if (claimable != null || greetFirst) {
+            return claimable;
+        }
+
+        return visible.stream().filter(id -> QuestSystem.isAvailable(player, id)).findFirst()
                 .orElse(visible.isEmpty() ? null : visible.getFirst());
     }
 
@@ -132,10 +165,11 @@ public class JournalScreen extends Screen {
         updateButton(player);
         super.render(gui, mouseX, mouseY, partialTick);
 
-        List<ResourceLocation> visible = QuestSystem.visible(player);
+        List<ResourceLocation> visible = visible(player);
 
         if (visible.isEmpty()) {
-            gui.drawString(font, "Nothing here yet.", left() + PADDING, top() + PADDING, COLOR_MUTED);
+            gui.drawString(font, teacher == null ? "Nothing here yet." : "No lessons for now.", left() + PADDING,
+                    top() + PADDING, COLOR_MUTED);
         }
 
         renderList(gui, player, visible, mouseX, mouseY);
@@ -144,6 +178,8 @@ public class JournalScreen extends Screen {
 
         if (quest != null) {
             renderDetails(gui, player, selected, quest);
+        } else {
+            renderGreeting(gui);
         }
     }
 
@@ -175,6 +211,24 @@ public class JournalScreen extends Screen {
         }
     }
 
+    private void renderGreeting(GuiGraphics gui) {
+
+        TeacherDefinition definition = TeacherRegistry.get(teacher);
+
+        if (definition == null || definition.greeting().isEmpty()) {
+            return;
+        }
+
+        int x = left() + LIST_WIDTH + PADDING * 2 + 1;
+        int width = PANEL_WIDTH - LIST_WIDTH - PADDING * 3 - 1;
+        int y = top() + PADDING;
+
+        for (FormattedCharSequence line : font.split(Component.literal("“" + definition.greeting() + "”"), width)) {
+            gui.drawString(font, line, x, y, COLOR_TEXT);
+            y += 10;
+        }
+    }
+
     private void renderDetails(GuiGraphics gui, Player player, ResourceLocation id, Quest quest) {
 
         int x = left() + LIST_WIDTH + PADDING * 2 + 1;
@@ -189,7 +243,7 @@ public class JournalScreen extends Screen {
         y += 1;
 
         if (quest.giver().isPresent()) {
-            for (FormattedCharSequence line : font.split(Component.literal("From: " + quest.giver().get()), width)) {
+            for (FormattedCharSequence line : font.split(Component.literal("From: " + TeacherRegistry.giverName(quest.giver().get())), width)) {
                 gui.drawString(font, line, x, y, COLOR_MUTED);
                 y += 10;
             }
@@ -260,7 +314,7 @@ public class JournalScreen extends Screen {
             int x = left() + PADDING;
             int y = top() + PADDING;
 
-            for (ResourceLocation id : QuestSystem.visible(minecraft.player)) {
+            for (ResourceLocation id : visible(minecraft.player)) {
 
                 if (mouseX >= x && mouseX < x + LIST_WIDTH && mouseY >= y && mouseY < y + ROW_HEIGHT) {
                     selected = id;

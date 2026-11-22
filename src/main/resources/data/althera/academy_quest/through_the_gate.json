@@ -1,6 +1,6 @@
 {
   "title": "Through the Gate",
-  "giver": "Headmaster of the Noble Magic Academy",
+  "giver": "althera:headmaster",
   "order": 10,
   "requires": [
     "althera:invitation"

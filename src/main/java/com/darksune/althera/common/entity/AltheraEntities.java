@@ -54,6 +54,14 @@ public final class AltheraEntities {
                             .updateInterval(10)
                             .build("hero_projectile"));
 
+    public static final DeferredHolder<EntityType<?>, EntityType<TeacherEntity>> TEACHER =
+            ENTITIES.register("teacher",
+                    () -> EntityType.Builder
+                            .of(TeacherEntity::new, MobCategory.MISC)
+                            .sized(0.6f, 1.8f)
+                            .clientTrackingRange(10)
+                            .build("teacher"));
+
     public static void register(final IEventBus bus) {
         ENTITIES.register(bus);
     }

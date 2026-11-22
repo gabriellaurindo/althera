@@ -1,6 +1,6 @@
 {
   "title": "Practice Makes Perfect",
-  "giver": "Headmaster of the Noble Magic Academy",
+  "giver": "althera:headmaster",
   "order": 30,
   "requires": [
     "althera:first_words"

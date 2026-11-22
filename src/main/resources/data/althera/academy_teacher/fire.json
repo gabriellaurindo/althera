@@ -1,0 +1,12 @@
+{
+  "name": "Ignis",
+  "title": "Master of Fire",
+  "texture": "althera:textures/entity/teacher/fire.png",
+  "position": [
+    -19.5,
+    101,
+    0.5
+  ],
+  "yaw": -90,
+  "greeting": "Fire is patience that suddenly runs out. Show me you can keep a flame alive before you set the world alight."
+}

@@ -39,6 +39,10 @@ import com.darksune.althera.common.AltheraServerConfig;
 import com.darksune.althera.common.quest.QuestLoader;
 import com.darksune.althera.common.quest.QuestRegistry;
 import com.darksune.althera.network.packet.SyncQuestsPacket;
+import com.darksune.althera.network.packet.SyncTeachersPacket;
+import com.darksune.althera.common.academy.teacher.TeacherLoader;
+import com.darksune.althera.common.academy.teacher.TeacherRegistry;
+import com.darksune.althera.common.entity.TeacherEntity;
 import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 
@@ -63,6 +67,7 @@ public final class Althera {
         event.addListener(new SpellNodeLoader());
         event.addListener(new EnemyMageLoader(event.getRegistryAccess()));
         event.addListener(new QuestLoader(event.getRegistryAccess()));
+        event.addListener(new TeacherLoader());
     }
 
     @SubscribeEvent
@@ -74,7 +79,8 @@ public final class Althera {
         SyncSpellNodesPacket spellNodes = new SyncSpellNodesPacket(SpellNodeRegistry.getAll());
         SyncEnemyMagesPacket mages = new SyncEnemyMagesPacket(EnemyMageRegistry.getAll());
         SyncQuestsPacket quests = new SyncQuestsPacket(QuestRegistry.getAll());
-        event.getRelevantPlayers().forEach(player -> PacketDistributor.sendToPlayer(player, classes, heroes, ultimates, spells, spellNodes, mages, quests));
+        SyncTeachersPacket teachers = new SyncTeachersPacket(TeacherRegistry.getAll());
+        event.getRelevantPlayers().forEach(player -> PacketDistributor.sendToPlayer(player, classes, heroes, ultimates, spells, spellNodes, mages, quests, teachers));
     }
 
     @SubscribeEvent
@@ -95,6 +101,10 @@ public final class Althera {
         event.put(
                 AltheraEntities.ENEMY_MAGE.get(),
                 EnemyMageEntity.createAttributes().build()
+        );
+        event.put(
+                AltheraEntities.TEACHER.get(),
+                TeacherEntity.createAttributes().build()
         );
     }
 }

@@ -1,0 +1,22 @@
+{
+  "title": "Static",
+  "giver": "althera:lightning",
+  "order": 51,
+  "requires": [
+    "althera:through_the_gate"
+  ],
+  "description": "Skeletons rattle like a storm about to break. Silence five of them and the sky will answer you.",
+  "tasks": [
+    {
+      "type": "kill",
+      "entity": "minecraft:skeleton",
+      "count": 5
+    }
+  ],
+  "rewards": [
+    {
+      "type": "discover_spell",
+      "node": "althera:lightning_strike"
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "title": "Kindling",
+  "giver": "althera:fire",
+  "order": 50,
+  "requires": [
+    "althera:through_the_gate"
+  ],
+  "description": "Zombies burn well and complain little. Put five of them to rest and I will show you the first flame.",
+  "tasks": [
+    {
+      "type": "kill",
+      "entity": "minecraft:zombie",
+      "count": 5
+    }
+  ],
+  "rewards": [
+    {
+      "type": "discover_spell",
+      "node": "althera:fire_bolt"
+    }
+  ]
+}

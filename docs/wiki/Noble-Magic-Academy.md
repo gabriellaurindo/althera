@@ -1,6 +1,6 @@
 # Noble Magic Academy
 
-> The academy is a work in progress. Teachers and more of the school are still to come.
+> The academy is a work in progress: more rooms, teachers and quests are still to come.
 
 The **Noble Magic Academy** is a school of magic on a giant floating island, in a dimension of its own. It is where
 summoners go to learn spells: its quests teach you new spells and send you to train them.
@@ -16,6 +16,21 @@ summoners go to learn spells: its quests teach you new spells and send you to tr
 - Days and nights pass, but you **can't sleep** or set your respawn point there
 - A **magic ward** follows the edge of the island: walk up to it and it pushes you back. Fall off and the ward brings
   you back to the hall
+
+---
+
+# 🧙 Teachers
+
+| Teacher | Where | Teaches |
+|---|---|---|
+| **Aldren**, Headmaster | Hall, in front of you when you arrive | The academy's main quests |
+| **Ignis**, Master of Fire | Fire classroom (west) | Fire Bolt |
+| **Volta**, Master of Lightning | Lightning classroom (east) | Lightning Strike |
+| **Glacia**, Master of Ice | Ice classroom (south) | Frost Shard |
+| **Mirel**, Librarian | Library (north) | A random basic spell, for a few books |
+
+**Right-click** a teacher to talk: you see their quests (the same ones as in your [Journal](#-journal)) and can accept
+or claim them there. Teachers can't be hurt and always come back to their place.
 
 ---
 
@@ -73,7 +88,7 @@ Quests are data-driven: `data/<namespace>/academy_quest/<name>.json`. The file n
 | Field | Default | Description |
 |---|---|---|
 | `title` | required | Name shown in the Journal |
-| `giver` | none | Who gives the quest ("From: ...") |
+| `giver` | none | A teacher id (`althera:headmaster`): the quest shows up when talking to that teacher and the Journal shows their name. Any other text is shown as is |
 | `description` | `""` | Quest text |
 | `order` | `0` | Position in the Journal (lowest first) |
 | `requires` | `[]` | Quests that must be finished before this one shows up |
@@ -98,6 +113,31 @@ Quests are data-driven: `data/<namespace>/academy_quest/<name>.json`. The file n
 | `invitation` | | The invitation to the academy |
 | `discover_spell` | `node` (optional), `tier` (default 1) | Discovers that spell, or a random undiscovered spell of that tier (a Spell Tome of that tier when all are known) |
 | `item` | `item`, `count` (default 1) | Items |
+
+### Teachers (datapacks)
+
+Teachers are data-driven too: `data/<namespace>/academy_teacher/<name>.json` (the file name is the id used by quests'
+`giver`).
+
+```json
+{
+  "name": "Ignis",
+  "title": "Master of Fire",
+  "texture": "althera:textures/entity/teacher/fire.png",
+  "position": [-19.5, 101, 0.5],
+  "yaw": -90,
+  "greeting": "Fire is patience that suddenly runs out."
+}
+```
+
+| Field | Default | Description |
+|---|---|---|
+| `name` | required | Teacher's name |
+| `title` | none | Shown after the name ("Ignis, Master of Fire") |
+| `texture` | required | A 64x64 player skin texture |
+| `position` | required | `[x, y, z]` in the academy (the hall's centre is `0.5, 101, 0.5`) |
+| `yaw` | `0` | Facing: `0` south, `90` west, `180` north, `-90` east |
+| `greeting` | `""` | What they say when you talk to them |
 
 ---
 

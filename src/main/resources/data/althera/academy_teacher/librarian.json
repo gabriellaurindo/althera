@@ -1,0 +1,12 @@
+{
+  "name": "Mirel",
+  "title": "Librarian",
+  "texture": "althera:textures/entity/teacher/librarian.png",
+  "position": [
+    0.5,
+    101,
+    -19.5
+  ],
+  "yaw": 0,
+  "greeting": "Shh. Every spell ever written rests on these shelves, or will. Bring me what you find out there."
+}

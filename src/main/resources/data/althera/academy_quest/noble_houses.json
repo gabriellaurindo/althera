@@ -1,6 +1,6 @@
 {
   "title": "The Noble Houses",
-  "giver": "Headmaster of the Noble Magic Academy",
+  "giver": "althera:headmaster",
   "order": 40,
   "requires": [
     "althera:first_words"

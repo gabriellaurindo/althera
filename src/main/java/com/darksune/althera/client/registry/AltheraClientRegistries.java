@@ -9,6 +9,7 @@ import com.darksune.althera.client.renderer.block.RitualPedestalRenderer;
 import com.darksune.althera.client.renderer.entity.HeroRenderer;
 import com.darksune.althera.client.renderer.entity.LightOrbRenderer;
 import com.darksune.althera.client.renderer.entity.EnemyMageRenderer;
+import com.darksune.althera.client.renderer.entity.TeacherRenderer;
 import com.darksune.althera.client.renderer.entity.SummonedRenderer;
 import com.darksune.althera.common.block.entity.AltheraBlockEntities;
 import com.darksune.althera.common.entity.AltheraEntities;
@@ -85,6 +86,11 @@ public final class AltheraClientRegistries {
         event.registerEntityRenderer(
                 AltheraEntities.ENEMY_MAGE.get(),
                 EnemyMageRenderer::new
+        );
+
+        event.registerEntityRenderer(
+                AltheraEntities.TEACHER.get(),
+                TeacherRenderer::new
         );
 
         event.registerEntityRenderer(

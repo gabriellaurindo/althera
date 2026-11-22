@@ -1,6 +1,6 @@
 {
   "title": "First Words",
-  "giver": "Headmaster of the Noble Magic Academy",
+  "giver": "althera:headmaster",
   "order": 20,
   "requires": [
     "althera:through_the_gate"

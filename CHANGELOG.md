@@ -101,6 +101,9 @@ and generates the GitHub Release, CurseForge and Discord notes from it.
     academy. The first one, **An Invitation**, is ready from the start: click Accept to get the invitation. The next
     ones send you to the academy, to learn and level spells and to defeat a Noble, and reward you with new spells.
     Quests are data-driven (`data/<namespace>/academy_quest/`, see the wiki page "Noble Magic Academy").
+  - **Teachers**: the Headmaster in the hall, a master in each classroom (Fire, Lightning, Ice) and the librarian.
+    Right-click one to talk and see their quests. The masters teach their element's basic spell, the librarian a
+    random one for a few books. Teachers are data-driven too (`data/<namespace>/academy_teacher/`).
   - New players start in the academy the first time they join (server config `academy.spawnInAcademy`, on by
     default; turn it off for modpacks with their own starting map).
 

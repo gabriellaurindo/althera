@@ -1,0 +1,22 @@
+{
+  "title": "Lost Pages",
+  "giver": "althera:librarian",
+  "order": 53,
+  "requires": [
+    "althera:through_the_gate"
+  ],
+  "description": "The library always needs more books. Bring me three and I will lend you something worth reading.",
+  "tasks": [
+    {
+      "type": "item",
+      "item": "minecraft:book",
+      "count": 3
+    }
+  ],
+  "rewards": [
+    {
+      "type": "discover_spell",
+      "tier": 1
+    }
+  ]
+}
