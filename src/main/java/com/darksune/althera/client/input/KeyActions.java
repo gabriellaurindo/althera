@@ -1,18 +1,25 @@
 package com.darksune.althera.client.input;
 
+import com.darksune.althera.client.hud.SpellSlots;
 import com.darksune.althera.client.screen.HeroScreen;
-import com.darksune.althera.client.screen.HeroSelectionOpener;
 import com.darksune.althera.client.screen.SealWheelScreen;
-import com.darksune.althera.common.attachment.HeroData;
+import com.darksune.althera.client.screen.JournalScreen;
+import com.darksune.althera.client.screen.SpellTreeScreen;
+import com.darksune.althera.client.screen.SpellWheelScreen;
 import com.darksune.althera.common.commandseal.skill.CommandSealSkillType;
+import com.darksune.althera.common.item.SpellBookItem;
+import com.darksune.althera.common.spell.PlayerSpellData;
 import com.darksune.althera.common.system.HeroCommandSystem;
 import com.darksune.althera.network.packet.DisguisePacket;
 import com.darksune.althera.network.packet.MarkTargetPacket;
+import com.darksune.althera.network.packet.SelectSpellSlotPacket;
 import com.darksune.althera.network.packet.SummonPacket;
 import com.darksune.althera.network.packet.UseCommandSealSkillPacket;
 import com.darksune.althera.network.packet.UseUltimateSkillPacket;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
@@ -33,11 +40,8 @@ public class KeyActions {
 
     public static void handleHero() {
         Minecraft mc = Minecraft.getInstance();
-        HeroData heroData = HeroData.get(mc.player);
-        if (mc.screen == null && heroData.getHeroDefinition() != null) {
+        if (mc.screen == null && mc.player != null) {
             mc.setScreen(new HeroScreen());
-        } else if (mc.screen == null) {
-            HeroSelectionOpener.open();
         } else {
             mc.setScreen(null);
         }
@@ -81,5 +85,58 @@ public class KeyActions {
 
     public static void handleUltimateSkill() {
         Minecraft.getInstance().getConnection().send(new UseUltimateSkillPacket());
+    }
+
+    public static void handleSpellWheel() {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.screen == null && mc.player != null && !SpellBookItem.isCastingWith(mc.player)) {
+            mc.setScreen(new SpellWheelScreen());
+        }
+    }
+
+    public static void handleSpellTree() {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.screen == null && mc.player != null && !SpellBookItem.isCastingWith(mc.player)) {
+            mc.setScreen(new SpellTreeScreen());
+        }
+    }
+
+    public static void handleJournal() {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.screen == null && mc.player != null) {
+            mc.setScreen(new JournalScreen(null));
+        }
+    }
+
+    public static void cycleSpell(final int direction) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.screen != null || mc.player == null) return;
+
+        selectSpellSlot(PlayerSpellData.get(mc.player).nextFilledSlot(direction));
+    }
+
+    public static boolean handleSpellScroll(final double delta) {
+        Minecraft mc = Minecraft.getInstance();
+        LocalPlayer player = mc.player;
+        if (delta == 0.0D || mc.screen != null || player == null || !SpellBookItem.isHeldBy(player)
+                || !AltheraKeybinds.isHeld(AltheraKeybinds.SPELL_SCROLL)) {
+            return false;
+        }
+
+        cycleSpell(delta > 0.0D ? -1 : 1);
+        return true;
+    }
+
+    public static void selectSpellSlot(final int slot) {
+        Minecraft mc = Minecraft.getInstance();
+        LocalPlayer player = mc.player;
+        if (player == null || SpellBookItem.isCastingWith(player)) return;
+
+        PlayerSpellData data = PlayerSpellData.get(player);
+        data.setSelectedSlot(slot);
+        mc.getConnection().send(new SelectSpellSlotPacket(slot));
+
+        mc.gui.setOverlayMessage(Component.literal((slot + 1) + " · ").withStyle(ChatFormatting.GRAY)
+                .append(SpellSlots.name(data, slot).copy().withStyle(ChatFormatting.LIGHT_PURPLE)), false);
     }
 }

@@ -1,6 +1,6 @@
 package com.darksune.althera.common.ultimate.effect;
 
-import com.darksune.althera.common.entity.CasterMob;
+import com.darksune.althera.common.entity.SpellCaster;
 import com.darksune.althera.common.entity.HeroProjectileEntity;
 import com.darksune.althera.common.util.CodecUtil;
 import com.mojang.serialization.Codec;
@@ -9,13 +9,14 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.util.ExtraCodecs;
-import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.List;
+import java.util.Optional;
 
 public record ProjectileEffect(int count, float spread, float speed, float amount, float attackMultiplier,
-                               ParticleOptions trail, List<UltimateEffect> onHit) implements UltimateEffect {
+                               ParticleOptions trail, List<UltimateEffect> onHit,
+                               Optional<ProjectileVisual> visual) implements UltimateEffect {
 
     public static final MapCodec<ProjectileEffect> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
             ExtraCodecs.POSITIVE_INT.optionalFieldOf("count", 1).forGetter(ProjectileEffect::count),
@@ -26,7 +27,8 @@ public record ProjectileEffect(int count, float spread, float speed, float amoun
                     .forGetter(ProjectileEffect::attackMultiplier),
             ParticleTypes.CODEC.optionalFieldOf("trail", ParticleTypes.FLAME).forGetter(ProjectileEffect::trail),
             Codec.lazyInitialized(() -> UltimateEffect.CODEC.listOf()).optionalFieldOf("on_hit", List.of())
-                    .forGetter(ProjectileEffect::onHit)
+                    .forGetter(ProjectileEffect::onHit),
+            ProjectileVisual.CODEC.optionalFieldOf("visual").forGetter(ProjectileEffect::visual)
     ).apply(instance, ProjectileEffect::new));
 
     @Override
@@ -36,16 +38,17 @@ public record ProjectileEffect(int count, float spread, float speed, float amoun
 
     @Override
     public void apply(UltimateContext context) {
-        CasterMob hero = context.caster();
+        SpellCaster hero = context.caster();
         Vec3 from = hero.getProjectileOrigin();
         Vec3 aim = context.target() != null
                 ? HeroProjectileEntity.aimAt(from, context.target())
                 : context.direction();
-        float damage = amount + attackMultiplier * (float) hero.getAttributeValue(Attributes.ATTACK_DAMAGE);
+        float damage = context.scale().damage(amount + attackMultiplier * hero.getSpellPower());
 
         for (int i = 0; i < count; i++) {
             float angle = count == 1 ? 0 : spread * ((float) i / (count - 1) - 0.5F);
-            HeroProjectileEntity.shoot(hero, from, aim.yRot(angle * ((float) Math.PI / 180F)), damage, speed, trail, onHit);
+            HeroProjectileEntity.shoot(hero, from, aim.yRot(angle * ((float) Math.PI / 180F)), damage, speed, trail, onHit,
+                    context.scale(), visual.orElse(null));
         }
     }
 }

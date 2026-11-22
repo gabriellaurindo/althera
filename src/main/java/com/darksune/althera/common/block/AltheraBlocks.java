@@ -5,6 +5,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.MapColor;
+import net.minecraft.world.level.material.PushReaction;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
@@ -34,6 +35,17 @@ public class AltheraBlocks {
                     .sound(SoundType.STONE)
                     .strength(1.5f, 6.0f)
                     .noOcclusion()
+            ));
+
+    public static final DeferredHolder<Block, Block> ACADEMY_PORTAL = BLOCKS.register("academy_portal",
+            () -> new AcademyPortalBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_PURPLE)
+                    .sound(SoundType.GLASS)
+                    .strength(-1.0f, 3600000.0f)
+                    .noCollission()
+                    .noLootTable()
+                    .lightLevel(state -> 11)
+                    .pushReaction(PushReaction.BLOCK)
             ));
 
     public static void register(final IEventBus bus) {

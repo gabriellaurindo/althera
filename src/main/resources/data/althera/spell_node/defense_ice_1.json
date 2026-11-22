@@ -1,0 +1,9 @@
+{
+  "spell": "althera:frost_ward",
+  "parent": "althera:knowledge",
+  "x": -2,
+  "y": -1,
+  "branch": "defense",
+  "element": "ice",
+  "tier": 1
+}

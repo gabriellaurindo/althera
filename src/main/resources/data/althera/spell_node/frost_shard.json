@@ -1,0 +1,9 @@
+{
+  "spell": "althera:frost_shard",
+  "parent": "althera:knowledge",
+  "x": 1,
+  "y": 2,
+  "branch": "damage",
+  "element": "ice",
+  "tier": 1
+}

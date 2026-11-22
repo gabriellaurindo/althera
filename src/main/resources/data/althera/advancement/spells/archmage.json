@@ -1,0 +1,20 @@
+{
+  "parent": "althera:spells/adept",
+  "display": {
+    "icon": {
+      "id": "althera:spell_book"
+    },
+    "title": {
+      "translate": "advancements.althera.archmage.title"
+    },
+    "description": {
+      "translate": "advancements.althera.archmage.description"
+    },
+    "frame": "challenge"
+  },
+  "criteria": {
+    "unlock": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

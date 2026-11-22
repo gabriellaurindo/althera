@@ -1,0 +1,12 @@
+{
+  "name": "Volta",
+  "title": "Master of Lightning",
+  "texture": "althera:textures/entity/teacher/lightning.png",
+  "position": [
+    20.5,
+    101,
+    0.5
+  ],
+  "yaw": 90,
+  "greeting": "Lightning never waits. Neither should you: strike first, think after. Well... think a little before."
+}

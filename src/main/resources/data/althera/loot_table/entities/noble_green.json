@@ -4,12 +4,24 @@
     {
       "rolls": 1,
       "conditions": [
-        { "condition": "minecraft:killed_by_player" }
+        {
+          "condition": "minecraft:killed_by_player"
+        },
+        {
+          "condition": "minecraft:random_chance",
+          "chance": 0.25
+        }
       ],
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "minecraft:diamond"
+          "name": "althera:spell_tome",
+          "functions": [
+            {
+              "function": "althera:random_spell_tome",
+              "tier": 1
+            }
+          ]
         }
       ]
     }

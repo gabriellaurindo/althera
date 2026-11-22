@@ -5,7 +5,6 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.ai.attributes.Attributes;
 
 public record DamageEffect(UltimateTarget target, EntityFilter filter, float amount,
                            float attackMultiplier) implements UltimateEffect {
@@ -25,12 +24,12 @@ public record DamageEffect(UltimateTarget target, EntityFilter filter, float amo
 
     @Override
     public void apply(UltimateContext context) {
-        float damage = amount + attackMultiplier * (float) context.caster().getAttributeValue(Attributes.ATTACK_DAMAGE);
+        float damage = context.scale().damage(amount + attackMultiplier * context.caster().getSpellPower());
         for (LivingEntity entity : filter.resolve(target, context)) {
             if (entity == context.target()) {
                 entity.invulnerableTime = 0;
             }
-            entity.hurt(context.caster().damageSources().mobAttack(context.caster()), damage);
+            entity.hurt(context.caster().attackSource(), damage);
         }
     }
 }

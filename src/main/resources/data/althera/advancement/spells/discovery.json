@@ -1,0 +1,19 @@
+{
+  "parent": "althera:root",
+  "display": {
+    "icon": {
+      "id": "althera:spell_tome"
+    },
+    "title": {
+      "translate": "advancements.althera.discovery.title"
+    },
+    "description": {
+      "translate": "advancements.althera.discovery.description"
+    }
+  },
+  "criteria": {
+    "unlock": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

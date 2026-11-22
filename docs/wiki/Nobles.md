@@ -80,12 +80,15 @@ A Noble slain by a player or a player's Hero drops a reward that grows with his 
 
 | Robe | Drop |
 |---|---|
-| 🟩 Green | 1 diamond |
-| 🟨 Yellow | 3-4 diamonds |
-| 🟥 Red | 1 diamond block + 1 [Hero Catalyst](Ritual-System#-hero-catalyst) |
+| 🟩 Green | 25% chance of a tier 1 Spell Tome |
+| 🟨 Yellow | 25% chance of a tier 1 Spell Tome, 25% chance of a tier 2 Spell Tome |
+| 🟥 Red | 1 [Hero Catalyst](Ritual-System#-hero-catalyst), 25% chance of a tier 2 Spell Tome, 10% chance of a tier 3 Spell Tome |
 
 The **Hero Catalyst** holds the class and rank of the Hero that served the Noble. Offered to the
 [ritual](Ritual-System) next to a diamond block, it gives you a Hero of that class and rank.
+
+The **Spell Tome** holds a random spell of its tier (no tier 3 spell exists yet, so that roll gives nothing for now). Right-click it to discover that spell, so you can train it in the
+spell tree, or, once the spell is learned, to add 10% of a level to its proficiency (see [Spells](Spells#-spell-tome)).
 
 Nobles killed by anything else (iron golems, other mobs, lava...) drop nothing.
 
@@ -108,45 +111,9 @@ gold and lanterns, and a **Noble Sigil** in the middle.
 
 ## 🧩 Custom Spells (datapacks)
 
-Spells are data-driven. They live in:
-
-```
-data/<namespace>/spell/<spell_name>.json
-```
-
-| Field | Default | Description |
-|---|---|---|
-| `name` | `"Spell"` | Display name |
-| `range` | `16` | Distance (blocks) the caster casts from |
-| `cooldown_ticks` | `40` | Ticks between casts |
-| `cast_ticks` | `0` | Ticks spent casting before the spell goes off |
-| `on_cast` | `[]` | Effects applied when the spell goes off |
-
-`on_cast` uses the same effects and targets as Ultimates (see
-[Creating Custom Ultimates](Creating-Custom-Ultimates)). The spell's target is the caster's current target.
-
-Example (Fire Bolt, `data/althera/spell/fire_bolt.json`):
-
-```json
-{
-  "name": "Fire Bolt",
-  "range": 16,
-  "cooldown_ticks": 40,
-  "cast_ticks": 10,
-  "on_cast": [
-    { "type": "sound", "sound": "minecraft:entity.blaze.shoot", "volume": 1.0, "pitch": 0.9 },
-    {
-      "type": "projectile",
-      "speed": 1.3,
-      "attack_multiplier": 1.8,
-      "trail": { "type": "minecraft:flame" },
-      "on_hit": [
-        { "type": "ignite", "target": "target", "ticks": 80 }
-      ]
-    }
-  ]
-}
-```
+Spells are data-driven (`data/<namespace>/spell/<spell_name>.json`) and shared with players: the same files are the
+spells players learn. Fields, effects and examples are in [Creating Custom Spells](Creating-Custom-Spells). Nobles
+use the spell's `range`, `cooldown_ticks` and `cast_ticks`, and aim at their current target.
 
 Nobles pick among the three built-in spells (`althera:fire_bolt`, `althera:frost_shard`, `althera:lightning_strike`).
 A datapack can change how they behave by overriding those files, or give new spells to a mage through its `spells`
@@ -168,3 +135,5 @@ other factions with their own shrines. See [Creating Custom Enemy Mages](Creatin
 - [Command Seals & Ultimates](Command-Seals-and-Ultimates)
 - [Creating Custom Ultimates](Creating-Custom-Ultimates)
 - [Creating Custom Enemy Mages](Creating-Custom-Enemy-Mages)
+- [Creating Custom Spells](Creating-Custom-Spells)
+- [Spells](Spells)

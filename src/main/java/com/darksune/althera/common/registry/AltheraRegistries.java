@@ -1,5 +1,6 @@
 package com.darksune.althera.common.registry;
 
+import com.darksune.althera.common.particle.AltheraParticles;
 import com.darksune.althera.common.attachment.AltheraAttachments;
 import com.darksune.althera.common.block.AltheraBlocks;
 import com.darksune.althera.common.block.entity.AltheraBlockEntities;
@@ -23,5 +24,6 @@ public final class AltheraRegistries {
         AltheraFeatures.register(modEventBus);
         AltheraLootFunctions.register(modEventBus);
         AltheraCreativeTabs.register(modEventBus);
+        AltheraParticles.register(modEventBus);
     }
 }

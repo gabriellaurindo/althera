@@ -13,12 +13,17 @@ import com.darksune.althera.common.hero.HeroLoader;
 import com.darksune.althera.common.hero.HeroRegistry;
 import com.darksune.althera.common.registry.AltheraRegistries;
 import com.darksune.althera.common.spell.SpellLoader;
+import com.darksune.althera.common.spell.SpellNodeLoader;
+import com.darksune.althera.common.spell.SpellNodeRegistry;
+import com.darksune.althera.common.spell.SpellRegistry;
 import com.darksune.althera.common.ultimate.UltimateLoader;
 import com.darksune.althera.common.ultimate.UltimateRegistry;
 import com.darksune.althera.network.AltheraNetwork;
 import com.darksune.althera.network.packet.SyncEnemyMagesPacket;
 import com.darksune.althera.network.packet.SyncHeroClassesPacket;
 import com.darksune.althera.network.packet.SyncHeroesPacket;
+import com.darksune.althera.network.packet.SyncSpellNodesPacket;
+import com.darksune.althera.network.packet.SyncSpellsPacket;
 import com.darksune.althera.network.packet.SyncUltimatesPacket;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -29,6 +34,16 @@ import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.event.OnDatapackSyncEvent;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.fml.config.ModConfig;
+import com.darksune.althera.common.AltheraServerConfig;
+import com.darksune.althera.common.quest.QuestLoader;
+import com.darksune.althera.common.quest.QuestRegistry;
+import com.darksune.althera.network.packet.SyncQuestsPacket;
+import com.darksune.althera.network.packet.SyncTeachersPacket;
+import com.darksune.althera.common.academy.teacher.TeacherLoader;
+import com.darksune.althera.common.academy.teacher.TeacherRegistry;
+import com.darksune.althera.common.entity.TeacherEntity;
+import com.darksune.althera.common.entity.TrainingDummyEntity;
 import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 
@@ -40,6 +55,7 @@ public final class Althera {
 
     public Althera(final IEventBus modEventBus, final ModContainer modContainer) {
         AltheraRegistries.register(modEventBus);
+        modContainer.registerConfig(ModConfig.Type.SERVER, AltheraServerConfig.SPEC);
         AltheraNetwork.register(modEventBus);
         NeoForge.EVENT_BUS.addListener(this::onReloadListeners);
     }
@@ -49,7 +65,10 @@ public final class Althera {
         event.addListener(new HeroLoader(event.getRegistryAccess()));
         event.addListener(new UltimateLoader(event.getRegistryAccess()));
         event.addListener(new SpellLoader(event.getRegistryAccess()));
+        event.addListener(new SpellNodeLoader());
         event.addListener(new EnemyMageLoader(event.getRegistryAccess()));
+        event.addListener(new QuestLoader(event.getRegistryAccess()));
+        event.addListener(new TeacherLoader());
     }
 
     @SubscribeEvent
@@ -57,8 +76,12 @@ public final class Althera {
         SyncHeroClassesPacket classes = new SyncHeroClassesPacket(HeroClassRegistry.getAll());
         SyncHeroesPacket heroes = SyncHeroesPacket.of(HeroRegistry.getAll());
         SyncUltimatesPacket ultimates = new SyncUltimatesPacket(UltimateRegistry.getAll());
+        SyncSpellsPacket spells = new SyncSpellsPacket(SpellRegistry.getAll());
+        SyncSpellNodesPacket spellNodes = new SyncSpellNodesPacket(SpellNodeRegistry.getAll());
         SyncEnemyMagesPacket mages = new SyncEnemyMagesPacket(EnemyMageRegistry.getAll());
-        event.getRelevantPlayers().forEach(player -> PacketDistributor.sendToPlayer(player, classes, heroes, ultimates, mages));
+        SyncQuestsPacket quests = new SyncQuestsPacket(QuestRegistry.getAll());
+        SyncTeachersPacket teachers = new SyncTeachersPacket(TeacherRegistry.getAll());
+        event.getRelevantPlayers().forEach(player -> PacketDistributor.sendToPlayer(player, classes, heroes, ultimates, spells, spellNodes, mages, quests, teachers));
     }
 
     @SubscribeEvent
@@ -79,6 +102,14 @@ public final class Althera {
         event.put(
                 AltheraEntities.ENEMY_MAGE.get(),
                 EnemyMageEntity.createAttributes().build()
+        );
+        event.put(
+                AltheraEntities.TEACHER.get(),
+                TeacherEntity.createAttributes().build()
+        );
+        event.put(
+                AltheraEntities.TRAINING_DUMMY.get(),
+                TrainingDummyEntity.createAttributes().build()
         );
     }
 }

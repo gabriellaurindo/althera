@@ -1,0 +1,12 @@
+{
+  "name": "Aldren",
+  "title": "Headmaster",
+  "texture": "althera:textures/entity/teacher/headmaster.png",
+  "position": [
+    0.5,
+    101,
+    -2.5
+  ],
+  "yaw": 0,
+  "greeting": "Welcome to the Noble Magic Academy. Every summoner who walks these halls learns to stand on their own, with or without their Hero. Our masters will teach you; I will watch you grow."
+}

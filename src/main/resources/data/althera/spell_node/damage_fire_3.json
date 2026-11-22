@@ -1,0 +1,8 @@
+{
+  "parent": "althera:damage_fire_2",
+  "x": -1,
+  "y": 4,
+  "branch": "damage",
+  "element": "fire",
+  "tier": 3
+}

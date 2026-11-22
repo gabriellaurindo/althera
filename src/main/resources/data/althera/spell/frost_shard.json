@@ -1,19 +1,82 @@
 {
   "name": "Frost Shard",
+  "player": {
+    "mana_cost": 20,
+    "description": "Fires a shard of ice that slows the target."
+  },
   "range": 16,
   "cooldown_ticks": 40,
   "cast_ticks": 10,
   "on_cast": [
-    { "type": "sound", "sound": "minecraft:entity.player.hurt_freeze", "volume": 1.0, "pitch": 1.4 },
+    {
+      "type": "sound",
+      "sound": "minecraft:entity.player.hurt_freeze",
+      "volume": 1.0,
+      "pitch": 1.4
+    },
+    {
+      "type": "particles",
+      "particle": {
+        "type": "althera:rune",
+        "color": "#8FD3FF",
+        "scale": 0.9,
+        "lifetime": 16
+      },
+      "height": 0.05
+    },
     {
       "type": "projectile",
       "speed": 1.6,
-      "attack_multiplier": 1.5,
-      "trail": { "type": "minecraft:snowflake" },
+      "attack_multiplier": 1.8,
+      "trail": {
+        "type": "althera:frost",
+        "scale": 0.8
+      },
+      "visual": {
+        "texture": "althera:textures/entity/projectile/shard.png",
+        "size": 0.4,
+        "stretch": 2.5,
+        "color": "#D6F1FF",
+        "spin": 25
+      },
       "on_hit": [
-        { "type": "mob_effect", "target": "target", "effect": "minecraft:slowness", "duration": 60, "amplifier": 1 },
-        { "type": "particles", "particle": { "type": "minecraft:snowflake" }, "count": 12, "spread": [0.3, 0.3, 0.3], "speed": 0.05 },
-        { "type": "sound", "sound": "minecraft:block.glass.break", "volume": 0.7, "pitch": 1.5 }
+        {
+          "type": "mob_effect",
+          "target": "target",
+          "effect": "minecraft:slowness",
+          "duration": 60,
+          "amplifier": 1,
+          "stack": true,
+          "max_amplifier": 2
+        },
+        {
+          "type": "particles",
+          "particle": {
+            "type": "althera:frost"
+          },
+          "count": 14,
+          "spread": [
+            0.3,
+            0.3,
+            0.3
+          ],
+          "speed": 0.12
+        },
+        {
+          "type": "particles",
+          "particle": {
+            "type": "althera:glow",
+            "color": "#8FD3FF",
+            "scale": 3,
+            "lifetime": 6
+          }
+        },
+        {
+          "type": "sound",
+          "sound": "minecraft:block.glass.break",
+          "volume": 0.7,
+          "pitch": 1.5
+        }
       ]
     }
   ]

@@ -1,0 +1,132 @@
+{
+  "name": "Glacial Spike",
+  "player": {
+    "mana_cost": 40,
+    "description": "Charge a spike of ice that hits hard and all but freezes the target.",
+    "cast_mode": "charge",
+    "cooldown_ticks": 20
+  },
+  "cast_ticks": 20,
+  "on_cast": [
+    {
+      "type": "sound",
+      "sound": "minecraft:block.glass.break",
+      "volume": 0.8,
+      "pitch": 0.6
+    },
+    {
+      "type": "projectile",
+      "speed": 2.4,
+      "attack_multiplier": 8.28,
+      "trail": {
+        "type": "althera:frost",
+        "scale": 1.2
+      },
+      "visual": {
+        "texture": "althera:textures/entity/projectile/shard.png",
+        "size": 0.7,
+        "stretch": 3.2,
+        "color": "#8FD3FF",
+        "spin": 15
+      },
+      "on_hit": [
+        {
+          "type": "mob_effect",
+          "target": "target",
+          "effect": "minecraft:slowness",
+          "duration": 80,
+          "amplifier": 3
+        },
+        {
+          "type": "damage",
+          "target": {
+            "area": 1.5
+          },
+          "filter": {
+            "exclude_target": true
+          },
+          "attack_multiplier": 0.8
+        },
+        {
+          "type": "mob_effect",
+          "target": {
+            "area": 1.5
+          },
+          "effect": "minecraft:slowness",
+          "duration": 60,
+          "amplifier": 1
+        },
+        {
+          "type": "particles",
+          "particle": {
+            "type": "althera:frost"
+          },
+          "count": 28,
+          "spread": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "speed": 0.18
+        },
+        {
+          "type": "particles",
+          "particle": {
+            "type": "althera:ring",
+            "color": "#8FD3FF",
+            "scale": 2.0,
+            "lifetime": 12
+          }
+        },
+        {
+          "type": "particles",
+          "particle": {
+            "type": "althera:glow",
+            "color": "#D6F1FF",
+            "scale": 5,
+            "lifetime": 6
+          }
+        },
+        {
+          "type": "sound",
+          "sound": "minecraft:block.glass.break",
+          "volume": 1.0,
+          "pitch": 1.2
+        }
+      ]
+    }
+  ],
+  "on_charge": [
+    {
+      "type": "particles",
+      "particle": {
+        "type": "althera:frost",
+        "lifetime": 12
+      },
+      "count": 6,
+      "circle": 0.9,
+      "height": 1.3,
+      "speed": 0.02
+    },
+    {
+      "type": "particles",
+      "particle": {
+        "type": "althera:rune",
+        "color": "#8FD3FF",
+        "scale": 1.1,
+        "lifetime": 6
+      },
+      "height": 0.05
+    },
+    {
+      "type": "particles",
+      "particle": {
+        "type": "althera:glow",
+        "color": "#D6F1FF",
+        "scale": 1.5,
+        "lifetime": 5
+      },
+      "height": 1.4
+    }
+  ]
+}

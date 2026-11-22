@@ -1,18 +1,28 @@
 package com.darksune.althera.network;
 
 import com.darksune.althera.network.packet.DisguisePacket;
+import com.darksune.althera.network.packet.EquipSpellPacket;
 import com.darksune.althera.network.packet.HeroStatsPacket;
 import com.darksune.althera.network.packet.MarkTargetPacket;
 import com.darksune.althera.network.packet.OpenHeroSelectionPacket;
 import com.darksune.althera.network.packet.RequestHeroStatsPacket;
 import com.darksune.althera.network.packet.SealTattooPacket;
 import com.darksune.althera.network.packet.SelectHeroPacket;
+import com.darksune.althera.network.packet.SelectSpellSlotPacket;
 import com.darksune.althera.network.packet.SummonPacket;
 import com.darksune.althera.network.packet.SyncEnemyMagesPacket;
 import com.darksune.althera.network.packet.SyncHeroClassesPacket;
 import com.darksune.althera.network.packet.SyncHeroesPacket;
+import com.darksune.althera.network.packet.SyncSpellNodesPacket;
+import com.darksune.althera.network.packet.SyncSpellsPacket;
 import com.darksune.althera.network.packet.SyncUltimatesPacket;
 import com.darksune.althera.network.packet.ToggleHeroSettingPacket;
+import com.darksune.althera.network.packet.SeenSpellNodesPacket;
+import com.darksune.althera.network.packet.ClaimQuestPacket;
+import com.darksune.althera.network.packet.SyncQuestsPacket;
+import com.darksune.althera.network.packet.SyncTeachersPacket;
+import com.darksune.althera.network.packet.OpenTeacherPacket;
+import com.darksune.althera.network.packet.TrainSpellNodePacket;
 import com.darksune.althera.network.packet.UseCommandSealSkillPacket;
 import com.darksune.althera.network.packet.UseUltimateSkillPacket;
 import net.neoforged.bus.api.IEventBus;
@@ -28,7 +38,7 @@ public final class AltheraNetwork {
 
     private static void registerPayloads(RegisterPayloadHandlersEvent event) {
 
-        var registrar = event.registrar("10");
+        var registrar = event.registrar("18");
 
         registrar.playToServer(
                 SummonPacket.TYPE,
@@ -78,6 +88,54 @@ public final class AltheraNetwork {
                 RequestHeroStatsPacket::handle
         );
 
+        registrar.playToServer(
+                SelectSpellSlotPacket.TYPE,
+                SelectSpellSlotPacket.STREAM_CODEC,
+                SelectSpellSlotPacket::handle
+        );
+
+        registrar.playToServer(
+                TrainSpellNodePacket.TYPE,
+                TrainSpellNodePacket.STREAM_CODEC,
+                TrainSpellNodePacket::handle
+        );
+
+        registrar.playToServer(
+                SeenSpellNodesPacket.TYPE,
+                SeenSpellNodesPacket.STREAM_CODEC,
+                SeenSpellNodesPacket::handle
+        );
+
+        registrar.playToServer(
+                ClaimQuestPacket.TYPE,
+                ClaimQuestPacket.STREAM_CODEC,
+                ClaimQuestPacket::handle
+        );
+
+        registrar.playToClient(
+                SyncQuestsPacket.TYPE,
+                SyncQuestsPacket.STREAM_CODEC,
+                SyncQuestsPacket::handle
+        );
+
+        registrar.playToClient(
+                SyncTeachersPacket.TYPE,
+                SyncTeachersPacket.STREAM_CODEC,
+                SyncTeachersPacket::handle
+        );
+
+        registrar.playToClient(
+                OpenTeacherPacket.TYPE,
+                OpenTeacherPacket.STREAM_CODEC,
+                OpenTeacherPacket::handle
+        );
+
+        registrar.playToServer(
+                EquipSpellPacket.TYPE,
+                EquipSpellPacket.STREAM_CODEC,
+                EquipSpellPacket::handle
+        );
+
         registrar.playToClient(
                 SyncHeroesPacket.TYPE,
                 SyncHeroesPacket.STREAM_CODEC,
@@ -94,6 +152,18 @@ public final class AltheraNetwork {
                 SyncUltimatesPacket.TYPE,
                 SyncUltimatesPacket.STREAM_CODEC,
                 SyncUltimatesPacket::handle
+        );
+
+        registrar.playToClient(
+                SyncSpellsPacket.TYPE,
+                SyncSpellsPacket.STREAM_CODEC,
+                SyncSpellsPacket::handle
+        );
+
+        registrar.playToClient(
+                SyncSpellNodesPacket.TYPE,
+                SyncSpellNodesPacket.STREAM_CODEC,
+                SyncSpellNodesPacket::handle
         );
 
         registrar.playToClient(

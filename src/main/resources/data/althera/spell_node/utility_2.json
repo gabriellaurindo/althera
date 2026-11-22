@@ -1,0 +1,8 @@
+{
+  "spell": "althera:mend",
+  "parent": "althera:knowledge",
+  "x": 0,
+  "y": -2,
+  "branch": "utility",
+  "tier": 1
+}

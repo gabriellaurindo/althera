@@ -16,6 +16,9 @@ public final class AltheraLootFunctions {
     public static final DeferredHolder<LootItemFunctionType<?>, LootItemFunctionType<ServantCatalystFunction>> SERVANT_CATALYST =
             FUNCTIONS.register("servant_catalyst", () -> new LootItemFunctionType<>(ServantCatalystFunction.CODEC));
 
+    public static final DeferredHolder<LootItemFunctionType<?>, LootItemFunctionType<RandomSpellTomeFunction>> RANDOM_SPELL_TOME =
+            FUNCTIONS.register("random_spell_tome", () -> new LootItemFunctionType<>(RandomSpellTomeFunction.CODEC));
+
     private AltheraLootFunctions() {
     }
 

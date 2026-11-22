@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "axis=x": {
+      "model": "althera:block/academy_portal_ns"
+    },
+    "axis=z": {
+      "model": "althera:block/academy_portal_ew"
+    }
+  }
+}

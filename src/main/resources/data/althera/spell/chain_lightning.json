@@ -1,0 +1,120 @@
+{
+  "name": "Chain Lightning",
+  "player": {
+    "mana_cost": 35,
+    "description": "A bolt that leaps from its target to up to 3 enemies nearby.",
+    "cooldown_ticks": 20
+  },
+  "on_cast": [
+    {
+      "type": "sound",
+      "sound": "minecraft:entity.evoker.prepare_attack",
+      "volume": 1.0,
+      "pitch": 1.6
+    },
+    {
+      "type": "particles",
+      "particle": {
+        "type": "althera:rune",
+        "color": "#D8F0FF",
+        "scale": 0.8,
+        "lifetime": 16
+      },
+      "height": 0.05
+    },
+    {
+      "type": "projectile",
+      "speed": 2.4,
+      "attack_multiplier": 4.14,
+      "trail": {
+        "type": "althera:spark",
+        "color": "#D8F0FF"
+      },
+      "visual": {
+        "texture": "althera:textures/entity/projectile/orb.png",
+        "size": 0.35,
+        "color": "#D8F0FF",
+        "spin": 40
+      },
+      "on_hit": [
+        {
+          "type": "particles",
+          "particle": {
+            "type": "althera:spark",
+            "color": "#D8F0FF"
+          },
+          "count": 16,
+          "spread": [
+            0.3,
+            0.3,
+            0.3
+          ],
+          "speed": 0.12
+        },
+        {
+          "type": "particles",
+          "particle": {
+            "type": "althera:glow",
+            "color": "#D8F0FF",
+            "scale": 4,
+            "lifetime": 5
+          }
+        },
+        {
+          "type": "sound",
+          "sound": "minecraft:entity.lightning_bolt.impact",
+          "volume": 0.6,
+          "pitch": 1.6
+        },
+        {
+          "type": "chain",
+          "jumps": 3,
+          "range": 5,
+          "particle": {
+            "type": "althera:spark",
+            "color": "#D8F0FF",
+            "scale": 1.2
+          },
+          "on_jump": [
+            {
+              "type": "damage",
+              "target": "target",
+              "attack_multiplier": 1.0
+            },
+            {
+              "type": "sound",
+              "sound": "minecraft:entity.lightning_bolt.impact",
+              "volume": 0.4,
+              "pitch": 1.9
+            },
+            {
+              "type": "particles",
+              "particle": {
+                "type": "althera:glow",
+                "color": "#D8F0FF",
+                "scale": 3,
+                "lifetime": 5
+              },
+              "height": 1.0
+            },
+            {
+              "type": "particles",
+              "particle": {
+                "type": "althera:spark",
+                "color": "#D8F0FF"
+              },
+              "count": 8,
+              "spread": [
+                0.3,
+                0.3,
+                0.3
+              ],
+              "speed": 0.1,
+              "height": 1.0
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "title": "The Noble Houses",
+  "giver": "althera:headmaster",
+  "order": 40,
+  "requires": [
+    "althera:first_words"
+  ],
+  "description": "Nobles guard their shrines and the spirits that serve them. Defeat one and bring back what you learn from the fight.",
+  "tasks": [
+    {
+      "type": "kill",
+      "entity": "althera:enemy_mage",
+      "name": "Noble"
+    }
+  ],
+  "rewards": [
+    {
+      "type": "discover_spell",
+      "tier": 2
+    }
+  ]
+}

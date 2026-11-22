@@ -1,0 +1,9 @@
+{
+  "spell": "althera:glacial_spike",
+  "parent": "althera:frost_shard",
+  "x": 1,
+  "y": 3,
+  "branch": "damage",
+  "element": "ice",
+  "tier": 2
+}

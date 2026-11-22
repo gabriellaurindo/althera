@@ -1,0 +1,12 @@
+{
+  "name": "Glacia",
+  "title": "Master of Ice",
+  "texture": "althera:textures/entity/teacher/ice.png",
+  "position": [
+    0.5,
+    101,
+    20.5
+  ],
+  "yaw": 180,
+  "greeting": "Ice is stillness made into a weapon. Slow your enemy, slow your breath, and the fight is already yours."
+}

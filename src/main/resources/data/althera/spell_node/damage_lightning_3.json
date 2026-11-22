@@ -1,0 +1,8 @@
+{
+  "parent": "althera:damage_lightning_2",
+  "x": 0,
+  "y": 4,
+  "branch": "damage",
+  "element": "lightning",
+  "tier": 3
+}

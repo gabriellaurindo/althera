@@ -1,0 +1,20 @@
+{
+  "parent": "althera:spells/first_spell",
+  "display": {
+    "icon": {
+      "id": "althera:spell_tome"
+    },
+    "title": {
+      "translate": "advancements.althera.adept.title"
+    },
+    "description": {
+      "translate": "advancements.althera.adept.description"
+    },
+    "frame": "goal"
+  },
+  "criteria": {
+    "unlock": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

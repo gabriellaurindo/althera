@@ -4,6 +4,7 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 
 public record IgniteEffect(UltimateTarget target, EntityFilter filter, int ticks) implements UltimateEffect {
 
@@ -22,6 +23,10 @@ public record IgniteEffect(UltimateTarget target, EntityFilter filter, int ticks
     public void apply(UltimateContext context) {
         for (LivingEntity entity : filter.resolve(target, context)) {
             entity.setRemainingFireTicks(ticks);
+
+            if (context.owner() instanceof Player player && entity != player) {
+                entity.setLastHurtByPlayer(player);
+            }
         }
     }
 }

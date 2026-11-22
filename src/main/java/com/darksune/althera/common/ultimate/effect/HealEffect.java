@@ -25,7 +25,7 @@ public record HealEffect(UltimateTarget target, EntityFilter filter, float amoun
     @Override
     public void apply(UltimateContext context) {
         for (LivingEntity entity : filter.resolve(target, context)) {
-            entity.heal(amount + maxHealthMultiplier * entity.getMaxHealth());
+            entity.heal(context.scale().damage(amount + maxHealthMultiplier * entity.getMaxHealth()));
         }
     }
 }

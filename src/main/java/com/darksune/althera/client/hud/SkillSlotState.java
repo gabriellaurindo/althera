@@ -7,6 +7,11 @@ import com.darksune.althera.common.commandseal.skill.CommandSealSkillType;
 import com.darksune.althera.common.commandseal.skill.ICommandSealSkill;
 import com.darksune.althera.common.hero.HeroDefinition;
 import com.darksune.althera.common.skill.SkillLimits;
+import com.darksune.althera.common.spell.PlayerSpell;
+import com.darksune.althera.common.spell.PlayerSpellData;
+import com.darksune.althera.common.spell.SpellDefinition;
+import com.darksune.althera.common.spell.SpellNode;
+import com.darksune.althera.common.spell.SpellNodeState;
 import com.darksune.althera.common.ultimate.UltimateData;
 import com.darksune.althera.common.ultimate.UltimateDefinition;
 import com.darksune.althera.common.ultimate.UltimateRegistry;
@@ -56,6 +61,37 @@ public record SkillSlotState(int timerTicks, int totalTicks, boolean active, @Nu
         return of(data.getActiveSkills().get(ultimateId), ultimate.channelTicks(),
                 data.getCooldownSkills().get(ultimateId), ultimate.cooldownTicks(),
                 ultimateBlocker(ultimate, heroData, usedToday, mana(player)), usedToday);
+    }
+
+    public static SkillSlotState spell(Player player, int slot) {
+
+        PlayerSpellData data = PlayerSpellData.get(player);
+        ResourceLocation nodeId = data.getSlot(slot);
+        SpellNode node = SpellSlots.node(data, slot);
+        SpellDefinition spell = node == null ? null : node.spellDefinition();
+
+        if (spell == null) {
+            return of(null, 0, null, 0, nodeId == null ? SpellSlots.EMPTY_NAME : "Unknown spell", false);
+        }
+
+        Integer cooldown = SkillLimits.isUnlimited(player) || !data.isOnCooldown(nodeId) ? null : data.getCooldown(nodeId);
+
+        PlayerSpell playerSpell = spell.player().orElseThrow();
+
+        return of(null, 0, cooldown, playerSpell.cooldownTicks(),
+                spellBlocker(data, nodeId, playerSpell, mana(player)), false);
+    }
+
+    @Nullable
+    private static String spellBlocker(PlayerSpellData data, ResourceLocation nodeId, PlayerSpell spell, int mana) {
+
+        SpellNodeState state = data.getState(nodeId);
+
+        if (state == SpellNodeState.LEARNED && !data.isUsable(nodeId)) return "Learn the spells before it";
+        if (state != SpellNodeState.LEARNED && state != SpellNodeState.TRAINING) return "Not training";
+        if (mana < SpellSlots.manaCost(data, nodeId, spell)) return "Not enough mana";
+
+        return null;
     }
 
     @Nullable

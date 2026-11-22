@@ -1,0 +1,121 @@
+{
+  "name": "Frost Ward",
+  "player": {
+    "mana_cost": 25,
+    "description": "Wraps you in a shell of ice that absorbs damage and freezes the enemies around you.",
+    "cooldown_ticks": 200
+  },
+  "on_cast": [
+    {
+      "type": "sound",
+      "sound": "minecraft:block.glass.place",
+      "volume": 1.0,
+      "pitch": 0.8
+    },
+    {
+      "type": "sound",
+      "sound": "minecraft:entity.player.hurt_freeze",
+      "volume": 0.8,
+      "pitch": 1.2
+    },
+    {
+      "type": "mob_effect",
+      "target": "self",
+      "effect": "minecraft:absorption",
+      "duration": 200,
+      "amplifier": 1
+    },
+    {
+      "type": "mob_effect",
+      "target": {
+        "area": 3
+      },
+      "effect": "minecraft:slowness",
+      "duration": 60,
+      "amplifier": 1
+    },
+    {
+      "type": "knockback",
+      "target": {
+        "area": 3
+      },
+      "horizontal": 0.6,
+      "vertical": 0.2
+    },
+    {
+      "type": "particles",
+      "particle": {
+        "type": "althera:ring",
+        "color": "#8FD3FF",
+        "scale": 3,
+        "lifetime": 14
+      },
+      "height": 0.05
+    },
+    {
+      "type": "particles",
+      "particle": {
+        "type": "althera:frost"
+      },
+      "count": 16,
+      "circle": 1.2,
+      "height": 1.0,
+      "speed": 0.05
+    },
+    {
+      "type": "aura",
+      "particle": {
+        "type": "althera:frost",
+        "scale": 1.2
+      },
+      "duration": 200,
+      "count": 5,
+      "radius": 1.0,
+      "height": 1.0,
+      "bob": 0.4,
+      "turn": 0.12,
+      "while_effect": "minecraft:absorption",
+      "on_break": [
+        {
+          "type": "sound",
+          "sound": "minecraft:block.glass.break",
+          "volume": 1.0,
+          "pitch": 0.8
+        },
+        {
+          "type": "mob_effect",
+          "target": {
+            "area": 3
+          },
+          "effect": "minecraft:slowness",
+          "duration": 60,
+          "amplifier": 1
+        },
+        {
+          "type": "particles",
+          "particle": {
+            "type": "althera:frost"
+          },
+          "count": 30,
+          "spread": [
+            1.2,
+            0.6,
+            1.2
+          ],
+          "speed": 0.15,
+          "height": 1.0
+        },
+        {
+          "type": "particles",
+          "particle": {
+            "type": "althera:ring",
+            "color": "#D6F1FF",
+            "scale": 3.5,
+            "lifetime": 12
+          },
+          "height": 0.05
+        }
+      ]
+    }
+  ]
+}

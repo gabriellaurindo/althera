@@ -1,0 +1,9 @@
+{
+  "spell": "althera:chain_lightning",
+  "parent": "althera:lightning_strike",
+  "x": 0,
+  "y": 3,
+  "branch": "damage",
+  "element": "lightning",
+  "tier": 2
+}

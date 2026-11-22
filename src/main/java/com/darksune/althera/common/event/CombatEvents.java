@@ -2,6 +2,7 @@ package com.darksune.althera.common.event;
 
 import com.darksune.althera.common.attachment.HeroData;
 import com.darksune.althera.common.entity.HeroEntity;
+import com.darksune.althera.common.entity.TrainingDummyEntity;
 import com.darksune.althera.common.hero.HeroDefinition;
 import com.darksune.althera.common.system.HeroProgressionSystem;
 import com.darksune.althera.common.system.HeroStatsSystem;
@@ -17,11 +18,29 @@ import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 
 @EventBusSubscriber
 public class CombatEvents {
+
+    @SubscribeEvent
+    public static void onPlayerDealsDamage(final LivingDamageEvent.Post event) {
+
+        if (event.getSource().getEntity() instanceof Player player && event.getEntity() != player) {
+            player.setLastHurtMob(event.getEntity());
+        }
+
+        if (event.getSource().getEntity() instanceof HeroEntity hero && hero.getOwner() instanceof Player owner
+                && event.getEntity() != owner) {
+            event.getEntity().setLastHurtByPlayer(owner);
+        }
+
+        if (event.getEntity() instanceof TrainingDummyEntity dummy) {
+            dummy.record(event.getSource(), event.getNewDamage());
+        }
+    }
 
     @SubscribeEvent
     public static void onDeath(LivingDeathEvent event) {

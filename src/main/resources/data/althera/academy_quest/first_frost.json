@@ -1,0 +1,22 @@
+{
+  "title": "First Frost",
+  "giver": "althera:ice",
+  "order": 52,
+  "requires": [
+    "althera:through_the_gate"
+  ],
+  "description": "Spiders hate the cold. Defeat five of them, then come learn how to make the cold.",
+  "tasks": [
+    {
+      "type": "kill",
+      "entity": "minecraft:spider",
+      "count": 5
+    }
+  ],
+  "rewards": [
+    {
+      "type": "discover_spell",
+      "node": "althera:frost_shard"
+    }
+  ]
+}

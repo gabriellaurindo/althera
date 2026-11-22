@@ -1,0 +1,20 @@
+{
+  "title": "Through the Gate",
+  "giver": "althera:headmaster",
+  "order": 10,
+  "requires": [
+    "althera:invitation"
+  ],
+  "description": "Every student finds their way to the academy on their own. Open an Academy Portal and come see us: your first spell is waiting.",
+  "tasks": [
+    {
+      "type": "visit_academy"
+    }
+  ],
+  "rewards": [
+    {
+      "type": "discover_spell",
+      "tier": 1
+    }
+  ]
+}

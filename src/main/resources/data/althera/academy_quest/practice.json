@@ -1,0 +1,21 @@
+{
+  "title": "Practice Makes Perfect",
+  "giver": "althera:headmaster",
+  "order": 30,
+  "requires": [
+    "althera:first_words"
+  ],
+  "description": "A spell grows with every cast. Use one until it reaches level 2.",
+  "tasks": [
+    {
+      "type": "spell_level",
+      "level": 2
+    }
+  ],
+  "rewards": [
+    {
+      "type": "discover_spell",
+      "tier": 1
+    }
+  ]
+}

@@ -4,7 +4,9 @@ import com.darksune.althera.Althera;
 import com.darksune.althera.common.hero.HeroRank;
 import com.darksune.althera.common.item.AltheraItems;
 import com.darksune.althera.common.item.HeroCatalystItem;
+import com.darksune.althera.common.item.SpellTomeItem;
 import com.darksune.althera.common.item.component.HeroCatalyst;
+import com.darksune.althera.common.spell.SpellNodeRegistry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
@@ -29,6 +31,10 @@ public final class AltheraCreativeTabs {
                                 output.accept(AltheraItems.RITUAL_PEDESTAL.get());
                                 output.accept(AltheraItems.ENEMY_MAGE_SPAWN_EGG.get());
                                 output.accept(AltheraItems.NOBLE_SIGIL.get());
+                                output.accept(AltheraItems.SPELL_BOOK.get());
+                                output.accept(AltheraItems.TRAINING_DUMMY.get());
+                                SpellNodeRegistry.getTrainableIds().forEach(nodeId ->
+                                        output.accept(SpellTomeItem.of(nodeId)));
                                 HeroCatalyst.BUILT_IN_CLASSES.forEach(classId ->
                                         output.accept(HeroCatalystItem.of(classId, HeroRank.EX)));
 

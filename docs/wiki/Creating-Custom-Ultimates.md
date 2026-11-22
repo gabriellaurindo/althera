@@ -136,6 +136,8 @@ Pushes targets away from the Hero, stronger the farther they are.
 | `duration` | — | Ticks |
 | `amplifier` | `0` | `0` = level I |
 | `show_particles` | `true` | |
+| `stack` | `false` | If the creature already has the effect, the new one is one level higher (at least `amplifier`) |
+| `max_amplifier` | `255` | Highest level `stack` can reach (`0` = level I) |
 
 ### `explosion`
 A visual/sound explosion at the Hero. It never breaks blocks.
@@ -153,8 +155,29 @@ A visual/sound explosion at the Hero. It never breaks blocks.
 | `speed` | `0` | |
 | `height` | `0` | Height above the Hero's feet |
 | `line` | `0` | Above 0, draws a trail along the line in front of the Hero (same path as `line` targets and `dash`), with `count` particles every half block |
+| `direction_speed` | `0` | Particles fly along the effect's direction at this speed (jets, cones). `speed` then adds a random jitter |
+| `circle` | `0` | Above 0, places the `count` particles evenly on a horizontal circle of this radius |
 
 Colored dust: `{ "type": "minecraft:dust", "color": [0.75, 0.05, 0.1], "scale": 1.5 }` (RGB from 0 to 1).
+
+#### Althera particles
+
+Usable anywhere a particle is asked (`particles`, `trail`, `aura`, `chain`...). All take an optional `color`
+(`"#RRGGBB"` or a number), `scale` and `lifetime` (ticks); they glow in the dark.
+
+| Particle | Default colour | Looks like |
+|---|---|---|
+| `althera:glow` | white | Soft round light |
+| `althera:ember` | orange | Rising, shrinking ember |
+| `althera:frost` | pale blue | Slowly falling, spinning snowflake |
+| `althera:spark` | yellow | Short flickering spark |
+| `althera:ring` | white | Flat ring on the ground that expands and fades (`scale` = final radius in blocks) |
+| `althera:rune` | violet | Flat rotating rune circle (`scale` = radius in blocks) |
+
+```json
+{ "type": "particles", "particle": { "type": "althera:rune", "color": "#ff8a2a", "scale": 1.2, "lifetime": 20 },
+  "height": 0.05 }
+```
 
 ### `sound`
 | Field | Default | |
@@ -192,6 +215,18 @@ Ultimate's direction. They fly straight, never hit the owner and run their own `
 | `attack_multiplier` | `0` | Extra damage as a multiple of the caster's attack damage. Was `attack_ratio`, still accepted for now |
 | `trail` | `{ "type": "minecraft:flame" }` | Trail and impact particle |
 | `on_hit` | none | Effects applied where each projectile lands |
+| `visual` | none | What the projectile looks like (without it, only the trail shows) |
+
+`visual`:
+
+| Field | Default | |
+|---|---|---|
+| `texture` | — | Texture of the projectile, e.g. `althera:textures/entity/projectile/orb.png` (a soft orb) or `.../shard.png` (a shard pointing right) |
+| `size` | `0.5` | Size in blocks |
+| `stretch` | `1` | Above 1, the texture is stretched along the flight (length = `size` × `stretch`, drawn as two crossed planes, for shards and spikes); otherwise it always faces the camera |
+| `spin` | `0` | Degrees per tick |
+| `glow` | `true` | Ignores darkness |
+| `color` | `"#FFFFFF"` | Tint |
 
 ```json
 { "type": "projectile", "count": 5, "spread": 40, "attack_multiplier": 1.5,
@@ -205,6 +240,46 @@ damage, so pair it with a `damage` effect. No fields.
 
 ```json
 { "type": "lightning" }
+```
+
+### `chain`
+Leaps from the creature that was hit (`"target"`, e.g. inside a projectile's `on_hit`) to the nearest enemy within
+`range`, then from that one to the next, drawing an arc of particles between them. Each creature is hit once. The
+`on_jump` effects run on every creature it leaps to (`"target"` is that creature, positions are its feet).
+
+| Field | Default | |
+|---|---|---|
+| `jumps` | `3` | How many creatures it leaps to |
+| `range` | `5` | Blocks between two creatures |
+| `particle` | `{ "type": "minecraft:electric_spark" }` | Arc particle |
+| `on_jump` | none | Effects applied to each creature it leaps to |
+
+```json
+{ "type": "chain", "jumps": 3, "range": 5,
+  "on_jump": [ { "type": "damage", "target": "target", "attack_multiplier": 1.0 } ] }
+```
+
+### `aura`
+Particles circling a creature for a while, following it (an ice shell, healing motes...). Visual only.
+
+| Field | Default | |
+|---|---|---|
+| `target` | `"self"` | Who gets the aura |
+| `filter` | none | |
+| `particle` | — | |
+| `duration` | — | Ticks |
+| `count` | `3` | Particles per pulse, spread evenly around |
+| `radius` | `0.8` | Blocks |
+| `height` | `1` | Height of the circle above the feet |
+| `bob` | `0.3` | How far the particles bob up and down |
+| `interval` | `2` | Ticks between pulses |
+| `turn` | `0.15` | Rotation per tick (radians) |
+| `while_effect` | none | A mob effect id: the aura also ends when the creature no longer has it |
+| `on_break` | none | Effects run when the aura ends early because `while_effect` is gone (e.g. an absorption shell used up). `"target"` is the creature, positions are its feet |
+
+```json
+{ "type": "aura", "particle": { "type": "althera:frost" }, "duration": 200, "count": 4, "radius": 1.0,
+  "while_effect": "minecraft:absorption" }
 ```
 
 ### `ultimate_animation`
@@ -286,4 +361,4 @@ Channels for 1.5 seconds over a crimson mist, then dashes 8 blocks through every
 
 - [Creating Custom Heroes](Creating-Custom-Heroes)
 - [Command Seals & Ultimates](Command-Seals-and-Ultimates)
-- [Nobles](Nobles) (spells use the same effects)
+- [Creating Custom Spells](Creating-Custom-Spells) (spells use the same effects)
