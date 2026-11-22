@@ -1,4 +1,5 @@
 {
+  "spell": "althera:chain_lightning",
   "parent": "althera:lightning_strike",
   "x": 0,
   "y": 3,

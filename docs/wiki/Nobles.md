@@ -80,16 +80,15 @@ A Noble slain by a player or a player's Hero drops a reward that grows with his 
 
 | Robe | Drop |
 |---|---|
-| 🟩 Green | 1 diamond |
-| 🟨 Yellow | 3-4 diamonds |
-| 🟥 Red | 1 diamond block + 1 [Hero Catalyst](Ritual-System#-hero-catalyst), 5% chance of a Spell Tome |
+| 🟩 Green | 25% chance of a tier 1 Spell Tome |
+| 🟨 Yellow | 25% chance of a tier 1 Spell Tome, 25% chance of a tier 2 Spell Tome |
+| 🟥 Red | 1 [Hero Catalyst](Ritual-System#-hero-catalyst), 25% chance of a tier 2 Spell Tome, 10% chance of a tier 3 Spell Tome |
 
 The **Hero Catalyst** holds the class and rank of the Hero that served the Noble. Offered to the
 [ritual](Ritual-System) next to a diamond block, it gives you a Hero of that class and rank.
 
-The **Spell Tome** holds a random basic spell. Right-click it to study: it adds half of that spell's training at
-once, even if you are not training the spell yet, or proficiency if you already know it (see
-[Spells](Spells#-spell-tome)).
+The **Spell Tome** holds a random spell of its tier (no tier 3 spell exists yet, so that roll gives nothing for now). Right-click it to discover that spell, so you can train it in the
+spell tree, or, once the spell is learned, to add 10% of a level to its proficiency (see [Spells](Spells#-spell-tome)).
 
 Nobles killed by anything else (iron golems, other mobs, lava...) drop nothing.
 

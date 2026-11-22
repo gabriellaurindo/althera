@@ -74,6 +74,9 @@ public class SpellTreeScreen extends Screen {
     private static final int COLOR_NODE = 0xFF1A1A24;
     private static final int COLOR_LEARNED = 0xFF55FF55;
     private static final int COLOR_MASTERED = 0xFFFFD43B;
+    private static final int COLOR_STAR_OUTLINE = 0xFF3A2A08;
+    private static final String COMING_SOON_MARK = "X";
+    private static final String[] MASTERED_STAR = {"..#..", ".###.", "#####", ".###.", ".#.#."};
     private static final int COLOR_TRAINING = 0xFF5599FF;
     private static final int COLOR_AVAILABLE = 0xFFFFDD55;
     private static final int COLOR_LOCKED = 0xFFCC4444;
@@ -164,9 +167,13 @@ public class SpellTreeScreen extends Screen {
         return super.keyPressed(keyCode, scanCode, modifiers);
     }
 
+    private Map<ResourceLocation, SpellNode> visibleNodes() {
+        return minecraft.player == null ? Map.of() : PlayerSpellData.get(minecraft.player).visibleNodes();
+    }
+
     private void fit() {
 
-        Map<ResourceLocation, SpellNode> nodes = SpellNodeRegistry.getAll();
+        Map<ResourceLocation, SpellNode> nodes = visibleNodes();
 
         if (nodes.isEmpty()) {
             return;
@@ -248,7 +255,7 @@ public class SpellTreeScreen extends Screen {
         double graphX = (mouseX - originX()) / zoom;
         double graphY = (mouseY - originY()) / zoom;
 
-        for (Map.Entry<ResourceLocation, SpellNode> entry : SpellNodeRegistry.getAll().entrySet()) {
+        for (Map.Entry<ResourceLocation, SpellNode> entry : visibleNodes().entrySet()) {
 
             SpellNode node = entry.getValue();
 
@@ -474,7 +481,7 @@ public class SpellTreeScreen extends Screen {
         }
 
         PlayerSpellData data = PlayerSpellData.get(player);
-        Map<ResourceLocation, SpellNode> nodes = SpellNodeRegistry.getAll();
+        Map<ResourceLocation, SpellNode> nodes = data.visibleNodes();
         ResourceLocation hoveredNode = carried == null && !panning ? nodeAt(mouseX, mouseY) : null;
         int hoveredSlot = slotAt(mouseX, mouseY);
 
@@ -556,7 +563,7 @@ public class SpellTreeScreen extends Screen {
             case LEARNED -> data.isUsable(id) ? dim(COLOR_LEARNED) : dim(COLOR_UNUSABLE);
             case TRAINING -> dim(COLOR_TRAINING);
             case AVAILABLE -> dim(COLOR_AVAILABLE);
-            case LOCKED, PLACEHOLDER -> COLOR_LINE_OFF;
+            case LOCKED, UNDISCOVERED, PLACEHOLDER -> COLOR_LINE_OFF;
         };
     }
 
@@ -623,9 +630,9 @@ public class SpellTreeScreen extends Screen {
         gui.fill(x, y, x + NODE_SIZE, y + NODE_SIZE, hovered ? COLOR_HOVER : stateColor(data, id, state));
         gui.fill(x + BORDER, y + BORDER, x + NODE_SIZE - BORDER, y + NODE_SIZE - BORDER, COLOR_NODE);
 
-        if (state == SpellNodeState.PLACEHOLDER) {
-            gui.drawCenteredString(font, SpellNode.PLACEHOLDER_NAME, x + NODE_HALF, y + NODE_HALF - font.lineHeight / 2 + 1,
-                    COLOR_PLACEHOLDER_TEXT);
+        if (state == SpellNodeState.PLACEHOLDER || state == SpellNodeState.UNDISCOVERED) {
+            gui.drawCenteredString(font, state == SpellNodeState.PLACEHOLDER ? COMING_SOON_MARK : SpellNode.PLACEHOLDER_NAME,
+                    x + NODE_HALF, y + NODE_HALF - font.lineHeight / 2 + 1, COLOR_PLACEHOLDER_TEXT);
             return;
         }
 
@@ -638,11 +645,9 @@ public class SpellTreeScreen extends Screen {
             gui.fill(x + BORDER, y + BORDER, x + NODE_SIZE - BORDER, y + NODE_SIZE - BORDER, COLOR_FADE);
         }
 
-        int slot = data.slotOf(id);
-
-        if (slot >= 0) {
-            String number = String.valueOf(slot + 1);
-            gui.drawString(font, number, x + NODE_SIZE - BORDER - font.width(number), y + BORDER, COLOR_SLOT_SELECTED);
+        if (state == SpellNodeState.LEARNED && data.isUsable(id)
+                && data.getSpellLevel(id) >= SpellProficiency.MAX_LEVEL) {
+            renderMasteredStar(gui, x - 2, y - 2);
         }
 
         gui.pose().popPose();
@@ -658,14 +663,32 @@ public class SpellTreeScreen extends Screen {
         }
     }
 
+    private static void renderMasteredStar(GuiGraphics gui, int x, int y) {
+
+        for (int row = 0; row < MASTERED_STAR.length; row++) {
+            for (int column = 0; column < MASTERED_STAR[row].length(); column++) {
+                if (MASTERED_STAR[row].charAt(column) == '#') {
+                    gui.fill(x + column - 1, y + row - 1, x + column + 2, y + row + 2, COLOR_STAR_OUTLINE);
+                }
+            }
+        }
+
+        for (int row = 0; row < MASTERED_STAR.length; row++) {
+            for (int column = 0; column < MASTERED_STAR[row].length(); column++) {
+                if (MASTERED_STAR[row].charAt(column) == '#') {
+                    gui.fill(x + column, y + row, x + column + 1, y + row + 1, COLOR_MASTERED);
+                }
+            }
+        }
+    }
+
     private static int stateColor(PlayerSpellData data, ResourceLocation id, SpellNodeState state) {
         return switch (state) {
-            case LEARNED -> !data.isUsable(id) ? COLOR_UNUSABLE
-                    : data.getSpellLevel(id) >= SpellProficiency.MAX_LEVEL ? COLOR_MASTERED : COLOR_LEARNED;
+            case LEARNED -> data.isUsable(id) ? COLOR_LEARNED : COLOR_UNUSABLE;
             case TRAINING -> COLOR_TRAINING;
             case AVAILABLE -> COLOR_AVAILABLE;
             case LOCKED -> COLOR_LOCKED;
-            case PLACEHOLDER -> COLOR_PLACEHOLDER;
+            case UNDISCOVERED, PLACEHOLDER -> COLOR_PLACEHOLDER;
         };
     }
 
@@ -709,12 +732,20 @@ public class SpellTreeScreen extends Screen {
         List<Component> lines = new ArrayList<>();
         SpellNodeState state = data.getState(id);
 
-        lines.add(Component.literal(node.displayName()).withColor(stateColor(data, id, state)));
-
-        if (state == SpellNodeState.PLACEHOLDER) {
-            lines.add(Component.literal("Not discovered yet.").withStyle(ChatFormatting.GRAY));
+        if (state == SpellNodeState.UNDISCOVERED) {
+            lines.add(Component.literal("Unknown spell").withColor(COLOR_PLACEHOLDER_TEXT));
+            lines.add(Component.literal(details(node)).withStyle(ChatFormatting.DARK_GRAY));
+            lines.add(Component.literal("Find its Spell Tome to discover it.").withStyle(ChatFormatting.GRAY));
             return wrap(lines);
         }
+
+        if (state == SpellNodeState.PLACEHOLDER) {
+            lines.add(Component.literal("Coming soon").withColor(COLOR_PLACEHOLDER_TEXT));
+            lines.add(Component.literal("This spell isn't in the game yet.").withStyle(ChatFormatting.DARK_GRAY));
+            return wrap(lines);
+        }
+
+        lines.add(Component.literal(node.displayName()).withColor(stateColor(data, id, state)));
 
         if (node.isRoot()) {
             lines.add(Component.literal("The root of all magic. Every spell starts here.").withStyle(ChatFormatting.GRAY));
@@ -780,6 +811,11 @@ public class SpellTreeScreen extends Screen {
         lines.add(Component.literal(levelText("Level", level, data.getSpellLevelProgress(id)))
                 .withStyle(ChatFormatting.GOLD));
 
+        if (data.isSpellLevelCapped(id)) {
+            lines.add(Component.literal("Can't level up past " + parentName(data, node) + " (level "
+                    + data.getSpellLevelCap(id) + ")").withColor(COLOR_LOCKED));
+        }
+
         if (node.element() != SpellElement.NONE) {
             lines.add(Component.literal(levelText(node.element().displayName() + " mastery", elementLevel,
                     data.getElementLevelProgress(node.element()))).withStyle(ChatFormatting.YELLOW));
@@ -818,7 +854,7 @@ public class SpellTreeScreen extends Screen {
 
     private static Component stateLine(PlayerSpellData data, ResourceLocation id, SpellNode node, SpellNodeState state) {
 
-        String parent = node.parent().map(SpellNodeRegistry::get).map(SpellNode::displayName).orElse("?");
+        String parent = parentName(data, node);
 
         return switch (state) {
             case LEARNED -> data.isUsable(id)
@@ -827,8 +863,16 @@ public class SpellTreeScreen extends Screen {
             case TRAINING -> Component.literal("Training").withColor(COLOR_TRAINING);
             case AVAILABLE -> Component.literal("Can be learned").withColor(COLOR_AVAILABLE);
             case LOCKED -> Component.literal("Locked · learn " + parent + " first").withColor(COLOR_LOCKED);
-            case PLACEHOLDER -> Component.literal(SpellNode.PLACEHOLDER_NAME).withColor(COLOR_PLACEHOLDER);
+            case UNDISCOVERED, PLACEHOLDER -> Component.literal(SpellNode.PLACEHOLDER_NAME).withColor(COLOR_PLACEHOLDER);
         };
+    }
+
+    private static String parentName(PlayerSpellData data, SpellNode node) {
+        return node.parent()
+                .filter(data::isDiscovered)
+                .map(SpellNodeRegistry::get)
+                .map(SpellNode::displayName)
+                .orElse("the spell before it");
     }
 
     private static String details(SpellNode node) {

@@ -5,5 +5,6 @@ public enum SpellNodeState {
     TRAINING,
     AVAILABLE,
     LOCKED,
+    UNDISCOVERED,
     PLACEHOLDER
 }

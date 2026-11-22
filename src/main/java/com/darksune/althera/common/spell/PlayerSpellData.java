@@ -18,6 +18,7 @@ import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -31,6 +32,8 @@ public class PlayerSpellData extends SyncableAttachment {
     private final Map<ResourceLocation, Float> progress = new HashMap<>();
 
     private final Set<ResourceLocation> training = new HashSet<>();
+
+    private final Set<ResourceLocation> discovered = new HashSet<>();
 
     private final ResourceLocation[] slots = new ResourceLocation[SLOT_COUNT];
 
@@ -71,9 +74,11 @@ public class PlayerSpellData extends SyncableAttachment {
 
             Codec.unboundedMap(ResourceLocation.CODEC, Codec.INT).optionalFieldOf("spellXp", Map.of()).forGetter(data -> data.spellXp),
 
-            Codec.unboundedMap(SpellElement.CODEC, Codec.INT).optionalFieldOf("elementXp", Map.of()).forGetter(data -> data.elementXp)
+            Codec.unboundedMap(SpellElement.CODEC, Codec.INT).optionalFieldOf("elementXp", Map.of()).forGetter(data -> data.elementXp),
 
-    ).apply(instance, (progress, training, slots, selectedSlot, spellXp, elementXp) -> {
+            ResourceLocation.CODEC.listOf().optionalFieldOf("discovered", List.of()).forGetter(data -> List.copyOf(data.discovered))
+
+    ).apply(instance, (progress, training, slots, selectedSlot, spellXp, elementXp, discovered) -> {
 
         PlayerSpellData data = new PlayerSpellData();
 
@@ -88,6 +93,8 @@ public class PlayerSpellData extends SyncableAttachment {
         data.spellXp.putAll(spellXp);
 
         data.elementXp.putAll(elementXp);
+
+        data.discovered.addAll(discovered);
 
         return data;
     }));
@@ -111,6 +118,8 @@ public class PlayerSpellData extends SyncableAttachment {
                 buf.writeMap(data.spellXp, FriendlyByteBuf::writeResourceLocation, FriendlyByteBuf::writeVarInt);
 
                 buf.writeMap(data.elementXp, FriendlyByteBuf::writeEnum, FriendlyByteBuf::writeVarInt);
+
+                buf.writeCollection(data.discovered, FriendlyByteBuf::writeResourceLocation);
             },
 
             buf -> {
@@ -132,6 +141,8 @@ public class PlayerSpellData extends SyncableAttachment {
                 data.spellXp.putAll(buf.readMap(FriendlyByteBuf::readResourceLocation, FriendlyByteBuf::readVarInt));
 
                 data.elementXp.putAll(buf.readMap(b -> b.readEnum(SpellElement.class), FriendlyByteBuf::readVarInt));
+
+                data.discovered.addAll(buf.readList(FriendlyByteBuf::readResourceLocation));
 
                 return data;
             });
@@ -208,6 +219,70 @@ public class PlayerSpellData extends SyncableAttachment {
         return Set.copyOf(training);
     }
 
+    public boolean isDiscovered(ResourceLocation id) {
+
+        SpellNode node = SpellNodeRegistry.get(id);
+
+        if (node != null && node.isRoot()) {
+            return true;
+        }
+
+        return discovered.contains(id) || getProgress(id) > 0.0F || training.contains(id);
+    }
+
+    public Map<ResourceLocation, SpellNode> visibleNodes() {
+
+        Map<ResourceLocation, SpellNode> all = SpellNodeRegistry.getAll();
+        Set<ResourceLocation> visible = new HashSet<>();
+
+        all.forEach((id, node) -> {
+
+            if (node.isRoot() || node.parent().map(all::get).filter(parent -> parent.isRoot()).isPresent()
+                    || node.parent().filter(this::isDiscovered).isPresent()) {
+                visible.add(id);
+            }
+
+            if (isDiscovered(id)) {
+                ResourceLocation current = id;
+                int steps = all.size();
+
+                while (current != null && steps-- >= 0 && all.containsKey(current)) {
+                    visible.add(current);
+                    current = all.get(current).parent().orElse(null);
+                }
+            }
+        });
+
+        Map<ResourceLocation, SpellNode> result = new LinkedHashMap<>();
+        all.forEach((id, node) -> {
+            if (visible.contains(id)) {
+                result.put(id, node);
+            }
+        });
+
+        return result;
+    }
+
+    public boolean discover(ResourceLocation id) {
+
+        if (isDiscovered(id)) {
+            return false;
+        }
+
+        discovered.add(id);
+        markDirty();
+
+        return true;
+    }
+
+    public void forget(ResourceLocation id) {
+
+        stopTraining(id);
+        unequip(id);
+        discovered.remove(id);
+        setProgress(id, 0.0F);
+    }
+
     public boolean isLearned(ResourceLocation id) {
 
         SpellNode node = SpellNodeRegistry.get(id);
@@ -257,6 +332,10 @@ public class PlayerSpellData extends SyncableAttachment {
             return SpellNodeState.LEARNED;
         }
 
+        if (!isDiscovered(id)) {
+            return SpellNodeState.UNDISCOVERED;
+        }
+
         if (isTraining(id)) {
             return SpellNodeState.TRAINING;
         }
@@ -271,11 +350,51 @@ public class PlayerSpellData extends SyncableAttachment {
     }
 
     public int getSpellLevel(ResourceLocation node) {
-        return SpellProficiency.levelFor(getSpellXp(node), SpellProficiency.SPELL_BASE_XP);
+        return SpellProficiency.levelFor(cappedXp(node), SpellProficiency.SPELL_BASE_XP);
     }
 
     public float getSpellLevelProgress(ResourceLocation node) {
-        return SpellProficiency.progressInLevel(getSpellXp(node), SpellProficiency.SPELL_BASE_XP);
+        return SpellProficiency.progressInLevel(cappedXp(node), SpellProficiency.SPELL_BASE_XP);
+    }
+
+    public int getSpellLevelCap(ResourceLocation node) {
+        return levelCap(node, SpellNodeRegistry.getAll().size());
+    }
+
+    public boolean isSpellLevelCapped(ResourceLocation node) {
+        int cap = getSpellLevelCap(node);
+        return cap < SpellProficiency.MAX_LEVEL && getSpellLevel(node) >= cap;
+    }
+
+    private int levelCap(ResourceLocation id, int depth) {
+
+        SpellNode node = SpellNodeRegistry.get(id);
+
+        if (node == null || depth <= 0) {
+            return SpellProficiency.MAX_LEVEL;
+        }
+
+        return node.parent()
+                .filter(parent -> {
+                    SpellNode parentNode = SpellNodeRegistry.get(parent);
+                    return parentNode != null && parentNode.isTrainable();
+                })
+                .map(parent -> Math.min(levelCap(parent, depth - 1),
+                        SpellProficiency.levelFor(getSpellXp(parent), SpellProficiency.SPELL_BASE_XP)))
+                .orElse(SpellProficiency.MAX_LEVEL);
+    }
+
+    private int xpCap(ResourceLocation node) {
+
+        int cap = getSpellLevelCap(node);
+
+        return cap >= SpellProficiency.MAX_LEVEL
+                ? SpellProficiency.maxXp(SpellProficiency.SPELL_BASE_XP)
+                : SpellProficiency.totalXpFor(cap, SpellProficiency.SPELL_BASE_XP);
+    }
+
+    private int cappedXp(ResourceLocation node) {
+        return Math.min(getSpellXp(node), xpCap(node));
     }
 
     public int getElementXp(SpellElement element) {
@@ -297,7 +416,13 @@ public class PlayerSpellData extends SyncableAttachment {
         }
 
         int spellBefore = getSpellLevel(node);
-        setSpellXp(node, getSpellXp(node) + amount);
+        int xp = getSpellXp(node);
+        int cap = xpCap(node);
+
+        if (xp < cap) {
+            setSpellXp(node, Math.min(xp + amount, cap));
+        }
+
         int spellAfter = getSpellLevel(node);
 
         int elementAfter = 0;
@@ -466,6 +591,7 @@ public class PlayerSpellData extends SyncableAttachment {
     public void reset() {
         progress.clear();
         training.clear();
+        discovered.clear();
         Arrays.fill(slots, null);
         selectedSlot = 0;
         cooldowns.clear();

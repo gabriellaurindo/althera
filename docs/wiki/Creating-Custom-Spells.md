@@ -85,7 +85,7 @@ Each level above 1 adds these fractions (level 10 = 9 times the value):
 
 | Field | Default | Description |
 |---|---|---|
-| `damage_per_level` | `0.10` | Damage of every `damage` and `projectile` effect (+10% per level) |
+| `damage_per_level` | `0.10` | Damage of every `damage` and `projectile` effect and healing of `heal` effects (+10% per level) |
 | `size_per_level` | `0.05` | `area` radius, `line` length and width, particle `spread` and `line` length |
 | `visual_per_level` | `0.10` | Particle `count` and projectile trail density |
 | `cost_per_level` | `0.03` | Mana cost reduction (at most `0.1`). The cost never drops below 1 |
@@ -98,7 +98,7 @@ Each level above 1 adds these fractions (level 10 = 9 times the value):
 ```
 
 The element mastery bonus (+5% damage per level) applies on top and is not configurable. Effects that are not listed
-(ignite time, mob effect duration, knockback, explosions, heal...) don't change with the level.
+(ignite time, mob effect duration, knockback, explosions...) don't change with the level.
 
 ### Cast modes
 
@@ -135,7 +135,7 @@ both at double mana and without real effect.
 | `name` | spell name | Overrides the name shown in the tree |
 | `branch` | `"none"` | `damage`, `defense`, `utility` or `none`. Shown in the tooltip |
 | `element` | `"none"` | `fire`, `lightning`, `ice` or `none`. Colours the spell's tome |
-| `tier` | `1` | Difficulty: a tier 2 spell needs twice as many training casts as a tier 1 spell of the same cost, and its tome gives half as much |
+| `tier` | `1` | Difficulty: a tier 2 spell needs twice as many training casts as a tier 1 spell of the same cost |
 
 A node can only be trained when its spell has a `player` block. A node whose spell is missing, or has no `player`
 block, is shown as a placeholder and can't be trained.
@@ -150,7 +150,7 @@ casts = max(3, ceil(mana_cost × 100 × tier / max mana))
 ```
 
 Every training cast adds `1 / casts` of the training, computed with the player's max mana at the time of the cast.
-A Spell Tome adds `50% / tier`.
+A spell must be discovered (with its Spell Tome) before it can be trained, and can't level up past its parent's level.
 
 ---
 

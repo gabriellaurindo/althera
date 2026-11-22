@@ -12,9 +12,7 @@ import org.jetbrains.annotations.Nullable;
 
 public record SpellTome(ResourceLocation nodeId) {
 
-    public static final float BASIC_PROGRESS = 0.5F;
-
-    public static final int PROFICIENCY_XP = SpellProficiency.SPELL_BASE_XP;
+    public static final float PROFICIENCY_SHARE = 0.10F;
 
     public static final Codec<SpellTome> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             ResourceLocation.CODEC.fieldOf("node").forGetter(SpellTome::nodeId)
@@ -25,13 +23,14 @@ public record SpellTome(ResourceLocation nodeId) {
             SpellTome::new
     );
 
+    public static int proficiencyXp(int level) {
+        return Math.max(1, Math.round(PROFICIENCY_SHARE
+                * SpellProficiency.xpForLevel(level + 1, SpellProficiency.SPELL_BASE_XP)));
+    }
+
     @Nullable
     public SpellNode node() {
         SpellNode node = SpellNodeRegistry.get(nodeId);
         return node != null && node.isTrainable() ? node : null;
-    }
-
-    public static float progressFor(SpellNode node) {
-        return BASIC_PROGRESS / node.tier();
     }
 }

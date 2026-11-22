@@ -39,6 +39,17 @@ public final class SpellSlots {
         return Component.literal(node == null ? EMPTY_NAME : node.displayName());
     }
 
+    public static boolean isBookEmpty(PlayerSpellData data) {
+
+        for (int slot = 0; slot < PlayerSpellData.SLOT_COUNT; slot++) {
+            if (data.getSlot(slot) != null) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     public static HudIcon icon(@Nullable ResourceLocation id) {
 
         SpellNode node = id == null ? null : SpellNodeRegistry.get(id);

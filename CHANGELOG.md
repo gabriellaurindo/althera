@@ -38,22 +38,27 @@ and generates the GitHub Release, CurseForge and Discord notes from it.
   **Spell Tree** button (closing the tree brings you back to the sheet). The settings gear is on both tabs. The sheet
   reopens on the last tab you used.
   Without a Hero, **G** now opens the sheet on the Player tab, and the Hero tab opens Choose your Hero.
-- **Spell Tome**: High Nobles (red) have a **5%** chance to drop a tome of a random basic spell. Right-click it to
-  study: it adds **+50%** of that spell's training at once, whatever the spell's state (not training yet, or even
-  locked behind a spell you don't know: the progress is kept and a spell finished this way stays unusable until the
-  spells before it are learned). Tomes of a spell you already know can't be used. The creative tab has one tome per
-  spell.
+- **Spell Tome**: every Noble can drop one (see Changed below). The spell tree starts
+  with only the tier 1 spells, hidden (`?`): right-click a spell's tome to **discover** it, then train it.
+  Discovering a spell reveals the next one in the tree. A spell discovered before the
+  spell leading to it is learned stays locked (faded) until that one is learned. Once the spell is learned, each
+  tome of it adds **10% of its current level** to its proficiency (not to the element's mastery). The creative tab
+  has one tome per spell.
+- A spell can't level up past the spell before it in the tree (with Fire Bolt at level 1, the next fire spell stays
+  at level 1).
 - **Spell proficiency**: every learned spell now has a **level** (1-10) and every element (Fire, Lightning, Ice) a
   **mastery** level (1-10). Both grow with the mana you spend on real casts (training casts don't count; nothing in
   Creative). Spell level 2 takes about 5 minutes of casting, mastery level 2 about 10, and each level after that
   takes 1.5 times longer: level 10 is about 6 hours of use for a spell and 12 for an element.
-  - Each spell level adds +10% damage, +5% size (areas, reach, particle spread), denser particles and -3% mana cost.
+  - Each spell level adds +10% damage (and healing), +5% size (areas, reach, particle spread), denser particles and -3% mana cost.
     Each mastery level adds +5% damage to every spell of that element. At level 10 with mastery 10, Fire Bolt deals
     19.8 damage instead of 7.2 and costs 15 mana instead of 20.
   - A message and a sound announce every level up. The spell tree tooltip shows the level, progress and bonuses, the
     book and spell wheel show the level, and the Player tab of the character sheet shows the three masteries.
   - Datapacks: the spell's `player` block takes an optional `proficiency` block (`damage_per_level`,
     `size_per_level`, `visual_per_level`, `cost_per_level`).
+  - Datapacks and Ultimates: new `chain` effect (leaps from the hit creature to the nearest enemies, running its
+    `on_jump` effects on each).
   - `/althera_spell level <node> <level>` and `/althera_spell element <element> <level>` (cheats).
 - Spells and elements have their own **icons** (Fire Bolt, Lightning Strike, Frost Shard; Fire, Lightning, Ice and
   an arcane rune for the Knowledge root) in the spell tree, the book HUD, the spell wheel and the character sheet.
@@ -62,14 +67,18 @@ and generates the GitHub Release, CurseForge and Discord notes from it.
 - New spells: **Frost Ward** (Defense, ice, 25 mana): Absorption II for 10 seconds and pushes back and slows the
   enemies around you, 10 second cooldown. **Flame Jet** (tier 2 fire, after Fire Bolt, 24 mana per second): hold
   right-click to pour a 5 block stream of fire that burns everything in it.
+- New spells: **Chain Lightning** (tier 2 lightning, after Lightning Strike, 35 mana): a bolt that leaps from its
+  target to up to 3 enemies nearby. **Glacial Spike** (tier 2 ice, after Frost Shard, 40 mana): hold to charge for a
+  second, release to fire a spike of ice that hits hard and all but freezes the target. **Mend** (the first Utility
+  spell, 30 mana): heals 3 hearts and gives Regeneration I for 5 seconds.
+- Getting started with spells: the Spell Book recipe unlocks when you pick up an amethyst shard or lapis lazuli, and an
+  empty Spell Book shows the Spell Tree key.
 - The Spell Book and the Spell Tome have new textures.
 - **Casting pose**: your character raises the book with both hands while casting (seen by everyone), the book lifts in
   first person while you hold a spell, and every cast puffs in the spell's element colour.
-- **Mastered spells** (level 10) get a gold border in the spell tree, sparkle when cast and leave a trail of light.
+- **Mastered spells** (level 10) get a gold star in the spell tree, sparkle when cast and leave a trail of light.
 - Advancements: **First Words** (learn a spell), **Adept** (a spell at level 5) and the challenge **Archmage** (Fire,
   Lightning and Ice mastery at 10).
-- A Spell Tome of a spell you already know now gives **1,500 proficiency** (a whole level 2) instead of being
-  refused; only tomes of a spell at level 10 are refused.
 - Player spells have **no cooldown** unless their spell says so: Fire Bolt, Lightning Strike and Frost Shard can be cast
   as often as your mana allows (Nobles keep their own cooldown on the same spells).
 - Datapacks: spells take an optional `player` block (`mana_cost`, `description`, `cast_mode`, `cooldown_ticks`, default
@@ -78,6 +87,12 @@ and generates the GitHub Release, CurseForge and Discord notes from it.
   See the new wiki pages "Spells" and "Creating Custom Spells" (the spell fields moved there from "Nobles").
 - `/althera_spell info | reset | progress <node> <value> | train <node> | untrain <node> | cast <node> [player]`
   and `/althera_spell equip <slot> <node>` / `unequip <slot>` (cheats) to inspect, set and test spells.
+
+### Changed
+- Your Hero now joins the fight when you hit a creature with a spell (or any ranged damage), as it does for melee hits.
+- **Noble drops**: Nobles no longer drop diamonds. They drop Spell Tomes instead: green **25%** a tier 1 tome; yellow
+  **25%** a tier 1 tome and **25%** a tier 2 tome; red its Hero Catalyst, **25%** a tier 2 tome and **10%** a tier 3
+  tome (no tier 3 spell exists yet).
 
 ## [4.3.0] - 2026-11-03 - Ritual Rework (feature)
 

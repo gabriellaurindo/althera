@@ -15,8 +15,8 @@
   "item.althera.spell_tome.faded": "Faded Tome",
   "item.althera.spell_tome.faded.hint": "Its spell no longer answers",
   "item.althera.spell_tome.details": "%s · Tier %s",
-  "item.althera.spell_tome.progress": "+%s%% training",
-  "item.althera.spell_tome.proficiency": "+%s proficiency once learned",
+  "item.althera.spell_tome.unlock": "Unlocks this spell for training",
+  "item.althera.spell_tome.proficiency": "Once learned: +%s%% of a level",
   "item.althera.spell_tome.tooltip": "Right-click to study",
 
   "entity.althera.enemy_mage": "Enemy Mage",

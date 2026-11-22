@@ -1,0 +1,66 @@
+{
+  "name": "Chain Lightning",
+  "player": {
+    "mana_cost": 35,
+    "description": "A bolt that leaps from its target to up to 3 enemies nearby.",
+    "cooldown_ticks": 20
+  },
+  "on_cast": [
+    {
+      "type": "sound",
+      "sound": "minecraft:entity.evoker.prepare_attack",
+      "volume": 1.0,
+      "pitch": 1.6
+    },
+    {
+      "type": "projectile",
+      "speed": 2.4,
+      "attack_multiplier": 1.5,
+      "trail": {
+        "type": "minecraft:electric_spark"
+      },
+      "on_hit": [
+        {
+          "type": "particles",
+          "particle": {
+            "type": "minecraft:electric_spark"
+          },
+          "count": 12,
+          "spread": [
+            0.3,
+            0.3,
+            0.3
+          ],
+          "speed": 0.1
+        },
+        {
+          "type": "sound",
+          "sound": "minecraft:entity.lightning_bolt.impact",
+          "volume": 0.6,
+          "pitch": 1.6
+        },
+        {
+          "type": "chain",
+          "jumps": 3,
+          "range": 5,
+          "particle": {
+            "type": "minecraft:electric_spark"
+          },
+          "on_jump": [
+            {
+              "type": "damage",
+              "target": "target",
+              "attack_multiplier": 1.0
+            },
+            {
+              "type": "sound",
+              "sound": "minecraft:entity.lightning_bolt.impact",
+              "volume": 0.4,
+              "pitch": 1.9
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

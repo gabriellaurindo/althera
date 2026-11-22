@@ -1,6 +1,7 @@
 package com.darksune.althera.client.hud;
 
 import com.darksune.althera.Althera;
+import com.darksune.althera.client.input.AltheraKeybinds;
 import com.darksune.althera.client.screen.SpellWheelScreen;
 import com.darksune.althera.common.item.SpellBookItem;
 import com.darksune.althera.common.spell.PlayerSpellData;
@@ -139,6 +140,11 @@ public final class SpellBookHudRenderer {
         Component mana = SpellSlots.mana(data, slot);
 
         if (SpellSlots.EMPTY_NAME.equals(state.blocker())) {
+            if (SpellSlots.isBookEmpty(data)) {
+                Component hint = Component.literal("[").append(AltheraKeybinds.SPELL_TREE.getTranslatedKeyMessage())
+                        .append("] Spell Tree");
+                gui.drawString(font, hint, x, y + font.lineHeight, COLOR_TRAINING);
+            }
             return;
         }
 

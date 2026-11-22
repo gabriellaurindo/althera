@@ -17,11 +17,20 @@ import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 
 @EventBusSubscriber
 public class CombatEvents {
+
+    @SubscribeEvent
+    public static void onPlayerDealsDamage(final LivingDamageEvent.Post event) {
+
+        if (event.getSource().getEntity() instanceof Player player && event.getEntity() != player) {
+            player.setLastHurtMob(event.getEntity());
+        }
+    }
 
     @SubscribeEvent
     public static void onDeath(LivingDeathEvent event) {

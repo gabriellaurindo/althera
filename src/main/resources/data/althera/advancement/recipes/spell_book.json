@@ -1,0 +1,19 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_amethyst_shard": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": { "items": [{ "items": "minecraft:amethyst_shard" }] }
+    },
+    "has_lapis_lazuli": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": { "items": [{ "items": "minecraft:lapis_lazuli" }] }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": { "recipe": "althera:spell_book" }
+    }
+  },
+  "requirements": [["has_amethyst_shard", "has_lapis_lazuli", "has_the_recipe"]],
+  "rewards": { "recipes": ["althera:spell_book"] }
+}

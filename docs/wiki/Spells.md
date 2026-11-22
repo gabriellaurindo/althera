@@ -4,31 +4,39 @@ Players can learn spells and cast them with a **Spell Book**. Spells are learned
 spell you are still learning costs more and does nothing, but every cast brings you closer to mastering it.
 
 > [!NOTE]
-> Player spells are a work in progress. Fire Bolt, Lightning Strike, Frost Shard, Frost Ward and Flame Jet are the
-> first spells; the other nodes are `?` placeholders for spells still to come.
+> Player spells are a work in progress. Eight spells exist today (below); the other nodes are `?` placeholders for
+> spells still to come.
 
 ---
 
 ## 🌳 Spell Tree
+
+New here? Craft a **Spell Book** (book, 2 amethyst shards and lapis lazuli; the recipe unlocks once you pick up an
+amethyst shard or lapis), then open the spell tree and click a yellow spell to start training it. The book shows the
+Spell Tree key while it has no spells.
 
 Press **K** (or click **Spell Tree** on the Player tab of the character sheet, **G**) to open the spell tree.
 
 - **Knowledge** sits in the centre and is always learned: every spell grows from it
 - **Damage** spells go up, **Defense** spells go left, **Utility** spells go down
 - Each branch splits into elements: **Fire**, **Lightning** and **Ice**
-- A spell can only be trained once the spell before it is learned. Higher tiers are harder to learn
+- At first the tree only shows the tier 1 spells, all **hidden** (`?`): find a spell's [Spell Tome](#-spell-tome) to
+  discover it. Discovering a spell reveals the next one after it (as `?`), and so on up the tree
+- A spell can only be trained once it is discovered **and** the spell before it is learned (a tier 4 needs the tier 3,
+  the tier 3 needs the tier 2...). Higher tiers are harder to learn
 
 Node borders show each spell's state:
 
 | Border | State |
 |---|---|
 | 🟩 Green | Learned |
-| 🟨 Gold | Learned and mastered (level 10, see [Proficiency](#-proficiency)) |
+| 🟩 Green with a gold star | Learned and mastered (level 10, see [Proficiency](#-proficiency)) |
 | 🟦 Blue | In training |
 | 🟨 Yellow | Can be trained (the spell before it is learned) |
-| 🟥 Red | Locked: learn the spell before it first |
-| 🟧 Orange | Learned, but not usable until the spells before it are learned (see [Spell Tome](#-spell-tome)) |
-| `?` | A spell still to come |
+| 🟥 Red, faded icon | Discovered, but locked: learn the spell before it first |
+| 🟧 Orange | Learned, but not usable until the spells before it are learned |
+| `?` | A spell you haven't discovered yet (its tooltip shows only its element and tier) |
+| `X` | A spell that isn't in the game yet (**Coming soon**) |
 
 Hover a node to see its cost, cooldown, element, tier, description and how many training casts are left at your
 current max mana.
@@ -106,10 +114,13 @@ In **Creative** mode spells cost no mana and have no cooldown, but they still ne
 | **Lightning Strike** | Lightning | 25 | A spark that calls lightning down on what it hits (9.6 damage) and hurts everything around it (3.6), even when it hits a wall |
 | **Frost Shard** | Ice | 20 | A shard of ice (6 damage) that gives Slowness II for 3 seconds |
 | **Frost Ward** (Defense) | Ice | 25 | Wraps you in ice: Absorption II for 10 seconds, and enemies within 3 blocks are pushed back and get Slowness II for 3 seconds. 10 second cooldown |
+| **Chain Lightning** (tier 2, after Lightning Strike) | Lightning | 35 | A bolt (6 damage) that leaps from its target to up to 3 enemies within 5 blocks of each other (4 damage each). 1 second cooldown |
+| **Glacial Spike** (tier 2, after Frost Shard) | Ice | 40 | **Hold** right-click for 1 second to charge, release to fire a spike of ice (10.4 damage) that gives Slowness IV for 4 seconds and chills everything next to it (3.2 damage, Slowness II). Releasing early wastes the charge. 2 second cooldown |
+| **Mend** (Utility) | None | 30 | Heals 3 hearts and gives Regeneration I for 5 seconds. 5 second cooldown |
 | **Flame Jet** (tier 2, after Fire Bolt) | Fire | 24 / s | **Hold** right-click to pour a stream of fire 5 blocks ahead: 3.6 damage twice a second to everything in it and sets it ablaze. 1 second cooldown after you stop |
 
-Spells fly where you look. Except for Frost Ward and Flame Jet, they have **no cooldown**: you can cast them as often
-as your mana allows. Mana is shared with your Hero, so casting while your Hero is summoned drains the same pool that
+Spells fly where you look. The basic attack spells have **no cooldown**: you can cast them as often as your mana
+allows. Mana is shared with your Hero, so casting while your Hero is summoned drains the same pool that
 keeps it in the world.
 
 While casting, your character raises the book with both hands, and a puff in the spell's element colour shows at
@@ -129,10 +140,12 @@ element (**Fire**, **Lightning**, **Ice**) has its own **mastery** level from 1 
 
 - Both grow with the **mana you spend** on real casts: the spell's level grows with the mana spent on that spell, the
   element's mastery with the mana spent on every spell of that element. Training casts give nothing
-- Each **spell level** adds **+10% damage**, **+5% size** (area, reach, particle spread), denser particles and
+- Each **spell level** adds **+10% damage** (and healing), **+5% size** (area, reach, particle spread), denser particles and
   **-3% mana cost**
 - Each **mastery level** adds **+5% damage** to every spell of that element
 - In Creative mode spells cost no mana, so they gain no proficiency
+- A spell can't level up past the spell before it: with Fire Bolt at level 1, Flame Jet stays at level 1 until Fire
+  Bolt reaches level 2. The mana spent meanwhile still counts for the element's mastery
 
 | Level | Spell, total mana spent | Time* | Mastery, total mana spent | Time* |
 |---|---|---|---|---|
@@ -146,7 +159,7 @@ element (**Fire**, **Lightning**, **Ice**) has its own **mastery** level from 1 
 
 At spell level 10 and mastery 10, Fire Bolt deals **19.8** damage instead of 7.2 and costs 15 mana instead of 20.
 
-A spell at level 10 is **mastered**: its node gets a gold border, its casts sparkle and its projectiles leave a
+A spell at level 10 is **mastered**: its node gets a gold star in the corner, its casts sparkle and its projectiles leave a
 trail of light.
 
 You get a message when a spell or a mastery goes up a level. The spell tree tooltip shows a learned spell's level,
@@ -157,19 +170,18 @@ character sheet (**G**) shows the three masteries (hover one for details).
 
 ## 📜 Spell Tome
 
-High Nobles (red robe) have a **5%** chance to drop a **Spell Tome** of a random basic spell (see [Nobles](Nobles)).
-The creative tab has one tome of each spell.
+Every Noble can drop a **Spell Tome** of a random spell: green robes **25%** tier 1, yellow robes **25%** tier 1 and
+**25%** tier 2, red robes **25%** tier 2 and **10%** tier 3 (see [Nobles](Nobles)). The creative tab has one tome of each spell.
 
-**Right-click** a tome to study it: it adds **+50%** of that spell's training at once. A tome works whatever the
-spell's state: you don't need to be training it, and the spell before it doesn't have to be learned. The progress
-just accumulates.
+**Right-click** a tome to study it: the spell is **discovered** and shows up in the spell tree. If the spell before it
+is learned you can start training it right away; otherwise it stays locked (faded) until you learn that one. A tome
+doesn't add training: the spell still has to be trained.
 
-A spell finished with tomes before the spells leading to it are learned counts as learned, but stays **unusable**
-(orange in the tree, faded in the book and wheel) until the spells before it are learned.
+Once the spell is **learned**, more tomes of it add **10% of its current level** to its
+[proficiency](#-proficiency) (ten tomes = one level; the element's mastery doesn't change). They can't be used while
+the spell is discovered but not learned yet, at level 10, or while it is held back by the spell before it.
 
-A tome of a spell you already know gives **1,500 proficiency** instead (a whole level 2), see
-[Proficiency](#-proficiency). Only a tome of a spell at level 10 can't be used. A tome whose spell no longer exists
-becomes a **Faded Tome**.
+A tome whose spell no longer exists becomes a **Faded Tome**.
 
 ---
 

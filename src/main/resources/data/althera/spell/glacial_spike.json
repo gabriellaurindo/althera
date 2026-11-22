@@ -1,0 +1,86 @@
+{
+  "name": "Glacial Spike",
+  "player": {
+    "mana_cost": 40,
+    "description": "Charge a spike of ice that hits hard and all but freezes the target.",
+    "cast_mode": "charge",
+    "cooldown_ticks": 40
+  },
+  "cast_ticks": 20,
+  "on_cast": [
+    {
+      "type": "sound",
+      "sound": "minecraft:block.glass.break",
+      "volume": 0.8,
+      "pitch": 0.6
+    },
+    {
+      "type": "projectile",
+      "speed": 2.4,
+      "attack_multiplier": 2.6,
+      "trail": {
+        "type": "minecraft:snowflake"
+      },
+      "on_hit": [
+        {
+          "type": "mob_effect",
+          "target": "target",
+          "effect": "minecraft:slowness",
+          "duration": 80,
+          "amplifier": 3
+        },
+        {
+          "type": "damage",
+          "target": {
+            "area": 1.5
+          },
+          "filter": {
+            "exclude_target": true
+          },
+          "attack_multiplier": 0.8
+        },
+        {
+          "type": "mob_effect",
+          "target": {
+            "area": 1.5
+          },
+          "effect": "minecraft:slowness",
+          "duration": 60,
+          "amplifier": 1
+        },
+        {
+          "type": "particles",
+          "particle": {
+            "type": "minecraft:item_snowball"
+          },
+          "count": 20,
+          "spread": [
+            0.4,
+            0.4,
+            0.4
+          ],
+          "speed": 0.15
+        },
+        {
+          "type": "particles",
+          "particle": {
+            "type": "minecraft:snowflake"
+          },
+          "count": 16,
+          "spread": [
+            0.6,
+            0.6,
+            0.6
+          ],
+          "speed": 0.05
+        },
+        {
+          "type": "sound",
+          "sound": "minecraft:block.glass.break",
+          "volume": 1.0,
+          "pitch": 1.2
+        }
+      ]
+    }
+  ]
+}

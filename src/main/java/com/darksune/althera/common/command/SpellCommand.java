@@ -61,6 +61,20 @@ public class SpellCommand {
                                 )
                         )
 
+                        .then(Commands.literal("discover")
+                                .then(withTarget(
+                                        Commands.argument("node", ResourceLocationArgument.id()).suggests(NODES),
+                                        SpellCommand::discover
+                                ))
+                        )
+
+                        .then(Commands.literal("forget")
+                                .then(withTarget(
+                                        Commands.argument("node", ResourceLocationArgument.id()).suggests(NODES),
+                                        SpellCommand::forget
+                                ))
+                        )
+
                         .then(Commands.literal("train")
                                 .then(withTarget(
                                         Commands.argument("node", ResourceLocationArgument.id()).suggests(NODES),
@@ -194,10 +208,14 @@ public class SpellCommand {
 
         int level = IntegerArgumentType.getInteger(ctx, "level");
 
-        PlayerSpellData.get(player).setSpellXp(id, SpellProficiency.totalXpFor(level, SpellProficiency.SPELL_BASE_XP));
+        PlayerSpellData data = PlayerSpellData.get(player);
+        data.setSpellXp(id, SpellProficiency.totalXpFor(level, SpellProficiency.SPELL_BASE_XP));
         SpellAdvancements.check(player);
 
-        ctx.getSource().sendSuccess(() -> Component.literal("§bSet " + id + " to level " + level + "."), true);
+        int effective = data.getSpellLevel(id);
+
+        ctx.getSource().sendSuccess(() -> Component.literal("§bSet " + id + " to level " + level
+                + (effective < level ? " (capped at " + effective + " by the spell before it)." : ".")), true);
 
         return 1;
     }
@@ -257,6 +275,42 @@ public class SpellCommand {
         return 1;
     }
 
+    private static int discover(CommandContext<CommandSourceStack> ctx, ServerPlayer player) {
+
+        ResourceLocation id = node(ctx);
+
+        if (id == null) {
+            return 0;
+        }
+
+        PlayerSpellData data = PlayerSpellData.get(player);
+
+        if (!data.discover(id)) {
+            ctx.getSource().sendFailure(Component.literal("§c" + id + " is already discovered."));
+            return 0;
+        }
+
+        ctx.getSource().sendSuccess(() -> Component.literal("§bDiscovered " + id + " (" + data.getState(id) + ")."), true);
+
+        return 1;
+    }
+
+    private static int forget(CommandContext<CommandSourceStack> ctx, ServerPlayer player) {
+
+        ResourceLocation id = node(ctx);
+
+        if (id == null) {
+            return 0;
+        }
+
+        PlayerSpellData data = PlayerSpellData.get(player);
+        data.forget(id);
+
+        ctx.getSource().sendSuccess(() -> Component.literal("§bForgot " + id + " (" + data.getState(id) + ")."), true);
+
+        return 1;
+    }
+
     private static int startTraining(CommandContext<CommandSourceStack> ctx, ServerPlayer player) {
 
         ResourceLocation id = node(ctx);
@@ -266,6 +320,7 @@ public class SpellCommand {
         }
 
         PlayerSpellData data = PlayerSpellData.get(player);
+        data.discover(id);
 
         if (!data.startTraining(id)) {
             ctx.getSource().sendFailure(Component.literal("§c" + id + " cannot be trained (" + data.getState(id) + ")."));

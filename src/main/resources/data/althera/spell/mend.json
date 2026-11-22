@@ -1,0 +1,60 @@
+{
+  "name": "Mend",
+  "player": {
+    "mana_cost": 30,
+    "description": "Knits your wounds closed: heals 3 hearts and regenerates a little more.",
+    "cooldown_ticks": 100
+  },
+  "on_cast": [
+    {
+      "type": "sound",
+      "sound": "minecraft:block.amethyst_block.chime",
+      "volume": 1.0,
+      "pitch": 1.4
+    },
+    {
+      "type": "sound",
+      "sound": "minecraft:block.beacon.power_select",
+      "volume": 0.4,
+      "pitch": 1.8
+    },
+    {
+      "type": "heal",
+      "target": "self",
+      "amount": 6
+    },
+    {
+      "type": "mob_effect",
+      "target": "self",
+      "effect": "minecraft:regeneration",
+      "duration": 100,
+      "amplifier": 0
+    },
+    {
+      "type": "particles",
+      "particle": {
+        "type": "minecraft:heart"
+      },
+      "count": 4,
+      "spread": [
+        0.4,
+        0.3,
+        0.4
+      ],
+      "height": 1.4
+    },
+    {
+      "type": "particles",
+      "particle": {
+        "type": "minecraft:happy_villager"
+      },
+      "count": 14,
+      "spread": [
+        0.5,
+        0.7,
+        0.5
+      ],
+      "height": 1.0
+    }
+  ]
+}

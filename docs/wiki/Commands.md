@@ -57,7 +57,9 @@ Every command takes an optional `<player>` at the end (default: you). `<node>` i
 | `/althera_spell info` | Cheats | Lists every node of the spell tree with its state, training progress and level, then the element masteries |
 | `/althera_spell reset` | Cheats | Forgets every spell, training progress, book slot, spell level and mastery |
 | `/althera_spell progress <node> <value>` | Cheats | Sets a spell's training progress (`0` to `1`; `1` = learned) |
-| `/althera_spell train <node>` | Cheats | Starts training a spell (the spell before it must be learned) |
+| `/althera_spell discover <node>` | Cheats | Discovers a spell, as its Spell Tome does |
+| `/althera_spell forget <node>` | Cheats | Hides a spell again: stops its training and clears its progress (proficiency is kept) |
+| `/althera_spell train <node>` | Cheats | Discovers a spell and starts training it (the spell before it must be learned) |
 | `/althera_spell untrain <node>` | Cheats | Pauses a spell's training (progress is kept) |
 | `/althera_spell cast <node>` | Cheats | Casts a spell without a Spell Book (instant spells only), paying its mana |
 | `/althera_spell equip <slot> <node>` | Cheats | Puts a spell in a book slot (1-9) |

@@ -207,6 +207,23 @@ damage, so pair it with a `damage` effect. No fields.
 { "type": "lightning" }
 ```
 
+### `chain`
+Leaps from the creature that was hit (`"target"`, e.g. inside a projectile's `on_hit`) to the nearest enemy within
+`range`, then from that one to the next, drawing an arc of particles between them. Each creature is hit once. The
+`on_jump` effects run on every creature it leaps to (`"target"` is that creature, positions are its feet).
+
+| Field | Default | |
+|---|---|---|
+| `jumps` | `3` | How many creatures it leaps to |
+| `range` | `5` | Blocks between two creatures |
+| `particle` | `{ "type": "minecraft:electric_spark" }` | Arc particle |
+| `on_jump` | none | Effects applied to each creature it leaps to |
+
+```json
+{ "type": "chain", "jumps": 3, "range": 5,
+  "on_jump": [ { "type": "damage", "target": "target", "attack_multiplier": 1.0 } ] }
+```
+
 ### `ultimate_animation`
 Plays the `ultimate` animation of the Hero model (if it has one). No fields.
 

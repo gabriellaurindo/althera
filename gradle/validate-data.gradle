@@ -47,6 +47,7 @@ class DataValidator {
             heal              : [target: true, filter: false, amount: false, max_health_multiplier: false],
             projectile        : [count: false, spread: false, speed: false, amount: false, attack_multiplier: false, trail: false, on_hit: false],
             lightning         : [:],
+            chain             : [jumps: false, range: false, particle: false, on_jump: false],
             ultimate_animation: [:]
     ]
 
@@ -166,6 +167,11 @@ class DataValidator {
         if (effect.type == 'projectile') {
             checkNumber(at, effect, 'count', false, 1)
             checkEffects("${at} on_hit", effect.on_hit)
+        }
+        if (effect.type == 'chain') {
+            checkNumber(at, effect, 'jumps', false, 1)
+            checkNumber(at, effect, 'range', false, 0)
+            checkEffects("${at} on_jump", effect.on_jump)
         }
     }
 
