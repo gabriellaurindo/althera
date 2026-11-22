@@ -4,7 +4,7 @@ import java.util.List;
 
 public final class AcademyLayout {
 
-    public static final int LAYOUT_VERSION = 2;
+    public static final int LAYOUT_VERSION = 3;
 
     public static final int CENTER_X = 0;
 

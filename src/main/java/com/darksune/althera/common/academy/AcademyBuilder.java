@@ -49,6 +49,7 @@ public final class AcademyBuilder {
 
         buildYard(level, CENTER_X + YARD_GRID_X * ROOM_SPACING, CENTER_Z + YARD_GRID_Z * ROOM_SPACING);
         buildReturnPortal(level);
+        AcademyDecorator.decorate(level);
     }
 
     private static void buildReturnPortal(ServerLevel level) {

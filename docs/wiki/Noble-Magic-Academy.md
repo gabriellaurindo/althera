@@ -14,8 +14,10 @@ summoners go to learn spells: its quests teach you new spells and send you to tr
 - It is a **safe place**: no monsters, no PvP (players and their Heroes can't hurt each other), you can't break or
   place blocks, and explosions don't break anything. Your Hero can be summoned as usual
 - Days and nights pass, but you **can't sleep** or set your respawn point there
-- A **magic ward** follows the edge of the island: walk up to it and it pushes you back. Fall off and the ward brings
-  you back to the hall
+- A **magic ward**, a faint violet dome over the island, follows its edge: walk up to it and it glows and pushes you
+  back. Fall off and the ward brings you back to the hall
+- Classrooms have desks for the students, the island has cherry, birch and oak trees, flowers and lamps along the
+  paths, and its own music
 
 ---
 

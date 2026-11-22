@@ -92,7 +92,9 @@ and generates the GitHub Release, CurseForge and Discord notes from it.
 
 - **Noble Magic Academy** (work in progress): a new dimension, a floating island in the sky with the school of magic
   (a hall, a library, Fire, Lightning and Ice classrooms and a training yard). It is a safe place: no monsters, no
-  PvP, no breaking or placing blocks, no sleeping; a magic ward around the island keeps you from leaving or falling.
+  PvP, no breaking or placing blocks, no sleeping; a magic ward around the island, a faint violet dome that glows as
+  you get close, keeps you from leaving or falling. Classrooms with desks and element decorations, trees, flowers,
+  lamps along the paths and its own music.
   - **Academy Portal**: build a frame of **amethyst blocks** like a Nether portal (at least 2 wide and 3 tall
     inside) and right-click it with a **Spell Book** to open it (**100 mana**). Stand in it for 2 seconds to travel.
     Only players **invited** to the academy get through. The portal in the academy's hall takes you back where you
