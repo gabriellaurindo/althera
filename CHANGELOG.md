@@ -40,7 +40,9 @@ and generates the GitHub Release, CurseForge and Discord notes from it.
   Without a Hero, **G** now opens the sheet on the Player tab, and the Hero tab opens Choose your Hero.
 - **Spell Tome**: every Noble can drop one (see Changed below). The spell tree starts
   with only the tier 1 spells, hidden (`?`): right-click a spell's tome to **discover** it, then train it.
-  Discovering a spell reveals the next one in the tree. A spell discovered before the
+  Discovering a spell reveals the next one in the tree, and the new nodes glow the next time you open it. A tome's
+  tooltip shows whether you know its spell (unknown, discovered, learned with its level, mastered). A spell
+  discovered before the
   spell leading to it is learned stays locked (faded) until that one is learned. Once the spell is learned, each
   tome of it adds **10% of its current level** to its proficiency (not to the element's mastery). The creative tab
   has one tome per spell.
@@ -72,12 +74,12 @@ and generates the GitHub Release, CurseForge and Discord notes from it.
   second, release to fire a spike of ice that hits hard and all but freezes the target. **Mend** (the first Utility
   spell, 30 mana): heals 3 hearts and gives Regeneration I for 5 seconds.
 - Getting started with spells: the Spell Book recipe unlocks when you pick up an amethyst shard or lapis lazuli, and an
-  empty Spell Book shows the Spell Tree key.
+  empty Spell Book says what to do next ("Find a Spell Tome", then the Spell Tree key).
 - The Spell Book and the Spell Tome have new textures.
 - **Casting pose**: your character raises the book with both hands while casting (seen by everyone), the book lifts in
   first person while you hold a spell, and every cast puffs in the spell's element colour.
 - **Mastered spells** (level 10) get a gold star in the spell tree, sparkle when cast and leave a trail of light.
-- Advancements: **First Words** (learn a spell), **Adept** (a spell at level 5) and the challenge **Archmage** (Fire,
+- Advancements: **Hidden Knowledge** (discover a spell), **First Words** (learn a spell), **Adept** (a spell at level 5) and the challenge **Archmage** (Fire,
   Lightning and Ice mastery at 10).
 - Player spells have **no cooldown** unless their spell says so: Fire Bolt, Lightning Strike and Frost Shard can be cast
   as often as your mana allows (Nobles keep their own cooldown on the same spells).

@@ -12,8 +12,9 @@ spell you are still learning costs more and does nothing, but every cast brings 
 ## 🌳 Spell Tree
 
 New here? Craft a **Spell Book** (book, 2 amethyst shards and lapis lazuli; the recipe unlocks once you pick up an
-amethyst shard or lapis), then open the spell tree and click a yellow spell to start training it. The book shows the
-Spell Tree key while it has no spells.
+amethyst shard or lapis), find a [Spell Tome](#-spell-tome) (Nobles drop them) to discover a spell, then open the
+spell tree and click the yellow spell to start training it. While the book has no spells it tells you what to do
+next: "Find a Spell Tome", then the Spell Tree key.
 
 Press **K** (or click **Spell Tree** on the Player tab of the character sheet, **G**) to open the spell tree.
 
@@ -21,7 +22,8 @@ Press **K** (or click **Spell Tree** on the Player tab of the character sheet, *
 - **Damage** spells go up, **Defense** spells go left, **Utility** spells go down
 - Each branch splits into elements: **Fire**, **Lightning** and **Ice**
 - At first the tree only shows the tier 1 spells, all **hidden** (`?`): find a spell's [Spell Tome](#-spell-tome) to
-  discover it. Discovering a spell reveals the next one after it (as `?`), and so on up the tree
+  discover it. Discovering a spell reveals the next one after it (as `?`), and so on up the tree. The next time you
+  open the tree, the spells you just discovered and revealed glow for a few seconds
 - A spell can only be trained once it is discovered **and** the spell before it is learned (a tier 4 needs the tier 3,
   the tier 3 needs the tier 2...). Higher tiers are harder to learn
 
@@ -181,6 +183,9 @@ Once the spell is **learned**, more tomes of it add **10% of its current level**
 [proficiency](#-proficiency) (ten tomes = one level; the element's mastery doesn't change). They can't be used while
 the spell is discovered but not learned yet, at level 10, or while it is held back by the spell before it.
 
+A tome's tooltip tells you where you stand with its spell: **Unknown to you**, **Discovered**, **Learned** with its
+level (and the spell holding it back, if any) or **Mastered**.
+
 A tome whose spell no longer exists becomes a **Faded Tome**.
 
 ---
@@ -189,6 +194,7 @@ A tome whose spell no longer exists becomes a **Faded Tome**.
 
 | Advancement | How |
 |---|---|
+| **Hidden Knowledge** | Discover a spell with a Spell Tome |
 | **First Words** | Learn your first spell |
 | **Adept** | Raise a spell to level 5 |
 | **Archmage** (challenge) | Master Fire, Lightning and Ice to level 10 |

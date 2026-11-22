@@ -290,6 +290,8 @@ public class SpellCommand {
             return 0;
         }
 
+        SpellAdvancements.check(player);
+
         ctx.getSource().sendSuccess(() -> Component.literal("§bDiscovered " + id + " (" + data.getState(id) + ")."), true);
 
         return 1;

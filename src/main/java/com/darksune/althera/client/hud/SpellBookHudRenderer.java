@@ -141,8 +141,10 @@ public final class SpellBookHudRenderer {
 
         if (SpellSlots.EMPTY_NAME.equals(state.blocker())) {
             if (SpellSlots.isBookEmpty(data)) {
-                Component hint = Component.literal("[").append(AltheraKeybinds.SPELL_TREE.getTranslatedKeyMessage())
-                        .append("] Spell Tree");
+                Component hint = data.hasDiscoveredSpell()
+                        ? Component.literal("[").append(AltheraKeybinds.SPELL_TREE.getTranslatedKeyMessage())
+                        .append("] Spell Tree")
+                        : Component.literal("Find a Spell Tome");
                 gui.drawString(font, hint, x, y + font.lineHeight, COLOR_TRAINING);
             }
             return;

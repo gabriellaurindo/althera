@@ -35,6 +35,8 @@ public class PlayerSpellData extends SyncableAttachment {
 
     private final Set<ResourceLocation> discovered = new HashSet<>();
 
+    private final Set<ResourceLocation> fresh = new HashSet<>();
+
     private final ResourceLocation[] slots = new ResourceLocation[SLOT_COUNT];
 
     private int selectedSlot;
@@ -76,9 +78,11 @@ public class PlayerSpellData extends SyncableAttachment {
 
             Codec.unboundedMap(SpellElement.CODEC, Codec.INT).optionalFieldOf("elementXp", Map.of()).forGetter(data -> data.elementXp),
 
-            ResourceLocation.CODEC.listOf().optionalFieldOf("discovered", List.of()).forGetter(data -> List.copyOf(data.discovered))
+            ResourceLocation.CODEC.listOf().optionalFieldOf("discovered", List.of()).forGetter(data -> List.copyOf(data.discovered)),
 
-    ).apply(instance, (progress, training, slots, selectedSlot, spellXp, elementXp, discovered) -> {
+            ResourceLocation.CODEC.listOf().optionalFieldOf("fresh", List.of()).forGetter(data -> List.copyOf(data.fresh))
+
+    ).apply(instance, (progress, training, slots, selectedSlot, spellXp, elementXp, discovered, fresh) -> {
 
         PlayerSpellData data = new PlayerSpellData();
 
@@ -95,6 +99,8 @@ public class PlayerSpellData extends SyncableAttachment {
         data.elementXp.putAll(elementXp);
 
         data.discovered.addAll(discovered);
+
+        data.fresh.addAll(fresh);
 
         return data;
     }));
@@ -120,6 +126,8 @@ public class PlayerSpellData extends SyncableAttachment {
                 buf.writeMap(data.elementXp, FriendlyByteBuf::writeEnum, FriendlyByteBuf::writeVarInt);
 
                 buf.writeCollection(data.discovered, FriendlyByteBuf::writeResourceLocation);
+
+                buf.writeCollection(data.fresh, FriendlyByteBuf::writeResourceLocation);
             },
 
             buf -> {
@@ -143,6 +151,8 @@ public class PlayerSpellData extends SyncableAttachment {
                 data.elementXp.putAll(buf.readMap(b -> b.readEnum(SpellElement.class), FriendlyByteBuf::readVarInt));
 
                 data.discovered.addAll(buf.readList(FriendlyByteBuf::readResourceLocation));
+
+                data.fresh.addAll(buf.readList(FriendlyByteBuf::readResourceLocation));
 
                 return data;
             });
@@ -270,9 +280,33 @@ public class PlayerSpellData extends SyncableAttachment {
         }
 
         discovered.add(id);
+        fresh.add(id);
+
+        SpellNodeRegistry.getAll().forEach((child, node) -> {
+            if (node.parent().filter(id::equals).isPresent()) {
+                fresh.add(child);
+            }
+        });
+
         markDirty();
 
         return true;
+    }
+
+    public boolean hasDiscoveredSpell() {
+        return SpellNodeRegistry.getAll().entrySet().stream()
+                .anyMatch(entry -> entry.getValue().isTrainable() && isDiscovered(entry.getKey()));
+    }
+
+    public Set<ResourceLocation> getFresh() {
+        return Set.copyOf(fresh);
+    }
+
+    public void clearFresh() {
+        if (!fresh.isEmpty()) {
+            fresh.clear();
+            markDirty();
+        }
     }
 
     public void forget(ResourceLocation id) {
@@ -280,6 +314,7 @@ public class PlayerSpellData extends SyncableAttachment {
         stopTraining(id);
         unequip(id);
         discovered.remove(id);
+        fresh.remove(id);
         setProgress(id, 0.0F);
     }
 
@@ -592,6 +627,7 @@ public class PlayerSpellData extends SyncableAttachment {
         progress.clear();
         training.clear();
         discovered.clear();
+        fresh.clear();
         Arrays.fill(slots, null);
         selectedSlot = 0;
         cooldowns.clear();

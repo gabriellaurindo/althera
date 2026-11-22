@@ -1,5 +1,5 @@
 {
-  "parent": "althera:root",
+  "parent": "althera:spells/discovery",
   "display": {
     "icon": {
       "id": "althera:spell_book"

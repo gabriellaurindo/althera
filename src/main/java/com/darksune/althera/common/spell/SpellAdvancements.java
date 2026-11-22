@@ -14,6 +14,8 @@ public final class SpellAdvancements {
 
     private static final String CRITERION = "unlock";
 
+    private static final ResourceLocation DISCOVERY = id("spells/discovery");
+
     private static final ResourceLocation FIRST_SPELL = id("spells/first_spell");
 
     private static final ResourceLocation ADEPT = id("spells/adept");
@@ -27,6 +29,10 @@ public final class SpellAdvancements {
 
         final PlayerSpellData data = PlayerSpellData.get(player);
         final List<ResourceLocation> spells = SpellNodeRegistry.getTrainableIds();
+
+        if (data.hasDiscoveredSpell()) {
+            award(player, DISCOVERY);
+        }
 
         if (spells.stream().anyMatch(data::isLearned)) {
             award(player, FIRST_SPELL);

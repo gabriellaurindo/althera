@@ -112,6 +112,7 @@ public class SpellTomeItem extends Item {
 
         data.discover(nodeId);
         playStudyEffects(player);
+        SpellAdvancements.check(player);
 
         boolean ready = node.parent().map(data::isLearned).orElse(true);
 

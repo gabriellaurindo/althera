@@ -17,9 +17,11 @@ import com.darksune.althera.common.spell.SpellScale;
 import com.darksune.althera.common.spell.SpellNodeState;
 import com.darksune.althera.common.spell.SpellTraining;
 import com.darksune.althera.network.packet.EquipSpellPacket;
+import com.darksune.althera.network.packet.SeenSpellNodesPacket;
 import com.darksune.althera.network.packet.TrainSpellNodePacket;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.ChatFormatting;
+import net.minecraft.Util;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.RenderType;
@@ -41,6 +43,7 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 public class SpellTreeScreen extends Screen {
 
@@ -76,6 +79,10 @@ public class SpellTreeScreen extends Screen {
     private static final int COLOR_MASTERED = 0xFFFFD43B;
     private static final int COLOR_STAR_OUTLINE = 0xFF3A2A08;
     private static final String COMING_SOON_MARK = "X";
+    private static final int COLOR_HIGHLIGHT = 0xE6C8FF;
+    private static final int HIGHLIGHT_SIZE = 4;
+    private static final long HIGHLIGHT_MILLIS = 6000L;
+    private static final long HIGHLIGHT_PULSE_MILLIS = 900L;
     private static final String[] MASTERED_STAR = {"..#..", ".###.", "#####", ".###.", ".#.#."};
     private static final int COLOR_TRAINING = 0xFF5599FF;
     private static final int COLOR_AVAILABLE = 0xFFFFDD55;
@@ -111,6 +118,10 @@ public class SpellTreeScreen extends Screen {
     private float panY;
     private boolean positioned;
 
+    private Set<ResourceLocation> highlighted = Set.of();
+
+    private long highlightStart;
+
     @Nullable
     private ResourceLocation pressedNode;
     private int pressedSlot = -1;
@@ -145,6 +156,21 @@ public class SpellTreeScreen extends Screen {
         if (!positioned) {
             fit();
             positioned = true;
+            highlightFresh();
+        }
+    }
+
+    private void highlightFresh() {
+
+        if (minecraft.player == null) {
+            return;
+        }
+
+        highlighted = PlayerSpellData.get(minecraft.player).getFresh();
+        highlightStart = Util.getMillis();
+
+        if (!highlighted.isEmpty()) {
+            send(SeenSpellNodesPacket.INSTANCE);
         }
     }
 
@@ -625,6 +651,10 @@ public class SpellTreeScreen extends Screen {
         int x = nodeX(node) - NODE_HALF;
         int y = nodeY(node) - NODE_HALF;
         SpellNodeState state = data.getState(id);
+
+        if (highlighted.contains(id)) {
+            renderHighlight(gui, x, y);
+        }
         boolean faded = state == SpellNodeState.LOCKED || state == SpellNodeState.LEARNED && !data.isUsable(id);
 
         gui.fill(x, y, x + NODE_SIZE, y + NODE_SIZE, hovered ? COLOR_HOVER : stateColor(data, id, state));
@@ -660,6 +690,25 @@ public class SpellTreeScreen extends Screen {
             gui.fill(x, barY, x + NODE_SIZE, barY + PROGRESS_HEIGHT, COLOR_PROGRESS_BACK);
             gui.fill(x, barY, x + filled, barY + PROGRESS_HEIGHT,
                     state == SpellNodeState.TRAINING ? COLOR_TRAINING : COLOR_PROGRESS_PAUSED);
+        }
+    }
+
+    private void renderHighlight(GuiGraphics gui, int x, int y) {
+
+        long elapsed = Util.getMillis() - highlightStart;
+
+        if (elapsed >= HIGHLIGHT_MILLIS) {
+            return;
+        }
+
+        float fade = 1.0F - (float) elapsed / HIGHLIGHT_MILLIS;
+        float pulse = 0.5F + 0.5F * Mth.sin(elapsed / (float) HIGHLIGHT_PULSE_MILLIS * Mth.TWO_PI);
+        int alpha = Math.round(255 * fade * (0.35F + 0.65F * pulse));
+
+        for (int ring = HIGHLIGHT_SIZE; ring > 0; ring--) {
+            int ringAlpha = alpha * (HIGHLIGHT_SIZE - ring + 1) / (HIGHLIGHT_SIZE + 1);
+            gui.fill(x - ring, y - ring, x + NODE_SIZE + ring, y + NODE_SIZE + ring,
+                    ringAlpha << 24 | COLOR_HIGHLIGHT);
         }
     }
 
